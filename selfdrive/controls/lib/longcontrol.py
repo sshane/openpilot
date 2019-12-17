@@ -83,9 +83,8 @@ class LongControl():
 
     gas = interp(self.v_ego, x, y)
 
-    if not travis:
-      with open('/data/lead_data', 'a') as f:
-        f.write(str(self.lead_data) + '\n')
+    with open('/data/lead_data', 'a') as f:
+      f.write(str(self.lead_data) + '\n')
 
     if self.lead_data['status']:  # if lead
       if self.v_ego <= 8.9408:  # if under 20 mph
@@ -124,11 +123,11 @@ class LongControl():
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, passable):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
-    self.handle_passable(passable)
     self.v_ego = v_ego
 
     # Actuation limits
     if not travis:
+      self.handle_passable(passable)  # so travis doesn't call vRel... on None
       gas_max = self.dynamic_gas()
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
