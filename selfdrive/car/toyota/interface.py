@@ -373,13 +373,18 @@ class CarInterface(CarInterfaceBase):
     # events
     events = []
 
+    if ret.cruiseState.enabled and not self.cruise_enabled_prev:  # this lets us modularize which alerts we want to disable if op is engaged
+      can_disengage = True
+    else:
+      can_disengage = False
+
     if self.cp_cam.can_invalid_cnt >= 200 and self.CP.enableCamera:
       events.append(create_event('invalidGiraffeToyota', [ET.PERMANENT]))
     if not ret.gearShifter == GearShifter.drive and self.CP.openpilotLongitudinalControl:
       events.append(create_event('wrongGear', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if ret.doorOpen:
+    if ret.doorOpen and can_disengage:
       events.append(create_event('doorOpen', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if ret.seatbeltUnlatched:
+    if ret.seatbeltUnlatched and can_disengage:
       events.append(create_event('seatbeltNotLatched', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
     if self.CS.esp_disabled and self.CP.openpilotLongitudinalControl:
       events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
