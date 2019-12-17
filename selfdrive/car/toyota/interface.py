@@ -8,6 +8,7 @@ from selfdrive.car.toyota.values import ECU, ECU_FINGERPRINT, CAR, NO_STOP_TIMER
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.swaglog import cloudlog
 from selfdrive.car.interfaces import CarInterfaceBase
+from common.travis_checker import travis
 
 ButtonType = car.CarState.ButtonEvent.Type
 GearShifter = car.CarState.GearShifter
@@ -373,7 +374,7 @@ class CarInterface(CarInterfaceBase):
     # events
     events = []
 
-    if ret.cruiseState.enabled and not self.cruise_enabled_prev:  # this lets us modularize which alerts we want to disable if op is engaged
+    if (ret.cruiseState.enabled and not self.cruise_enabled_prev) or travis:  # this lets us modularize which alerts we want to disable if op is engaged
       can_disengage = True
     else:
       can_disengage = False
