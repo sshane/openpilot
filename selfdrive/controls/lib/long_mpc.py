@@ -215,6 +215,9 @@ class LongitudinalMpc():
     n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, 1.8)
     duration = int((sec_since_boot() - t) * 1e9)
 
+    with open('/data/mpc_debug.{}'.format(self.mpc_id), 'a') as f:
+      f.write('{}\n'.format(self.lead_data))
+
     if LOG_MPC:
       self.send_mpc_solution(pm, n_its, duration)
 
