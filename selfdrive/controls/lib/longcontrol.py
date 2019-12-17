@@ -58,6 +58,8 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 
 class LongControl():
   def __init__(self, CP, compute_gb):
+    self.gas_interceptor = CP.enableGasInterceptor
+
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
@@ -76,10 +78,11 @@ class LongControl():
     self.v_pid = v_pid
 
   def dynamic_gas(self):
-    x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]
-    # y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.34784, 0.36765, 0.38, 0.396, 0.409, 0.425, 0.478, 0.55, 0.621, 0.7]
-    # y = [0.175, 0.178, 0.185, 0.195, 0.209, 0.222, 0.249, 0.264, 0.276, 0.283, 0.293, 0.3, 0.31, 0.342, 0.385, 0.428, 0.475]  # todo: elvaluate if this is better
-    y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.35, 0.368, 0.377, 0.389, 0.399, 0.411, 0.45, 0.504, 0.558, 0.617]  # todo: this is the average of the above, only above the 8th index (about .75 reduction)
+    if self.gas_interceptor:  # if user has pedal (probably Toyota)
+      x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]
+      # y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.34784, 0.36765, 0.38, 0.396, 0.409, 0.425, 0.478, 0.55, 0.621, 0.7]
+      # y = [0.175, 0.178, 0.185, 0.195, 0.209, 0.222, 0.249, 0.264, 0.276, 0.283, 0.293, 0.3, 0.31, 0.342, 0.385, 0.428, 0.475]  # todo: elvaluate if this is better
+      y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.35, 0.368, 0.377, 0.389, 0.399, 0.411, 0.45, 0.504, 0.558, 0.617]  # todo: this is the average of the above, only above the 8th index (about .75 reduction)
 
     gas = interp(self.v_ego, x, y)
 
