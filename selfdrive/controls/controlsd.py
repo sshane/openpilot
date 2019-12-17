@@ -74,8 +74,6 @@ def data_sample(CI, CC, sm, can_sock, driver_status, state, mismatch_counter, pa
   can_strs = messaging.drain_sock_raw(can_sock, wait_for_one=True)
   CS = CI.update(CC, can_strs)
 
-  sm.update(0)
-
   events = list(CS.events)
   add_lane_change_event(events, sm['pathPlan'])
   enabled = isEnabled(state)
@@ -238,7 +236,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
 
 
 def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last,
-                  AM, rk, driver_status, LaC, LoC, read_only, is_metric, cal_perc, last_blinker_frame):
+                  AM, rk, driver_status, LaC, LoC, read_only, is_metric, cal_perc, last_blinker_frame, lead_one):
   """Given the state, this function returns an actuators packet"""
 
   actuators = car.CarControl.Actuators.new_message()
@@ -285,8 +283,9 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
   v_acc_sol = plan.vStart + dt * (a_acc_sol + plan.aStart) / 2.0
 
   # Gas/Brake PID loop
+  passable = {'lead_one': lead_one, 'gas_pressed': CS.gasPressed, 'has_lead': plan.hasLead}
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
-                                              v_cruise_kph, v_acc_sol, plan.vTargetFuture, a_acc_sol, CP)
+                                              v_cruise_kph, v_acc_sol, plan.vTargetFuture, a_acc_sol, CP, passable)
   # Steering PID loop and lateral MPC
   actuators.steer, actuators.steerAngle, lac_log = LaC.update(active, CS.vEgo, CS.steeringAngle, CS.steeringRate, CS.steeringTorqueEps, CS.steeringPressed, CS.steeringRateLimited, CP, path_plan)
 
@@ -477,7 +476,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
 
   if sm is None:
     sm = messaging.SubMaster(['thermal', 'health', 'liveCalibration', 'driverMonitoring', 'plan', 'pathPlan', \
-                              'model', 'gpsLocation'], ignore_alive=['gpsLocation'])
+                              'model', 'gpsLocation', 'radarState'], ignore_alive=['gpsLocation'])
 
 
   if can_sock is None:
@@ -549,6 +548,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
   prof = Profiler(False)  # off by default
 
   while True:
+    sm.update(0)
     start_time = sec_since_boot()
     prof.checkpoint("Ratekeeper", ignore=True)
 
@@ -593,7 +593,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
     # Compute actuators (runs PID loops and lateral MPC)
     actuators, v_cruise_kph, driver_status, v_acc, a_acc, lac_log, last_blinker_frame = \
       state_control(sm.frame, sm.rcv_frame, sm['plan'], sm['pathPlan'], CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, AM, rk,
-                    driver_status, LaC, LoC, read_only, is_metric, cal_perc, last_blinker_frame)
+                    driver_status, LaC, LoC, read_only, is_metric, cal_perc, last_blinker_frame, sm['radarState'].leadOne)
 
     prof.checkpoint("State Control")
 
