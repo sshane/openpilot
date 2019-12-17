@@ -19,6 +19,7 @@ class LongitudinalMpc():
   def __init__(self, mpc_id):
     self.mpc_id = mpc_id
     self.MPH_TO_MS = 0.44704
+    self.op_params = opParams()
 
     self.setup_mpc()
     self.v_mpc = 0.0
@@ -30,10 +31,9 @@ class LongitudinalMpc():
     self.new_lead = False
     self.last_cloudlog_t = 0.0
 
-    self.op_params = opParams()
     self.CS = None
+    self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
     self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
-    self.past_v_ego = 0.0
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
     self.customTR = self.op_params.get('following_distance', None)
@@ -100,20 +100,19 @@ class LongitudinalMpc():
       self.df_data['v_leads'].append({'v_lead': self.lead_data['v_lead'], 'time': time.time()})
 
     self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if time.time() - sample['time'] <= v_ego_retention]
-    self.df_data['v_egos'].append({'v_ego': self.CS.vEgo, 'time': time.time()})
+    self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': time.time()})
 
-  def accel_over_time(self):
-    min_consider_time = 1.5
-    if len(self.df_data['v_leads']) > 0:
+  def lead_accel_over_time(self):
+    min_consider_time = 1.0  # minimum amount of time required to consider calculation
+    a_lead = self.lead_data['a_lead']
+    if len(self.df_data['v_leads']):  # if not empty
       elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
-      if elapsed > min_consider_time:
+      if elapsed > min_consider_time:  # if greater than min time (not 0)
         v_diff = self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']
-        to_return = v_diff / elapsed
-        if abs(self.CS.aEgo) > abs(to_return):
-          return self.CS.aEgo
-        else:
-          return to_return
-    return 0
+        calculated_accel = v_diff / elapsed
+        if abs(calculated_accel) > abs(a_lead):  # if a_lead is greater than calculated accel (over last 1.5s, use that)
+          a_lead = calculated_accel
+    return a_lead  # if above doesn't execute, we'll return a_lead from radar
 
   def dynamic_follow(self):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
@@ -122,28 +121,31 @@ class LongitudinalMpc():
     sng_TR = 1.7  # stop and go parameters
     sng_speed = 15.0 * self.MPH_TO_MS
 
-    if self.CS.vEgo >= sng_speed or self.df_data['v_egos'][-1]['v_ego'] >= self.CS.vEgo:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use 1.8s and slowly decrease
-      TR = interp(self.CS.vEgo, x_vel, y_mod)
+    if self.car_data['v_ego'] >= sng_speed or self.df_data['v_egos'][-1]['v_ego'] >= self.car_data['v_ego']:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use 1.8s and slowly decrease
+      TR = interp(self.car_data['v_ego'], x_vel, y_mod)
     else:  # this allows us to get closer to the lead car when stopping, while being able to have smooth stop and go when reaccelerating
       x = [sng_speed / 3.0, sng_speed]  # decrease TR between 5 and 15 mph from 1.8s to defined TR above at 15mph while accelerating
       y = [sng_TR, interp(sng_speed, x_vel, y_mod)]
-      TR = interp(self.CS.vEgo, x, y)
+      TR = interp(self.car_data['v_ego'], x, y)
 
     # Dynamic follow modifications (the secret sauce)
     x = [-20, -15.655, -11.1702, -7.8235, -4.6665, -2.5663, -1.1843, 0, 1.0107, 1.89, 2.6909]  # relative velocity values
     y = [0.65, 0.525, 0.44, 0.341, 0.26, 0.159, 0.049, 0, -0.082, -0.18, -0.28]  # modification values
-    TR_mod = interp(self.lead_data['v_lead'] - self.CS.vEgo, x, y)
+    TR_mod = interp(self.lead_data['v_lead'] - self.car_data['v_ego'], x, y)
 
-    x = [-2.235, -1.49, -1.1, -0.67, -0.224, 0.0, 0.67, 1.1, 1.49]  # lead acceleration values
-    y = [0.26, 0.182, 0.104, 0.06, 0.039, 0.0, -0.016, -0.032, -0.056]  # modification values
-    # TR_mod += interp(self.accel_over_time(), x, y)  # todo: test if these modifications are too much
+    x = [-4.4704, -1.77, -0.3145, 0, 0.446, 1.3411]  # lead acceleration values
+    y = [0.237, 0.12, 0.027, 0, -0.105, -0.195]  # modification values
+    TR_mod += interp(self.lead_accel_over_time(), x, y)  # todo: test if these modifications are too much
 
     TR += TR_mod
 
     if self.CS.leftBlinker or self.CS.rightBlinker:
+      old_TR = float(TR)
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .7, .65]  # reduce TR when changing lanes
-      TR *= interp(self.CS.vEgo, x, y)
+      TR *= interp(self.car_data['v_ego'], x, y)
+      with open('/data/blinker_debug', 'a') as f:
+        f.write('{}\n'.format([self.CS.leftBlinker, self.CS.rightBlinker, self.car_data['v_ego'], old_TR, TR]))
 
     # TR *= self.get_traffic_level()  # modify TR based on last minute of traffic data  # todo: look at getting this to work, a model could be used
 
@@ -155,9 +157,26 @@ class LongitudinalMpc():
     self.lead_data['x_lead'] = x_lead
     self.lead_data['status'] = status
 
+  # def get_traffic_level(self, lead_vels):  # generate a value to modify TR by based on fluctuations in lead speed
+  #   if len(lead_vels) < 60:
+  #     return 1.0  # if less than 30 seconds of traffic data do nothing to TR
+  #   lead_vel_diffs = []
+  #   for idx, vel in enumerate(lead_vels):
+  #     try:
+  #       lead_vel_diffs.append(abs(vel - lead_vels[idx - 1]))
+  #     except:
+  #       pass
+  #
+  #   x = [0, len(lead_vels)]
+  #   y = [1.15, .9]  # min and max values to modify TR by, need to tune
+  #   traffic = interp(sum(lead_vel_diffs), x, y)
+  #
+  #   return traffic
+
   def update(self, pm, CS, lead, v_cruise_setpoint):
     v_ego = CS.vEgo
     self.CS = CS
+    self.car_data = {'v_ego': CS.vEgo, 'a_ego': CS.aEgo}
 
     # Setup current mpc state
     self.cur_state[0].x_ego = 0.0
@@ -170,7 +189,6 @@ class LongitudinalMpc():
       if v_lead < 0.1 or -a_lead / 2.0 > v_lead:
         v_lead = 0.0
         a_lead = 0.0
-
       self.process_lead(v_lead, a_lead, x_lead, lead.status)
 
       self.a_lead_tau = lead.aLeadTau
