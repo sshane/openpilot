@@ -130,8 +130,8 @@ class LongitudinalMpc():
       TR = interp(self.CS.vEgo, x, y)
 
     # Dynamic follow modifications (the secret sauce)
-    x = [-15.6464, -9.8422, -6.0, -4.0, -2.68, -2.3, -1.8, -1.26, -0.61, 0, 0.61, 1.26, 2.1, 2.68]  # relative velocity values
-    y = [.504, 0.34, 0.29, 0.25, 0.22, 0.19, 0.13, 0.053, 0.017, 0, -0.015, -0.042, -0.108, -0.163]  # modification values  # todo: test if these modifications are too much
+    x = [-20, -15.655, -11.1702, -7.8235, -4.6665, -2.5663, -1.1843, 0, 1.0107, 1.89, 2.6909]  # relative velocity values
+    y = [0.65, 0.525, 0.44, 0.341, 0.26, 0.159, 0.049, 0, -0.082, -0.18, -0.28]  # modification values
     TR_mod = interp(self.lead_data['v_lead'] - self.CS.vEgo, x, y)
 
     x = [-2.235, -1.49, -1.1, -0.67, -0.224, 0.0, 0.67, 1.1, 1.49]  # lead acceleration values
