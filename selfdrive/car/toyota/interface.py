@@ -52,6 +52,18 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     ret.steerLimitTimer = 0.4
+    ret.enableGasInterceptor = 0x201 in fingerprint[0]
+
+    if ret.enableGasInterceptor:
+      ret.gasMaxBP = [0., 9., 35]
+      ret.gasMaxV = [0.2, 0.5, 0.7]
+      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
+      ret.longitudinalTuning.kiV = [0.18, 0.12]
+    else:
+      ret.gasMaxBP = [0.]
+      ret.gasMaxV = [0.5]
+      ret.longitudinalTuning.kpV = [3.6, 2.4, 1.5]
+      ret.longitudinalTuning.kiV = [0.54, 0.36]
 
     if candidate not in [CAR.PRIUS, CAR.RAV4, CAR.RAV4H]: # These cars use LQR/INDI
       ret.lateralTuning.init('pid')
@@ -250,7 +262,6 @@ class CarInterface(CarInterfaceBase):
     # In TSS2 cars the camera does long control
     ret.enableDsu = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, ECU.DSU) and candidate not in TSS2_CAR
     ret.enableApgs = False  # is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, ECU.APGS)
-    ret.enableGasInterceptor = 0x201 in fingerprint[0]
     ret.openpilotLongitudinalControl = ret.enableCamera and (ret.enableDsu or candidate in TSS2_CAR)
     cloudlog.warning("ECU Camera Simulated: %r", ret.enableCamera)
     cloudlog.warning("ECU DSU Simulated: %r", ret.enableDsu)
@@ -270,17 +281,6 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiBP = [0., 35.]
     ret.stoppingControl = False
     ret.startAccel = 0.0
-
-    if ret.enableGasInterceptor:
-      ret.gasMaxBP = [0., 9., 35]
-      ret.gasMaxV = [0.2, 0.5, 0.7]
-      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]
-    else:
-      ret.gasMaxBP = [0.]
-      ret.gasMaxV = [0.5]
-      ret.longitudinalTuning.kpV = [3.6, 2.4, 1.5]
-      ret.longitudinalTuning.kiV = [0.54, 0.36]
 
     return ret
 
