@@ -30,6 +30,6 @@ Highlight Features
     cd /data/openpilot
     python op_edit.py
     ```
-   A list of parameters that you can change are located [here](https://github.com/ShaneSmiskol/openpilot/blob/stock_additions-07-final/common/op_params.py#L29).
+   A list of parameters that you can change are located [here](https://github.com/ShaneSmiskol/openpilot/blob/stock_additions-07/common/op_params.py#L29).
 
     Parameters are stored at `/data/op_params.json`
