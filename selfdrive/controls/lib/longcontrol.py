@@ -128,7 +128,10 @@ class LongControl():
     self.v_ego = v_ego
 
     # Actuation limits
-    gas_max = self.dynamic_gas()
+    if not travis:
+      gas_max = self.dynamic_gas()
+    else:
+      gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
 
     # Update state machine
