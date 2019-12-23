@@ -31,7 +31,6 @@ class LongitudinalMpc():
     self.new_lead = False
     self.last_cloudlog_t = 0.0
 
-    self.pm = messaging.PubMaster(['radarState'])
     self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
     self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
@@ -80,10 +79,10 @@ class LongitudinalMpc():
 
     if not travis:
       self.change_cost(TR)
-      dat = messaging.new_message()
-      dat.init('radarState')
-      dat.radarState.mpcTR = TR
-      self.pm.send('radarState', dat)
+      # dat = messaging.new_message()
+      # dat.init('radarState')
+      # dat.radarState.mpcTR = TR
+      # self.pm.send('radarState', dat)
     return TR
 
   def change_cost(self, TR):
