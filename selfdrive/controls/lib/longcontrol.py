@@ -5,6 +5,7 @@ from common.travis_checker import travis
 from selfdrive.car.toyota.values import CAR as CAR_TOYOTA
 from selfdrive.config import Conversions as CV
 from common.op_params import opParams
+import numpy as np
 
 LongCtrlState = log.ControlsState.LongControlState
 
@@ -69,6 +70,7 @@ class LongControl():
                             convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
+
     self.op_params = opParams()
     self.dynamic_lane_speed_active = self.op_params.get('dynamic_lane_speed', default=True)
     self.min_dynamic_lane_speed = self.op_params.get('min_dynamic_lane_speed', default=20.) * CV.MPH_TO_MS
@@ -79,13 +81,14 @@ class LongControl():
     self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
     self.track_data = []
     self.mpc_TR = 1.8
+    self.v_ego = 0.0
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
 
-  def dynamic_gas(self, v_ego, CP):
+  def dynamic_gas(self, CP):
     x, y = [], []
     if CP.enableGasInterceptor and (self.candidate in self.toyota_candidates):  # todo: make different profiles for different makes
       x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]  # vels
@@ -97,10 +100,10 @@ class LongControl():
     if not x:
       x, y = CP.gasMaxBP, CP.gasMaxV  # if unsupported car, use stock. todo: think about disallowing dynamic follow for unsupported cars
 
-    gas = interp(v_ego, x, y)
+    gas = interp(self.v_ego, x, y)
 
     if self.lead_data['status']:  # if lead
-      if v_ego <= 8.9408:  # if under 20 mph
+      if self.v_ego <= 8.9408:  # if under 20 mph
         x = [0.0, 0.24588812499999999, 0.432818589, 0.593044697, 0.730381365, 1.050833588, 1.3965, 1.714627481]  # relative velocity mod
         y = [gas * 0.9901, gas * 0.905, gas * 0.8045, gas * 0.625, gas * 0.431, gas * 0.2083, gas * .0667, 0]
         gas_mod = -interp(self.lead_data['v_rel'], x, y)
@@ -116,9 +119,9 @@ class LongControl():
 
         x = [1.78816, 6.0, 8.9408]  # slowly ramp mods down as we approach 20 mph
         y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
-        gas = interp(v_ego, x, y)
+        gas = interp(self.v_ego, x, y)
       else:
-        current_TR = self.lead_data['x_lead'] / v_ego
+        current_TR = self.lead_data['x_lead'] / self.v_ego
         x = [-1.78816, -0.89408, 0, 1.78816, 2.68224]  # relative velocity mod
         y = [-gas * 0.35, -gas * 0.25, -gas * 0.075, gas * 0.175, gas * 0.225]
         gas_mod = interp(self.lead_data['v_rel'], x, y)
@@ -131,6 +134,12 @@ class LongControl():
 
     return clip(gas, 0.0, 1.0)
 
+  def handle_live_tracks(self, live_tracks):
+    if live_tracks['updated']:
+      self.track_data = []
+      for track in live_tracks['tracks']:
+        self.track_data.append({'v_lead': self.v_ego + track.vRel, 'y_rel': track.yRel})
+
   def handle_passable(self, passable):
     self.gas_pressed = passable['gas_pressed']
     self.lead_data['v_rel'] = passable['lead_one'].vRel
@@ -138,14 +147,53 @@ class LongControl():
     self.lead_data['x_lead'] = passable['lead_one'].dRel
     self.lead_data['status'] = passable['has_lead']  # this fixes radarstate always reporting a lead, thanks to arne
     self.mpc_TR = passable['mpc_TR']
+    self.handle_live_tracks(passable['live_tracks'])
+
+  def dynamic_lane_speed(self, v_target, v_target_future, v_cruise, a_target):
+    v_cruise *= CV.KPH_TO_MS  # convert to m/s
+    min_tracks = 3
+    vels = [i * CV.MPH_TO_MS for i in [5, 40, 70]]
+    margins = [0.4, 0.55, 0.6]
+    track_speed_margin = interp(self.v_ego, vels, margins)
+    MPC_TIME_STEP = 1 / 20.
+    similar_track_tolerance = 0.022
+    if self.dynamic_lane_speed_active and self.v_ego > self.min_dynamic_lane_speed:
+      tracks = []
+      for trk_vel in self.track_data:
+        valid = all([True if abs(x - trk_vel) >= similar_track_tolerance else False for x in tracks])  # radar sometimes reports multiple points for one vehicle, especially semis
+        # todo: factor in yRel, so multiple vehicles that happen to be at the exact same speed aren't filtered out!
+        if valid:
+          tracks.append(trk_vel)
+      tracks = [trk_vel for trk_vel in tracks if (self.v_ego * track_speed_margin) <= trk_vel <= v_cruise]  # .125, 0.025, 0.02500009536743164, 0.02500009536743164
+      if len(tracks) >= min_tracks:
+        average_track_speed = np.mean(tracks)
+        if average_track_speed < v_target and average_track_speed < v_target_future:
+          # so basically, if there's at least 3 tracks, the speeds of the tracks must be within n% of set speed, if our speed is at least set_speed mph,
+          # if the average speeds of tracks is less than v_target and v_target_future, then get a weight for how many tracks exist, with more tracks, the more we
+          # favor the average track speed, then weighted average it with our set_speed, if these conditions aren't met, then we just return original values
+          # this should work...?
+          x = [3, 6, 19]
+          y = [0.275, .375, 0.5]
+          track_speed_weight = interp(len(tracks), x, y)
+          if self.lead_data['status']:  # if lead, give more weight to surrounding tracks (todo: this if check might need to be flipped, so if not lead...)
+            track_speed_weight = clip(1.05 * track_speed_weight, min(y), max(y))
+          v_target_slow = (v_cruise * (1 - track_speed_weight)) + (average_track_speed * track_speed_weight)
+          if v_target_slow < v_target and v_target_slow < v_target_future:  # just a sanity check, don't want to run into any leads if we somehow predict faster velocity
+            a_target_slow = MPC_TIME_STEP * ((v_target_slow - v_target) / 1.0)  # long_mpc runs at 20 hz, so interpolate assuming a_target is 1 second into future? or since long_control is 100hz, should we interpolate using that?
+            a_target = a_target_slow
+            v_target = v_target_slow
+            v_target_future = v_target_slow
+
+    return v_target, v_target_future, a_target
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, passable):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
-
+    self.v_ego = v_ego
     # Actuation limits
     if not travis:
       self.handle_passable(passable)
-      gas_max = self.dynamic_gas(v_ego, CP)
+      gas_max = self.dynamic_gas(CP)
+      # v_target, v_target_future, a_target = self.dynamic_lane_speed(v_target, v_target_future, v_cruise, a_target)
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)

@@ -65,8 +65,9 @@ class Planner():
   def __init__(self, CP):
     self.CP = CP
 
-    self.mpc1 = LongitudinalMpc(1)
-    self.mpc2 = LongitudinalMpc(2)
+    pm = messaging.PubMaster(['smiskolData'])
+    self.mpc1 = LongitudinalMpc(1, pm)
+    self.mpc2 = LongitudinalMpc(2, pm)
 
     self.v_acc_start = 0.0
     self.a_acc_start = 0.0

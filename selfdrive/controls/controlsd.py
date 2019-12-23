@@ -289,8 +289,8 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
   passable_loc = {}
   if not travis:
     passable_loc['lead_one'] = sm['radarState'].leadOne
-    passable_loc['mpc_TR'] = sm['radarState'].mpcTR
-    # passable_loc['live_tracks'] = {'tracks': sm['liveTracks'], 'updated': sm.updated['liveTracks']}
+    passable_loc['mpc_TR'] = sm['smiskolData'].mpcTR
+    passable_loc['live_tracks'] = {'tracks': sm['liveTracks'], 'updated': sm.updated['liveTracks']}
     passable_loc['has_lead'] = plan.hasLead
     passable_loc['gas_pressed'] = CS.gasPressed
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
@@ -485,7 +485,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
 
   if sm is None:
     sm = messaging.SubMaster(['thermal', 'health', 'liveCalibration', 'driverMonitoring', 'plan', 'pathPlan', \
-                              'model', 'gpsLocation', 'radarState', 'liveTracks'], ignore_alive=['gpsLocation'])
+                              'model', 'gpsLocation', 'radarState', 'liveTracks', 'smiskolData'], ignore_alive=['gpsLocation'])
 
 
   if can_sock is None:

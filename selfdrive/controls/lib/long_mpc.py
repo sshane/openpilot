@@ -17,7 +17,7 @@ LOG_MPC = os.environ.get('LOG_MPC', False)
 
 
 class LongitudinalMpc():
-  def __init__(self, mpc_id):
+  def __init__(self, mpc_id, pm):
     self.mpc_id = mpc_id
     self.op_params = opParams()
 
@@ -31,7 +31,7 @@ class LongitudinalMpc():
     self.new_lead = False
     self.last_cloudlog_t = 0.0
 
-    self.pm = messaging.PubMaster(['smiskolData'])
+    self.pm = pm
     self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
     self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
@@ -80,10 +80,11 @@ class LongitudinalMpc():
 
     if not travis:
       self.change_cost(TR)
-      dat = messaging.new_message()
-      dat.init('smiskolData')
-      dat.smiskolData.mpcTR = TR
-      self.pm.send('smiskolData', dat)
+      if self.mpc_id == 1:
+        dat = messaging.new_message()
+        dat.init('smiskolData')
+        dat.smiskolData.mpcTR = TR
+        self.pm.send('smiskolData', dat)
     return TR
 
   def change_cost(self, TR):
