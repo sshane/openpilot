@@ -112,7 +112,7 @@ class LongControl():
         # x = [TR * 0.5, TR, TR * 1.5]  # as lead gets further from car, lessen gas mod  # todo: this
         # y = [gas_mod * 1.5, gas_mod, gas_mod * 0.5]
         # gas_mod += (interp(current_TR, x, y))
-        new_gas = gas + gas_mod  # (interp(current_TR, x, y))
+        new_gas = gas + gas_mod
 
         x = [1.78816, 6.0, 8.9408]  # slowly ramp mods down as we approach 20 mph
         y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
@@ -123,9 +123,9 @@ class LongControl():
         y = [-gas * 0.35, -gas * 0.25, -gas * 0.075, gas * 0.175, gas * 0.225]
         gas_mod = interp(self.lead_data['v_rel'], x, y)
 
-        x_tr = [self.mpc_TR - 0.2, self.mpc_TR, self.mpc_TR + 0.2, self.mpc_TR + 0.4]
-        y_tr = [-gas_mod * 0.22, 0.0, gas_mod * 0.15, gas_mod * 0.45]
-        gas_mod -= interp(current_TR, x_tr, y_tr)
+        x = [self.mpc_TR - 0.22, self.mpc_TR, self.mpc_TR + 0.2, self.mpc_TR + 0.4]
+        y = [-gas_mod * 0.36, 0.0, gas_mod * 0.15, gas_mod * 0.45]
+        gas_mod -= interp(current_TR, x, y)
 
         gas += gas_mod
 
