@@ -17,7 +17,7 @@ LOG_MPC = os.environ.get('LOG_MPC', False)
 
 
 class LongitudinalMpc():
-  def __init__(self, mpc_id, pm):
+  def __init__(self, mpc_id):
     self.mpc_id = mpc_id
     self.op_params = opParams()
 
@@ -31,12 +31,15 @@ class LongitudinalMpc():
     self.new_lead = False
     self.last_cloudlog_t = 0.0
 
-    self.pm = pm
+    self.pm = None
     self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
     self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
     self.customTR = self.op_params.get('following_distance', None)
+
+  def set_pm(self, pm):
+    self.pm = pm
 
   def send_mpc_solution(self, pm, qp_iterations, calculation_time):
     qp_iterations = max(0, qp_iterations)
