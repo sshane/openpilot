@@ -156,15 +156,16 @@ class LongControl():
     margins = [0.4, 0.55, 0.6]
     track_speed_margin = interp(self.v_ego, vels, margins)
     MPC_TIME_STEP = 1 / 20.
-    similar_track_tolerance = 0.022
+    track_tolerance_v = 0.0268
+    track_tolerance_y = 1.8288
     if self.dynamic_lane_speed_active and self.v_ego > self.min_dynamic_lane_speed:
       tracks = []
-      for trk_vel in self.track_data:
-        valid = all([True if abs(x - trk_vel) >= similar_track_tolerance else False for x in tracks])  # radar sometimes reports multiple points for one vehicle, especially semis
-        # todo: factor in yRel, so multiple vehicles that happen to be at the exact same speed aren't filtered out!
-        if valid:
-          tracks.append(trk_vel)
-      tracks = [trk_vel for trk_vel in tracks if (self.v_ego * track_speed_margin) <= trk_vel <= v_cruise]  # .125, 0.025, 0.02500009536743164, 0.02500009536743164
+      for track in self.track_data:
+        valid = all([True if abs(trk['v_lead'] - track['v_lead']) >= track_tolerance_v else False for trk in tracks])  # radar sometimes reports multiple points for one vehicle, especially semis
+        valid_y = all([True if abs(trk['y_rel'] - track['y_rel']) >= track_tolerance_y else False for trk in tracks])
+        if valid or valid_y:
+          tracks.append(track)
+      tracks = [trk['v_lead'] for trk in tracks if (self.v_ego * track_speed_margin) <= trk['v_lead'] <= v_cruise]  # .125, 0.025, 0.02500009536743164, 0.02500009536743164
       if len(tracks) >= min_tracks:
         average_track_speed = np.mean(tracks)
         if average_track_speed < v_target and average_track_speed < v_target_future:
@@ -193,7 +194,7 @@ class LongControl():
     if not travis:
       self.handle_passable(passable)
       gas_max = self.dynamic_gas(CP)
-      v_target, v_target_future, a_target = self.dynamic_lane_speed(v_target, v_target_future, v_cruise, a_target)
+      # v_target, v_target_future, a_target = self.dynamic_lane_speed(v_target, v_target_future, v_cruise, a_target)
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
