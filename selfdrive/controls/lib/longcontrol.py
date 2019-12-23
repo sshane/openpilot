@@ -137,7 +137,7 @@ class LongControl():
     self.lead_data['a_lead'] = passable['lead_one'].aLeadK
     self.lead_data['x_lead'] = passable['lead_one'].dRel
     self.lead_data['status'] = passable['has_lead']  # this fixes radarstate always reporting a lead, thanks to arne
-    self.mpc_TR = passable['mpc_TR']
+    # self.mpc_TR = passable['mpc_TR']
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, passable):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
