@@ -372,7 +372,6 @@ struct RadarState @0x9a185389d6fdd05f {
   leadOne @3 :LeadData;
   leadTwo @4 :LeadData;
   cumLagMs @5 :Float32;
-  mpcTR @13 :Float32;
 
   struct LeadData {
     dRel @0 :Float32;
@@ -1815,6 +1814,10 @@ struct KalmanOdometry {
   rotStd @3 :List(Float32); # std rad/s in device frame
 }
 
+struct SmiskolData {
+  mpcTR @0 :Float32;
+}
+
 struct Event {
   # in nanoseconds?
   logMonoTime @0 :UInt64;
@@ -1890,5 +1893,6 @@ struct Event {
     carEvents @68: List(Car.CarEvent);
     carParams @69: Car.CarParams;
     frontFrame @70: FrameData;
+    smiskolData @71 :SmiskolData;
   }
 }
