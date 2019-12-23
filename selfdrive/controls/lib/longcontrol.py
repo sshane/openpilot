@@ -174,11 +174,11 @@ class LongControl():
           # favor the average track speed, then weighted average it with our set_speed, if these conditions aren't met, then we just return original values
           # this should work...?
           x = [3, 6, 19]
-          y = [0.275, .375, 0.5]
+          y = [0.3, .4, 0.6]
           track_speed_weight = interp(len(tracks), x, y)
           if self.lead_data['status']:  # if lead, give more weight to surrounding tracks (todo: this if check might need to be flipped, so if not lead...)
             track_speed_weight = clip(1.05 * track_speed_weight, min(y), max(y))
-          v_target_slow = (v_cruise * (1 - track_speed_weight)) + (average_track_speed * track_speed_weight)
+          v_target_slow = (self.v_ego * (1 - track_speed_weight)) + (average_track_speed * track_speed_weight)
           if v_target_slow < v_target and v_target_slow < v_target_future:  # just a sanity check, don't want to run into any leads if we somehow predict faster velocity
             a_target_slow = MPC_TIME_STEP * ((v_target_slow - v_target) / 1.0)  # long_mpc runs at 20 hz, so interpolate assuming a_target is 1 second into future? or since long_control is 100hz, should we interpolate using that?
             a_target = a_target_slow
@@ -194,7 +194,7 @@ class LongControl():
     if not travis:
       self.handle_passable(passable)
       gas_max = self.dynamic_gas(CP)
-      # v_target, v_target_future, a_target = self.dynamic_lane_speed(v_target, v_target_future, v_cruise, a_target)
+      v_target, v_target_future, a_target = self.dynamic_lane_speed(v_target, v_target_future, v_cruise, a_target)
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
