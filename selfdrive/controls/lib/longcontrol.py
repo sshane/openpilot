@@ -2,7 +2,9 @@ from cereal import log
 from common.numpy_fast import clip, interp
 from selfdrive.controls.lib.pid import PIController
 from common.travis_checker import travis
-from selfdrive.car.toyota.values import CAR
+from selfdrive.car.toyota.values import CAR as CAR_TOYOTA
+from selfdrive.config import Conversions as CV
+from common.op_params import opParams
 
 LongCtrlState = log.ControlsState.LongControlState
 
@@ -67,23 +69,27 @@ class LongControl():
                             convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
-    self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
-    self.v_ego = 0.0
-    self.gas_pressed = False
+    self.op_params = opParams()
+    self.dynamic_lane_speed_active = self.op_params.get('dynamic_lane_speed', default=True)
+    self.min_dynamic_lane_speed = self.op_params.get('min_dynamic_lane_speed', default=20.) * CV.MPH_TO_MS
     self.candidate = candidate
-    self.toyota_candidates = [attr for attr in dir(CAR) if not attr.startswith("__")]
+    self.toyota_candidates = [attr for attr in dir(CAR_TOYOTA) if not attr.startswith("__")]
+
+    self.gas_pressed = False
+    self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
+    self.track_data = []
+    self.mpc_TR = 1.8
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
 
-  def dynamic_gas(self, CP):
+  def dynamic_gas(self, v_ego, CP):
     x, y = [], []
-    if CP.enableGasInterceptor:  # if pedal, todo: make different profiles for different vehicles
-      if self.candidate in [CAR.COROLLA]:
-        x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]
-        y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.35, 0.368, 0.377, 0.389, 0.399, 0.411, 0.45, 0.504, 0.558, 0.617]  # todo: this is the average of the above, only above the 8th index (about .75 reduction)
+    if CP.enableGasInterceptor and (self.candidate in self.toyota_candidates):  # todo: make different profiles for different makes
+      x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]  # vels
+      y = [0.2, 0.20443, 0.21592, 0.23334, 0.25734, 0.27916, 0.3229, 0.35, 0.368, 0.377, 0.389, 0.399, 0.411, 0.45, 0.504, 0.558, 0.617]  # max gas
     elif self.candidate in self.toyota_candidates:
       x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]
       y = [0.35, 0.47, 0.43, 0.35, 0.3, 0.3, 0.3229, 0.34784, 0.36765, 0.38, 0.396, 0.409, 0.425, 0.478, 0.55, 0.621, 0.7]
@@ -91,20 +97,17 @@ class LongControl():
     if not x:
       x, y = CP.gasMaxBP, CP.gasMaxV  # if unsupported car, use stock. todo: think about disallowing dynamic follow for unsupported cars
 
-    gas = interp(self.v_ego, x, y)
+    gas = interp(v_ego, x, y)
 
     if self.lead_data['status']:  # if lead
-      if self.v_ego <= 8.9408:  # if under 20 mph
-        # TR = 1.8  # desired TR, might need to switch this to hardcoded distance values
-        # current_TR = self.lead_data['x_lead'] / self.v_ego if self.v_ego > 0 else TR
-
+      if v_ego <= 8.9408:  # if under 20 mph
         x = [0.0, 0.24588812499999999, 0.432818589, 0.593044697, 0.730381365, 1.050833588, 1.3965, 1.714627481]  # relative velocity mod
         y = [gas * 0.9901, gas * 0.905, gas * 0.8045, gas * 0.625, gas * 0.431, gas * 0.2083, gas * .0667, 0]
         gas_mod = -interp(self.lead_data['v_rel'], x, y)
 
-        # x = [0.0, 0.22, 0.44518483, 0.675, 1.0, 1.76361684]  # lead accel mod  # todo: this
-        # y = [0.0, (gas * 0.08), (gas * 0.20), (gas * 0.4), (gas * 0.52), (gas * 0.6)]
-        # gas_mod += interp(a_lead, x, y)
+        x = [0.44704, 1.78816]  # lead accel mod
+        y = [0.0, gas_mod * .6]
+        gas_mod -= interp(self.lead_data['a_lead'], x, y)  # as lead accelerates, we can reduce the reduction of the above mod (the max this will ouput is the original gas value, it never increases it)
 
         # x = [TR * 0.5, TR, TR * 1.5]  # as lead gets further from car, lessen gas mod  # todo: this
         # y = [gas_mod * 1.5, gas_mod, gas_mod * 0.5]
@@ -113,11 +116,18 @@ class LongControl():
 
         x = [1.78816, 6.0, 8.9408]  # slowly ramp mods down as we approach 20 mph
         y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
-        gas = interp(self.v_ego, x, y)
+        gas = interp(v_ego, x, y)
       else:
-        x = [-0.89408, 0, 2.0]  # need to tune this
-        y = [-.17, -.08, .01]
-        gas += interp(self.lead_data['v_rel'], x, y)
+        current_TR = self.lead_data['x_lead'] / v_ego
+        x = [-1.78816, -0.89408, 0, 1.78816, 2.68224]  # relative velocity mod
+        y = [-gas * 0.35, -gas * 0.25, -gas * 0.075, gas * 0.175, gas * 0.225]
+        gas_mod = interp(self.lead_data['v_rel'], x, y)
+
+        x_tr = [self.mpc_TR - 0.2, self.mpc_TR, self.mpc_TR + 0.2, self.mpc_TR + 0.4]
+        y_tr = [-gas_mod * 0.22, 0.0, gas_mod * 0.15, gas_mod * 0.45]
+        gas_mod -= interp(current_TR, x_tr, y_tr)
+
+        gas += gas_mod
 
     return clip(gas, 0.0, 1.0)
 
@@ -127,15 +137,15 @@ class LongControl():
     self.lead_data['a_lead'] = passable['lead_one'].aLeadK
     self.lead_data['x_lead'] = passable['lead_one'].dRel
     self.lead_data['status'] = passable['has_lead']  # this fixes radarstate always reporting a lead, thanks to arne
+    # self.mpc_TR = passable['mpc_TR']
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, passable):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
-    self.v_ego = v_ego
 
     # Actuation limits
     if not travis:
       self.handle_passable(passable)
-      gas_max = self.dynamic_gas(CP)
+      gas_max = self.dynamic_gas(v_ego, CP)
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
