@@ -156,7 +156,7 @@ class LongControl():
     margins = [0.4, 0.55, 0.6]
     track_speed_margin = interp(self.v_ego, vels, margins)
     MPC_TIME_STEP = 1 / 20.
-    track_tolerance_v = 0.0268
+    track_tolerance_v = 0.022352
     track_tolerance_y = 1.8288
     if self.dynamic_lane_speed_active and self.v_ego > self.min_dynamic_lane_speed:
       tracks = []
