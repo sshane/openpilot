@@ -162,8 +162,8 @@ class LongControl():
       tracks = []
       for track in self.track_data:
         valid = all([True if abs(trk['v_lead'] - track['v_lead']) >= track_tolerance_v else False for trk in tracks])  # radar sometimes reports multiple points for one vehicle, especially semis
-        valid_y = all([True if abs(trk['y_rel'] - track['y_rel']) >= track_tolerance_y else False for trk in tracks])
-        if valid or valid_y:
+        # valid_y = all([True if abs(trk['y_rel'] - track['y_rel']) >= track_tolerance_y else False for trk in tracks])
+        if valid:  # or valid_y:
           tracks.append(track)
       tracks = [trk['v_lead'] for trk in tracks if (self.v_ego * track_speed_margin) <= trk['v_lead'] <= v_cruise]  # .125, 0.025, 0.02500009536743164, 0.02500009536743164
       if len(tracks) >= min_tracks:
