@@ -7,12 +7,12 @@ except:
 
 
 def get_wrapper():  # initialize st model and process long predictions
-    libmpc_fn = "/data/openpilot/selfdrive/df/smart_torque.so"
+    libmpc_fn = "/data/openpilot/selfdrive/smart_torque/smart_torque.so"
 
     ffi = FFI()
     ffi.cdef("""    
     void init_model();
-    float run_model(float inputData[54]);
+    float run_model(float inputData[1000]);
     """)
 
     return ffi.dlopen(libmpc_fn)
