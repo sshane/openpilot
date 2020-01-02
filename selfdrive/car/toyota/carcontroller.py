@@ -124,7 +124,7 @@ class CarController():
     v_ego = np.interp(CS.v_ego, self.st_scales['v_ego'], [0, 1])
     angle_steers = np.interp(CS.angle_steers, self.st_scales['angle_steers'], [0, 1])
     delta_desired = np.interp(math.degrees(path_plan.deltaDesired), self.st_scales['delta_desired'], [0, 1])
-    angle_offset = np.interp(0, self.st_scales['angle_offset'], [0, 1])  # todo: this
+    angle_offset = np.interp(path_plan.angleOffsetLive, self.st_scales['angle_offset'], [0, 1])
     if self.last_st_output is None:
       driver_torque = CS.steer_torque_driver
     else:
@@ -132,6 +132,9 @@ class CarController():
     driver_torque = np.interp(driver_torque, self.st_scales['driver_torque'], [0, 1])
 
     self.st_data.append([v_ego, angle_steers, delta_desired, angle_offset, driver_torque])
+
+    with open('/data/delta_desired', 'a') as f:
+      f.write('{}\n'.format(math.degrees(path_plan.deltaDesired)))
 
     while len(self.st_data) > self.st_seq_len:
       del self.st_data[0]
