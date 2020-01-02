@@ -142,7 +142,7 @@ class CarController():
     if len(self.st_data) != self.st_seq_len:
       return 0.0
 
-    self.last_st_output = self.st_model.run_model(np.ndarray.flatten(self.st_data).tolist())
+    self.last_st_output = self.st_model.run_model(np.array(self.st_data).flatten().tolist())
     return np.interp(self.last_st_output, [0, 1], self.st_scales['driver_torque'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
