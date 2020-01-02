@@ -6,6 +6,9 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
                                            create_acc_cancel_command, create_fcw_command
 from selfdrive.car.toyota.values import CAR, ECU, STATIC_MSGS, SteerLimitParams
 from opendbc.can.packer import CANPacker
+import math
+from selfdrive.smart_torque import st_wrapper
+import numpy as np
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -106,9 +109,41 @@ class CarController():
     if enable_apg: self.fake_ecus.add(ECU.APGS)
 
     self.packer = CANPacker(dbc_name)
+    self.st_model = st_wrapper.get_wrapper()
+    self.st_model.init_model()
+    self.st_scales = {'angle_offset': [-1.5868093967437744, 2.339749574661255],
+                      'angle_steers': [-59.099998474121094, 75.9000015258789],
+                      'delta_desired': [-5.2593878142219195, 6.793199853675723],
+                      'driver_torque': [-365.0, 372.0],
+                      'v_ego': [6.437766075134277, 32.0827522277832]}
+    self.last_st_output = None
+    self.st_data = []
+    self.st_seq_len = 200  # seq length (2 seconds)
+
+  def handle_st(self, CS, path_plan):
+    v_ego = np.interp(CS.v_ego, self.st_scales['v_ego'], [0, 1])
+    angle_steers = np.interp(CS.angle_steers, self.st_scales['angle_steers'], [0, 1])
+    delta_desired = np.interp(math.degrees(path_plan.deltaDesired), self.st_scales['delta_desired'], [0, 1])
+    angle_offset = np.interp(0, self.st_scales['angle_offset'], [0, 1])  # todo: this
+    if self.last_st_output is None:
+      driver_torque = CS.steer_torque_driver
+    else:
+      driver_torque = self.last_st_output
+    driver_torque = np.interp(driver_torque, self.st_scales['driver_torque'], [0, 1])
+
+    self.st_data.append([v_ego, angle_steers, delta_desired, angle_offset, driver_torque])
+
+    while len(self.st_data) > self.st_seq_len:
+      del self.st_data[0]
+
+    if len(self.st_data) != self.st_seq_len:
+      return 0.0
+
+    self.last_st_output = self.st_model.run_model(np.ndarray.flatten(self.st_data).tolist())
+    return np.interp(self.last_st_output, [0, 1], self.st_scales['driver_torque'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
-             left_line, right_line, lead, left_lane_depart, right_lane_depart):
+             left_line, right_line, lead, left_lane_depart, right_lane_depart, path_plan):
 
     # *** compute control surfaces ***
 
@@ -127,16 +162,16 @@ class CarController():
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     # steer torque
-    new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
-    apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.steer_torque_motor, SteerLimitParams)
-    self.steer_rate_limited = new_steer != apply_steer
+    # new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
+    # apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.steer_torque_motor, SteerLimitParams)
+    apply_steer = self.handle_st(CS, path_plan)
 
     # only cut torque when steer state is a known fault
     if CS.steer_state in [9, 25]:
       self.last_fault_frame = frame
 
     # Cut steering for 2s after fault
-    if not enabled or (frame - self.last_fault_frame < 200):
+    if not enabled or (frame - self.last_fault_frame < 200) or CS.angle_steers_rate > 125:
       apply_steer = 0
       apply_steer_req = 0
     else:
