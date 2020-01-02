@@ -9,6 +9,7 @@ from opendbc.can.packer import CANPacker
 import math
 from selfdrive.smart_torque import st_wrapper
 import numpy as np
+import cereal.messaging as messaging
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -109,6 +110,8 @@ class CarController():
     if enable_apg: self.fake_ecus.add(ECU.APGS)
 
     self.packer = CANPacker(dbc_name)
+
+    self.sm = messaging.SubMaster(['pathPlan'])
     self.st_model = st_wrapper.get_wrapper()
     self.st_model.init_model()
     self.st_scales = {'angle_offset': [-1.5868093967437744, 2.339749574661255],
@@ -146,12 +149,12 @@ class CarController():
     return np.interp(self.last_st_output, [0, 1], self.st_scales['driver_torque'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
-             left_line, right_line, lead, left_lane_depart, right_lane_depart, path_plan):
+             left_line, right_line, lead, left_lane_depart, right_lane_depart):
 
     # *** compute control surfaces ***
 
     # gas and brake
-
+    self.sm.update(0)
     apply_gas = clip(actuators.gas, 0., 1.)
 
     if CS.CP.enableGasInterceptor:
@@ -167,7 +170,7 @@ class CarController():
     # steer torque
     # new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
     # apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.steer_torque_motor, SteerLimitParams)
-    apply_steer = self.handle_st(CS, path_plan)
+    apply_steer = self.handle_st(CS, self.sm['pathPlan'])
 
     # only cut torque when steer state is a known fault
     if CS.steer_state in [9, 25]:

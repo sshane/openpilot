@@ -26,7 +26,7 @@ class CarInterfaceBase():
     raise NotImplementedError
 
   # return sendcan, pass in a car.CarControl
-  def apply(self, c, path_plan):
+  def apply(self, c):
     raise NotImplementedError
 
 class RadarInterfaceBase():
