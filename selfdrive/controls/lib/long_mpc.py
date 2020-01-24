@@ -37,6 +37,7 @@ class LongitudinalMpc():
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    self.sng = False
 
   def set_pm(self, pm):
     self.pm = pm
@@ -132,16 +133,20 @@ class LongitudinalMpc():
     # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
     # y_mod = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.604, 1.627, 1.658, 1.705]
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
-    y_mod = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.594, 1.612, 1.637, 1.675]
+    y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.594, 1.612, 1.637, 1.675]
 
-    sng_TR = 1.8  # stop and go TR
+    sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
 
-    if self.car_data['v_ego'] >= sng_speed or self.df_data['v_egos'][0]['v_ego'] >= self.car_data['v_ego']:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use 1.8s and slowly decrease
-      TR = interp(self.car_data['v_ego'], x_vel, y_mod)
+    if self.car_data['v_ego'] > sng_speed:  # keep sng distance until we're above sng speed again
+      self.sng = False
+
+    if self.car_data['v_ego'] >= sng_speed or self.df_data['v_egos'][0]['v_ego'] >= self.car_data['v_ego'] and not self.sng:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use sng_TR and slowly decrease
+      TR = interp(self.car_data['v_ego'], x_vel, y_dist)
     else:  # this allows us to get closer to the lead car when stopping, while being able to have smooth stop and go when reaccelerating
+      self.sng = True
       x = [sng_speed / 3.0, sng_speed]  # decrease TR between 5 and 15 mph from 1.8s to defined TR above at 15mph while accelerating
-      y = [sng_TR, interp(sng_speed, x_vel, y_mod)]
+      y = [sng_TR, interp(sng_speed, x_vel, y_dist)]
       TR = interp(self.car_data['v_ego'], x, y)
 
     # Dynamic follow modifications (the secret sauce)
