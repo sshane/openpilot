@@ -114,7 +114,7 @@ class LongitudinalMpc():
     self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
     self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': cur_time})
 
-  def lead_accel_over_time(self):
+  def calculate_lead_accel(self):
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
     a_lead = self.lead_data['a_lead']
     if len(self.df_data['v_leads']):  # if not empty
@@ -130,12 +130,20 @@ class LongitudinalMpc():
     return a_lead  # if above doesn't execute, we'll return a_lead from radar
 
   def dynamic_follow(self, CS):
-    # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
-    # y_mod = [1.102, 1.12, 1.14, 1.168, 1.21, 1.273, 1.36, 1.411, 1.543, 1.62, 1.664, 1.736, 1.853]  # TRs
-    # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
-    # y_mod = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.604, 1.627, 1.658, 1.705]
-    x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
-    y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.594, 1.612, 1.637, 1.675]
+    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    if self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
+      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
+      y_dist = [1.36, 1.369, 1.381, 1.396, 1.419, 1.449, 1.483, 1.495, 1.504, 1.526, 1.536, 1.55, 1.572]  # TRs
+    elif self.df_profile == 'roadtrip':
+      # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]  # todo: test 15-30% higher above 30m/s
+      # y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.658, 1.696, 1.756]
+      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]
+      y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.61739, 1.649, 1.678, 1.724]
+      # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]  # todo: slightly closer above 10m/s, this one might be more balanced
+      # y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.56, 1.576, 1.608, 1.635, 1.66, 1.7]
+    else:  # default to relaxed/stock
+      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
+      y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.594, 1.612, 1.637, 1.675]
 
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -158,7 +166,7 @@ class LongitudinalMpc():
 
     x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
     y = [0.225, 0.159, 0.082, 0.046, 0.026, 0.017, 0.0, -0.005, -0.036, -0.045, -0.05]  # modification values
-    TR_mod += interp(self.lead_accel_over_time(), x, y)
+    TR_mod += interp(self.calculate_lead_accel(), x, y)
 
     x = [4.4704, 22.352]  # 10 to 50 mph
     y = [0.875, 1.0]
