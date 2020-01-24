@@ -45,8 +45,9 @@ class opParams:
                            'lane_hug_angle_offset': {'default': 0.0, 'allowed_types': [float, int], 'description': ('This is the angle your wheel reads when driving straight at highway speeds.\n'
                                                                                                                     'Replaces both offsets from the calibration learner to help fix lane hugging.\n'
                                                                                                                     'Enter absolute value here, direction is determined by parameter \'lane_hug_direction\''), 'live': True},
-                           'following_distance': {'default': None, 'allowed_types': [type(None), float], 'description': 'None has no effect, while setting this to a float will let you change\n'
-                                                                                                                        'the TR (0.9 to 2.7). If this isn\'t None, dynamic follow will be disabled as well)', 'live': False},
+                           'dynamic_follow': {'default': 'relaxed', 'allowed_types': [str], 'description': "('traffic', 'relaxed', 'roadtrip'): Left to right increases in following distance.\n"
+                                                                                                           "All profiles support dynamic follow so you'll get your preferred distance while\n"
+                                                                                                           "retaining the smoothness and safety of dynamic follow!", 'live': True},
                            'alca_nudge_required': {'default': True, 'allowed_types': [bool], 'description': ('Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                                                              'If False, lane change will occur IMMEDIATELY after signaling'), 'live': False},
                            'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)', 'live': False},
@@ -61,9 +62,9 @@ class opParams:
     self.params_file = "/data/op_params.json"
     self.kegman_file = "/data/kegman.json"
     self.last_read_time = time.time()
-    self.read_frequency = 5.0  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 7.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['dynamic_lane_speed', 'longkiV']
+    self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance']
     self.run_init()  # restores, reads, and updates params
 
   def create_id(self):  # creates unique identifier to send with sentry errors. please update uniqueID with op_edit.py to your username!

@@ -36,7 +36,7 @@ class LongitudinalMpc():
     self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
-    self.customTR = self.op_params.get('following_distance', None)
+    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
 
   def set_pm(self, pm):
     self.pm = pm
