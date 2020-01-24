@@ -76,10 +76,8 @@ class LongitudinalMpc():
   def get_TR(self, CS):
     if not self.lead_data['status'] or travis:
       TR = 1.8
-    elif self.customTR is not None:
-      TR = clip(self.customTR, 0.9, 2.7)
     else:
-      self.store_lead_data()
+      self.store_df_data()
       TR = self.dynamic_follow(CS)
 
     if not travis:
@@ -102,18 +100,19 @@ class LongitudinalMpc():
       self.libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.last_cost = cost
 
-  def store_lead_data(self):
-    v_lead_retention = 2.15  # seconds
-    v_ego_retention = 2.5
+  def store_df_data(self):
+    v_lead_retention = 1.75  # keep only last x seconds
+    v_ego_retention = 2.0
 
+    cur_time = time.time()
     if self.lead_data['status']:
       self.df_data['v_leads'] = [sample for sample in self.df_data['v_leads'] if
-                                 time.time() - sample['time'] <= v_lead_retention
+                                 cur_time - sample['time'] <= v_lead_retention
                                  and not self.new_lead]  # reset when new lead
-      self.df_data['v_leads'].append({'v_lead': self.lead_data['v_lead'], 'time': time.time()})
+      self.df_data['v_leads'].append({'v_lead': self.lead_data['v_lead'], 'time': cur_time})
 
-    self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if time.time() - sample['time'] <= v_ego_retention]
-    self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': time.time()})
+    self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
+    self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': cur_time})
 
   def lead_accel_over_time(self):
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
@@ -121,10 +120,13 @@ class LongitudinalMpc():
     if len(self.df_data['v_leads']):  # if not empty
       elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
       if elapsed > min_consider_time:  # if greater than min time (not 0)
-        v_diff = self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']
-        calculated_accel = v_diff / elapsed
-        if abs(calculated_accel) > abs(a_lead) and a_lead < 0.33528:  # if a_lead is greater than calculated accel (over last 1.5s, use that) and if lead accel is not above 0.75 mph/s
-          a_lead = calculated_accel
+        a_calculated = (self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']) / elapsed  # delta speed / delta time
+        # old version: # if abs(a_calculated) > abs(a_lead) and a_lead < 0.33528:  # if a_lead is greater than calculated accel (over last 1.5s, use that) and if lead accel is not above 0.75 mph/s
+        #   a_lead = a_calculated
+
+        # long version of below: if (a_calculated < 0 and a_lead >= 0 and a_lead < -a_calculated * 0.5) or (a_calculated > 0 and a_lead <= 0 and -a_lead > a_calculated * 0.5) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):
+        if (a_calculated < 0 <= a_lead < -a_calculated * 0.55) or (a_calculated > 0 >= a_lead and -a_lead < a_calculated * 0.45) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):
+          a_lead = a_calculated
     return a_lead  # if above doesn't execute, we'll return a_lead from radar
 
   def dynamic_follow(self, CS):
