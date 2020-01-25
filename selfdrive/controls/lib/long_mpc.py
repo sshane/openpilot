@@ -134,15 +134,15 @@ class LongitudinalMpc():
     if self.df_profile == 'roadtrip':
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]
       y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.653, 1.687, 1.74]
-      profile_mod = 0.8  # need to tune
+      profile_mod = [1.175, 0.8]  # multiplier for negative mods, positive mods
     elif self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 40.2336]  # velocities
       y_dist = [1.381, 1.389, 1.4, 1.413, 1.435, 1.464, 1.496, 1.504, 1.507, 1.535]  # TRs
-      profile_mod = 1.25
+      profile_mod = [0.9, 1.35]  # multiply TR mods that reduce distance by idx 0, multiply mods that increase distance by idx 1
     else:  # default to relaxed/stock
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
-      profile_mod = 1.0
+      profile_mod = [1.0, 1.0]
 
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -158,20 +158,21 @@ class LongitudinalMpc():
       y = [sng_TR, interp(sng_speed, x_vel, y_dist)]
       TR = interp(self.car_data['v_ego'], x, y)
 
+    TR_mod = []
     # Dynamic follow modifications (the secret sauce)
     x = [-20.0383, -15.6978, -11.2053, -7.8781, -5.0407, -3.2167, -1.6122, 0.0, 0.6847, 1.3772, 1.9007, 2.7452]  # relative velocity values
     y = [0.641, 0.506, 0.418, 0.334, 0.24, 0.115, 0.065, 0.0, -0.049, -0.068, -0.142, -0.221]  # modification values
-    TR_mod = interp(self.lead_data['v_lead'] - self.car_data['v_ego'], x, y)
+    TR_mod.append(interp(self.lead_data['v_lead'] - self.car_data['v_ego'], x, y))
 
     x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
-    y = [0.225, 0.159, 0.082, 0.046, 0.026, 0.017, 0.0, -0.005, -0.036, -0.045, -0.05]  # modification values
-    TR_mod += interp(self.calculate_lead_accel(), x, y)
+    y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
+    TR_mod.append(interp(self.calculate_lead_accel(), x, y))
 
     # x = [4.4704, 22.352]  # 10 to 50 mph  #todo: remove if uneeded/unsafe
     # y = [0.94, 1.0]
     # TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
 
-    TR_mod *= profile_mod  # alter TR modification according to profile
+    TR_mod = sum([mod * profile_mod[0] if mod < 0 else mod * profile_mod[1] for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
 
     if CS.leftBlinker or CS.rightBlinker:

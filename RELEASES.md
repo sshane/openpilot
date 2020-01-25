@@ -1,4 +1,4 @@
-Stock Additions 0.7.1 (version 0.1)
+Stock Additions 0.7.1 (version 0.2)
 ========================
  * Test
 
