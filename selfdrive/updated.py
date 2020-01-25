@@ -289,7 +289,7 @@ def attempt_update():
 
     try:
       r = run(NICE_LOW_PRIORITY + ["git", "pull"])
-      if 'already up to date' not in r.lower():
+      if 'already up to date' not in r.lower(): # comment
         os.system('reboot')
     except:
       pass
