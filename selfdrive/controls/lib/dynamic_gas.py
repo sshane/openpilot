@@ -57,7 +57,6 @@ class DynamicGas:
         y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
         gas = interp(v_ego, x, y)
       else:
-        # do something with blinker_status
         x = [-3.12928, -1.78816, -0.89408, 0, 0.33528, 1.78816, 2.68224]  # relative velocity mod
         y = [-gas * 0.2625, -gas * 0.18, -gas * 0.12, 0.0, gas * 0.075, gas * 0.135, gas * 0.19]
         gas_mod = interp(lead_data['v_rel'], x, y)
@@ -71,7 +70,7 @@ class DynamicGas:
 
         if blinker_status:
           x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-          y = [1.0, 1.275, 1.45]  # reduce TR when changing lanes
+          y = [1.0, 1.275, 1.45]
           gas *= interp(v_ego, x, y)
 
     return clip(gas, 0.0, 1.0)
