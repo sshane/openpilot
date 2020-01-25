@@ -62,7 +62,7 @@ class opParams:
     self.params_file = "/data/op_params.json"
     self.kegman_file = "/data/kegman.json"
     self.last_read_time = time.time()
-    self.read_frequency = 7.0  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 5.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance']
     self.run_init()  # restores, reads, and updates params

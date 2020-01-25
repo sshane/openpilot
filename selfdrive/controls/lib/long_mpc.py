@@ -102,7 +102,7 @@ class LongitudinalMpc():
 
   def store_df_data(self):
     v_lead_retention = 1.9  # keep only last x seconds
-    v_ego_retention = 2.0
+    v_ego_retention = 2.5
 
     cur_time = time.time()
     if self.lead_data['status']:
