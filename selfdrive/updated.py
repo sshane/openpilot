@@ -46,7 +46,7 @@ OVERLAY_MERGED = os.path.join(STAGING_ROOT, "merged")
 FINALIZED = os.path.join(STAGING_ROOT, "finalized")
 
 NICE_LOW_PRIORITY = ["nice", "-n", "19"]
-SHORT = os.getenv("SHORT") is not None
+SHORT = True  # os.getenv("SHORT") is not None
 
 # Workaround for the EON/termux build of Python having os.link removed.
 ffi = FFI()
@@ -331,7 +331,7 @@ def main(gctx=None):
             cloudlog.info(".git directory changed, recreating overlay")
             overlay_init_done = False
 
-        if not overlay_init_done: # comment
+        if not overlay_init_done:
           init_ovfs()
           overlay_init_done = True
 
