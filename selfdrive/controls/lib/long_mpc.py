@@ -101,7 +101,7 @@ class LongitudinalMpc():
       self.last_cost = cost
 
   def store_df_data(self):
-    v_lead_retention = 1.75  # keep only last x seconds
+    v_lead_retention = 1.9  # keep only last x seconds
     v_ego_retention = 2.0
 
     cur_time = time.time()
@@ -131,14 +131,14 @@ class LongitudinalMpc():
 
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
-    if self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
-      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 40.2336]  # velocities
-      y_dist = [1.381, 1.389, 1.4, 1.413, 1.435, 1.464, 1.496, 1.504, 1.507, 1.535]  # TRs
-      profile_mod = 1.25  # need to tune
-    elif self.df_profile == 'roadtrip':
+    if self.df_profile == 'roadtrip':
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]
       y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.653, 1.687, 1.74]
-      profile_mod = 0.8
+      profile_mod = 0.8  # need to tune
+    elif self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
+      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 40.2336]  # velocities
+      y_dist = [1.381, 1.389, 1.4, 1.413, 1.435, 1.464, 1.496, 1.504, 1.507, 1.535]  # TRs
+      profile_mod = 1.25
     else:  # default to relaxed/stock
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
@@ -167,16 +167,16 @@ class LongitudinalMpc():
     y = [0.225, 0.159, 0.082, 0.046, 0.026, 0.017, 0.0, -0.005, -0.036, -0.045, -0.05]  # modification values
     TR_mod += interp(self.calculate_lead_accel(), x, y)
 
-    x = [4.4704, 22.352]  # 10 to 50 mph
-    y = [0.94, 1.0]
-    TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
+    # x = [4.4704, 22.352]  # 10 to 50 mph  #todo: remove if uneeded/unsafe
+    # y = [0.94, 1.0]
+    # TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
 
-    # TR_mod *= profile_mod  # alter TR modification according to profile
+    TR_mod *= profile_mod  # alter TR modification according to profile
     TR += TR_mod
 
     if CS.leftBlinker or CS.rightBlinker:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-      y = [1.0, .8, .72]  # reduce TR when changing lanes
+      y = [1.0, .75, .65]  # reduce TR when changing lanes
       TR *= interp(self.car_data['v_ego'], x, y)
 
     # TR *= self.get_traffic_level()  # modify TR based on last minute of traffic data  # todo: look at getting this to work, a model could be used
