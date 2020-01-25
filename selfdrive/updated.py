@@ -267,8 +267,6 @@ def attempt_update(time_offroad, need_reboot):
   if new_version or git_fetch_result:
     cloudlog.info("Running update")
     if new_version:
-      with open('/data/updated', 'a') as f:
-        f.write('{}\n'.format('updated'))
       cloudlog.info("git reset in progress")
       r = [
         run(NICE_LOW_PRIORITY + ["git", "reset", "--hard", "@{u}"], OVERLAY_MERGED),
