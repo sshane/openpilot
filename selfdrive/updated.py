@@ -276,6 +276,12 @@ def attempt_update():
         run(NICE_LOW_PRIORITY + ["git", "submodule", "update"], OVERLAY_MERGED),
       ]
       cloudlog.info("git reset success: %s", '\n'.join(r))
+      try:
+        r = run(NICE_LOW_PRIORITY + ["git", "pull"])
+        if 'already up to date' not in r.lower(): # comment
+          os.system('reboot')
+      except:
+        pass
 
     # Un-set the validity flag to prevent the finalized tree from being
     # activated later if the finalize step is interrupted
@@ -286,13 +292,6 @@ def attempt_update():
     # Make sure the validity flag lands on disk LAST, only when the local git
     # repo and OP install are in a consistent state.
     set_consistent_flag()
-
-    try:
-      r = run(NICE_LOW_PRIORITY + ["git", "pull"])
-      if 'already up to date' not in r.lower(): # comment
-        os.system('reboot')
-    except:
-      pass
 
     cloudlog.info("update successful!")
   else:
