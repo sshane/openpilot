@@ -45,7 +45,7 @@ OVERLAY_METADATA = os.path.join(STAGING_ROOT, "metadata")
 OVERLAY_MERGED = os.path.join(STAGING_ROOT, "merged")
 FINALIZED = os.path.join(STAGING_ROOT, "finalized")
 
-NICE_LOW_PRIORITY = ["nice", "-n", "19"]  # comment
+NICE_LOW_PRIORITY = ["nice", "-n", "19"]
 SHORT = True  # os.getenv("SHORT") is not None
 
 # Workaround for the EON/termux build of Python having os.link removed.
