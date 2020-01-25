@@ -251,7 +251,7 @@ def finalize_from_ovfs_copy():
   cloudlog.info("done finalizing overlay")
 
 
-def attempt_update(time_offroad):
+def attempt_update(time_offroad, need_reboot):
   cloudlog.info("attempting git update inside staging overlay")
 
   git_fetch_output = run(NICE_LOW_PRIORITY + ["git", "fetch"], OVERLAY_MERGED)
@@ -277,7 +277,6 @@ def attempt_update(time_offroad):
         run(NICE_LOW_PRIORITY + ["git", "submodule", "update"], OVERLAY_MERGED),
       ]
       cloudlog.info("git reset success: %s", '\n'.join(r))
-      auto_update_reboot(time_offroad)
 
     # Un-set the validity flag to prevent the finalized tree from being
     # activated later if the finalize step is interrupted
@@ -294,16 +293,20 @@ def attempt_update(time_offroad):
     cloudlog.info("nothing new from git at this time")
 
   set_update_available_params(new_version=new_version)
+  return auto_update_reboot(time_offroad, need_reboot, new_version)
 
-def auto_update_reboot(time_offroad):
-  min_time = 3.
-  if time.time() - time_offroad > min_time * 60:  # allow reboot x minutes after stopping openpilot or starting EON
+def auto_update_reboot(time_offroad, need_reboot, new_version):
+  min_reboot_time = 3.
+  if new_version:
     try:
       r = run(NICE_LOW_PRIORITY + ["git", "pull"])
-      if 'already up to date' not in r.lower(): # comment
-        os.system('reboot')
+      if 'already up to date' not in r.lower():
+        need_reboot = True
     except:
       pass
+  if time.time() - time_offroad > min_reboot_time * 60 and need_reboot:  # allow reboot x minutes after stopping openpilot or starting EON
+    os.system('reboot')
+  return need_reboot
 
 
 def main(gctx=None):
@@ -326,6 +329,7 @@ def main(gctx=None):
     raise RuntimeError("couldn't get overlay lock; is another updated running?")
 
   time_offroad = time.time()
+  need_reboot = False
   while True:
     time_wrong = datetime.datetime.now().year < 2019
     ping_failed = subprocess.call(["ping", "-W", "4", "-c", "1", "8.8.8.8"])
@@ -349,7 +353,7 @@ def main(gctx=None):
           overlay_init_done = True
 
         if params.get("IsOffroad") == b"1":
-          attempt_update(time_offroad)
+          need_reboot = attempt_update(time_offroad, need_reboot)
         else:
           time_offroad = time.time()
           cloudlog.info("not running updater, openpilot running")
