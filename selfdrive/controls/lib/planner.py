@@ -32,8 +32,8 @@ if travis:
   _A_CRUISE_MAX_V = [1.2, 1.2, 0.65, .4]
   _A_CRUISE_MAX_V_FOLLOWING = [1.6, 1.6, 0.65, .4]
 else:
-  _A_CRUISE_MAX_V = [1.6, 1.4, 0.65, .4]
-  _A_CRUISE_MAX_V_FOLLOWING = [1.9, 1.9, 0.75, .6]
+  _A_CRUISE_MAX_V = [1.6, 1.4, 0.7, .4]
+  _A_CRUISE_MAX_V_FOLLOWING = [1.75, 1.75, 0.7, .6]
 _A_CRUISE_MAX_BP = [0.,  6.4, 22.5, 40.]
 
 # Lookup table for turns
@@ -74,7 +74,7 @@ class Planner():
     self.mpc1 = LongitudinalMpc(1)
     self.mpc2 = LongitudinalMpc(2)
     if not travis:
-      pm = messaging.PubMaster(['smiskolData'])
+      pm = messaging.PubMaster(['smiskolData'])  # why is this here?
       self.mpc1.set_pm(pm)
 
     self.v_acc_start = 0.0
