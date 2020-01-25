@@ -18,7 +18,6 @@ Highlight Features
 * [**Dynamic lane speed**](#dynamic-lane-speed)
 * [**(NOT YET ADDED) Two PID loops to control gas and brakes independently**](#Two-PID-loops-to-control-gas-and-brakes-independently)
 * [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
-* [**Custom following distance**](#Custom-following-distance)
 * [**Customize this branch (opEdit Parameter class)**](#Customize-this-branch-opEdit-Parameter-class)
 * [**Live tuning support**](#Live-tuning-support)
 
@@ -76,16 +75,6 @@ Stock openpilot doesn't seem to be able to identify your car's true angle offset
     You'll be greeted with a list of your parameters you can explore, enter the number corresponding to `lane_hug_direction`. Your options are to enter `'left'` or `'right'` for whichever direction your car has a tendency to hug toward. `None` will disable the feature.
     Finally you'll need to enter your absolute angle offset (negative will be converted to positive) with the `opParams` parameter: `lane_hug_angle_offset`.
 
-Custom following distance
------
-Using the `following_distance` parameter in `opParams`, you can specify a custom TR value to always be used. Afraid of technology and want to give yourself the highest following distance out there? Try out 2.7s! Are you daredevil and don't care about pissing off the car you're tailgating ahead? Try 0.9s! Please note dynamic follow modifications will be disabled if you set this parameter.
-- Again, you can use `opEdit` to change this:
-    ```python
-    cd /data/openpilot
-    python op_edit.py
-    ```
-    Then enter the number for the `following_distance` parameter and set to a float or integer between `0.9` and `2.7`. `None` will use dynamic follow!
-
 Customize this branch (opEdit Parameter class)
 -----
 This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
@@ -93,6 +82,16 @@ This is a handy tool to change your `opParams` parameters without diving into an
 cd /data/openpilot
 python op_edit.py
 ```
+
+Some parameters you can use to customize this fork:
+- `camera_offset`: Your camera offset to use in lane_planner.py. Helps fix lane hugging
+- `awareness_factor`: The multiplier for driver monitoring
+- `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
+- `alca_min_speed`: The minimum speed allowed for an automatic lane change
+- `static_steer_ratio`: Whether you want to use the learned steer ratio or the static one in your interface.py
+- `upload_on_hotspot`: Controls whether your EON will upload driving log data on your phone's hotspot
+- `reset_integral`: Resets integral gain whenever the longitudinal PID error crosses or is zero. Helps overshoot
+
 A list of parameters that you can modify are located [here](common/op_params.py#L42).
 
 Parameters are stored at `/data/op_params.json`
