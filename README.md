@@ -13,7 +13,7 @@ This branch is simply stock openpilot with some additions to help it drive as sm
 Highlight Features
 =====
 
-* [**Dynamic follow (now with profiles!)**](#dynamic-follow)
+* [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles)
 * [**Dynamic gas**](#dynamic-gas)
 * [**Dynamic lane speed**](#dynamic-lane-speed)
 * [**(NOT YET ADDED) Two PID loops to control gas and brakes independently**](#Two-PID-loops-to-control-gas-and-brakes-independently)
