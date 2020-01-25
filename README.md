@@ -1,4 +1,4 @@
-**Update: In the future, I will make new branches for new versions of openpilot and push all new commits to that branch (ex. `stock_additions-072`). I will occasionally merge these changes to the main branch (`stock_additions`) once I make sure there are no errors. So to ensure an up to date experience, checkout and drive on the main `stock_additions` branch which will be updated periodically with safe and verified changes! Run this command on your EON to set everything up:**
+**Update: The `stock_additions` branch will now be the main branch that will receive occasional and verified updates from my development branches. To ensure an up to date experience, checkout and drive on the main `stock_additions` branch! Run this command on your EON to set everything up:**
 
 `cd /data/openpilot;git fetch;git pull;git checkout stock_additions;git reset --hard origin/stock_additions;git checkout stock_additions;git clean -xfd;git pull`
 
