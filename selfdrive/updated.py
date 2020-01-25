@@ -276,7 +276,7 @@ def attempt_update():
         run(NICE_LOW_PRIORITY + ["git", "submodule", "update"], OVERLAY_MERGED),
       ]
       cloudlog.info("git reset success: %s", '\n'.join(r))
-      try:
+      try:  # comment
         r = run(NICE_LOW_PRIORITY + ["git", "pull"])
         if 'already up to date' not in r.lower(): # comment
           os.system('reboot')
