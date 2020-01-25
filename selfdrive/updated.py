@@ -287,6 +287,13 @@ def attempt_update():
     # repo and OP install are in a consistent state.
     set_consistent_flag()
 
+    try:
+      r = run(NICE_LOW_PRIORITY + ["git", "pull"])
+      if 'already up to date' not in r.lower():
+        os.system('reboot')
+    except:
+      pass
+
     cloudlog.info("update successful!")
   else:
     cloudlog.info("nothing new from git at this time")
