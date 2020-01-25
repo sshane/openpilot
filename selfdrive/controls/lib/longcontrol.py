@@ -75,6 +75,7 @@ class LongControl():
     self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
     self.track_data = []
     self.mpc_TR = 1.8
+    self.blinker_status = False
     self.dynamic_lane_speed = DynamicLaneSpeed()
 
   def reset(self, v_pid):
@@ -83,7 +84,9 @@ class LongControl():
     self.v_pid = v_pid
 
   def handle_passable(self, passable, v_ego):
-    self.gas_pressed = passable['gas_pressed']
+    CS = passable['car_state']
+    self.blinker_status = CS.leftBlinker or CS.rightBlinker
+    self.gas_pressed = CS.gasPressed
     self.lead_data['v_rel'] = passable['lead_one'].vRel
     self.lead_data['a_lead'] = passable['lead_one'].aLeadK
     self.lead_data['x_lead'] = passable['lead_one'].dRel
@@ -98,7 +101,7 @@ class LongControl():
     # Actuation limits
     if not travis:
       self.handle_passable(passable, v_ego)
-      gas_max = self.dynamic_gas.update(v_ego, self.lead_data, self.mpc_TR)
+      gas_max = self.dynamic_gas.update(v_ego, self.lead_data, self.mpc_TR, self.blinker_status)
       # v_target, v_target_future, a_target = self.dynamic_lane_speed.update(v_target, v_target_future, v_cruise, a_target, v_ego, self.track_data, self.lead_data)
     else:
       gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)

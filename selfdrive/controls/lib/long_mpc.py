@@ -134,6 +134,7 @@ class LongitudinalMpc():
     if self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
       y_dist = [1.36, 1.369, 1.381, 1.396, 1.419, 1.449, 1.483, 1.495, 1.504, 1.526, 1.536, 1.55, 1.572]  # TRs
+      profile_mod = 1.25  # need to tune
     elif self.df_profile == 'roadtrip':
       # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]  # todo: test 15-30% higher above 30m/s
       # y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.658, 1.696, 1.756]
@@ -141,9 +142,11 @@ class LongitudinalMpc():
       y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.61739, 1.649, 1.678, 1.724]
       # x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]  # todo: slightly closer above 10m/s, this one might be more balanced
       # y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.56, 1.576, 1.608, 1.635, 1.66, 1.7]
+      profile_mod = 0.75
     else:  # default to relaxed/stock
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.538, 1.554, 1.594, 1.612, 1.637, 1.675]
+      profile_mod = 1.0
 
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -169,14 +172,15 @@ class LongitudinalMpc():
     TR_mod += interp(self.calculate_lead_accel(), x, y)
 
     x = [4.4704, 22.352]  # 10 to 50 mph
-    y = [0.875, 1.0]
+    y = [0.9, 1.0]
     TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
 
+    # TR_mod *= profile_mod  # alter TR modification according to profile
     TR += TR_mod
 
     if CS.leftBlinker or CS.rightBlinker:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-      y = [1.0, .57, .47]  # reduce TR when changing lanes
+      y = [1.0, .8, .72]  # reduce TR when changing lanes
       TR *= interp(self.car_data['v_ego'], x, y)
 
     # TR *= self.get_traffic_level()  # modify TR based on last minute of traffic data  # todo: look at getting this to work, a model could be used

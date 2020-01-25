@@ -11,7 +11,7 @@ class DynamicGas:
     self.candidate = candidate
     self.CP = CP
 
-  def update(self, v_ego, lead_data, mpc_TR):
+  def update(self, v_ego, lead_data, mpc_TR, blinker_status):
     x, y = [], []  # gasMaxBP, gasMaxV
     if self.CP.enableGasInterceptor:
       if self.candidate == CAR_TOYOTA.COROLLA:
@@ -57,15 +57,21 @@ class DynamicGas:
         y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
         gas = interp(v_ego, x, y)
       else:
-        x = [-1.78816, -0.89408, 0, 1.78816, 2.68224]  # relative velocity mod
-        y = [-gas * 0.35, -gas * 0.25, -gas * 0.075, gas * 0.1575, gas * 0.2025]
+        # do something with blinker_status
+        x = [-3.12928, -1.78816, -0.89408, 0, 0.33528, 1.78816, 2.68224]  # relative velocity mod
+        y = [-gas * 0.2625, -gas * 0.18, -gas * 0.12, 0.0, gas * 0.075, gas * 0.135, gas * 0.19]
         gas_mod = interp(lead_data['v_rel'], x, y)
 
         current_TR = lead_data['x_lead'] / v_ego
         x = [mpc_TR - 0.22, mpc_TR, mpc_TR + 0.2, mpc_TR + 0.4]
-        y = [-gas_mod * 0.36, 0.0, gas_mod * 0.15, gas_mod * 0.4]
+        y = [-gas_mod * 0.15, 0.0, gas_mod * 0.25, gas_mod * 0.4]
         gas_mod -= interp(current_TR, x, y)
 
         gas += gas_mod
+
+        if blinker_status:
+          x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
+          y = [1.0, 1.275, 1.45]  # reduce TR when changing lanes
+          gas *= interp(v_ego, x, y)
 
     return clip(gas, 0.0, 1.0)

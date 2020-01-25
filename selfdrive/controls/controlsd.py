@@ -297,7 +297,7 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
     passable_loc['mpc_TR'] = sm_smiskol['smiskolData'].mpcTR
     passable_loc['live_tracks'] = sm_smiskol['liveTracks']
     passable_loc['has_lead'] = plan.hasLead
-    passable_loc['gas_pressed'] = CS.gasPressed
+    passable_loc['car_state'] = CS
 
   # Gas/Brake PID loop
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
