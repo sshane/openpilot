@@ -16,9 +16,7 @@ Highlight Features
 * [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles)
 * [**Dynamic gas**](#dynamic-gas)
 * [**Customize this branch (opEdit Parameter class)**](#Customize-this-branch-opEdit-Parameter-class)
-* [**Dynamic lane speed**](#dynamic-lane-speed)
 * [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
-* [**(NOT YET ADDED) Two PID loops to control gas and brakes independently**](#Two-PID-loops-to-control-gas-and-brakes-independently)
 * [**Live tuning support**](#Live-tuning-support)
 
 -----
