@@ -1,6 +1,6 @@
 Stock Additions 0.7.1 (version 0.1)
 ========================
- * Nothing new yet
+ * Test
 
 Stock Additions 0.7 (version 0.1)
 ========================
