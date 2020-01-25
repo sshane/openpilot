@@ -172,7 +172,7 @@ class LongitudinalMpc():
     TR_mod += interp(self.calculate_lead_accel(), x, y)
 
     x = [4.4704, 22.352]  # 10 to 50 mph
-    y = [0.9, 1.0]
+    y = [0.94, 1.0]
     TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
 
     # TR_mod *= profile_mod  # alter TR modification according to profile
