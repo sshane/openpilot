@@ -138,7 +138,7 @@ class LongitudinalMpc():
     elif self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 40.2336]  # velocities
       y_dist = [1.381, 1.389, 1.4, 1.413, 1.435, 1.464, 1.496, 1.504, 1.507, 1.535]  # TRs
-      profile_mod = [0.9, 1.35]  # multiply TR mods that reduce distance by idx 0, multiply mods that increase distance by idx 1
+      profile_mod = [0.875, 1.35]  # multiply TR mods that reduce distance by idx 0, multiply mods that increase distance by idx 1
     else:  # default to relaxed/stock
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
