@@ -297,7 +297,7 @@ def attempt_update(time_offroad):
 
 def auto_update_reboot(time_offroad):
   min_time = 3.
-  if time.time() - time_offroad > min_time * 60:  # allow reboot x minutes after stopping openpilot
+  if time.time() - time_offroad > min_time * 60:  # allow reboot x minutes after stopping openpilot or starting EON
     try:
       r = run(NICE_LOW_PRIORITY + ["git", "pull"])
       if 'already up to date' not in r.lower(): # comment
