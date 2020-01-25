@@ -120,7 +120,7 @@ class opParams:
       write_params(self.params, self.params_file)
 
   def delete_old(self):
-    prev_params = self.params
+    prev_params = dict(self.params)
     for i in self.to_delete:
       if i in self.params:
         del self.params[i]
