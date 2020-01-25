@@ -331,7 +331,7 @@ def main(gctx=None):
             cloudlog.info(".git directory changed, recreating overlay")
             overlay_init_done = False
 
-        if not overlay_init_done:
+        if not overlay_init_done: # comment
           init_ovfs()
           overlay_init_done = True
 
