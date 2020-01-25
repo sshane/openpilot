@@ -296,7 +296,7 @@ def attempt_update(time_offroad, need_reboot):
   return auto_update_reboot(time_offroad, need_reboot, new_version)
 
 def auto_update_reboot(time_offroad, need_reboot, new_version):
-  min_reboot_time = 3.
+  min_reboot_time = 10.
   if new_version:
     try:
       r = run(NICE_LOW_PRIORITY + ["git", "pull"])
