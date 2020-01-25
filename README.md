@@ -37,6 +37,8 @@ python op_edit.py
 ```
 Then change the `dynamic_follow` parameter to one of the above profiles, make sure to spell it correctly. You're done!
 
+<img src=".media/photos/df_profiles.png?raw=true" width="600">
+
 Dynamic gas
 -----
 Currently supported vehicles (w/ comma pedal only):
@@ -100,4 +102,4 @@ Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow` pa
 - Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
 - Alternatively, you can use the new opTune module to live tune quicker and easier! It stays in the parameter edit view so you can more easily experiment with values. opTune shown below:
 
-<img src="gifs/op_tune.gif?raw=true" width="600">
+<img src=".media/gifs/op_tune.gif?raw=true" width="600">
