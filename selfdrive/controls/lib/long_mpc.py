@@ -131,8 +131,8 @@ class LongitudinalMpc():
 
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     if self.df_profile == 'roadtrip':
-      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 29.5452, 33.528, 35.7632, 40.2336]  # velocities
       y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.653, 1.687, 1.74]  # TRs
       profile_mod = [1.175, 0.8]  # multiplier for negative mods, positive mods
     elif self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
@@ -140,7 +140,6 @@ class LongitudinalMpc():
       y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.5055, 1.507, 1.53]
       profile_mod = [0.875, 1.35]  # multiply TR mods that reduce distance by idx 0, multiply mods that increase distance by idx 1
     else:  # default to relaxed/stock
-      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
       profile_mod = [1.0, 1.0]
 
