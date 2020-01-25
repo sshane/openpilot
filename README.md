@@ -4,7 +4,7 @@
 
 Then run `git branch` to make sure you are on `stock_additions`. The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
 
-Shane's Stock Additions 0.7.1 (version 0.1)
+Shane's Stock Additions 0.7.1 (version 0.2)
 =====
 
 This branch is simply stock openpilot with some additions to help it drive as smooth as possible on my 2017 Toyota Corolla w/ comma pedal.
@@ -13,9 +13,9 @@ This branch is simply stock openpilot with some additions to help it drive as sm
 Highlight Features
 =====
 
+* [**Dynamic follow (now with profiles!)**](#dynamic-follow)
 * [**Dynamic gas**](#dynamic-gas)
-* [**Dynamic follow**](#dynamic-follow)
-* [**Dynamic lane speed (new!)**](#dynamic-lane-speed)
+* [**Dynamic lane speed**](#dynamic-lane-speed)
 * [**(NOT YET ADDED) Two PID loops to control gas and brakes independently**](#Two-PID-loops-to-control-gas-and-brakes-independently)
 * [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
 * [**Custom following distance**](#Custom-following-distance)
@@ -24,23 +24,38 @@ Highlight Features
 
 -----
 
+Dynamic follow (3 profiles)
+-----
+This is my dynamic follow from 0.5, where it changes your TR (following distance) dynamically based on multiple vehicle factors, as well as data from the lead vehicle. [Here's an old write up from a while ago explaining how it works exactly. Some of it might be out of date, but how it functions is the same.](https://github.com/ShaneSmiskol/openpilot/blob/dynamic-follow/README.md) The goal is to essentially make the driving experience more smooth and increase safety, braking sooner.
+
+Now you can choose a profile based on traffic and your driving preference. There are three profiles currently:
+  * `traffic` - Meant to keep you a bit closer in traffic, hopefully reducing cut-ins. May not be the safest when approaching a vastly slower vehicle.
+  * `relaxed` - This is the current and now default dynamic follow profile just with a cool name. Also slight closer than previously at high speeds.
+  * `roadtrip` - This profile is for road trips mainly where you're on two lane highways and don't want to be following particularly closely; at night for example.
+
+**How to choose a profile:** The easiest way is to use `opEdit` over ssh with your mobile device.
+```python
+cd /data/openpilot
+python op_edit.py
+```
+Then change the `dynamic_follow` parameter to one of the above profiles, make sure to spell it correctly. You're done!
+
 Dynamic gas
 -----
 Currently supported vehicles (w/ comma pedal only):
   * 2017 Toyota Corolla (non-TSS2)
   * Toyota RAV4 (non-TSS2)
+  * 2019 Honda Pilot
+
+*TODO: Need to factor in distance, as it will not accelerate to get closer to the stopped lead if you engage at ~0mph far back from the lead.*
 
 This aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by modifying the maximum gas that can be applied based on your current velocity and the relative velocity of the lead car. It'll also of course increase the maximum gas when the lead is accelerating to help you get up to speed quicker than stock. And smoother; this eliminates the jerking you get from stock openpilot with comma pedal. It tries to coast if the lead is only moving slowly, it doesn't use maximum gas as soon as the lead inches forward :). When you are above 20 mph, relative velocity and the following distance is taken into consideration.
-
-Dynamic follow
------
-This is my dynamic follow from 0.5, where it changes your TR (following distance) dynamically based on multiple vehicle factors, as well as data from the lead vehicle. [Here's an old write up from a while ago explaining how it works exactly. Some of it might be out of date, but how it functions is the same.](https://github.com/ShaneSmiskol/openpilot/blob/dynamic-follow/README.md) The goal is to essentially smoothen the driving experience and increase safety, braking sooner.
 
 Dynamic lane speed
 -----
 *This feature is disabled until I can figure out how to improve it.*
 
-This is a new feature that reduces your cruising speed if many vehicles around you are significantly slower than you. This works with and without an openpilot-identified lead. Ex.: It will slow you down if traveling in an open lane with cars in adjacent lanes that are slower than you. Or if the lead in front of the lead is slowing down, as well as cars in other lanes far ahead. The most it will slow you down is some average of: (the set speed and the average of the surrounding cars) The more the radar points, the more weight goes to the speeds of surrounding vehicles.
+This is a feature that reduces your cruising speed if many vehicles around you are significantly slower than you. This works with and without an openpilot-identified lead. Ex.: It will slow you down if traveling in an open lane with cars in adjacent lanes that are slower than you. Or if the lead in front of the lead is slowing down, as well as cars in other lanes far ahead. The most it will slow you down is some average of: (the set speed and the average of the surrounding cars) The more the radar points, the more weight goes to the speeds of surrounding vehicles.
 
 ~~Two PID loops to control gas and brakes independently~~
 -----
@@ -84,8 +99,8 @@ Parameters are stored at `/data/op_params.json`
 
 Live tuning support
 -----
-This has just been added and currently only the `camera_offset` and `lane_hug_angle_offset` parameters are supported.
+Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow` parameters are supported.
 - Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
-- Alternatively, you can use the new opTune module to live tune quicker and easier! It stays in the parameter edit view so you can more easily experiment with values. opTune show below:
+- Alternatively, you can use the new opTune module to live tune quicker and easier! It stays in the parameter edit view so you can more easily experiment with values. opTune shown below:
 
 <img src="gifs/op_tune.gif?raw=true" width="600">
