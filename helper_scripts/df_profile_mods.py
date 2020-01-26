@@ -2,16 +2,16 @@ from numpy import interp
 
 p_mod_x = [6.71081, 44.7387, 78.2928]
 for v_ego in p_mod_x:
-  if v_ego == 6.71081:
+  if v_ego != 78.2928:
     continue
-  # traffic
-  x_vel = [0.0, 4.166748138, 8.333272582, 12.50002072, 16.666768858, 20.833293302, 25.858579012, 30.5230463, 50.123114580000006, 64.610209102, 77.857591476, 90.35090137600001]
-  y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.506, 1.502, 1.496, 1.487, 1.473]
-  TR_traffic = interp(v_ego, x_vel, y_dist)
-  traffic_mod_pos = [1.015, 1.18, 1.34]
-  traffic_mod_neg = [1.0, 0.85, 0.85]
-  traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
-  traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
+  # roadtrip
+  x_vel = [0.0, 4.166748138, 8.333272582, 12.50002072, 16.666768858, 20.833293302, 25.858579012, 30.5230463, 50.00008288, 70.00011603200001, 75.00012432, 80.000132608, 90.00014918400001]
+  y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.653, 1.687, 1.74]  # TRs
+  TR_roadtrip = interp(v_ego, x_vel, y_dist)
+  roadtrip_mod_pos = [0.85, 0.815, 0.57]
+  roadtrip_mod_neg = [1.18, 1.27, 1.675]
+  roadtrip_mod_pos = interp(v_ego, p_mod_x, roadtrip_mod_pos)
+  roadtrip_mod_neg = interp(v_ego, p_mod_x, roadtrip_mod_neg)
 
   # relaxed
   x_vel = [0.0, 4.166748138, 8.333272582, 12.50002072, 16.666768858, 20.833293302, 25.858579012, 30.5230463, 50.00008288, 70.00011603200001, 75.00012432, 80.000132608, 90.00014918400001]
@@ -27,8 +27,8 @@ for v_ego in p_mod_x:
   TR_mod_pos = interp(-10, x_rel, y_rel)
   TR_mod_neg = interp(3.6, x_rel, y_rel)
   print('v_ego: {}'.format(v_ego))
-  print('traffic: {}'.format(TR_traffic))
-  print('pos: {}, neg: {}'.format(TR_traffic + TR_mod_pos * traffic_mod_pos, TR_traffic + TR_mod_neg * traffic_mod_neg))
+  print('roadtrip: {}'.format(TR_roadtrip))
+  print('pos: {}, neg: {}'.format(TR_roadtrip + TR_mod_pos * roadtrip_mod_pos, TR_roadtrip + TR_mod_neg * roadtrip_mod_neg))
   print()
   print('relaxed: {}'.format(TR_relaxed))
   print('pos: {}, neg: {}'.format(TR_relaxed + TR_mod_pos * relaxed_mod_pos, TR_relaxed + TR_mod_neg * relaxed_mod_neg))
