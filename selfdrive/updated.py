@@ -297,8 +297,7 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
   min_reboot_time = 10.
   if new_version:
     try:
-      r = run(NICE_LOW_PRIORITY + ["git", "pull"])
-      if 'already up to date' not in r.lower():
+      if 'already up to date' not in run(NICE_LOW_PRIORITY + ["git", "pull"]).lower():
         need_reboot = True
     except:
       pass
