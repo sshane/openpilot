@@ -37,7 +37,10 @@ else:
 _A_CRUISE_MAX_BP = [0.,  6.4, 22.5, 40.]
 
 # Lookup table for turns
-_A_TOTAL_MAX_V = [2.38, 4.48]
+if travis:
+  _A_TOTAL_MAX_V = [1.7, 3.2]
+else:
+  _A_TOTAL_MAX_V = [2.38, 4.48]
 _A_TOTAL_MAX_BP = [20., 40.]
 
 # 75th percentile
