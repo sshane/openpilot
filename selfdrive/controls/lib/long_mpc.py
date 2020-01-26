@@ -132,16 +132,23 @@ class LongitudinalMpc():
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
+    p_mod_x = [3, 20, 35]  # profile mod speeds
     if self.df_profile == 'roadtrip':
       y_dist = [1.41, 1.419, 1.431, 1.446, 1.47, 1.5, 1.542, 1.563, 1.581, 1.617, 1.653, 1.687, 1.74]  # TRs
-      profile_mod = [1.175, 0.8]  # multiplier for negative mods, positive mods
-    elif self.df_profile == 'traffic':  # for in congested traffic, might need to reduce TR at lower speeds
+      p_mod_pos = [0.8, 0.77, 0.725]
+      p_mod_neg = [1.1, 1.15, 1.175]
+    elif self.df_profile == 'traffic':  # for in congested traffic
       x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 40.2336]
       y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.5055, 1.507, 1.53]
-      profile_mod = [0.875, 1.35]  # multiply TR mods that reduce distance by idx 0, multiply mods that increase distance by idx 1
+      p_mod_pos = [1.31, 1.175, 1.0]
+      p_mod_neg = [1.0, 0.9, 0.85]
     else:  # default to relaxed/stock
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
-      profile_mod = [1.0, 1.0]
+      p_mod_pos = [1.0, 1.0, 1.0]
+      p_mod_neg = [1.0, 1.0, 1.0]
+
+    p_mod_pos = interp(self.car_data['v_ego'], p_mod_x, p_mod_pos)
+    p_mod_neg = interp(self.car_data['v_ego'], p_mod_x, p_mod_neg)
 
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -171,7 +178,7 @@ class LongitudinalMpc():
     # y = [0.94, 1.0]
     # TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
 
-    TR_mod = sum([mod * profile_mod[0] if mod < 0 else mod * profile_mod[1] for mod in TR_mod])  # alter TR modification according to profile
+    TR_mod = sum([mod * p_mod_neg if mod < 0 else mod * p_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
 
     if CS.leftBlinker or CS.rightBlinker:
