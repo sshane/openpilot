@@ -1,6 +1,12 @@
 Stock Additions 0.7.1 (version 0.2)
 ========================
- * Test
+ * Recover faster when lead leaves path, or when braking or acceleration is required immediately. Also should speed up the acceleration with auto lane change.
+ * Add 3 different dynamic follow profiles: `roadtrip`, `relaxed`, and `traffic`. `relaxed` is the current dynamic follow profile. You can also swap profiles without rebooting live by using opTune or opEdit. SSH in and: `cd /data/openpilot;python op_tune.py` The parameter to change is `dynamic_follow`
+ * Fix for steering unavailable when wheel goes over 100 degrees/sec.
+ * Tuning for dynamic gas
+ * Accelerate quicker and get closer when you're lane changing
+ * Higher acceleration, and higher limits for turns
+ * Automatic updates, EON will reboot by itself as long as it has been inactive for 10 minutes
 
 Stock Additions 0.7 (version 0.1)
 ========================
