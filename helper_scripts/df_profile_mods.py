@@ -6,10 +6,10 @@ for v_ego in p_mod_x:
     continue
   # traffic
   x_vel = [0.0, 4.166748138, 8.333272582, 12.50002072, 16.666768858, 20.833293302, 25.858579012, 30.5230463, 40.000066304, 50.123114580000006, 64.610209102, 78.00008455400001, 90.35134876400001]
-  y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.506, 1.38, 1.2216, 1.085, 1.0516, 1.016]
+  y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.506, 1.38, 1.1899, 1.026, 0.9859, 0.9432]
   TR_traffic = interp(v_ego, x_vel, y_dist)
-  traffic_mod_pos = [1.015, 2.175, 3.65]
-  traffic_mod_neg = [0.98, 0.08, 0.0]
+  traffic_mod_pos = [1.015, 2.175, 3.95]
+  traffic_mod_neg = [0.98, 0.1, 0.0]
   traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
   traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
 
