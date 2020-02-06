@@ -18,6 +18,7 @@ Highlight Features
 * [**Customize this branch (opEdit Parameter class)**](#Customize-this-branch-opEdit-Parameter-class)
 * [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
 * [**Live tuning support**](#Live-tuning-support)
+* [**Automatic updates**](#Automatic-updates)
 
 -----
 
@@ -102,3 +103,10 @@ Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow` pa
 - Alternatively, you can use the new opTune module to live tune quicker and easier! It stays in the parameter edit view so you can more easily experiment with values. opTune shown below:
 
 <img src=".media/gifs/op_tune.gif?raw=true" width="600">
+
+Automatic updates
+-----
+When a new update is available on GitHub for the current branch you're on, your EON will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
+- your EON has been inactive for more than 5 minutes.
+
+Therefore, if the EON sees an update while you're driving it will reboot 5 minutes after you stop your drive, it resets the timer if you start driving again before the 5 minutes is up.

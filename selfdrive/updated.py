@@ -81,7 +81,7 @@ def wait_between_updates(ready_event):
   if SHORT:
     ready_event.wait(timeout=10)
   else:
-    ready_event.wait(timeout=60 * 7.5)
+    ready_event.wait(timeout=60 * 10)
 
 
 def link(src, dest):
@@ -294,7 +294,7 @@ def attempt_update(time_offroad, need_reboot):
   return auto_update_reboot(time_offroad, need_reboot, new_version)
 
 def auto_update_reboot(time_offroad, need_reboot, new_version):
-  min_reboot_time = 10.
+  min_reboot_time = 5.
   if new_version:
     try:
       if 'already up to date' not in run(NICE_LOW_PRIORITY + ["git", "pull"]).lower():
