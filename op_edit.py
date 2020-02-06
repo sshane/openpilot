@@ -7,7 +7,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
     self.params = None
-    self.sleep_time = 1.25
+    self.sleep_time = 1.0
     self.run_loop()
 
   def run_loop(self):

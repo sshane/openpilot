@@ -11,10 +11,11 @@ class opTune:
 
   def start(self):
     print('Welcome to the opParams command line live tuner!')
-    editable = [p for p in self.op_params.get(force_update=True) if p in self.op_params.default_params and 'live' in self.op_params.default_params[p] and self.op_params.default_params[p]['live']]
+    params = self.op_params.get(force_update=True)
+    editable = [p for p in params if p in self.op_params.default_params and 'live' in self.op_params.default_params[p] and self.op_params.default_params[p]['live']]
     while True:
       print('Choose a parameter to tune:')
-      print('\n'.join(['{}. {}'.format(idx + 1, p) for idx, p in enumerate(editable)]))
+      print('\n'.join(['{}. {}: {}'.format(idx + 1, p, params[p]) for idx, p in enumerate(editable)]))
       choice = input('>> ')
       if not choice:
         print('Exiting opTune!')
@@ -35,7 +36,7 @@ class opTune:
 
     to_print = []
     if has_description:
-      to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n     ')))
+      to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')))
     if has_allowed_types:
       allowed_types = self.op_params.default_params[chosen_key]['allowed_types']
       to_print.append('>>  Allowed types: {}'.format(', '.join([str(i).split("'")[1] for i in allowed_types])))
@@ -49,12 +50,9 @@ class opTune:
         self.message('Exiting this parameter...')
         break
 
-      status, value = self.parse_input(value)
-      if not status:
-        self.message('Cannot parse input!')
-        continue
+      value = self.parse_input(value)
 
-      if has_allowed_types and not any([isinstance(value, typ) for typ in allowed_types]):
+      if has_allowed_types and not type(value) in allowed_types:
         self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(value)).split("'")[1]))
         continue
       self.op_params.put(chosen_key, value)
@@ -66,15 +64,17 @@ class opTune:
     print()
 
   def parse_input(self, dat):
-    dat = dat.replace("'", '"')
+    dat = dat.strip()
     try:
       dat = ast.literal_eval(dat)
     except:
-      try:
-        dat = ast.literal_eval('"{}"'.format(dat))
-      except ValueError:
-        return False, dat
-    return True, dat
+      if dat.lower() == 'none':
+        dat = None
+      elif dat.lower() == 'false':
+        dat = False
+      elif dat.lower() == 'true':  # else, assume string
+        dat = True
+    return dat
 
 
 opTune()
