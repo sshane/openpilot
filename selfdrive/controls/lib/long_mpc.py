@@ -125,7 +125,7 @@ class LongitudinalMpc():
         #   a_lead = a_calculated
 
         # long version of below: if (a_calculated < 0 and a_lead >= 0 and a_lead < -a_calculated * 0.5) or (a_calculated > 0 and a_lead <= 0 and -a_lead > a_calculated * 0.5) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):
-        if (a_calculated < 0 <= a_lead < -a_calculated * 0.55) or (a_calculated > 0 >= a_lead and -a_lead < a_calculated * 0.45) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):
+        if (a_calculated < 0 <= a_lead < -a_calculated * 0.55) or (a_calculated > 0 >= a_lead and -a_lead < a_calculated * 0.45) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):  # this is a mess, fix
           a_lead = a_calculated
     return a_lead  # if above doesn't execute, we'll return a_lead from radar
 
