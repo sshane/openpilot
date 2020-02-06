@@ -2,7 +2,7 @@
 
 `cd /data/openpilot;git fetch;git pull;git checkout stock_additions;git reset --hard origin/stock_additions;git checkout stock_additions;git clean -xfd;git pull`
 
-Then run `git branch` to make sure you are on `stock_additions`. The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
+The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
 
 Shane's Stock Additions 0.7.1 (version 0.2)
 =====
