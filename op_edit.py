@@ -16,9 +16,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     while True:
       self.params = self.op_params.get(force_update=True)
       values_list = [self.params[i] if len(str(self.params[i])) < 20 else '{} ... {}'.format(str(self.params[i])[:30], str(self.params[i])[-15:]) for i in self.params]
-      live = [' (live!)' if i in self.op_params.default_params and 'live' in self.op_params.default_params[i] and self.op_params.default_params[i]['live'] else '' for i in self.params]
+      live = ['(live!)' if i in self.op_params.default_params and 'live' in self.op_params.default_params[i] and self.op_params.default_params[i]['live'] else '' for i in self.params]
 
-      to_print = ['{}. {}: {} {}'.format(idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
+      to_print = ['{}. {}: {}  {}'.format(idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
       to_print.append('\n{}. Add new parameter!'.format(len(self.params) + 1))
       to_print.append('{}. Delete parameter!'.format(len(self.params) + 2))
       print('\n'.join(to_print))
@@ -71,11 +71,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       old_value = self.params[chosen_key]
       print('Chosen parameter: {}'.format(chosen_key))
-      print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
 
       to_print = []
       if has_description:
-        to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n     ')))
+        to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')))
       if has_allowed_types:
         allowed_types = self.op_params.default_params[chosen_key]['allowed_types']
         to_print.append('>>  Allowed types: {}'.format(', '.join([str(i).split("'")[1] for i in allowed_types])))
@@ -87,18 +86,16 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
+      print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
+
       print('Enter your new value:')
       new_value = input('>> ').strip()
       if new_value == '':
         self.message('Exiting this parameter...')
         return
 
-      status, new_value = self.parse_input(new_value)
-
-      if not status:
-        continue
-
-      if has_allowed_types and not any([isinstance(new_value, typ) for typ in allowed_types]):
+      new_value = self.parse_input(new_value)
+      if has_allowed_types and not type(new_value) in allowed_types:
         self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
         continue
 
@@ -114,25 +111,26 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       return
 
   def parse_input(self, dat):
+    dat = dat.strip()
     try:
       dat = ast.literal_eval(dat)
     except:
-      try:
-        dat = ast.literal_eval('"{}"'.format(dat))
-      except ValueError:
-        self.message('Cannot parse input, please try again!')
-        return False, dat
-    return True, dat
+      if dat.lower() == 'none':
+        dat = None
+      elif dat.lower() == 'false':
+        dat = False
+      elif dat.lower() == 'true':  # else, assume string
+        dat = True
+    return dat
 
   def delete_parameter(self):
     while True:
       print('Enter the name of the parameter to delete:')
       key = input('>> ').lower()
-      status, key = self.parse_input(key)
+      key = self.parse_input(key)
+
       if key == '':
         return
-      if not status:
-        continue
       if not isinstance(key, str):
         self.message('Input must be a string!')
         continue
@@ -160,19 +158,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if key == '':
         return
 
-      status, key = self.parse_input(key)
+      key = self.parse_input(key)
 
-      if not status:
-        continue
       if not isinstance(key, str):
         self.message('Input must be a string!')
         continue
 
       print("Enter the data you'd like to save with this parameter:")
       value = input('>> ').strip()
-      status, value = self.parse_input(value)
-      if not status:
-        continue
+      value = self.parse_input(value)
 
       print('Parameter name: {}'.format(key))
       print('Parameter value: {} (type: {})'.format(value, str(type(value)).split("'")[1]))
