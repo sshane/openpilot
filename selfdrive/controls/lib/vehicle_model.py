@@ -108,15 +108,19 @@ class VehicleModel():
 
     self.cF_orig = CP.tireStiffnessFront
     self.cR_orig = CP.tireStiffnessRear
-    self.static_steer_ratio = opParams().get('static_steer_ratio', default=False)
+    self.op_params = opParams()
+    self.steer_ratio = self.op_params.get('steer_ratio', default=None)
     self.sR = CP.steerRatio
     self.update_params(1.0, CP.steerRatio)
 
   def update_params(self, stiffness_factor, steer_ratio):
     """Update the vehicle model with a new stiffness factor and steer ratio"""
+    self.steer_ratio = self.op_params.get('steer_ratio', default=None)
     self.cF = stiffness_factor * self.cF_orig
     self.cR = stiffness_factor * self.cR_orig
-    if travis or not self.static_steer_ratio:  # leave sR at CP.steerRatio if static_steer_ratio is True
+    if not travis and type(self.steer_ratio) in [int, float]:
+      self.sR = float(self.steer_ratio)
+    else:
       self.sR = steer_ratio
 
   def steady_state_sol(self, sa, u):

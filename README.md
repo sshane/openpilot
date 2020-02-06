@@ -62,7 +62,7 @@ Some parameters you can use to customize this fork:
 - `awareness_factor`: The multiplier for driver monitoring
 - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
 - `alca_min_speed`: The minimum speed allowed for an automatic lane change
-- `static_steer_ratio`: Whether you want to use the learned steer ratio or the static one in your interface.py
+- `steer_ratio`: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead.
 - `upload_on_hotspot`: Controls whether your EON will upload driving log data on your phone's hotspot
 - `reset_integral`: Resets integral gain whenever the longitudinal PID error crosses or is zero. Helps overshoot
 
