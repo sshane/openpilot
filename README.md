@@ -98,7 +98,7 @@ If you have a Toyota Corolla with a comma pedal, you'll love this addition. Two 
 
 Live tuning support
 -----
-Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow` parameters are supported.
+Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow`, and `steer_ratio` parameters are supported.
 - Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
 - Alternatively, you can use the new opTune module to live tune quicker and easier! It stays in the parameter edit view so you can more easily experiment with values. opTune shown below:
 
