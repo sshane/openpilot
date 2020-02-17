@@ -7,8 +7,6 @@ RUN="docker run --shm-size 1G --rm tmppilot /bin/sh -c"
 docker build -t tmppilot -f Dockerfile.openpilot .
 
 $RUN "$SETUP cd /tmp/openpilot/selfdrive/test/ && ./test_fingerprints.py"
-$RUN "$SETUP ./flake8_openpilot.sh"
-$RUN "$SETUP ./pylint_openpilot.sh"
 $RUN "$SETUP python -m unittest discover common"
 $RUN "$SETUP python -m unittest discover opendbc/can"
 $RUN "$SETUP python -m unittest discover selfdrive/boardd"
