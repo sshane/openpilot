@@ -8,6 +8,8 @@ from selfdrive.controls.lib.lane_planner import LanePlanner
 from selfdrive.config import Conversions as CV
 import cereal.messaging as messaging
 from cereal import log
+from common.op_params import opParams
+from selfdrive.controls.lane_hugging import LaneHugging
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
@@ -58,6 +60,11 @@ class PathPlanner():
     self.lane_change_timer = 0.0
     self.prev_one_blinker = False
 
+    self.lane_hugging = LaneHugging()
+    self.op_params = opParams()
+    self.alca_nudge_required = self.op_params.get('alca_nudge_required', default=True)
+    self.alca_min_speed = self.op_params.get('alca_min_speed', default=30.0)
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -90,7 +97,7 @@ class PathPlanner():
 
     # Lane change logic
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
-    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
+    below_lane_change_speed = v_ego < self.alca_min_speed
 
     if sm['carState'].leftBlinker:
       self.lane_change_direction = LaneChangeDirection.left
