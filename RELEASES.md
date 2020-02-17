@@ -1,4 +1,4 @@
-Stock Additions 0.7.2 (version 0.3)
+Stock Additions 0.7.2 (version 0.2.1)
 ========================
  * In progress of porting
 

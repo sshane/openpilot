@@ -4,7 +4,7 @@
 
 The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
 
-Shane's Stock Additions 0.7.1 (version 0.2)
+Shane's Stock Additions 0.7.2 (version 0.2.1)
 =====
 
 This branch is simply stock openpilot with some additions to help it drive as smooth as possible on my 2017 Toyota Corolla w/ comma pedal.
