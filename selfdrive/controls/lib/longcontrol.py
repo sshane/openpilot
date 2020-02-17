@@ -59,7 +59,7 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 
 
 class LongControl():
-  def __init__(self, CP, compute_gb):
+  def __init__(self, CP, compute_gb, candidate):
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
@@ -69,15 +69,41 @@ class LongControl():
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 
+    self.dynamic_gas = DynamicGas(CP, candidate)
+    self.gas_pressed = False
+    self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
+    self.track_data = []
+    self.mpc_TR = 1.8
+    self.blinker_status = False
+    self.dynamic_lane_speed = DynamicLaneSpeed()
+
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP):
+  def handle_bundle(self, bundle, v_ego):
+    CS = bundle['car_state']
+    self.blinker_status = CS.leftBlinker or CS.rightBlinker
+    self.gas_pressed = CS.gasPressed
+    self.lead_data['v_rel'] = bundle['lead_one'].vRel
+    self.lead_data['a_lead'] = bundle['lead_one'].aLeadK
+    self.lead_data['x_lead'] = bundle['lead_one'].dRel
+    self.lead_data['status'] = bundle['has_lead']  # this fixes radarstate always reporting a lead, thanks to arne
+    self.mpc_TR = bundle['mpc_TR']
+    self.track_data = []
+    for track in bundle['live_tracks']:
+      self.track_data.append({'v_lead': v_ego + track.vRel, 'y_rel': track.yRel, 'x_lead': track.dRel})
+
+  def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, bundle):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Actuation limits
-    gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
+    if not travis:
+      self.handle_bundle(bundle, v_ego)
+      gas_max = self.dynamic_gas.update(v_ego, self.lead_data, self.mpc_TR, self.blinker_status)
+      # v_target, v_target_future, a_target = self.dynamic_lane_speed.update(v_target, v_target_future, v_cruise, a_target, v_ego, self.track_data, self.lead_data)
+    else:
+      gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
 
     # Update state machine
@@ -88,7 +114,7 @@ class LongControl():
 
     v_ego_pid = max(v_ego, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
 
-    if self.long_control_state == LongCtrlState.off:
+    if self.long_control_state == LongCtrlState.off or (self.gas_pressed and not travis):
       self.v_pid = v_ego_pid
       self.pid.reset()
       output_gb = 0.
