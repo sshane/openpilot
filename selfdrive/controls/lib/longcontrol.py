@@ -1,6 +1,9 @@
 from cereal import log
 from common.numpy_fast import clip, interp
-from selfdrive.controls.lib.pid import PIController
+from selfdrive.controls.lib.pid_long import PIController
+from common.travis_checker import travis
+from selfdrive.controls.lib.dynamic_lane_speed import DynamicLaneSpeed
+from selfdrive.controls.lib.dynamic_gas import DynamicGas
 
 LongCtrlState = log.ControlsState.LongControlState
 
