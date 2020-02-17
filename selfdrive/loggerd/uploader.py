@@ -17,7 +17,10 @@ from selfdrive.loggerd.config import ROOT
 from common import android
 from common.params import Params
 from common.api import Api
+from common.op_params import opParams
 
+
+upload_on_hotspot = opParams().get('upload_on_hotspot', default=False)
 fake_upload = os.getenv("FAKEUPLOAD") is not None
 
 def raise_on_thread(t, exctype):
@@ -140,12 +143,13 @@ class Uploader():
 
   def next_file_to_upload(self, with_raw):
     upload_files = list(self.gen_upload_files())
-    # try to upload qlog files first
-    for name, key, fn in upload_files:
-      if name in self.immediate_priority:
-        return (key, fn)
 
-    if with_raw:
+    if with_raw or upload_on_hotspot:
+      # don't upload qlog files on hotspot unless user allows it
+      for name, key, fn in upload_files:
+        if name in self.immediate_priority:
+          return (key, fn)
+
       # then upload the full log files, rear and front camera files
       for name, key, fn in upload_files:
         if name in self.high_priority:
