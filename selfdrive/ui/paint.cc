@@ -731,7 +731,7 @@ static void ui_draw_vision_display_button(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
-  float display_button_alpha = s->display_on ? 1.0f : 0.15f;
+  float display_button_alpha = 1.0f;
   nvgStrokeColor(s->vg, nvgRGBA(255,255,255,255 * display_button_alpha));
   nvgStrokeWidth(s->vg, 6);
   nvgStroke(s->vg);
