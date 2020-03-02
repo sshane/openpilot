@@ -723,6 +723,23 @@ static void ui_draw_vision_face(UIState *s) {
   nvgFill(s->vg);
 }
 
+static void ui_draw_vision_display_button(UIState *s) {
+  int btn_w = 150;
+  int btn_h = 150;
+  int btn_x = 1920 - btn_w;
+  int btn_y = 1080 - btn_h - 50;
+
+  nvgBeginPath(s->vg);
+  nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
+  float display_button_alpha = s->display_on ? 1.0f : 0.15f;
+  nvgStrokeColor(s->vg, nvgRGBA(255,255,255,255 * display_button_alpha));
+  nvgStrokeWidth(s->vg, 6);
+  nvgStroke(s->vg);
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
+  nvgFontSize(s->vg, 70);
+  nvgText(s->vg,btn_x-34,btn_y+50,"DSP",NULL);
+}
+
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
   int ui_viz_rx = scene->ui_viz_rx;
@@ -755,6 +772,7 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, ui_viz_rx, footer_y, ui_viz_rw, footer_h);
 
   ui_draw_vision_face(s);
+  ui_draw_vision_display_button(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
