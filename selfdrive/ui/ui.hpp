@@ -168,6 +168,7 @@ typedef struct UIState {
   SubSocket *map_data_sock;
   SubSocket *uilayout_sock;
   Poller * poller;
+  PubSocket *smiskoldata_sock;
 
   int active_app;
 
