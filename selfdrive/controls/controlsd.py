@@ -51,7 +51,8 @@ def df_button_alert(sm_smiskol, op_params):
     current_profile = op_params.get('dynamic_follow', default='relaxed').lower()
     if profile_to_idx[current_profile] != 0:  # the following line and loop ensure we start at the user's current profile
       idx_to_profile[0] = current_profile
-      for idx, profile in enumerate([i for i in profiles if i != current_profile]):
+      profiles.remove(current_profile)
+      for idx, profile in enumerate(profiles):
         idx_to_profile[idx + 1] = profile
     last_df_button_status = 0
   else:
