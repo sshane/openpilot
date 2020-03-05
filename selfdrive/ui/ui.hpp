@@ -11,8 +11,7 @@
 #include "common/framebuffer.h"
 #include "common/modeldata.h"
 #include "messaging.hpp"
-#include <capnp/serialize.h>
-#include <capnp/message.h>
+
 
 #include "cereal/gen/c/log.capnp.h"
 

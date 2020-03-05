@@ -5,6 +5,9 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
+#include <capnp/serialize-packed.h>
+#include <capnp/serialize.h>
+#include <capnp/message.h>
 
 #include <json.h>
 #include <czmq.h>
