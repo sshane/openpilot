@@ -112,7 +112,7 @@ static void ui_init(UIState *s) {
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
-  s->smiskoldata_sock = SubSocket::create(s->ctx, "smiskolData");
+  s->smiskoldata_sock = PubSocket::create(s->ctx, "smiskolData");
 
   assert(s->model_sock != NULL);
   assert(s->controlsstate_sock != NULL);
