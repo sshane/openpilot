@@ -220,7 +220,7 @@ void send_df(UIState *s, bool status){
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
   auto smiskolData = event.initSmiskolData();
-  smiskolData.setDfButtonTouched(true);
+  smiskolData.setDfButtonTouched(status);
 
   auto words = capnp::messageToFlatArray(msg);
   auto bytes = words.asBytes();
