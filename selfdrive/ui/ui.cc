@@ -204,6 +204,13 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->limit_set_speed_timeout = UI_FREQ;
 }
 
+bool df_button_clicked(int touch_x, int touch_y) {
+  if ((touch_x >= 1700) && (touch_y >= 830)) {
+    return true;
+  }
+  return false;
+}
+
 static PathData read_path(cereal_ModelData_PathData_ptr pathp) {
   PathData ret = {0};
 
@@ -894,9 +901,12 @@ int main(int argc, char* argv[]) {
       if (s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
         int touch_x = -1, touch_y = -1;
         int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
-//        if (df_button_clicked(touch_x, touch_y)) {
-//          toggle_df(s);
-//        }
+        if (df_button_clicked(touch_x, touch_y)) {
+          // toggle_df(s);
+          s->scene.dfButtonTouched = true;
+        } else {
+          s->scene.dfButtonTouched = false;
+        }
       }
     }
 

@@ -735,7 +735,7 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
   if (s->scene.dfButtonTouched) {
     nvgStrokeColor(s->vg, nvgRGBA(0, 113, 141, 255 * display_button_alpha));
   } else {
-    nvgStrokeColor(s->vg, nvgRGBA(0, 255, 255, 255 * display_button_alpha));
+    nvgStrokeColor(s->vg, nvgRGBA(245, 66, 99, 255 * display_button_alpha));
   }
   // nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * 1.0f));
   nvgStrokeWidth(s->vg, 10);
@@ -743,13 +743,6 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
   nvgFontSize(s->vg, 70);
   nvgText(s->vg, btn_x - 34, btn_y + 50, "DF", NULL);
-}
-
-bool df_button_clicked(int touch_x, int touch_y) {
-  if ((touch_x >= 1700) && (touch_y >= 830)) {
-    return true;
-  }
-  return false;
 }
 
 //void toggle_df(UIState *s) {
