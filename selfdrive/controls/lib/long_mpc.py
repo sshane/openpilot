@@ -31,7 +31,7 @@ class LongitudinalMpc():
     self.new_lead = False
     self.last_cloudlog_t = 0.0
 
-    if not travis and mpc_id == 1:
+    if travis and mpc_id == 1:
       self.pm = messaging.PubMaster(['smiskolData'])
     else:
       self.pm = None
