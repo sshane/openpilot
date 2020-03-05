@@ -745,12 +745,6 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
   nvgText(s->vg, btn_x - 34, btn_y + 50, "DF", NULL);
 }
 
-//void toggle_df(UIState *s) {
-//  if (s->scene.dfButtonTouched) {
-//
-//  }
-//}
-
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
   int ui_viz_rx = scene->ui_viz_rx;

@@ -1830,7 +1830,7 @@ struct SmiskolData {
 }
 
 struct DynamicFollowButton {
-  status @1 :UInt16;
+  status @0 :UInt16;
 }
 
 struct Event {
