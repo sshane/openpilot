@@ -179,6 +179,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
       .dfButtonTouched = false,
+      .dfButtonStatus = 0,
   };
 
   s->rgb_width = back_bufs.width;
@@ -216,11 +217,11 @@ bool df_button_clicked(int touch_x, int touch_y) {
   return false;
 }
 
-void send_df(UIState *s, bool status){
+void send_df(UIState *s, int status){
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
   auto smiskolData = event.initSmiskolData();
-  smiskolData.setDfButtonTouched(status);
+  smiskolData.setDfButtonStatus(status);
 
   auto words = capnp::messageToFlatArray(msg);
   auto bytes = words.asBytes();
@@ -918,11 +919,13 @@ int main(int argc, char* argv[]) {
         int touch_x = -1, touch_y = -1;
         int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
         if (df_button_clicked(touch_x, touch_y)) {
-          send_df(s, true);
-
+          s->dfButtonStatus++;
+          if (s->dfButtonStatus > 2){
+            s->dfButtonStatus = 0;
+          }
+          send_df(s, s->dfButtonStatus);
           s->scene.dfButtonTouched = true;
         } else {
-          send_df(s, false);
           s->scene.dfButtonTouched = false;
         }
       }
