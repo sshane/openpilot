@@ -173,6 +173,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .front_box_height = ui_info.front_box_height,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
+      .dfButtonTouched = false,
   };
 
   s->rgb_width = back_bufs.width;
@@ -883,6 +884,20 @@ int main(int argc, char* argv[]) {
       s->awake_timeout--;
     } else {
       set_awake(s, false);
+    }
+
+    //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
+    if (s->awake && s->vision_connected && s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
+      //dynamic follow button
+      ui_draw_dynamic_follow_button(s);
+      //df button clicked
+      if (s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
+        int touch_x = -1, touch_y = -1;
+        int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
+//        if (df_button_clicked(touch_x, touch_y)) {
+//          toggle_df(s);
+//        }
+      }
     }
 
     // Don't waste resources on drawing in case screen is off or car is not started.

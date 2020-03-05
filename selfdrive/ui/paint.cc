@@ -723,7 +723,7 @@ static void ui_draw_vision_face(UIState *s) {
   nvgFill(s->vg);
 }
 
-static void ui_draw_vision_display_button(UIState *s) {
+static void ui_draw_dynamic_follow_button(UIState *s) {
   int btn_w = 150;
   int btn_h = 150;
   int btn_x = 1920 - btn_w;
@@ -732,14 +732,31 @@ static void ui_draw_vision_display_button(UIState *s) {
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
   float display_button_alpha = 1.0f;
-  nvgStrokeColor(s->vg, nvgRGBA(0, 113, 141, 255 * display_button_alpha));
-  nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * 1.0f));
+  if (s->scene.dfButtonTouched) {
+    nvgStrokeColor(s->vg, nvgRGBA(0, 113, 141, 255 * display_button_alpha));
+  } else {
+    nvgStrokeColor(s->vg, nvgRGBA(0, 255, 255, 255 * display_button_alpha));
+  }
+  // nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * 1.0f));
   nvgStrokeWidth(s->vg, 10);
   nvgStroke(s->vg);
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
   nvgFontSize(s->vg, 70);
   nvgText(s->vg, btn_x - 34, btn_y + 50, "DF", NULL);
 }
+
+bool df_button_clicked(int touch_x, int touch_y) {
+  if ((touch_x >= 1700) && (touch_y >= 830)) {
+    return true;
+  }
+  return false;
+}
+
+//void toggle_df(UIState *s) {
+//  if (s->scene.dfButtonTouched) {
+//
+//  }
+//}
 
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
@@ -773,7 +790,6 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, ui_viz_rx, footer_y, ui_viz_rw, footer_h);
 
   ui_draw_vision_face(s);
-  ui_draw_vision_display_button(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
