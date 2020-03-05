@@ -790,6 +790,7 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, ui_viz_rx, footer_y, ui_viz_rw, footer_h);
 
   ui_draw_vision_face(s);
+  ui_draw_dynamic_follow_button(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
