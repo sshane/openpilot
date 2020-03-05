@@ -43,12 +43,19 @@ last_df_button_status = None
 
 
 def df_button_alert(sm_smiskol, op_params):
+  profiles = ['traffic', 'relaxed', 'roadtrip']
   idx_to_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
+  profile_to_idx = {v: k for k, v in idx_to_profile.items()}
   global last_df_button_status
   if last_df_button_status is None:
+    current_profile = op_params.get('dynamic_follow', default='relaxed').lower()
+    if profile_to_idx[current_profile] != 0:  # the following line and loop ensure we start at the user's current profile
+      idx_to_profile[0] = current_profile
+      for idx, profile in enumerate([i for i in profiles if i != current_profile]):
+        idx_to_profile[idx + 1] = profile
     last_df_button_status = 0
   else:
-    df_profile = sm_smiskol['smiskolData'].dfButtonStatus
+    df_profile = sm_smiskol['dynamicFollowButton'].status
     if last_df_button_status != df_profile:
       last_df_button_status = df_profile
       df_profile_string = idx_to_profile[df_profile]
@@ -519,7 +526,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
   if sm is None:
     sm = messaging.SubMaster(['thermal', 'health', 'liveCalibration', 'driverMonitoring', 'plan', 'pathPlan', \
                               'model', 'gpsLocation'], ignore_alive=['gpsLocation'])
-  sm_smiskol = messaging.SubMaster(['radarState', 'smiskolData', 'liveTracks'])
+  sm_smiskol = messaging.SubMaster(['radarState', 'smiskolData', 'liveTracks', 'dynamicFollowButton'])
 
 
   if can_sock is None:

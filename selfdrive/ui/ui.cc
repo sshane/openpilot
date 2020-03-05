@@ -220,8 +220,8 @@ bool df_button_clicked(int touch_x, int touch_y) {
 void send_df(UIState *s, int status){
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
-  auto smiskolData = event.initSmiskolData();
-  smiskolData.setDfButtonStatus(status);
+  auto smiskolData = event.initDynamicFollowButton();
+  smiskolData.setStatus(status);
 
   auto words = capnp::messageToFlatArray(msg);
   auto bytes = words.asBytes();

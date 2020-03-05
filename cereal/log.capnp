@@ -1827,7 +1827,10 @@ struct KalmanOdometry {
 
 struct SmiskolData {
   mpcTR @0 :Float32;
-  dfButtonStatus @1 :UInt16;
+}
+
+struct DynamicFollowButton {
+  status @1 :UInt16;
 }
 
 struct Event {
@@ -1906,5 +1909,6 @@ struct Event {
     carParams @69: Car.CarParams;
     frontFrame @70: FrameData;
     smiskolData @71 :SmiskolData;
+    dynamicFollowButton @72 :DynamicFollowButton;
   }
 }
