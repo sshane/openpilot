@@ -919,11 +919,11 @@ int main(int argc, char* argv[]) {
         int touch_x = -1, touch_y = -1;
         int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
         if (df_button_clicked(touch_x, touch_y)) {
-          s->dfButtonStatus++;
-          if (s->dfButtonStatus > 2){
-            s->dfButtonStatus = 0;
+          s->scene.dfButtonStatus++;
+          if (s->scene.dfButtonStatus > 2){
+            s->scene.dfButtonStatus = 0;
           }
-          send_df(s, s->dfButtonStatus);
+          send_df(s, s->scene.dfButtonStatus);
           s->scene.dfButtonTouched = true;
         } else {
           s->scene.dfButtonTouched = false;
