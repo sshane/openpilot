@@ -900,7 +900,7 @@ int main(int argc, char* argv[]) {
       //df button clicked
       if (s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
         int touch_x = -1, touch_y = -1;
-        int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
+        int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 50 : 100);
         if (df_button_clicked(touch_x, touch_y)) {
           // toggle_df(s);
           s->scene.dfButtonTouched = true;
