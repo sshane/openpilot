@@ -39,6 +39,26 @@ LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 
+last_df_button_status = None
+
+
+def df_button_alert(sm_smiskol, op_params):
+  idx_to_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
+  global last_df_button_status
+  if last_df_button_status is None:
+    last_df_button_status = sm_smiskol['dfButtonStatus']
+  else:
+    df_profile = sm_smiskol['dfButtonStatus']
+    if last_df_button_status != df_profile:
+      last_df_button_status = df_profile
+      df_profile_string = idx_to_profile[df_profile]
+      op_params.put('dynamic_follow', df_profile_string)
+      return df_profile_string
+
+  return None
+
+
+
 def add_lane_change_event(events, path_plan):
   if path_plan.laneChangeState == LaneChangeState.preLaneChange:
     if path_plan.laneChangeDirection == LaneChangeDirection.left:
@@ -78,6 +98,7 @@ def data_sample(CI, CC, sm, can_sock, driver_status, state, mismatch_counter, ca
   sm.update(0)
 
   events = list(CS.events)
+
   add_lane_change_event(events, sm['pathPlan'])
   enabled = isEnabled(state)
 
@@ -152,7 +173,7 @@ def data_sample(CI, CC, sm, can_sock, driver_status, state, mismatch_counter, ca
   return CS, events, cal_perc, mismatch_counter, can_error_counter
 
 
-def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM):
+def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, op_params):
   """Compute conditional state transitions and execute actions on state transitions"""
   enabled = isEnabled(state)
 
@@ -167,6 +188,10 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # decrease the soft disable timer at every step, as it's reset on
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
+
+  df_alert = df_button_alert(sm_smiskol, op_params)
+  if df_alert is not None:
+    AM.add(frame, 'dfProfileAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow now using {} profile'.format(df_alert))
 
   # DISABLED
   if state == State.disabled:
@@ -615,7 +640,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
     if not read_only:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
-        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM)
+        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, op_params)
       prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)

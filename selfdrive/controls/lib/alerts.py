@@ -192,6 +192,12 @@ ALERTS = [
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
 
+  Alert("dfProfileAlert",
+        "Dynamic follow profile: ",
+        "",
+        AlertStatus.normal, AlertSize.mid,
+        Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., 1.),
+
   Alert(
       "ethicalDilemma",
       "TAKE CONTROL IMMEDIATELY",
