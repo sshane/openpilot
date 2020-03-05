@@ -46,7 +46,7 @@ def df_button_alert(sm_smiskol, op_params):
   idx_to_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
   global last_df_button_status
   if last_df_button_status is None:
-    last_df_button_status = sm_smiskol['dfButtonStatus']
+    last_df_button_status = 0
   else:
     df_profile = sm_smiskol['smiskolData']['dfButtonStatus']
     if last_df_button_status != df_profile:
