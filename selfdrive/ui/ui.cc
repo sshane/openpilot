@@ -112,12 +112,14 @@ static void ui_init(UIState *s) {
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
+  s->smiskoldata_sock = SubSocket::create(s->ctx, "smiskolData");
 
   assert(s->model_sock != NULL);
   assert(s->controlsstate_sock != NULL);
   assert(s->uilayout_sock != NULL);
   assert(s->livecalibration_sock != NULL);
   assert(s->radarstate_sock != NULL);
+  assert(s->smiskoldata_sock != NULL);
 
   s->poller = Poller::create({
                               s->model_sock,
@@ -209,6 +211,17 @@ bool df_button_clicked(int touch_x, int touch_y) {
     return true;
   }
   return false;
+}
+
+void send_df(UIState *s, bool status){
+  capnp::MallocMessageBuilder msg;
+  cereal::Event::Builder event = msg.initRoot<cereal::Event>();
+  auto smiskolData = event.initSmiskolData();
+  smiskolData.setDfButtonTouched(true);
+
+  auto words = capnp::messageToFlatArray(msg);
+  auto bytes = words.asBytes();
+  s->smiskoldata_sock->send((char*)bytes.begin(), bytes.size());
 }
 
 static PathData read_path(cereal_ModelData_PathData_ptr pathp) {
@@ -900,11 +913,13 @@ int main(int argc, char* argv[]) {
       //df button clicked
       if (s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
         int touch_x = -1, touch_y = -1;
-        int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 50 : 100);
+        int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
         if (df_button_clicked(touch_x, touch_y)) {
-          // toggle_df(s);
+          send_df(s, true);
+
           s->scene.dfButtonTouched = true;
         } else {
+          send_df(s, false);
           s->scene.dfButtonTouched = false;
         }
       }

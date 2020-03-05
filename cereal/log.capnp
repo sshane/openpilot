@@ -1827,6 +1827,7 @@ struct KalmanOdometry {
 
 struct SmiskolData {
   mpcTR @0 :Float32;
+  dfButtonTouched @1 :Bool;
 }
 
 struct Event {
