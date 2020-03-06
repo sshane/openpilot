@@ -880,7 +880,7 @@ int main(int argc, char* argv[]) {
         LOGW("poll failed (%d)", ret);
       } else if (ret > 0) {
         // awake on any touch
-        std::cout << "here!\n";
+        cout << "here!\n";
         int touch_x = -1, touch_y = -1;
         int touched = touch_read(&touch, &touch_x, &touch_y);
         if (touched == 1) {
