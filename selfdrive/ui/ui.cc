@@ -881,7 +881,6 @@ int main(int argc, char* argv[]) {
         LOGW("poll failed (%d)", ret);
       } else if (ret > 0) {
         // awake on any touch
-        std::cout << "here!\n";
         int touch_x = -1, touch_y = -1;
         int touched = touch_read(&touch, &touch_x, &touch_y);
         if (touched == 1) {
@@ -921,6 +920,7 @@ int main(int argc, char* argv[]) {
         int touch_x = -1, touch_y = -1;
         int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
         if (df_button_clicked(touch_x, touch_y)) {
+          std::cout << "df button clicked!\n";
           s->scene.dfButtonStatus++;
           if (s->scene.dfButtonStatus > 2){
             s->scene.dfButtonStatus = 0;
