@@ -882,9 +882,9 @@ int main(int argc, char* argv[]) {
         // awake on any touch
         int touch_x = -1, touch_y = -1;
         int touched = touch_read(&touch, &touch_x, &touch_y);
-//        if (touched == 1) {
-//          set_awake(s, true);
-//        }
+        if (touched == 1) {
+          set_awake(s, true);
+        }
       }
       if (s->status != STATUS_STOPPED) {
         update_status(s, STATUS_STOPPED);
