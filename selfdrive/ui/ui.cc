@@ -116,14 +116,14 @@ static void ui_init(UIState *s) {
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
-  s->smiskoldata_sock = PubSocket::create(s->ctx, "dynamicFollowButton");
+  s->dynamicfollowbutton_sock = PubSocket::create(s->ctx, "dynamicFollowButton");
 
   assert(s->model_sock != NULL);
   assert(s->controlsstate_sock != NULL);
   assert(s->uilayout_sock != NULL);
   assert(s->livecalibration_sock != NULL);
   assert(s->radarstate_sock != NULL);
-  assert(s->smiskoldata_sock != NULL);
+  assert(s->dynamicfollowbutton_sock != NULL);
 
   s->poller = Poller::create({
                               s->model_sock,
@@ -221,12 +221,12 @@ bool df_button_clicked(int touch_x, int touch_y) {
 void send_df(UIState *s, int status){
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
-  auto smiskolData = event.initDynamicFollowButton();
-  smiskolData.setStatus(status);
+  auto dfStatus = event.initDynamicFollowButton();
+  dfStatus.setStatus(status);
 
   auto words = capnp::messageToFlatArray(msg);
   auto bytes = words.asBytes();
-  s->smiskoldata_sock->send((char*)bytes.begin(), bytes.size());
+  s->dynamicfollowbutton_sock->send((char*)bytes.begin(), bytes.size());
 }
 
 static PathData read_path(cereal_ModelData_PathData_ptr pathp) {
