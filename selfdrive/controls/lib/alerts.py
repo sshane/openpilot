@@ -196,7 +196,7 @@ ALERTS = [
         "",
         "",
         AlertStatus.normal, AlertSize.mid,
-        Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.chimePrompt, 0.2, 0., 1.),
+        Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
 
   Alert(
       "ethicalDilemma",
