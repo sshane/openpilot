@@ -40,26 +40,27 @@ LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 
 last_df_button_status = None
+idx_to_df_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
 
 
 def df_button_alert(sm_smiskol, op_params):
-  profiles = ['traffic', 'relaxed', 'roadtrip']
-  idx_to_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
-  profile_to_idx = {v: k for k, v in idx_to_profile.items()}
   global last_df_button_status
+  global idx_to_df_profile
+  profiles = ['traffic', 'relaxed', 'roadtrip']
+  profile_to_idx = {v: k for k, v in idx_to_df_profile.items()}
   if last_df_button_status is None:
     current_profile = op_params.get('dynamic_follow', default='relaxed').lower()
     if profile_to_idx[current_profile] != 0:  # the following line and loop ensure we start at the user's current profile
-      idx_to_profile[0] = current_profile
+      idx_to_df_profile[0] = current_profile
       profiles.remove(current_profile)
       for idx, profile in enumerate(profiles):
-        idx_to_profile[idx + 1] = profile
+        idx_to_df_profile[idx + 1] = profile
     last_df_button_status = 0
   else:
     df_profile = sm_smiskol['dynamicFollowButton'].status
     if last_df_button_status != df_profile:
       last_df_button_status = df_profile
-      df_profile_string = idx_to_profile[df_profile]
+      df_profile_string = idx_to_df_profile[df_profile]
       op_params.put('dynamic_follow', df_profile_string)
       return df_profile_string
 
