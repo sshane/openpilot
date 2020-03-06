@@ -940,6 +940,7 @@ int main(int argc, char* argv[]) {
 
     // Don't waste resources on drawing in case screen is off or car is not started.
     if (s->awake && s->vision_connected) {
+      std::cout << "6\n";
       ui_draw(s);
       glFinish();
       should_swap = true;
@@ -993,6 +994,7 @@ int main(int argc, char* argv[]) {
     // the bg thread needs to be scheduled, so the main thread needs time without the lock
     // safe to do this outside the lock?
     if (should_swap) {
+      std::cout << "7\n";
       double u2 = millis_since_boot();
       if (u2-u1 > 66) {
         // warn on sub 15fps
