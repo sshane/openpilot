@@ -200,7 +200,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
 
   df_alert = df_button_alert(sm_smiskol, op_params)
   if df_alert is not None:
-    AM.add(frame, 'dfProfileAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow now using {} profile'.format(df_alert))
+    AM.add(frame, 'dfProfileAlert', enabled, extra_text_1="Using {} profile".format(df_alert), extra_text_2='Dynamic follow: {} profile active'.format(df_alert))
 
   # DISABLED
   if state == State.disabled:

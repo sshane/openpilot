@@ -871,6 +871,7 @@ int main(int argc, char* argv[]) {
     set_brightness(s, (int)smooth_brightness);
 
     if (!s->vision_connected) {
+      std::cout << "1\n";
       // Car is not started, keep in idle state and awake on touch events
       zmq_pollitem_t polls[1] = {{0}};
       polls[0].fd = s->touch_fd;
@@ -884,19 +885,23 @@ int main(int argc, char* argv[]) {
         int touch_x = -1, touch_y = -1;
         int touched = touch_read(&touch, &touch_x, &touch_y);
         if (touched == 1) {
+          std::cout << "2\n";
           set_awake(s, true);
         }
       }
       if (s->status != STATUS_STOPPED) {
+        std::cout << "3\n";
         update_status(s, STATUS_STOPPED);
       }
     } else {
       if (s->status == STATUS_STOPPED) {
+        std::cout << "4\n";
         update_status(s, STATUS_DISENGAGED);
       }
       // Car started, fetch a new rgb image from ipc and peek for zmq events.
       ui_update(s);
       if(!s->vision_connected) {
+        std::cout << "5\n";
         // Visiond process is just stopped, force a redraw to make screen blank again.
         ui_draw(s);
         glFinish();
