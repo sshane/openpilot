@@ -177,7 +177,6 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .front_box_height = ui_info.front_box_height,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
-      .dfButtonTouched = false,
       .dfButtonStatus = 0,
   };
 
