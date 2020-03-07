@@ -912,7 +912,7 @@ int main(int argc, char* argv[]) {
     //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
     if (s->awake && s->vision_connected && s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
       int touch_x = -1, touch_y = -1;
-      int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
+      int touched = touch_poll(&touch, &touch_x, &touch_y, 0);  // s->awake ? 0 : 100
       if (df_button_clicked(touch_x, touch_y)) {
         s->scene.dfButtonStatus++;
         if (s->scene.dfButtonStatus > 2){
