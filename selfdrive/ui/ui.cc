@@ -17,6 +17,7 @@
 #include "common/touch.h"
 #include "common/visionimg.h"
 #include "common/params.h"
+#include "cereal/gen/cpp/log.capnp.h"
 
 #include "ui.hpp"
 #include "sound.hpp"
