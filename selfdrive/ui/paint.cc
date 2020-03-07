@@ -740,9 +740,7 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
   nvgFontSize(s->vg, 75);
   nvgText(s->vg, btn_x - 34, btn_y + 30, "DF", NULL);
 
-  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
-  nvgFontSize(s->vg, 45);
-  nvgText(s->vg, btn_x - 34, btn_y + 50 + 15, "profile", NULL);
+
 }
 
 static void ui_draw_vision_header(UIState *s) {
