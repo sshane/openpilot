@@ -1,8 +1,8 @@
 import time
 import cereal.messaging as messaging
 
-sm = messaging.SubMaster(['smiskolData'])
+sm = messaging.SubMaster(['dynamicFollowButton'])
 while True:
   sm.update(0)
-  print(sm['smiskolData'].dfButtonStatus)
+  print(sm['dynamicFollowButton'].status)
   time.sleep(1)
