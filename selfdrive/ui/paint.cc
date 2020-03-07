@@ -732,14 +732,14 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
-  nvgStrokeColor(s->vg, nvgRGBA(5, 80, 141, 255 * display_button_alpha));
+  nvgStrokeColor(s->vg, nvgRGBA(4, 34, 84, 255 * display_button_alpha));
   // nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * display_button_alpha));
-  nvgStrokeWidth(s->vg, 10);
+  nvgStrokeWidth(s->vg, 12);
   nvgStroke(s->vg);
 
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
   nvgFontSize(s->vg, 75);
-  nvgText(s->vg, btn_x - 34, btn_y + 30, "DF", NULL);
+  nvgText(s->vg, btn_x - 38, btn_y + 30, "DF", NULL);
 
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
   nvgFontSize(s->vg, 45);
