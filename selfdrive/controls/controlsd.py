@@ -79,7 +79,6 @@ def data_sample(CI, CC, sm, can_sock, driver_status, state, mismatch_counter, ca
   sm.update(0)
 
   events = list(CS.events)
-
   add_lane_change_event(events, sm['pathPlan'])
   enabled = isEnabled(state)
 
@@ -172,7 +171,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
 
   df_alert = df_alert_manager.update(sm_smiskol)
   if df_alert is not None:
-    AM.add(frame, 'dfProfileAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow: {} profile active'.format(df_alert))
+    AM.add(frame, 'dfButtonAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow: {} profile active'.format(df_alert))
 
   # DISABLED
   if state == State.disabled:

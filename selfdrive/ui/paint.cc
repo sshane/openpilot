@@ -731,14 +731,14 @@ static void ui_draw_dynamic_follow_button(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
-  float display_button_alpha = 1.0f;
-  nvgStrokeColor(s->vg, nvgRGBA(0, 113, 141, 255 * display_button_alpha));
-  // nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * 1.0f));
+  nvgFillColor(s->vg, nvgRGBA(11, 46, 164, 255 * 1.0f));
   nvgStrokeWidth(s->vg, 10);
   nvgStroke(s->vg);
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255 * display_button_alpha));
   nvgFontSize(s->vg, 70);
   nvgText(s->vg, btn_x - 34, btn_y + 50, "DF", NULL);
+  nvgFontSize(s->vg, 30);
+  nvgText(s->vg, btn_x - 34 - 70, btn_y + 50, "profile", NULL);
 }
 
 static void ui_draw_vision_header(UIState *s) {

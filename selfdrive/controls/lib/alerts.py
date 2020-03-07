@@ -192,7 +192,7 @@ ALERTS = [
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW_LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
 
-  Alert("dfProfileAlert",
+  Alert("dfButtonAlert",
         "Using profile: ",
         "",
         AlertStatus.normal, AlertSize.mid,

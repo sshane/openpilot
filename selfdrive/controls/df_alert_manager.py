@@ -29,6 +29,3 @@ class DfAlertManager:
         return df_profile_string
 
     return None
-
-from common.op_params import opParams
-df_alert = DfAlertManager(opParams())
