@@ -28,6 +28,7 @@ from selfdrive.controls.lib.gps_helpers import is_rhd_region
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 from common.travis_checker import travis
 from common.op_params import opParams
+from selfdrive.controls.df_alert_manager import DfAlertManager
 
 LANE_DEPARTURE_THRESHOLD = 0.1
 
@@ -37,35 +38,6 @@ HwType = log.HealthData.HwType
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
-
-
-last_df_button_status = None
-idx_to_df_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
-
-
-def df_button_alert(sm_smiskol, op_params):
-  global last_df_button_status
-  global idx_to_df_profile
-  profiles = ['traffic', 'relaxed', 'roadtrip']
-  profile_to_idx = {v: k for k, v in idx_to_df_profile.items()}
-  if last_df_button_status is None:
-    current_profile = op_params.get('dynamic_follow', default='relaxed').lower()
-    if profile_to_idx[current_profile] != 0:  # the following line and loop ensure we start at the user's current profile
-      idx_to_df_profile[0] = current_profile
-      profiles.remove(current_profile)
-      for idx, profile in enumerate(profiles):
-        idx_to_df_profile[idx + 1] = profile
-    last_df_button_status = 0
-  else:
-    df_profile = sm_smiskol['dynamicFollowButton'].status
-    if last_df_button_status != df_profile:
-      last_df_button_status = df_profile
-      df_profile_string = idx_to_df_profile[df_profile]
-      op_params.put('dynamic_follow', df_profile_string)
-      return df_profile_string
-
-  return None
-
 
 
 def add_lane_change_event(events, path_plan):
@@ -182,7 +154,7 @@ def data_sample(CI, CC, sm, can_sock, driver_status, state, mismatch_counter, ca
   return CS, events, cal_perc, mismatch_counter, can_error_counter
 
 
-def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, op_params):
+def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, df_alert_manager):
   """Compute conditional state transitions and execute actions on state transitions"""
   enabled = isEnabled(state)
 
@@ -198,7 +170,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  df_alert = df_button_alert(sm_smiskol, op_params)
+  df_alert = df_alert_manager.update(sm_smiskol)
   if df_alert is not None:
     AM.add(frame, 'dfProfileAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow: {} profile active'.format(df_alert))
 
@@ -604,6 +576,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
 
   prof = Profiler(False)  # off by default
   op_params = opParams()
+  df_alert_manager = DfAlertManager(op_params)
 
   while True:
     sm_smiskol.update(0)
@@ -649,7 +622,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
     if not read_only:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
-        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, op_params)
+        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, df_alert_manager)
       prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)
