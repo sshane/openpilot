@@ -12,6 +12,7 @@
 #include "common/modeldata.h"
 #include "messaging.hpp"
 
+#include "cereal/gen/c/log.capnp.h"
 #include "cereal/gen/cpp/log.capnp.h"
 
 #include "sound.hpp"
