@@ -924,9 +924,6 @@ int main(int argc, char* argv[]) {
             s->scene.dfButtonStatus = 0;
           }
           send_df(s, s->scene.dfButtonStatus);
-          s->scene.dfButtonTouched = true;
-        } else {
-          s->scene.dfButtonTouched = false;
         }
       }
     }
