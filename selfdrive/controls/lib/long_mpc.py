@@ -135,20 +135,20 @@ class LongitudinalMpc():
     p_mod_x = [3, 20, 35]  # profile mod speeds
     if self.df_profile == 'roadtrip':
       y_dist = [1.3847, 1.3946, 1.4078, 1.4243, 1.4507, 1.4837, 1.5327, 1.553, 1.581, 1.617, 1.653, 1.687, 1.74]  # TRs
-      p_mod_pos = [0.99, 0.815, 0.57]
-      p_mod_neg = [1.0, 1.27, 1.675]
+      profile_mod_pos = [0.99, 0.815, 0.57]
+      profile_mod_neg = [1.0, 1.27, 1.675]
     elif self.df_profile == 'traffic':  # for in congested traffic
       x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
       y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
-      p_mod_pos = [1.1, 2.41, 3.775]
-      p_mod_neg = [0.79, 0.02, 0.0]
+      profile_mod_pos = [1.1, 2.41, 3.775]
+      profile_mod_neg = [0.79, 0.02, 0.0]
     else:  # default to relaxed/stock
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
-      p_mod_pos = [1.0, 1.0, 1.0]
-      p_mod_neg = [1.0, 1.0, 1.0]
+      profile_mod_pos = [1.0, 1.0, 1.0]
+      profile_mod_neg = [1.0, 1.0, 1.0]
 
-    p_mod_pos = interp(self.car_data['v_ego'], p_mod_x, p_mod_pos)
-    p_mod_neg = interp(self.car_data['v_ego'], p_mod_x, p_mod_neg)
+    profile_mod_pos = interp(self.car_data['v_ego'], p_mod_x, profile_mod_pos)
+    profile_mod_neg = interp(self.car_data['v_ego'], p_mod_x, profile_mod_neg)
 
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -174,7 +174,7 @@ class LongitudinalMpc():
     y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mod.append(interp(self.calculate_lead_accel(), x, y))
 
-    TR_mod = sum([mod * p_mod_neg if mod < 0 else mod * p_mod_pos for mod in TR_mod])  # alter TR modification according to profile
+    TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
 
     if CS.leftBlinker or CS.rightBlinker and self.df_profile != 'traffic':
