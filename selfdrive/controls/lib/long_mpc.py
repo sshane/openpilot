@@ -138,13 +138,10 @@ class LongitudinalMpc():
       p_mod_pos = [0.99, 0.815, 0.57]
       p_mod_neg = [1.0, 1.27, 1.675]
     elif self.df_profile == 'traffic':  # for in congested traffic
-      x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 17.8816, 22.407, 28.8833, 34.8691, 40.3906]
-      y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.506, 1.38, 1.2216, 1.085, 1.0516, 1.016]
-      p_mod_pos = [1.015, 2.175, 3.65]
-      p_mod_neg = [0.98, 0.08, 0.0]
-      # y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.3506, 1.3959, 1.4156, 1.38, 1.1899, 1.026, 0.9859, 0.9432]  # from 071-2 (need to fix FCW)
-      # p_mod_pos = [1.015, 2.2, 3.95]
-      # p_mod_neg = [0.98, 0.1, 0.0]
+      x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
+      y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
+      p_mod_pos = [1.1, 2.41, 3.775]
+      p_mod_neg = [0.79, 0.02, 0.0]
     else:  # default to relaxed/stock
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
       p_mod_pos = [1.0, 1.0, 1.0]
@@ -177,10 +174,6 @@ class LongitudinalMpc():
     y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mod.append(interp(self.calculate_lead_accel(), x, y))
 
-    # x = [4.4704, 22.352]  # 10 to 50 mph  #todo: remove if uneeded/unsafe
-    # y = [0.94, 1.0]
-    # TR_mod *= interp(self.car_data['v_ego'], x, y)  # modify TR less at lower speeds
-
     TR_mod = sum([mod * p_mod_neg if mod < 0 else mod * p_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
 
@@ -189,8 +182,6 @@ class LongitudinalMpc():
       y = [1.0, .75, .65]  # reduce TR when changing lanes
       TR *= interp(self.car_data['v_ego'], x, y)
 
-    # TR *= self.get_traffic_level()  # modify TR based on last minute of traffic data  # todo: look at getting this to work, a model could be used
-
     return clip(TR, 0.9, 2.7)
 
   def process_lead(self, v_lead, a_lead, x_lead, status):
@@ -198,22 +189,6 @@ class LongitudinalMpc():
     self.lead_data['a_lead'] = a_lead
     self.lead_data['x_lead'] = x_lead
     self.lead_data['status'] = status
-
-  # def get_traffic_level(self, lead_vels):  # generate a value to modify TR by based on fluctuations in lead speed
-  #   if len(lead_vels) < 60:
-  #     return 1.0  # if less than 30 seconds of traffic data do nothing to TR
-  #   lead_vel_diffs = []
-  #   for idx, vel in enumerate(lead_vels):
-  #     try:
-  #       lead_vel_diffs.append(abs(vel - lead_vels[idx - 1]))
-  #     except:
-  #       pass
-  #
-  #   x = [0, len(lead_vels)]
-  #   y = [1.15, .9]  # min and max values to modify TR by, need to tune
-  #   traffic = interp(sum(lead_vel_diffs), x, y)
-  #
-  #   return traffic
 
   def update(self, pm, CS, lead, v_cruise_setpoint):
     v_ego = CS.vEgo

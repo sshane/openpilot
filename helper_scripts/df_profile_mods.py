@@ -1,15 +1,20 @@
 from numpy import interp
 
+
+def to_mph(x):
+  return [i * 2.23694 for i in x]
+
 p_mod_x = [6.71081, 44.7387, 78.2928]
 for v_ego in p_mod_x:
-  if v_ego != 78.2928:
+  if v_ego != 6.71081:
     continue
   # traffic
-  x_vel = [0.0, 4.166748138, 8.333272582, 12.50002072, 16.666768858, 20.833293302, 25.858579012, 30.5230463, 40.000066304, 50.123114580000006, 64.610209102, 78.00008455400001, 90.35134876400001]
-  y_dist = [1.384, 1.391, 1.403, 1.415, 1.437, 1.468, 1.501, 1.506, 1.38, 1.2216, 1.085, 1.0516, 1.016]
+  x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
+  x_vel = to_mph(x_vel)
+  y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
   TR_traffic = interp(v_ego, x_vel, y_dist)
-  traffic_mod_pos = [1.015, 2.175, 3.65]
-  traffic_mod_neg = [0.98, 0.08, 0.0]
+  traffic_mod_pos = [1.1, 2.41, 3.775]
+  traffic_mod_neg = [0.79, 0.02, 0.0]
   traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
   traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
 
