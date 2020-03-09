@@ -1,9 +1,3 @@
-**Update: The `stock_additions` branch will now be the main branch that will receive occasional and verified updates from my development branches. To ensure an up to date experience, checkout and drive on the main `stock_additions` branch! Run this command on your EON to set everything up:**
-
-`cd /data/openpilot;git fetch;git pull;git checkout stock_additions;git reset --hard origin/stock_additions;git checkout stock_additions;git clean -xfd;git pull`
-
-The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
-
 Shane's Stock Additions 0.7.1 (version 0.2)
 =====
 
@@ -19,6 +13,7 @@ Highlight Features
 * [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
 * [**Live tuning support**](#Live-tuning-support)
 * [**Automatic updates**](#Automatic-updates)
+* [**Installation**](#Installation)
 
 -----
 
@@ -32,18 +27,14 @@ Now you can choose a profile based on traffic and your driving preference. There
   * `roadtrip` - This profile is for road trips mainly where you're on two lane highways and don't want to be following particularly closely; at night for example.
 <img src=".media/photos/df_profiles.png?raw=true" width="800">
 
-**How to choose a profile:** The easiest way is to use `opEdit` over ssh with your mobile device.
-```python
-cd /data/openpilot
-python op_edit.py
-```
-Then change the `dynamic_follow` parameter to one of the above profiles, make sure to spell it correctly. You're done!
+**How to choose a profile:** The easiest way is to use the new on-screen profile changing button! Once you're on a drive, you can simply tap the button on the bottom right of the screen to cycle between the profiles.
 
 Dynamic gas
 -----
 Currently supported vehicles (w/ comma pedal only):
   * 2017 Toyota Corolla (non-TSS2)
   * Toyota RAV4 (non-TSS2)
+  * 2017 Honda Civic
   * 2019 Honda Pilot
 
 *TODO: Need to factor in distance, as it will not accelerate to get closer to the stopped lead if you engage at ~0mph far back from the lead.*
@@ -73,13 +64,13 @@ Parameters are stored at `/data/op_params.json`
 
 Dynamic lane speed
 -----
-*This feature is disabled until I can figure out how to improve it.*
+*This feature is disabled until I can figure out how to improve it. Probably going to be replaced by comma's upcoming end 2 end long model.*
 
 This is a feature that reduces your cruising speed if many vehicles around you are significantly slower than you. This works with and without an openpilot-identified lead. Ex.: It will slow you down if traveling in an open lane with cars in adjacent lanes that are slower than you. Or if the lead in front of the lead is slowing down, as well as cars in other lanes far ahead. The most it will slow you down is some average of: (the set speed and the average of the surrounding cars) The more the radar points, the more weight goes to the speeds of surrounding vehicles.
 
 Custom wheel offset to reduce lane hugging
 -----
-***Update**: The performance of this modification is iffy at best, but it definitely is more apparant than just tuning your camera offset value. Removing the immediate angle offset can have some weird oscilating effect when it's windy or on roads with camber (slant to one side). Will be left in, but disabled.*
+***Update**: The performance of this modification is iffy at best, but it definitely is more apparent than just tuning your camera offset value. Removing the immediate angle offset can have some weird oscillating effect when it's windy or on roads with camber (slant to one side). Will be left in, but disabled by default.*
 
 Stock openpilot doesn't seem to be able to identify your car's true angle offset. With the `LaneHugging` module you can specify a custom angle offset to be added to your desired steering angle. Simply find the angle your wheel is at when you're driving on a straight highway. By default, this is disabled, to enable you can:
 - Use the `opEdit` class in the root directory of openpilot. To use it, simply open an `ssh` shell and enter the commands below:
@@ -89,6 +80,8 @@ Stock openpilot doesn't seem to be able to identify your car's true angle offset
     ```
     You'll be greeted with a list of your parameters you can explore, enter the number corresponding to `lane_hug_direction`. Your options are to enter `'left'` or `'right'` for whichever direction your car has a tendency to hug toward. `None` will disable the feature.
     Finally you'll need to enter your absolute angle offset (negative will be converted to positive) with the `opParams` parameter: `lane_hug_angle_offset`.
+    
+    The lane hugging mod is enabled only if `lane_hug_direction` is `'left'` or `'right'`.
 
 ~~Two PID loops to control gas and brakes independently~~
 -----
@@ -106,7 +99,27 @@ Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow`, a
 
 Automatic updates
 -----
-When a new update is available on GitHub for the current branch you're on, your EON will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
+When a new update is available on GitHub for the `stock_additions` branch, your EON will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
 - your EON has been inactive for more than 5 minutes.
 
 Therefore, if the EON sees an update while you're driving it will reboot 5 minutes after you stop your drive, it resets the timer if you start driving again before the 5 minutes is up.
+
+Installation
+-----
+
+The `stock_additions` branch is my release branch that will receive occasional and verified updates from my [development branch](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-devel). With automatic updates, you should only need to run the following commands on your EON once (will only clone the release branch):
+
+```
+cd /data/
+mv openpilot openpilot.old
+git clone -b stock_additions --single-branch https://github.com/shanesmiskol/openpilot
+reboot
+```
+
+For those on an old branch of my fork you can run the following commands to get set up:
+
+```
+cd /data/openpilot;git fetch;git pull;git checkout stock_additions;git reset --hard origin/stock_additions;git checkout stock_additions;git clean -xfd;git pull
+```
+
+The command above is just a one time process for users that have cloned the branch in the past and resolves conflicts.
