@@ -58,7 +58,9 @@ Some parameters you can use to customize this fork:
 - `upload_on_hotspot`: Controls whether your EON will upload driving log data on your phone's hotspot
 - `reset_integral`: Resets integral gain whenever the longitudinal PID error crosses or is zero. Helps overshoot
 
-A list of parameters that you can modify are located [here](common/op_params.py#L42). [An archive of opParams lives here.](https://github.com/ShaneSmiskol/op_params)
+A list of parameters that you can modify are located [here](common/op_params.py#L42).
+
+An archive of opParams [lives here.](https://github.com/ShaneSmiskol/op_params)
 
 Parameters are stored at `/data/op_params.json`
 
