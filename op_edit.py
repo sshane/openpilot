@@ -102,7 +102,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         print('\n{}\n'.format('\n'.join(to_print)))
 
       print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
-      if key_info.life or self.live_tuning:  # similar to opTune
+      if key_info.live or self.live_tuning:  # similar to opTune
         while True:
           print('Enter your new value:')
           new_value = input('>> ').strip()

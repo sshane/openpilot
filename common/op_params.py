@@ -58,8 +58,8 @@ class opParams:
                            'alca_nudge_required': {'default': True, 'allowed_types': [bool], 'description': ('Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                                                              'If False, lane change will occur IMMEDIATELY after signaling'), 'live': False},
                            'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)', 'live': False},
-                           'steer_ratio': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'Can be: (None, 17.8, 14.6) If you enter None, openpilot will use the learned sR.\n'
-                                                                                                                      'If you use a number, openpilot will use that steer ratio instead', 'live': True},
+                           'steer_ratio': {'default': None, 'allowed_types': [type(None), float, int], 'description': '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
+                                                                                                                      'If you use a float/int, openpilot will use that steer ratio instead', 'live': True},
                            'use_dynamic_lane_speed': {'default': True, 'allowed_types': [bool], 'description': 'Whether you want openpilot to adjust your speed based on surrounding vehicles', 'live': False},
                            'min_dynamic_lane_speed': {'default': 20.0, 'allowed_types': [float, int], 'description': 'The minimum speed to allow dynamic lane speed to operate (in MPH)', 'live': False},
                            'upload_on_hotspot': {'default': False, 'allowed_types': [bool], 'description': 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot', 'live': False},
