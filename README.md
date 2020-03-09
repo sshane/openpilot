@@ -10,8 +10,8 @@ Highlight Features
 * [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles)
 * [**Dynamic gas**](#dynamic-gas)
 * [**Customize this branch (opEdit Parameter class)**](#Customize-this-branch-opEdit-Parameter-class)
-* [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
 * [**Live tuning support**](#Live-tuning-support)
+* [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
 * [**Automatic updates**](#Automatic-updates)
 * [**Installation**](#Installation)
 
@@ -62,6 +62,13 @@ A list of parameters that you can modify are located [here](common/op_params.py#
 
 Parameters are stored at `/data/op_params.json`
 
+Live tuning support
+-----
+Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow`, and `steer_ratio` parameters are supported.
+- Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
+
+<img src=".media/gifs/op_tune.gif?raw=true" width="600">
+
 Dynamic lane speed
 -----
 *This feature is disabled until I can figure out how to improve it. Probably going to be replaced by comma's upcoming end 2 end long model.*
@@ -88,13 +95,6 @@ Stock openpilot doesn't seem to be able to identify your car's true angle offset
 ***Update**: Probably going to remove this addition, as tuning the current pedal parameters will be a more robust solution in the long run.*
 
 If you have a Toyota Corolla with a comma pedal, you'll love this addition. Two longitudinal PID loops are set up in `longcontrol.py` so that one is running with comma pedal tuning to control the gas, and the other is running stock non-pedal tuning for better braking control. In the car, this feels miles better than stock openpilot, and nearly as good as your stock Toyota cruise control before you pulled out your DSU! It won't accelerate up to stopped cars and brake at the last moment anymore.
-
-Live tuning support
------
-Currently only the `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow`, and `steer_ratio` parameters are supported.
-- Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
-
-<img src=".media/gifs/op_tune.gif?raw=true" width="600">
 
 Automatic updates
 -----
