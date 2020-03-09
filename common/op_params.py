@@ -24,6 +24,13 @@ def read_params(params_file, default_params):
     return params, False
 
 
+class KeyInfo:
+  has_allowed_types = False
+  live = False
+  has_default = False
+  has_description = False
+
+
 class opParams:
   def __init__(self):
     """
@@ -138,12 +145,12 @@ class opParams:
 
     if key in self.params:
       key_info = self.get_key_info(key)
-      if key_info['has_allowed_types']:
+      if key_info.has_allowed_types:
         value = self.params[key]
         allowed_types = self.default_params[key]['allowed_types']
         valid_type = type(value) in allowed_types
         if not valid_type:
-          if key_info['has_default']:  # if value in op_params.json is not correct type, use default
+          if key_info.has_default:  # if value in op_params.json is not correct type, use default
             value = self.default_params[key]['default']
           else:  # else use a standard value based on type (last resort to keep openpilot running)
             value = self.value_from_types(allowed_types)
@@ -155,17 +162,19 @@ class opParams:
     return value
 
   def get_key_info(self, key):
-    info = {'has_allowed_types': False, 'live': False, 'has_default': False}
+    key_info = KeyInfo()
     if key in self.default_params:
       if 'allowed_types' in self.default_params[key]:
         allowed_types = self.default_params[key]['allowed_types']
         if isinstance(allowed_types, list) and len(allowed_types) > 0:
-          info['has_allowed_types'] = True
+          key_info.has_allowed_types = True
       if 'live' in self.default_params[key] and self.default_params[key]['live'] is True:
-        info['live'] = True
+        key_info.live = True
       if 'default' in self.default_params[key]:
-        info['has_default'] = True
-    return info
+        key_info.has_default = True
+      if 'description' in self.default_params[key]:
+        key_info.has_description = True
+    return key_info
 
   def value_from_types(self, allowed_types):
     if list in allowed_types:
@@ -179,7 +188,7 @@ class opParams:
     return None  # unknown type
 
   def update_params(self, key, force_update):
-    if force_update or self.get_key_info(key)['live']:  # if is a live param, we want to get updates while openpilot is running
+    if force_update or self.get_key_info(key).live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and time.time() - self.last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
         self.params, read_status = read_params(self.params_file, self.format_default_params())
         if not read_status:

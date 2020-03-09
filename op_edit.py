@@ -8,21 +8,44 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.op_params = opParams()
     self.params = None
     self.sleep_time = 1.0
-    self.run_loop()
+    self.live_tuning = False
+    self.welcome()
+
+  def welcome(self):
+    print('Welcome to the opParams command line editor!')
+    while True:
+      print('Would you like to enter opEdit\'s live-tuning mode?')
+      choice = input('[Y/n]: ').lower().strip()
+      if choice in ['y', 'ye', 'yes']:
+        self.live_tuning = True
+        self.run_loop()
+        break
+      elif choice in ['n', 'no']:
+        self.run_loop()
+        break
+      elif choice in ['e', 'exit']:
+        break
 
   def run_loop(self):
-    print('Welcome to the opParams command line editor!')
-    print('Here are your parameters:\n')
+    if not self.live_tuning:
+      print('Here are your parameters:\n')
+    else:
+      print('Here are your live parameters:\n')
     while True:
       self.params = self.op_params.get(force_update=True)
+      if self.live_tuning:  # only display live tunable params
+        self.params = {k: v for k, v in self.params.items() if self.op_params.get_key_info(k).live}
+
       values_list = [self.params[i] if len(str(self.params[i])) < 20 else '{} ... {}'.format(str(self.params[i])[:30], str(self.params[i])[-15:]) for i in self.params]
-      live = ['(live!)' if i in self.op_params.default_params and 'live' in self.op_params.default_params[i] and self.op_params.default_params[i]['live'] else '' for i in self.params]
+      live = ['(live!)' if self.op_params.get_key_info(i).live else '' for i in self.params]
 
       to_print = ['{}. {}: {}  {}'.format(idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
       to_print.append('\n{}. Add new parameter!'.format(len(self.params) + 1))
       to_print.append('{}. Delete parameter!'.format(len(self.params) + 2))
+
       print('\n'.join(to_print))
       print('\nChoose a parameter to explore (by integer index): ')
+
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice)
       if parsed == 'continue':
@@ -61,54 +84,61 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def change_parameter(self, choice):
     while True:
       chosen_key = list(self.params)[choice]
-      has_description = False
-      has_allowed_types = False
-      live = False
-      if chosen_key in self.op_params.default_params:
-        has_description = 'description' in self.op_params.default_params[chosen_key]
-        has_allowed_types = 'allowed_types' in self.op_params.default_params[chosen_key]
-        live = 'live' in self.op_params.default_params[chosen_key] and self.op_params.default_params[chosen_key]['live']
+      key_info = self.op_params.get_key_info(chosen_key)
 
       old_value = self.params[chosen_key]
       print('Chosen parameter: {}'.format(chosen_key))
 
       to_print = []
-      if has_description:
+      if key_info.has_description:
         to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')))
-      if has_allowed_types:
+      if key_info.has_allowed_types:
         allowed_types = self.op_params.default_params[chosen_key]['allowed_types']
         to_print.append('>>  Allowed types: {}'.format(', '.join([str(i).split("'")[1] for i in allowed_types])))
-      if live:
+      if key_info.live:
         to_print.append('>>  This parameter supports live tuning! Updates should take affect within 5 seconds.\n')
-        to_print.append('Try out opTune! It\'s designed to help you live tune parameters quicker.')
-        to_print.append('Just exit out of this and type: \'python op_tune.py\'')
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
       print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
+      if self.live_tuning:  # similar to opTune
+        while True:
+          print('Enter your new value:')
+          new_value = input('>> ').strip()
+          if new_value == '':
+            self.message('Exiting this parameter...')
+            return
 
-      print('Enter your new value:')
-      new_value = input('>> ').strip()
-      if new_value == '':
-        self.message('Exiting this parameter...')
-        return
+          new_value = self.parse_input(new_value)
+          if key_info.has_allowed_types and type(new_value) not in allowed_types:
+            self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+            continue
 
-      new_value = self.parse_input(new_value)
-      if has_allowed_types and not type(new_value) in allowed_types:
-        self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
-        continue
-
-      print('\nOld value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
-      print('New value: {} (type: {})'.format(new_value, str(type(new_value)).split("'")[1]))
-      print('Do you want to save this?')
-      choice = input('[Y/n]: ').lower().strip()
-      if choice == 'y':
-        self.op_params.put(chosen_key, new_value)
-        self.message('Saved!')
+          self.op_params.put(chosen_key, new_value)
+          print('Saved {} with value: {}! (type: {})\n'.format(chosen_key, new_value, str(type(new_value)).split("'")[1]))
       else:
-        self.message('Not saved!')
-      return
+        print('Enter your new value:')
+        new_value = input('>> ').strip()
+        if new_value == '':
+          self.message('Exiting this parameter...')
+          return
+
+        new_value = self.parse_input(new_value)
+        if key_info.has_allowed_types and type(new_value) not in allowed_types:
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+          continue
+
+        print('\nOld value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
+        print('New value: {} (type: {})'.format(new_value, str(type(new_value)).split("'")[1]))
+        print('Do you want to save this?')
+        choice = input('[Y/n]: ').lower().strip()
+        if choice == 'y':
+          self.op_params.put(chosen_key, new_value)
+          self.message('Saved!')
+        else:
+          self.message('Not saved!')
+        return
 
   def parse_input(self, dat):
     dat = dat.strip()
