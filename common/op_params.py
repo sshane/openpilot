@@ -161,13 +161,10 @@ class opParams:
         allowed_types = self.default_params[key]['allowed_types']
         if isinstance(allowed_types, list) and len(allowed_types) > 0:
           info['has_allowed_types'] = True
-
       if 'live' in self.default_params[key] and self.default_params[key]['live'] is True:
         info['live'] = True
-
       if 'default' in self.default_params[key]:
         info['has_default'] = True
-
     return info
 
   def value_from_types(self, allowed_types):
