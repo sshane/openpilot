@@ -137,12 +137,16 @@ class opParams:
       return self.params
 
     if key in self.params:
-      if key in self.default_params and 'allowed_types' in self.default_params[key]:
+      key_info = self.get_key_info(key)
+      if key_info['has_allowed_types']:
         value = self.params[key]
         allowed_types = self.default_params[key]['allowed_types']
         valid_type = type(value) in allowed_types
         if not valid_type:
-          value = self.value_from_types(allowed_types)
+          if key_info['has_default']:  # if value in op_params.json is not correct type, use default
+            value = self.default_params[key]['default']
+          else:  # else use a standard value based on type (last resort to keep openpilot running)
+            value = self.value_from_types(allowed_types)
       else:
         value = self.params[key]
     else:
@@ -150,17 +154,35 @@ class opParams:
 
     return value
 
+  def get_key_info(self, key):
+    info = {'has_allowed_types': False, 'live': False, 'has_default': False}
+    if key in self.default_params:
+      if 'allowed_types' in self.default_params[key]:
+        allowed_types = self.default_params[key]['allowed_types']
+        if isinstance(allowed_types, list) and len(allowed_types) > 0:
+          info['has_allowed_types'] = True
+
+      if 'live' in self.default_params[key] and self.default_params[key]['live'] is True:
+        info['live'] = True
+
+      if 'default' in self.default_params[key]:
+        info['has_default'] = True
+
+    return info
+
   def value_from_types(self, allowed_types):
     if list in allowed_types:
       return []
     elif float in allowed_types or int in allowed_types:
       return 0
+    elif type(None) in allowed_types:
+      return None
     elif str in allowed_types:
       return ''
-    return None
+    return None  # unknown type
 
   def update_params(self, key, force_update):
-    if force_update or (key in self.default_params and 'live' in self.default_params[key] and self.default_params[key]['live']):  # if is a live param, we want to get updates while openpilot is running
+    if force_update or self.get_key_info(key)['live']:  # if is a live param, we want to get updates while openpilot is running
       if not travis and time.time() - self.last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
         self.params, read_status = read_params(self.params_file, self.format_default_params())
         if not read_status:
