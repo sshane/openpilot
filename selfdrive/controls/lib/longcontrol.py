@@ -4,6 +4,7 @@ from selfdrive.controls.lib.pid_long import PIController
 from common.travis_checker import travis
 from selfdrive.controls.lib.dynamic_lane_speed import DynamicLaneSpeed
 from selfdrive.controls.lib.dynamic_gas import DynamicGas
+from common.op_params import opParams
 
 LongCtrlState = log.ControlsState.LongControlState
 
@@ -70,6 +71,8 @@ class LongControl():
     self.last_output_gb = 0.0
 
     self.dynamic_gas = DynamicGas(CP, candidate)
+    self.op_params = opParams()
+    self.enable_dg = self.op_params.get('dynamic_gas', True)
 
     self.gas_pressed = False
     self.lead_data = {'v_rel': None, 'a_lead': None, 'x_lead': None, 'status': False}
@@ -99,13 +102,15 @@ class LongControl():
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future, a_target, CP, passable):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Actuation limits
+
+    gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
+    brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
+
     if not travis:
       self.handle_passable(passable, v_ego)
-      gas_max = self.dynamic_gas.update(v_ego, self.lead_data, self.mpc_TR, self.blinker_status)
+      if self.enable_dg:
+        gas_max = self.dynamic_gas.update(v_ego, self.lead_data, self.mpc_TR, self.blinker_status)
       # v_target, v_target_future, a_target = self.dynamic_lane_speed.update(v_target, v_target_future, v_cruise, a_target, v_ego, self.track_data, self.lead_data)
-    else:
-      gas_max = interp(v_ego, CP.gasMaxBP, CP.gasMaxV)
-    brake_max = interp(v_ego, CP.brakeMaxBP, CP.brakeMaxV)
 
     # Update state machine
     output_gb = self.last_output_gb

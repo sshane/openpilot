@@ -67,6 +67,7 @@ class opParams:
                            'reset_integral': {'default': False, 'allowed_types': [bool], 'description': 'This resets integral whenever the longitudinal PID error crosses or is zero.\nShould help it recover from overshoot quicker', 'live': False},
                            'disengage_on_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether you want openpilot to be disengage on gas input or not. It can cause issues on specific cars'},
                            'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'},
+                           'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
