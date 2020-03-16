@@ -121,13 +121,22 @@ class LongitudinalMpc():
       elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
       if elapsed > min_consider_time:  # if greater than min time (not 0)
         a_calculated = (self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']) / elapsed  # delta speed / delta time
-        # old version: # if abs(a_calculated) > abs(a_lead) and a_lead < 0.33528:  # if a_lead is greater than calculated accel (over last 1.5s, use that) and if lead accel is not above 0.75 mph/s
-        #   a_lead = a_calculated
 
-        # long version of below: if (a_calculated < 0 and a_lead >= 0 and a_lead < -a_calculated * 0.5) or (a_calculated > 0 and a_lead <= 0 and -a_lead > a_calculated * 0.5) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):
-        if (a_calculated < 0 <= a_lead < -a_calculated * 0.55) or (a_calculated > 0 >= a_lead and -a_lead < a_calculated * 0.45) or (a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead)):  # this is a mess, fix
-          a_lead = a_calculated
-    return a_lead  # if above doesn't execute, we'll return a_lead from radar
+        if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
+          # both are negative or positive and calculated is greater than current
+          return a_calculated
+
+        if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
+          if a_lead < -a_calculated * 0.5:
+            # half of accel over time is less than current positive accel, we're not decelerating after long decel
+            return a_calculated
+
+        if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
+          if -a_lead < a_calculated * 0.5:
+            # half of accel over time is greater than current negative accel, we're not accelerating after long accel
+            return a_calculated
+
+    return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
