@@ -53,6 +53,7 @@ try:
   else:
     dirty = True
 except subprocess.CalledProcessError:
+  origin = 'None'
   try:
     cloudlog.exception("git subprocess failed while finding version")
   except:
