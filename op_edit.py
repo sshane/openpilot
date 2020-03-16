@@ -53,7 +53,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       print('\nChoose a parameter to explore (by integer index): ')
 
       choice = input('>> ').strip()
-      parsed, choice = self.parse_choice(choice, len(params))
+      parsed, choice = self.parse_choice(choice, len(self.params))
       if parsed == 'continue':
         continue
       elif parsed == 'add':
