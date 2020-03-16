@@ -10,11 +10,13 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.params = None
     self.sleep_time = 1.0
     self.live_tuning = self.op_params.get('op_edit_live_mode', False)
+    self.username = self.op_params.get('username', None)
+
     self.run_init()
 
   def run_init(self):
-    print('\nWelcome to the opParams command line editor!')
-    if self.op_params.get('username', None) is None:
+    if self.username is None:
+      print('\nWelcome to the opParams command line editor!')
       print('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
       if self.is_affirmative():
         print('Please enter your Discord username so the developers can reach out if a crash occurs:')
@@ -24,6 +26,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.message('Thanks! Saving your Discord username to op_params.json\n'
                      'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
         self.op_params.put('username', username)
+        self.username = username
+      else:
+        print('\nWelcome to the opParams command line editor, {}!'.format(self.username))
 
     self.run_loop()
 
