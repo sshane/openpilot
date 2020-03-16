@@ -3,7 +3,7 @@ import os
 import sys
 import threading
 import capnp
-from selfdrive.version import version, dirty, origin, branch
+from selfdrive.version import version, dirty
 from common.op_params import opParams
 
 from selfdrive.swaglog import cloudlog
@@ -22,7 +22,7 @@ else:
   from raven.transport.http import HTTPTransport
 
   op_params = opParams()
-  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch}
+  error_tags = {'dirty': dirty, 'origin': 'origin', 'branch': 'branch'}
   username = op_params.get('username', None)
   if username is not None and isinstance(username, str):
     error_tags['username'] = username

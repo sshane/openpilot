@@ -2,7 +2,6 @@
 import os
 import subprocess
 from selfdrive.swaglog import cloudlog
-from common.travis_checker import travis
 
 
 def get_git_commit():
@@ -59,9 +58,6 @@ except subprocess.CalledProcessError:
   except:
     pass
   dirty = True
-
-if travis:
-  origin = 'None'
 
 training_version = b"0.2.0"
 terms_version = b"2"
