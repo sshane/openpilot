@@ -10,6 +10,20 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.params = None
     self.sleep_time = 1.0
     self.live_tuning = self.op_params.get('op_edit_live_mode', False)
+    self.run_init()
+
+  def run_init(self):
+    if self.op_params.get('username', None) is None:
+      print('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
+      if self.is_affirmative():
+        print('Please enter your Discord username so the developers can reach out if a crash occurs:')
+        username = ''
+        while username == '':
+          username = input('>> ').strip()
+        self.message('Great! Saving your Discord username to op_params.json!\n'
+                     'Edit the \'username\' parameter at any time to update.', sleep_time=2.0)
+        self.op_params.put('username', username)
+
     self.run_loop()
 
   def run_loop(self):
@@ -132,6 +146,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           self.message('Not saved!')
         return
 
+  def is_affirmative(self):
+    return input('[Y/n]: ').lower().strip() in ['yes', 'ye', 'y']
+
   def parse_input(self, dat):
     dat = dat.strip()
     try:
@@ -202,9 +219,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.message('Not saved!')
       return
 
-  def message(self, msg):
+  def message(self, msg, sleep_time=None):
+    if sleep_time is None:
+      sleep_time = self.sleep_time
     print('--------\n{}\n--------'.format(msg), flush=True)
-    time.sleep(self.sleep_time)
+    time.sleep(sleep_time)
     print()
 
 

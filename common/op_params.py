@@ -77,28 +77,16 @@ class opParams:
     self.last_read_time = time.time()
     self.read_frequency = 5.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio']  # a list of params you want to delete (unused)
+    self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio', 'uniqueID']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
-
-  def create_id(self):  # creates unique identifier to send with sentry errors. please update uniqueID with op_edit.py to your username!
-    need_id = False
-    if "uniqueID" not in self.params:
-      need_id = True
-    if "uniqueID" in self.params and self.params["uniqueID"] is None:
-      need_id = True
-    if need_id:
-      random_id = ''.join([random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for i in range(15)])
-      self.params["uniqueID"] = random_id
 
   def add_default_params(self):
     prev_params = dict(self.params)
-    if not travis:
-      self.create_id()
-      for key in self.default_params:
-        if self.force_update:
-          self.params[key] = self.default_params[key]['default']
-        elif key not in self.params:
-          self.params[key] = self.default_params[key]['default']
+    for key in self.default_params:
+      if self.force_update:
+        self.params[key] = self.default_params[key]['default']
+      elif key not in self.params:
+        self.params[key] = self.default_params[key]['default']
     return prev_params == self.params
 
   def format_default_params(self):
