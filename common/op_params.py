@@ -49,8 +49,7 @@ class opParams:
       self.default_params = {'camera_offset': {'default': 0.06}}
     """
 
-    self.default_params = {'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True},
-                           'camera_offset': {'default': 0.06, 'allowed_types': [float, int], 'description': 'Your camera offset to use in lane_planner.py', 'live': True},
+    self.default_params = {'camera_offset': {'default': 0.06, 'allowed_types': [float, int], 'description': 'Your camera offset to use in lane_planner.py', 'live': True},
                            'awareness_factor': {'default': 3.0, 'allowed_types': [float, int], 'description': 'Multiplier for the awareness times', 'live': False},
                            'lane_hug_direction': {'default': None, 'allowed_types': [type(None), str], 'description': "(None, 'left', 'right'): Direction of your lane hugging, if present. None will disable this modification", 'live': False},
                            'lane_hug_angle_offset': {'default': 0.0, 'allowed_types': [float, int], 'description': ('This is the angle your wheel reads when driving straight at highway speeds.\n'
@@ -69,14 +68,16 @@ class opParams:
                            'upload_on_hotspot': {'default': False, 'allowed_types': [bool], 'description': 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot', 'live': False},
                            'reset_integral': {'default': False, 'allowed_types': [bool], 'description': 'This resets integral whenever the longitudinal PID error crosses or is zero.\nShould help it recover from overshoot quicker', 'live': False},
                            'disengage_on_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether you want openpilot to be disengage on gas input or not. It can cause issues on specific cars'},
-                           'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'}}
+                           'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'},
+
+                           'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
     self.params = {}
     self.params_file = "/data/op_params.json"
     self.last_read_time = time.time()
     self.read_frequency = 5.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio']
+    self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
 
   def create_id(self):  # creates unique identifier to send with sentry errors. please update uniqueID with op_edit.py to your username!
