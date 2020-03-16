@@ -13,6 +13,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.run_init()
 
   def run_init(self):
+    print('Welcome to the opParams command line editor!')
     if self.op_params.get('username', None) is None:
       print('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
       if self.is_affirmative():
@@ -27,7 +28,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.run_loop()
 
   def run_loop(self):
-    print('Welcome to the opParams command line editor!')
     while True:
       if not self.live_tuning:
         print('Here are your parameters:\n')
