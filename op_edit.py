@@ -45,15 +45,16 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       # to_print.append('{}. Delete parameter'.format(len(to_print) + 1))
       # to_print.append('{}. Toggle live tuning'.format(len(to_print) + 1))
 
-      to_print.append('---\na. Add new parameter')
-      to_print.append('d. Delete parameter')
-      to_print.append('l. Toggle live tuning')
+      extras = ['---\na. Add new parameter',
+                'd. Delete parameter',
+                'l. Toggle live tuning']
+      to_print += extras
 
       print('\n'.join(to_print))
       print('\nChoose a parameter to explore (by integer index): ')
 
       choice = input('>> ').strip()
-      parsed, choice = self.parse_choice(choice, len(self.params))
+      parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
       if parsed == 'continue':
         continue
       elif parsed == 'add':
