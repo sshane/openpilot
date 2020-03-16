@@ -2,8 +2,6 @@
 import os
 import json
 import time
-import string
-import random
 from selfdrive.swaglog import cloudlog
 from common.travis_checker import travis
 
