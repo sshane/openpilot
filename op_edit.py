@@ -82,9 +82,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     if choice == '':
       print('Exiting opEdit!')
       return 'exit', choice
-    # else:
-    #   self.message('Not an integer!')
-    #   return 'retry', choice
 
     if choice in ['a', 'add']:  # add new parameter
       return 'add', choice
