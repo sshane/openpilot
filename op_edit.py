@@ -65,31 +65,34 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       elif parsed == 'live':
         self.live_tuning = not self.live_tuning
         self.op_params.put('op_edit_live_mode', self.live_tuning)  # for next opEdit startup
-      elif parsed == 'error':
+      elif parsed == 'exit':
         return
 
   def parse_choice(self, choice, opt_len):
     if choice.isdigit():
       choice = int(choice)
       choice -= 1
-    elif choice == '':
-      print('Exiting opEdit!')
-      return 'error', choice
-    else:
-      self.message('Not an integer!')
-      return 'retry', choice
-    if choice not in range(opt_len):  # number of options to choose from
-      self.message('Not in range!')
-      return 'continue', choice
+      if choice not in range(opt_len):  # number of options to choose from
+        self.message('Not in range!')
+        return 'continue', choice
+      return 'change', choice
 
-    if choice == opt_len - 3:  # add new parameter
+    if choice == '':
+      print('Exiting opEdit!')
+      return 'exit', choice
+    # else:
+    #   self.message('Not an integer!')
+    #   return 'retry', choice
+
+    if choice in ['a', 'add']:  # add new parameter
       return 'add', choice
-    elif choice == opt_len - 2:  # delete parameter
+    elif choice in ['d', 'delete', 'del']:  # delete parameter
       return 'delete', choice
-    elif choice == opt_len - 1:  # live tuning mode
+    elif choice in ['l', 'live']:  # live tuning mode
       return 'live', choice
 
-    return 'change', choice
+    self.message('Invalid choice!')
+    return 'continue', choice
 
   def change_parameter(self, choice):
     while True:
