@@ -22,7 +22,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         while username == '':
           username = input('>> ').strip()
         self.message('Great! Saving your Discord username to op_params.json!\n'
-                     'Edit the \'username\' parameter at any time to update.', sleep_time=2.0)
+                     'Edit the \'username\' parameter at any time to update.', sleep_time=3.0)
         self.op_params.put('username', username)
 
     self.run_loop()
@@ -41,9 +41,13 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       live = ['(live!)' if self.op_params.key_info(i).live else '' for i in self.params]
 
       to_print = ['{}. {}: {}  {}'.format(idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
-      to_print.append('---\n{}. Add new parameter'.format(len(to_print) + 1))
-      to_print.append('{}. Delete parameter'.format(len(to_print) + 1))
-      to_print.append('{}. Toggle live tuning'.format(len(to_print) + 1))
+      # to_print.append('---\n{}. Add new parameter'.format(len(to_print) + 1))
+      # to_print.append('{}. Delete parameter'.format(len(to_print) + 1))
+      # to_print.append('{}. Toggle live tuning'.format(len(to_print) + 1))
+
+      to_print.append('---\naa. Add new parameter')
+      to_print.append('dd. Delete parameter')
+      to_print.append('ll. Toggle live tuning')
 
       print('\n'.join(to_print))
       print('\nChoose a parameter to explore (by integer index): ')
