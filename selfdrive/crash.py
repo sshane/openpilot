@@ -3,7 +3,8 @@ import os
 import sys
 import threading
 import capnp
-from selfdrive.version import version, dirty
+from selfdrive.version import version, dirty, origin, branch
+from common.op_params import opParams
 
 from selfdrive.swaglog import cloudlog
 
@@ -19,8 +20,15 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH"):
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
+
+  op_params = opParams()
+  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch}
+  username = op_params.get('username', None)
+  if username is not None and isinstance(username, str):
+    error_tags['username'] = username
+
   client = Client('https://1f80722852fb4faa879c3cc26a750ba4:1ab8ecb658ec449d9107a068282bac77@sentry.io/1895841',
-                  install_sys_hook=False, transport=HTTPTransport, release=version, tags={'dirty': dirty})
+                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
 
   def capture_exception(*args, **kwargs):
     exc_info = sys.exc_info()
