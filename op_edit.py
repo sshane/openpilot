@@ -27,8 +27,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                      'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
         self.op_params.put('username', username)
         self.username = username
-      else:
-        print('\nWelcome to the opParams command line editor, {}!'.format(self.username))
+    else:
+      print('\nWelcome to the opParams command line editor, {}!'.format(self.username))
 
     self.run_loop()
 
