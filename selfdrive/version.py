@@ -2,6 +2,7 @@
 import os
 import subprocess
 from selfdrive.swaglog import cloudlog
+from common.travis_checker import travis
 
 
 def get_git_commit():
@@ -53,12 +54,14 @@ try:
   else:
     dirty = True
 except subprocess.CalledProcessError:
-  origin = 'None'
   try:
     cloudlog.exception("git subprocess failed while finding version")
   except:
     pass
   dirty = True
+
+if travis:
+  origin = 'None'
 
 training_version = b"0.2.0"
 terms_version = b"2"
