@@ -5,6 +5,7 @@ import threading
 import capnp
 from selfdrive.version import version, dirty
 from common.op_params import opParams
+from common.travis_checker import travis
 
 from selfdrive.swaglog import cloudlog
 
@@ -20,12 +21,19 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH"):
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
+  if not travis:
+    from selfdrive.version import origin, branch
+
 
   op_params = opParams()
-  error_tags = {'dirty': dirty, 'origin': 'origin', 'branch': 'branch'}
+  error_tags = {'dirty': dirty}
+
   username = op_params.get('username', None)
   if username is not None and isinstance(username, str):
     error_tags['username'] = username
+  if not travis:
+    error_tags['origin'] = origin
+    error_tags['branch'] = branch
 
   client = Client('https://1f80722852fb4faa879c3cc26a750ba4:1ab8ecb658ec449d9107a068282bac77@sentry.io/1895841',
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
