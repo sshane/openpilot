@@ -51,7 +51,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       to_print += extras
 
       print('\n'.join(to_print))
-      print('\nChoose a parameter to explore (by integer index): ')
+      print('\nChoose a parameter to explore (by identifier): ')
 
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
