@@ -485,8 +485,10 @@ def manager_prepare(spinner=None):
 
   ordered_managed_processes = [p for p in managed_processes if not isinstance(p, str)]
   ordered_managed_processes += [p for p in managed_processes if isinstance(p, str)]
+  print('SHOULD BE TRUE:')
+  print(set(list(managed_processes.keys())) == set(ordered_managed_processes))
 
-  for i, p in enumerate(managed_processes):
+  for i, p in enumerate(ordered_managed_processes):
     if spinner is not None:
       spinner_status = None
       if isinstance(p, str):
