@@ -481,7 +481,7 @@ def manager_prepare(spinner=None):
 
   # Spinner has to start from 70 here
   total = 100.0 if prebuilt else 100 - scons_finished_progress
-  preimporting = [p for p in managed_processes if isinstance(p, str)]
+  preimporting = [p for p in managed_processes if isinstance(managed_processes[p], str)]
 
   i = 0
   for p in managed_processes:
