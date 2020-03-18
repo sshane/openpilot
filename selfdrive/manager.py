@@ -101,8 +101,8 @@ if not prebuilt:
           i = int(line[len(prefix):])
           if spinner is not None:
             # spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
-            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
-            # spinner.update("20")
+            # spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
+            spinner.update("hi")
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
