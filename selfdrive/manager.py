@@ -483,18 +483,12 @@ def manager_prepare(spinner=None):
   # Spinner has to start from 70 here
   total = 100.0 if prebuilt else 100 - scons_finished_progress
 
-  ordered_managed_processes = [p for p in managed_processes if not isinstance(p, str)]
-  ordered_managed_processes += [p for p in managed_processes if isinstance(p, str)]
-  print('SHOULD BE TRUE:')
-  print(set(list(managed_processes.keys())) == set(ordered_managed_processes))
-
-  for i, p in enumerate(ordered_managed_processes):
+  for i, p in enumerate(managed_processes):
     if spinner is not None:
       spinner_status = None
+      spinner_status = 'preparing {}'.format(p)
       if isinstance(p, str):
         spinner_status = 'preimporting {}'.format(p)
-      else:
-        spinner_status = 'preparing {}'.format(p)
 
       spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), spinner_status)
     prepare_managed_process(p)

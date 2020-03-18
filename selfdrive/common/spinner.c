@@ -86,35 +86,11 @@ int spin(int argc, char** argv) {
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
 
-
-
-//      char *spinstatus;
-//      if (strchr(',', spintext)){
-//        char *spinstatus = strchr(spintext, ',');
-//        *spinstatus++ = '\0';
-//        printf("spintext: %s\n", spintext);
-//        char *test_pointer = strchr (spintext, ',');
-//        *test_pointer++ = '\0';
-//        printf("status: %s\n", spintext);
-//        printf("spintext: %s\n", test_pointer);
-//      }
-
-      //int index = strcspn(spintext, ",");
-//      printf("%d\n", index);
-      //char* status;
-//      for (int i=0; i < index; i++){
-//        printf("here: %d\n", i);
-//        //printf("%c\n", spintext[i]);
-//        status[i] = spintext[i];
-//      }
-      //printf("status: %s\n", status);
       size_t len = strlen(spintext);
-
       // Check if receiving extra build status to display text
       for (int i = 0; i < len; i++){
         if (spintext[i] == ','){
           has_extra = true;
-          printf("has extra!\n");
           break;
         }
       }
@@ -122,9 +98,7 @@ int spin(int argc, char** argv) {
       // Get current status
       if (has_extra) {
         spinstatus = strchr(spintext, ',');
-        *spinstatus++ = '\0';
-        printf("status: %s\n", spintext);
-        printf("spintext: %s\n", spinstatus);
+        *spinstatus++ = '\0';  // split spintext and status
       }
 
 
