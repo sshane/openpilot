@@ -490,11 +490,6 @@ def manager_prepare(spinner=None):
       if p in preimporting:  # is python file
         spinner_status = 'preimporting {}'.format(p)
         i += 1
-      print(len(preimporting))
-      print(i)
-      print(p)
-      print((100.0 - total) + total * i / len(preimporting))
-      print('--------')
       spinner.update("%d" % ((100.0 - total) + total * i / len(preimporting),), spinner_status)
     prepare_managed_process(p)
 
