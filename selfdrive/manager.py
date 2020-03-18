@@ -93,6 +93,8 @@ if not prebuilt:
         line = scons.stderr.readline()
         if line is None:
           continue
+        print(line)
+        print('---------------\n')
 
         line = line.rstrip()
         prefix = b'progress: '
