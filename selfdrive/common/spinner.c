@@ -214,11 +214,16 @@ int spin(int argc, char** argv) {
       nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
       nvgFontSize(vg, 160);
       nvgText(vg, progress_x, progress_y + 50, "TEST TEXT!!", NULL);
-    } else {
+    }
+    if (has_extra || !draw_progress) {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 96.0f);
-      nvgText(vg, fb_w/2, (fb_h*2/3)+24, spintext, NULL);
+      if (has_extra) {
+        nvgText(vg, fb_w/2, (fb_h*2/3)+24, spinstatus, NULL);
+      } else {
+        nvgText(vg, fb_w/2, (fb_h*2/3)+24, spintext, NULL);
+      }
     }
 
     nvgEndFrame(vg);
