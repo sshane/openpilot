@@ -221,7 +221,6 @@ SConscript(['selfdrive/proclogd/SConscript'])
 
 SConscript(['selfdrive/ui/SConscript'])
 SConscript(['selfdrive/loggerd/SConscript'])
-SConscript(['selfdrive/common/SConscript'])
 
 if arch == "aarch64":
   SConscript(['selfdrive/logcatd/SConscript'])
