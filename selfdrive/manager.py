@@ -101,7 +101,6 @@ if not prebuilt:
           i = int(line[len(prefix):])
           if spinner is not None:
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
-            # spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
@@ -485,9 +484,8 @@ def manager_prepare(spinner=None):
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
-      spinner_status = None
       spinner_status = 'preparing {}'.format(p)
-      if isinstance(p, str):
+      if isinstance(p, str):  # is python file
         spinner_status = 'preimporting {}'.format(p)
 
       spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), spinner_status)
