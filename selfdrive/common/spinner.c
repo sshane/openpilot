@@ -95,7 +95,6 @@ int spin(int argc, char** argv) {
 
       // Check if number (update progress bar)
       size_t len = strlen(spintext);
-      len = strlen(spintext);  // reset to new length
       bool is_number = len > 0;
       for (int i = 0; i < len; i++){
         if (!isdigit(spintext[i])){
