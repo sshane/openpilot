@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
-#include <fstream>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
@@ -52,15 +51,11 @@ int spin(int argc, char** argv) {
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
 
-  ofstream myfile;
-  myfile.open ("/data/openpilot/selfdrive/ui/spinner/test.txt");
-  myfile << "Writing this to a file.\n";
-  myfile.close();
-
   const char* spintext_arg = NULL;
   if (argc >= 2) {
     strncpy(spintext, argv[1], SPINTEXT_LENGTH);
   }
+  printf("test");
 
   // spinner
   int fb_w, fb_h;
@@ -89,6 +84,7 @@ int spin(int argc, char** argv) {
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
+
 
       // Check if number (update progress bar)
       size_t len = strlen(spintext);
