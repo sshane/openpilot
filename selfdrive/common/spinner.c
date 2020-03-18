@@ -51,9 +51,6 @@ int spin(int argc, char** argv) {
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
 
-  printf("count: \n");
-  printf(argc);
-
   const char* spintext_arg = NULL;
   if (argc >= 2) {
     strncpy(spintext, argv[1], SPINTEXT_LENGTH);
