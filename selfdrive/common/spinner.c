@@ -167,7 +167,7 @@ int spin(int argc, char** argv) {
       paint = nvgBoxGradient(
           vg, progress_x, progress_y,
           bar_pos+1.5f, progress_height-1, 3, 4,
-          nvgRGB(245, 245, 245), nvgRGB(105, 105, 105));
+          nvgRGB(75, 0, 173), nvgRGB(75, 0, 173));
 
       nvgBeginPath(vg);
       nvgRoundedRect(
@@ -181,7 +181,7 @@ int spin(int argc, char** argv) {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       if (has_extra) {
-        nvgFontSize(vg, 86.0f);
+        nvgFontSize(vg, 78.0f);
         nvgText(vg, fb_w/2, (fb_h*2/3)+24+96, spinstatus, NULL);
       } else {
         nvgFontSize(vg, 96.0f);
