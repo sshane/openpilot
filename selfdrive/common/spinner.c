@@ -85,7 +85,7 @@ int spin(int argc, char** argv) {
       spintext[strcspn(spintext, "\n")] = 0;
       printf("spintext: %s\n", spintext);
       char find = ',';
-      printf("idx: %s\n", strchr(spintext, find));
+      printf("idx: %s\n", *strchr(spintext, find) - spintext);
 
 
       // Check if number (update progress bar)
