@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
+#include <fstream>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
@@ -50,6 +51,11 @@ int spin(int argc, char** argv) {
 
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
+
+  ofstream myfile;
+  myfile.open ("/data/openpilot/selfdrive/ui/spinner/test.txt");
+  myfile << "Writing this to a file.\n";
+  myfile.close();
 
   const char* spintext_arg = NULL;
   if (argc >= 2) {
