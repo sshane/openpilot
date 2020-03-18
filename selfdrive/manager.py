@@ -477,6 +477,7 @@ def manager_thread():
         sys.exit(print_cpu_usage(first_proc, last_proc))
 
 def manager_prepare(spinner=None):
+  spinner.update("%d" % scons_finished_progress, "starting preimporting")
   # build all processes
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
