@@ -167,7 +167,7 @@ int spin(int argc, char** argv) {
       paint = nvgBoxGradient(
           vg, progress_x, progress_y,
           bar_pos+1.5f, progress_height-1, 3, 4,
-          nvgRGB(75, 0, 173), nvgRGB(75, 0, 173));
+          nvgRGB(75, 0, 173), nvgRGB(26, 20, 105));
 
       nvgBeginPath(vg);
       nvgRoundedRect(
