@@ -87,6 +87,7 @@ int spin(int argc, char** argv) {
       int index = strcspn(spintext, ",");
       char* status;
       for (int i; i < index; i++){
+        printf("here\n");
         printf("%c", spintext[i]);
         status[i] = spintext[i];
       }
