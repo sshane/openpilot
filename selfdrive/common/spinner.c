@@ -55,7 +55,6 @@ int spin(int argc, char** argv) {
   if (argc >= 2) {
     strncpy(spintext, argv[1], SPINTEXT_LENGTH);
   }
-  printf("spintext: %s\n", spintext);
 
   // spinner
   int fb_w, fb_h;
