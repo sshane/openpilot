@@ -297,6 +297,7 @@ def prepare_managed_process(p):
       subprocess.check_call(["make", "clean"], cwd=os.path.join(BASEDIR, proc[0]))
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
   else:
+    print(proc)
     time.sleep(0.5)
 
 
