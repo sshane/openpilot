@@ -117,7 +117,7 @@ if not prebuilt:
       else:
         raise RuntimeError("scons build failed")
     else:
-      spinner.update("%d" % scons_finished_progress, "compiling: finished")
+      spinner.update("%d" % scons_finished_progress, "finished compiling")
       break
 
 import cereal
@@ -483,7 +483,7 @@ def manager_prepare(spinner=None):
   total = 100.0 if prebuilt else 100 - scons_finished_progress
   preimporting = [p for p in managed_processes if isinstance(managed_processes[p], str)]
 
-  i = -1
+  i = 0
   for p in managed_processes:
     if spinner is not None:
       spinner_status = 'preparing {}'.format(p)
