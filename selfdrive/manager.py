@@ -487,9 +487,9 @@ def manager_prepare(spinner=None):
     if spinner is not None:
       spinner_status = None
       if isinstance(p, str):
-        spinner_status = 'preimporting {}'.format(spinner_status)
+        spinner_status = 'preimporting {}'.format(p)
       else:
-        spinner_status = 'preparing {}'.format(spinner_status)
+        spinner_status = 'preparing {}'.format(p)
 
       spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), spinner_status)
     prepare_managed_process(p)
