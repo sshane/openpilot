@@ -94,15 +94,14 @@ if not prebuilt:
         line = scons.stderr.readline()
         if line is None:
           continue
-        print(line)
-        print('---------------\n')
 
         line = line.rstrip()
         prefix = b'progress: '
         if line.startswith(prefix):
           i = int(line[len(prefix):])
           if spinner is not None:
-            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
+            # spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
+            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
