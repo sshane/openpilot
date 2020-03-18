@@ -211,9 +211,9 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
 
-      nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
-      nvgFontSize(vg, 160);
-      nvgText(vg, progress_x, progress_y + 50, "TEST TEXT!!", NULL);
+//      nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
+//      nvgFontSize(vg, 160);
+//      nvgText(vg, progress_x, progress_y + 50, "TEST TEXT!!", NULL);
     }
     if (has_extra || !draw_progress) {
       // message
