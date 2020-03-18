@@ -47,6 +47,7 @@ int spin(int argc, char** argv) {
 
   bool draw_progress = false;
   float progress_val = 0.0;
+  char *spinstatus;
 
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
@@ -108,12 +109,22 @@ int spin(int argc, char** argv) {
       //printf("status: %s\n", status);
       size_t len = strlen(spintext);
 
+      // Check if receiving extra build status to display text
       bool has_extra = false;
       for (int i = 0; i < len; i++){
         if (spintext[i] == ','){
           has_extra = true;
           printf("has extra!\n");
+          break;
         }
+      }
+
+      // Get current status
+      if (has_extra) {
+        *spinstatus = strchr(spintext, ',');
+        *spinstatus++ = '\0';
+        printf("status: %s\n", spintext);
+        printf("spintext: %s\n", spinstatus);
       }
 
 
