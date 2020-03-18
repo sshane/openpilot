@@ -19,9 +19,9 @@ class Spinner():
   def update(self, spinner_text, spinner_status=None):
     if self.spinner_proc is not None:
       if spinner_status is None:
-        self.spinner_proc.stdin.write(spinner_text.encode('utf8') + b"\n")
-      else:
-        self.spinner_proc.stdin.write('{},{}'.format(spinner_text, spinner_status).encode('utf8') + b"\n")
+        spinner_text += ",{}".format(spinner_status)
+      self.spinner_proc.stdin.write(spinner_text.encode('utf8') + b"\n")
+
       try:
         self.spinner_proc.stdin.flush()
       except BrokenPipeError:
