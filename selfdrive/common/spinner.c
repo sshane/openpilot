@@ -166,6 +166,10 @@ int spin(int argc, char** argv) {
           bar_pos, progress_height-2, 12);
       nvgFillPaint(vg, paint);
       nvgFill(vg);
+
+      nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
+      nvgFontSize(s->vg, 160);
+      nvgText(s->vg, progress_x, progress_y + 50, "TEST TEXT!!", NULL);
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
