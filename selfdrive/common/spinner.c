@@ -86,22 +86,15 @@ int spin(int argc, char** argv) {
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
 
-      size_t len = strlen(spintext);
-      // Check if receiving extra status to display text
-      has_extra = strchr(spintext, ',') != NULL;
-      if (has_extra){
-        printf("has extra!\n");
-      } else {
-        printf("has no extra!\n");
-      }
-
       // Get current status
+      has_extra = strchr(spintext, ',') != NULL;
       if (has_extra) {
         spinstatus = strchr(spintext, ',');
         *spinstatus++ = '\0';  // split spintext and status
       }
 
       // Check if number (update progress bar)
+      size_t len = strlen(spintext);
       len = strlen(spintext);  // reset to new length
       bool is_number = len > 0;
       for (int i = 0; i < len; i++){
