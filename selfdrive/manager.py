@@ -74,7 +74,7 @@ from multiprocessing import Process
 
 # Run scons
 spinner = Spinner()
-spinner.update("0")
+spinner.update("0", 'starting openpilot')
 
 if not prebuilt:
   for retry in [True, False]:
@@ -485,8 +485,6 @@ def manager_prepare(spinner=None):
 
   i = 0
   for p in managed_processes:
-    print(len(preimporting))
-    print(i)
     if spinner is not None:
       spinner_status = 'preparing {}'.format(p)
       if isinstance(p, str):  # is python file
