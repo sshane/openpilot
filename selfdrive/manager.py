@@ -101,7 +101,7 @@ if not prebuilt:
         if line.startswith(prefix):
           i = int(line[len(prefix):])
           if spinner is not None:
-            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)), 'compiling with scons')
+            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
