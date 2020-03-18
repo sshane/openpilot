@@ -55,7 +55,7 @@ int spin(int argc, char** argv) {
   if (argc >= 2) {
     strncpy(spintext, argv[1], SPINTEXT_LENGTH);
   }
-  printf("test");
+  printf("spintext: %s\n", spintext);
 
   // spinner
   int fb_w, fb_h;
@@ -84,7 +84,7 @@ int spin(int argc, char** argv) {
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
-
+      printf("spintext: %s\n", spintext);
 
       // Check if number (update progress bar)
       size_t len = strlen(spintext);
