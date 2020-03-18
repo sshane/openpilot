@@ -487,8 +487,9 @@ def manager_prepare(spinner=None):
   for p in managed_processes:
     if spinner is not None:
       spinner_status = 'preparing {}'.format(p)
-      if isinstance(p, str):  # is python file
+      if isinstance(managed_processes[p], str):  # is python file
         spinner_status = 'preimporting {}'.format(p)
+      print(len(preimporting))
       print(i)
       print(p)
       print((100.0 - total) + total * (i + 1) / len(preimporting))
