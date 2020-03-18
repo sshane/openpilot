@@ -99,7 +99,7 @@ if not prebuilt:
         if line.startswith(prefix):
           i = int(line[len(prefix):])
           if spinner is not None:
-            spinner.update("%d" % (50.0 * (i / TOTAL_SCONS_NODES)))
+            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)))
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
@@ -478,7 +478,7 @@ def manager_prepare(spinner=None):
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
   # Spinner has to start from 70 here
-  total = 100.0 if prebuilt else 50.0
+  total = 100.0 if prebuilt else 25.0
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
