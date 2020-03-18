@@ -46,9 +46,10 @@ int spin(int argc, char** argv) {
   int err;
 
   bool draw_progress = false;
+  bool has_extra = false;
   float progress_val = 0.0;
-  char *spinstatus;
 
+  char *spinstatus;
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
 
@@ -110,7 +111,6 @@ int spin(int argc, char** argv) {
       size_t len = strlen(spintext);
 
       // Check if receiving extra build status to display text
-      bool has_extra = false;
       for (int i = 0; i < len; i++){
         if (spintext[i] == ','){
           has_extra = true;
