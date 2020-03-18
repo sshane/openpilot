@@ -87,12 +87,12 @@ int spin(int argc, char** argv) {
       spintext[strcspn(spintext, "\n")] = 0;
 
       size_t len = strlen(spintext);
-      // Check if receiving extra build status to display text
-      for (int i = 0; i < len; i++){
-        if (spintext[i] == ','){
-          has_extra = true;
-          break;
-        }
+      // Check if receiving extra status to display text
+      has_extra = strchr(spintext, ',') != NULL;
+      if (has_extra){
+        printf("has extra!\n");
+      } else {
+        printf("has no extra!\n");
       }
 
       // Get current status
