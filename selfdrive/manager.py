@@ -149,6 +149,7 @@ managed_processes = {
   "ubloxd": ("selfdrive/locationd", ["./ubloxd"]),
   "loggerd": ("selfdrive/loggerd", ["./loggerd"]),
   "logmessaged": "selfdrive.logmessaged",
+  "locationd": "selfdrive.locationd.locationd",
   "tombstoned": "selfdrive.tombstoned",
   "logcatd": ("selfdrive/logcatd", ["./logcatd"]),
   "proclogd": ("selfdrive/proclogd", ["./proclogd"]),
@@ -164,7 +165,6 @@ managed_processes = {
   "updated": "selfdrive.updated",
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
-  "locationd": "selfdrive.locationd.locationd",
 }
 
 daemon_processes = {
@@ -482,6 +482,9 @@ def manager_prepare(spinner=None):
 
   # Spinner has to start from 70 here
   total = 100.0 if prebuilt else 100 - scons_finished_progress
+
+  ordered_managed_processes = [p for p in managed_processes if not isinstance(p, str)]
+  ordered_managed_processes += [p for p in managed_processes if isinstance(p, str)]
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
