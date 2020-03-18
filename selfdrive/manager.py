@@ -296,6 +296,7 @@ def prepare_managed_process(p):
       cloudlog.warning("building %s failed, make clean" % (proc, ))
       subprocess.check_call(["make", "clean"], cwd=os.path.join(BASEDIR, proc[0]))
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
+    time.sleep(0.5)
 
 
 def join_process(process, timeout):
