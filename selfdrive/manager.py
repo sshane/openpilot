@@ -99,7 +99,7 @@ if not prebuilt:
         if line.startswith(prefix):
           i = int(line[len(prefix):])
           if spinner is not None:
-            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)))
+            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)), 'compiling with scons')
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
@@ -482,7 +482,7 @@ def manager_prepare(spinner=None):
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
-      spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),))
+      spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), 'preimporting {}'.format(p))
     prepare_managed_process(p)
 
 def uninstall():
