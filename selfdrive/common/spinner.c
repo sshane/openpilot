@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
+#include <iostream>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
@@ -50,6 +51,8 @@ int spin(int argc, char** argv) {
 
   char spintext[SPINTEXT_LENGTH];
   spintext[0] = 0;
+
+  std::cout << "count: " << argc << std::endl;
 
   const char* spintext_arg = NULL;
   if (argc >= 2) {
