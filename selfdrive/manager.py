@@ -118,6 +118,7 @@ if not prebuilt:
       else:
         raise RuntimeError("scons build failed")
     else:
+      spinner.update("75", "compiling: finished")
       break
 
 import cereal
