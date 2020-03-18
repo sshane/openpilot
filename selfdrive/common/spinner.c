@@ -84,7 +84,8 @@ int spin(int argc, char** argv) {
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
       printf("spintext: %s\n", spintext);
-      printf("idx: %s\n", spintext[strcspn(spintext, ",")]);
+      size_t index = strcspn(spintext, ",");
+      printf("idx: %c\n",[index);
 
 
       // Check if number (update progress bar)
