@@ -83,16 +83,19 @@ int spin(int argc, char** argv) {
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
-      char *spinstatus;
-      if (strchr(',', spintext)){
-        char *spinstatus = strchr (spintext, ',');
-        *spinstatus++ = '\0';
-        printf("spintext: %s\n", spintext);
-        char *test_pointer = strchr (spintext, ',');
-        *test_pointer++ = '\0';
-        printf("status: %s\n", spintext);
-        printf("spintext: %s\n", test_pointer);
-      }
+
+
+
+//      char *spinstatus;
+//      if (strchr(',', spintext)){
+//        char *spinstatus = strchr(spintext, ',');
+//        *spinstatus++ = '\0';
+//        printf("spintext: %s\n", spintext);
+//        char *test_pointer = strchr (spintext, ',');
+//        *test_pointer++ = '\0';
+//        printf("status: %s\n", spintext);
+//        printf("spintext: %s\n", test_pointer);
+//      }
 
       //int index = strcspn(spintext, ",");
 //      printf("%d\n", index);
@@ -103,10 +106,18 @@ int spin(int argc, char** argv) {
 //        status[i] = spintext[i];
 //      }
       //printf("status: %s\n", status);
+      size_t len = strlen(spintext);
+
+      bool has_extra = false;
+      for (int i = 0; i < len; i++){
+        if (spintext[i] == ','){
+          has_extra = true;
+          printf("has extra!\n");
+        }
+      }
 
 
       // Check if number (update progress bar)
-      size_t len = strlen(spintext);
       bool is_number = len > 0;
       for (int i = 0; i < len; i++){
         if (!isdigit(spintext[i])){
