@@ -483,21 +483,20 @@ def manager_prepare(spinner=None):
   total = 100.0 if prebuilt else 100 - scons_finished_progress
   preimporting = [p for p in managed_processes if isinstance(managed_processes[p], str)]
 
-  i = 0
+  i = -1
   for p in managed_processes:
     if spinner is not None:
       spinner_status = 'preparing {}'.format(p)
-      if isinstance(managed_processes[p], str):  # is python file
+      if p in preimporting:  # is python file
         spinner_status = 'preimporting {}'.format(p)
+        i += 1
       print(len(preimporting))
       print(i)
       print(p)
       print((100.0 - total) + total * (i + 1) / len(preimporting))
       print('--------')
-      spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(preimporting),), spinner_status)
+      spinner.update("%d" % ((100.0 - total) + total * i / len(preimporting),), spinner_status)
     prepare_managed_process(p)
-    if p in preimporting:
-      i += 1
 
 def uninstall():
   cloudlog.warning("uninstalling")
