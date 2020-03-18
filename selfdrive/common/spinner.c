@@ -85,7 +85,7 @@ int spin(int argc, char** argv) {
       spintext[strcspn(spintext, "\n")] = 0;
       printf("spintext: %s\n", spintext);
       char *test_pointer = strchr (spintext, ',');
-      *p++ = '\0';
+      *test_pointer++ = '\0';
       printf("spintext: %s\n", spintext);
       //int index = strcspn(spintext, ",");
 //      printf("%d\n", index);
