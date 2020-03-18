@@ -18,6 +18,7 @@ class Spinner():
 
   def update(self, spinner_text):
     if self.spinner_proc is not None:
+      self.spinner_proc.stdin.write('hi'.encode('utf8') + b"\n")
       self.spinner_proc.stdin.write(spinner_text.encode('utf8') + b"\n")
       try:
         self.spinner_proc.stdin.flush()
