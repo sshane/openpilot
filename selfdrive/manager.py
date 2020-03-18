@@ -493,7 +493,7 @@ def manager_prepare(spinner=None):
       print(len(preimporting))
       print(i)
       print(p)
-      print((100.0 - total) + total * (i + 1) / len(preimporting))
+      print((100.0 - total) + total * i / len(preimporting))
       print('--------')
       spinner.update("%d" % ((100.0 - total) + total * i / len(preimporting),), spinner_status)
     prepare_managed_process(p)
