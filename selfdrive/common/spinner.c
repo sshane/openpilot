@@ -121,7 +121,7 @@ int spin(int argc, char** argv) {
 
       // Get current status
       if (has_extra) {
-        *spinstatus = strchr(spintext, ',');
+        spinstatus = strchr(spintext, ',');
         *spinstatus++ = '\0';
         printf("status: %s\n", spintext);
         printf("spintext: %s\n", spinstatus);
