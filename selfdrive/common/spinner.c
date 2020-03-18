@@ -175,7 +175,6 @@ int spin(int argc, char** argv) {
           bar_pos, progress_height-2, 12);
       nvgFillPaint(vg, paint);
       nvgFill(vg);
-
     }
     if (has_extra || !draw_progress) {
       // message
