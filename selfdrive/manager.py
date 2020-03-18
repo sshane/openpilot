@@ -86,6 +86,7 @@ if not prebuilt:
     nproc = os.cpu_count()
     j_flag = "" if nproc is None else "-j%d" % (nproc - 1)
     scons = subprocess.Popen(["scons", j_flag], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
+    scons_finished_progress = 70.0
 
     # Read progress from stderr and update spinner
     while scons.poll() is None:
@@ -101,7 +102,7 @@ if not prebuilt:
         if line.startswith(prefix):
           i = int(line[len(prefix):])
           if spinner is not None:
-            spinner.update("%d" % (75.0 * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
+            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), 'compiling: {} of {}'.format(i, TOTAL_SCONS_NODES))
         elif len(line):
           print(line.decode('utf8'))
       except Exception:
@@ -118,7 +119,7 @@ if not prebuilt:
       else:
         raise RuntimeError("scons build failed")
     else:
-      spinner.update("75", "compiling: finished")
+      spinner.update("%d" % scons_finished_progress, "compiling: finished")
       break
 
 import cereal
@@ -481,7 +482,7 @@ def manager_prepare(spinner=None):
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
   # Spinner has to start from 70 here
-  total = 100.0 if prebuilt else 25.0
+  total = 100.0 if prebuilt else 100 - scons_finished_progress
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
