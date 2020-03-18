@@ -89,7 +89,7 @@ int spin(int argc, char** argv) {
       for (int i; i < index; i++){
         status[i] = spintext[i];
       }
-      printf("status: %d\n", status);
+      printf("status: %s\n", status);
 
 
       // Check if number (update progress bar)
