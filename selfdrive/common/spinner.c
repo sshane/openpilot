@@ -83,11 +83,17 @@ int spin(int argc, char** argv) {
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
       spintext[strcspn(spintext, "\n")] = 0;
-      printf("spintext: %s\n", spintext);
-      char *test_pointer = strchr (spintext, ',');
-      *test_pointer++ = '\0';
-      printf("status: %s\n", spintext);
-      printf("spintext: %s\n", test_pointer);
+      char *spinstatus;
+      if (strchr(',', spintext)){
+        char *spinstatus = strchr (spintext, ',');
+        *spinstatus++ = '\0';
+        printf("spintext: %s\n", spintext);
+        char *test_pointer = strchr (spintext, ',');
+        *test_pointer++ = '\0';
+        printf("status: %s\n", spintext);
+        printf("spintext: %s\n", test_pointer);
+      }
+
       //int index = strcspn(spintext, ",");
 //      printf("%d\n", index);
       //char* status;
