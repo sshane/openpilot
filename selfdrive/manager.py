@@ -149,7 +149,6 @@ managed_processes = {
   "ubloxd": ("selfdrive/locationd", ["./ubloxd"]),
   "loggerd": ("selfdrive/loggerd", ["./loggerd"]),
   "logmessaged": "selfdrive.logmessaged",
-  "locationd": "selfdrive.locationd.locationd",
   "tombstoned": "selfdrive.tombstoned",
   "logcatd": ("selfdrive/logcatd", ["./logcatd"]),
   "proclogd": ("selfdrive/proclogd", ["./proclogd"]),
@@ -165,6 +164,7 @@ managed_processes = {
   "updated": "selfdrive.updated",
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
+  "locationd": "selfdrive.locationd.locationd",
 }
 
 daemon_processes = {
@@ -477,7 +477,6 @@ def manager_thread():
         sys.exit(print_cpu_usage(first_proc, last_proc))
 
 def manager_prepare(spinner=None):
-  spinner.update("%d" % scons_finished_progress, "starting preimporting")
   # build all processes
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -486,7 +485,13 @@ def manager_prepare(spinner=None):
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
-      spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), 'preimporting {}'.format(p))
+      spinner_status = None
+      if isinstance(p, str):
+        spinner_status = 'preimporting {}'.format(spinner_status)
+      else:
+        spinner_status = 'preparing {}'.format(spinner_status)
+
+      spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),), spinner_status)
     prepare_managed_process(p)
 
 def uninstall():
