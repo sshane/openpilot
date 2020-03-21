@@ -8,6 +8,7 @@ import signal
 import shutil
 import subprocess
 import datetime
+import re
 
 from common.basedir import BASEDIR, PARAMS
 from common.android import ANDROID
@@ -89,6 +90,7 @@ if not prebuilt:
     scons_finished_progress = 70.0
 
     # Read progress from stderr and update spinner
+    i = 0
     while scons.poll() is None:
       try:
         line = scons.stderr.readline()
@@ -101,8 +103,13 @@ if not prebuilt:
           i = int(line[len(prefix):])
           if spinner is not None:
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
-        # elif len(line):
-        #   print(line.decode('utf8'))
+        elif len(line):
+          line = line.decode('utf8')
+          if 'error: ' in line:
+            str_err = re.search('error: (.*)\n', line).span()
+            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), str_err)
+
+          print(line)
       except Exception:
         pass
 
