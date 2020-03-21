@@ -96,7 +96,7 @@ if not prebuilt:
         line = scons.stderr.readline()
         if line is None:
           continue
-        print('output: {}'.format(line))
+        # print('output: {}'.format(line))
         line = line.rstrip()
         prefix = b'progress: '
         if line.startswith(prefix):
@@ -105,12 +105,12 @@ if not prebuilt:
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
         elif len(line):
           line = line.decode('utf8')
-          if 'error: ' in line:
-            str_err = re.search('error: (.*)\n', line).span()
-            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), str_err)
-            break
+          if 'error: ' in line and line[-1] == '\n':
+            print('error line: {}'.format(line))
+            # str_err = re.search('error: (.*)\n', line).span()
+            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
 
-          print(line)
+          # print(line)
       except Exception:
         pass
 
