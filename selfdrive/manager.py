@@ -94,7 +94,7 @@ if not prebuilt:
         line = scons.stderr.readline()
         if line is None:
           continue
-
+        print('output: {}'.format(line))
         line = line.rstrip()
         prefix = b'progress: '
         if line.startswith(prefix):
