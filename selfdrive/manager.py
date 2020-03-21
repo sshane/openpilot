@@ -109,7 +109,7 @@ if not prebuilt:
           print('line: {}'.format(line))
           print('error: ' in line)
           print(line[-1] == '\n')
-          if 'error: ' in line and line[-1] == '\n':
+          if 'error: ' in line:
             print('error line: {}'.format(line))
             # str_err = re.search('error: (.*)\n', line).span()
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
