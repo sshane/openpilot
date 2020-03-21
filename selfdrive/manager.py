@@ -75,10 +75,10 @@ from multiprocessing import Process
 
 # Run scons
 spinner = Spinner()
-spinner.update("0", 'starting openpilot')
+spinner.update("0")
 scons_build_failed = False
 if not prebuilt:
-  for retry in [True, False]:
+  for retry in [False]:
     # run scons
     env = os.environ.copy()
     env['SCONS_PROGRESS'] = "1"
