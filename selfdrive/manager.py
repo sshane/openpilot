@@ -108,6 +108,7 @@ if not prebuilt:
           if 'error: ' in line:
             str_err = re.search('error: (.*)\n', line).span()
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), str_err)
+            break
 
           print(line)
       except Exception:
