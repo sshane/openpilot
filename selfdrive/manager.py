@@ -104,7 +104,11 @@ if not prebuilt:
           if spinner is not None:
             spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
         elif len(line):
+          print('NOT PROGRESS')
           line = line.decode('utf8')
+          print('line: {}'.format(line))
+          print('error: ' in line)
+          print(line[-1] == '\n')
           if 'error: ' in line and line[-1] == '\n':
             print('error line: {}'.format(line))
             # str_err = re.search('error: (.*)\n', line).span()
