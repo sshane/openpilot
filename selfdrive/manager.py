@@ -76,9 +76,9 @@ from multiprocessing import Process
 # Run scons
 spinner = Spinner()
 spinner.update("0", 'starting openpilot')
-
+scons_build_failed = False
 if not prebuilt:
-  for retry in [False, False]:
+  for retry in [True, False]:
     # run scons
     env = os.environ.copy()
     env['SCONS_PROGRESS'] = "1"
@@ -124,7 +124,7 @@ if not prebuilt:
         # subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
         # shutil.rmtree("/tmp/scons_cache")
       else:
-        pass
+        scons_build_failed = True
         # raise RuntimeError("scons build failed")
     else:
       spinner.update("%d" % scons_finished_progress, "finished compiling")
@@ -579,6 +579,7 @@ def main():
     uninstall()
 
 if __name__ == "__main__":
-  main()
-  # manual exit because we are forked
-  sys.exit(0)
+  if not scons_build_failed:
+    main()
+    # manual exit because we are forked
+    sys.exit(0)
