@@ -78,57 +78,46 @@ spinner = Spinner()
 spinner.update("0")
 scons_build_failed = False
 if not prebuilt:
-  for retry in [False]:
-    # run scons
-    env = os.environ.copy()
-    env['SCONS_PROGRESS'] = "1"
-    env['SCONS_CACHE'] = "1"
+  # run scons
+  env = os.environ.copy()
+  env['SCONS_PROGRESS'] = "1"
+  env['SCONS_CACHE'] = "1"
 
-    nproc = os.cpu_count()
-    j_flag = "" if nproc is None else "-j%d" % (nproc - 1)
-    scons = subprocess.Popen(["scons", j_flag], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
-    scons_finished_progress = 70.0
+  nproc = os.cpu_count()
+  j_flag = "" if nproc is None else "-j%d" % (nproc - 1)
+  scons = subprocess.Popen(["scons", j_flag], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
+  scons_finished_progress = 70.0
 
-    # Read progress from stderr and update spinner
-    i = 0
-    while scons.poll() is None:
-      try:
-        line = scons.stderr.readline()
-        if line is None:
-          continue
-        # print('output: {}'.format(line))
-        line = line.rstrip()
-        prefix = b'progress: '
-        if line.startswith(prefix):
-          i = int(line[len(prefix):])
-          if spinner is not None:
-            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
-        elif len(line):
-          line = line.decode('utf8')
-          print(line[-1] == '\n')
-          if 'error: ' in line:
-            print('error line: {}'.format(line))
-            # str_err = re.search('error: (.*)\n', line).span()
-            spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
+  # Read progress from stderr and update spinner
+  i = 0
+  while scons.poll() is None:
+    try:
+      line = scons.stderr.readline()
+      if line is None:
+        continue
+      # print('output: {}'.format(line))
+      line = line.rstrip()
+      prefix = b'progress: '
+      if line.startswith(prefix):
+        i = int(line[len(prefix):])
+        if spinner is not None:
+          spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
+      elif len(line):
+        line = line.decode('utf8')
+        print(line[-1] == '\n')
+        if 'error: ' in line:
+          print('error line: {}'.format(line))
+          # str_err = re.search('error: (.*)\n', line).span()
+          spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
 
-          # print(line)
-      except Exception:
-        pass
+        # print(line)
+    except Exception:
+      pass
 
-    if scons.returncode != 0:
-      if retry:
-        print("scons build failed, cleaning in")
-        for i in range(3,-1,-1):
-          print("....%d" % i)
-          time.sleep(1)
-        # subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
-        # shutil.rmtree("/tmp/scons_cache")
-      else:
-        scons_build_failed = True
-        # raise RuntimeError("scons build failed")
-    else:
-      spinner.update("%d" % scons_finished_progress, "finished compiling")
-      break
+  if scons.returncode != 0:
+    scons_build_failed = True
+    # raise RuntimeError("scons build failed")
+print('here')
 
 import cereal
 import cereal.messaging as messaging
