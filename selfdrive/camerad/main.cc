@@ -156,7 +156,7 @@ void* frontview_thread(void *arg) {
   for (int cnt = 0; !do_exit; cnt++) {
     int buf_idx = tbuffer_acquire(&s->cameras.front.camera_tb);
     if (buf_idx < 0) {
-      break;
+      break
     }
 
     int ui_idx = tbuffer_select(&s->ui_front_tb);
