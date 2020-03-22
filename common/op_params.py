@@ -69,9 +69,6 @@ class opParams:
                            'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'},
                            'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
 
-                           'profile_mod_positive': {'default': 1.0, 'allowed_types': [float, int], 'live': True},  # todo: remove these
-                           'profile_mod_negative': {'default': 1.0, 'allowed_types': [float, int], 'live': True},
-
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
     self.params = {}
