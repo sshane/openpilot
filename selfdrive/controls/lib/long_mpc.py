@@ -125,12 +125,12 @@ class LongitudinalMpc():
           return a_calculated
 
         if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
-          if a_lead < -a_calculated * 0.5:
+          if a_lead < -a_calculated * 0.55:
             # half of accel over time is less than current positive accel, we're not decelerating after long decel
             return a_calculated
 
         if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
-          if -a_lead < a_calculated * 0.5:
+          if -a_lead < a_calculated * 0.45:
             # half of accel over time is greater than current negative accel, we're not accelerating after long accel
             return a_calculated
 
