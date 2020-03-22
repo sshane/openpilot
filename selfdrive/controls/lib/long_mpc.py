@@ -178,8 +178,10 @@ class LongitudinalMpc():
     y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mod.append(interp(self.calculate_lead_accel(), x, y))
 
-    profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
-    profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)
+    # profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
+    # profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)
+    profile_mod_pos = self.op_params.get('profile_mod_positive', 1.0)
+    profile_mod_neg = self.op_params.get('profile_mod_negative', 1.0)
 
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
