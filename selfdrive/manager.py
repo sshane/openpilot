@@ -104,18 +104,18 @@ if not prebuilt:
           spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)))
       elif len(line):
         line = line.decode('utf8')
-        print(line[-1] == '\n')
         if 'error: ' in line:
           print('error line: {}'.format(line))
           # str_err = re.search('error: (.*)\n', line).span()
           spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
           # time.sleep(5.0)
-          raise Exception()
+          break
 
         print(line)
     except Exception:
+      print('except!!')
       pass
-
+  print(scons.returncode)
   if scons.returncode != 0:
     for i in range(10):
       spinner.update("cleaning in {}...".format(10 - i))
