@@ -109,15 +109,17 @@ if not prebuilt:
           print('error line: {}'.format(line))
           # str_err = re.search('error: (.*)\n', line).span()
           spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
+          time.sleep(5.0)
 
-        # print(line)
+        print(line)
     except Exception:
       pass
 
   if scons.returncode != 0:
-    scons_build_failed = True
-    # raise RuntimeError("scons build failed")
-print('here')
+    for i in range(10):
+      spinner.update("cleaning in ...")
+      time.sleep(1)
+      # raise RuntimeError("scons build failed")
 
 import cereal
 import cereal.messaging as messaging
@@ -568,7 +570,6 @@ def main():
     uninstall()
 
 if __name__ == "__main__":
-  if not scons_build_failed:
-    main()
-    # manual exit because we are forked
-    sys.exit(0)
+  main()
+  # manual exit because we are forked
+  sys.exit(0)
