@@ -176,31 +176,15 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
     }
-    // has_extra = true;
+    has_extra = true;
     if (!draw_progress) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 96.0f);
       nvgText(vg, fb_w/2, (fb_h*2/3)+24, spintext, NULL);
     } else if (has_extra) {
-      char substring[3];
-      strncpy(substring, spinstatus, 3);
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 59.0f);
-      nvgText(vg, fb_w/2, (fb_h*2/3)+24+96, substring, NULL);
-      spinstatus += 3;
-
-      strncpy(substring, spinstatus, 3);
-      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
-      nvgFontSize(vg, 59.0f);
-      nvgText(vg, fb_w/2, (fb_h*2/3)+24+96+20, substring, NULL);
-
-//      while (*spinstatus != '\0') {
-//        strncpy(substring, spinstatus, 3);
-//        nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
-//        nvgFontSize(vg, 59.0f);
-//        nvgText(vg, fb_w/2, (fb_h*2/3)+24+96, spinstatus, NULL);
-//        spinstatus += 3;
-//      }
+      nvgTextBox(vg, fb_w/2, (fb_h*2/3)+24+96, "cereal/messaging/messaging.cc:61:24: \nerror: out-of-line definition of 'create123' does not match any declaration in 'PubSocket'; did you mean 'create'?", NULL);
     }
 
     nvgEndFrame(vg);
