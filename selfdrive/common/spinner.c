@@ -184,7 +184,8 @@ int spin(int argc, char** argv) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 59.0f);
       // nvgTextBox(s->vg, metric_x + 35, metric_y + (strlen(message_str) > 8 ? 40 : 50), metric_w - 50, message_str, NULL);
-      nvgTextBox(vg, fb_w/2 - 825, (fb_h*2/3)+24+96, 800, spinstatus, NULL);
+      int new_line_length = 800;
+      nvgTextBox(vg, fb_w/2 - (new_line_length / 2), (fb_h*2/3)+24+96, new_line_length, spinstatus, NULL);
     }
 
     nvgEndFrame(vg);
