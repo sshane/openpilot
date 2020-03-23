@@ -109,7 +109,8 @@ if not prebuilt:
           print('error line: {}'.format(line))
           # str_err = re.search('error: (.*)\n', line).span()
           spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), line)
-          time.sleep(5.0)
+          # time.sleep(5.0)
+          raise Exception()
 
         print(line)
     except Exception:
@@ -117,7 +118,7 @@ if not prebuilt:
 
   if scons.returncode != 0:
     for i in range(10):
-      spinner.update("cleaning in ...")
+      spinner.update("cleaning in {}...".format(10 - i))
       time.sleep(1)
       # raise RuntimeError("scons build failed")
 
