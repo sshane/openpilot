@@ -37,13 +37,14 @@ class DynamicGas:
         y = [gas * 0.9901, gas * 0.905, gas * 0.8045, gas * 0.625, gas * 0.431, gas * 0.2083, gas * .0667, 0]
         gas_mod = -interp(lead_data['v_rel'], x, y)
 
-        x = [0.44704, 1.78816]  # lead accel mod
-        y = [0.0, gas_mod * .4]  # maximum we can reduce gas_mod is 40 percent of it
-        gas_mod -= interp(lead_data['a_lead'], x, y)  # reduce the reduction of the above mod (the max this will ouput is the original gas value, it never increases it)
+        x = [0.44704, 1.1176, 1.34112]  # lead accel mod
+        y = [1.0, 0.85, 0.75]  # maximum we can reduce gas_mod is 40 percent (never increases mod)
+        gas_mod *= interp(lead_data['a_lead'], x, y)
 
-        # x = [TR * 0.5, TR, TR * 1.5]  # as lead gets further from car, lessen gas mod  # todo: this
-        # y = [gas_mod * 1.5, gas_mod, gas_mod * 0.5]
-        # gas_mod += (interp(current_TR, x, y))
+        x = [0.6096, 3.048, 8, 10, 12]  # as lead gets further from car, lessen gas mod
+        y = [1.0, 0.9, 0.65, 0.3, 0]
+        gas_mod *= interp(lead_data['x_lead'], x, y)
+
         print('Gas mod: {}'.format(round(gas_mod, 4)))
         new_gas = gas + gas_mod
         print('New gas: {}'.format(round(new_gas, 4)))
@@ -74,7 +75,7 @@ class DynamicGas:
 CP = CarParams()
 dg = DynamicGas(CP, 'Corolla')
 
-lead_data = {'status': True, 'a_lead': -90.44704, 'v_rel': -10, 'x_lead': 4}
+lead_data = {'status': True, 'a_lead': 1.1, 'v_rel': -10, 'x_lead': 20}
 v_ego = 2.5 * CV.MPH_TO_MS
 mpc_TR = 1.9
 o = dg.update(v_ego, lead_data, mpc_TR, False)
