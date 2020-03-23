@@ -176,7 +176,6 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
     }
-    has_extra = true;
     if (!draw_progress) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 96.0f);
@@ -185,7 +184,7 @@ int spin(int argc, char** argv) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 59.0f);
       // nvgTextBox(s->vg, metric_x + 35, metric_y + (strlen(message_str) > 8 ? 40 : 50), metric_w - 50, message_str, NULL);
-      nvgTextBox(vg, fb_w/2 - 20, (fb_h*2/3)+24+96, 1600, spinstatus, NULL);
+      nvgTextBox(vg, fb_w/2 - 600, (fb_h*2/3)+24+96, 1600, spinstatus, NULL);
     }
 
     nvgEndFrame(vg);
