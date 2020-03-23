@@ -118,7 +118,7 @@ if not prebuilt:
   print(scons.returncode)
   if scons.returncode != 0:
     for i in range(10):
-      spinner.update("cleaning in {}...".format(10 - i))
+      spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), "cleaning in {}...".format(10 - i))
       time.sleep(1)
       # raise RuntimeError("scons build failed")
 
