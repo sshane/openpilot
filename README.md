@@ -30,7 +30,7 @@ Now you can choose a profile based on traffic and your driving preference. There
   * `traffic` - Meant to keep you a bit closer in traffic, hopefully reducing cut-ins. May not be the safest when approaching a vastly slower vehicle.
   * `relaxed` - This is the current and now default dynamic follow profile just with a cool name. Also slight closer than previously at high speeds.
   * `roadtrip` - This profile is for road trips mainly where you're on two lane highways and don't want to be following particularly closely; at night for example.
-<img src=".media/photos/df_profiles.jpg?raw=true" width="800">
+<img src=".media/photos/df_profiles.jpg?raw=true" height="600">
 
 **How to choose a profile:** The easiest way is to use the new on-screen profile changing button! Once you're on a drive, you can simply tap the button on the bottom right of the screen to cycle between the profiles.
 
