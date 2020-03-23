@@ -36,15 +36,22 @@ Now you can choose a profile based on traffic and your driving preference. There
 
 Dynamic gas
 -----
-Currently supported vehicles (w/ comma pedal only):
+This aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by modifying the maximum gas that can be applied based on your current velocity and the relative velocity of the lead car. It'll also of course increase the maximum gas when the lead is accelerating to help you get up to speed quicker than stock. And smoother; this eliminates the jerking you get from stock openpilot with comma pedal. It tries to coast if the lead is only moving slowly, it doesn't use maximum gas as soon as the lead inches forward :). When you are above 20 mph, relative velocity and the following distance is taken into consideration.
+
+All cars that have a comma pedal are supported! However to get the smoothest acceleration, I've custom tuned a gas curve profile for the following cars:
+
+pedal cars:
   * 2017 Toyota Corolla (non-TSS2)
   * Toyota RAV4 (non-TSS2)
   * 2017 Honda Civic
   * 2019 Honda Pilot
 
-*TODO: Need to factor in distance, as it will not accelerate to get closer to the stopped lead if you engage at ~0mph far back from the lead.*
+non-pedal cars:
+  * None yet
 
-This aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by modifying the maximum gas that can be applied based on your current velocity and the relative velocity of the lead car. It'll also of course increase the maximum gas when the lead is accelerating to help you get up to speed quicker than stock. And smoother; this eliminates the jerking you get from stock openpilot with comma pedal. It tries to coast if the lead is only moving slowly, it doesn't use maximum gas as soon as the lead inches forward :). When you are above 20 mph, relative velocity and the following distance is taken into consideration.
+If you have a car without a pedal, or you do have one but I haven't created a profile for you yet, please let me know and we can develop one for your car to test.
+
+~~*TODO: Need to factor in distance, as it will not accelerate to get closer to the stopped lead if you engage at ~0mph far back from the lead.*~~ Update: Added lead distance into dynamic follow, now just need to tune and test.
 
 Customize this branch (opEdit Parameter class)
 -----
