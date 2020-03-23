@@ -31,8 +31,10 @@ class DynamicGas:
     #     y = [0.5]
 
     if not x:
-      x, y = self.CP.gasMaxBP, self.CP.gasMaxV  # if unsupported car, use stock gas values
-      # return interp(v_ego, self.CP.gasMaxBP, self.CP.gasMaxV)
+      if self.CP.enableGasInterceptor:
+        x, y = self.CP.gasMaxBP, self.CP.gasMaxV  # if no custom gas profile, use stock gas values
+      else:  # else if no gas profile and user doesn't have pedal, no dynamic gas
+        return interp(v_ego, self.CP.gasMaxBP, self.CP.gasMaxV)
 
     gas = interp(v_ego, x, y)
 
