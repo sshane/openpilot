@@ -1,4 +1,4 @@
-Shane's Stock Additions 0.7.4
+Stock Additions 0.7.4
 =====
 
 This branch is simply stock openpilot with some additions to help it drive as smooth as possible on my 2017 Toyota Corolla w/ comma pedal.
