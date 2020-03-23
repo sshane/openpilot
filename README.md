@@ -27,7 +27,7 @@ Dynamic follow (3 profiles)
 This is my dynamic follow from 0.5, where it changes your TR (following distance) dynamically based on multiple vehicle factors, as well as data from the lead vehicle. [Here's an old write up from a while ago explaining how it works exactly. Some of it might be out of date, but how it functions is the same.](https://github.com/ShaneSmiskol/openpilot/blob/dynamic-follow/README.md) The goal is to essentially make the driving experience more smooth and increase safety, braking and accelerating sooner.
 
 Now you can choose a profile based on traffic and your driving preference. There are three profiles currently:
-  * `traffic` - Meant to keep you a bit closer in traffic, hopefully reducing cut-ins. May not be the safest when approaching a vastly slower vehicle.
+  * `traffic` - Meant to keep you a bit closer in traffic, hopefully reducing cut-ins. Use with caution, as you do with any fork adding custom functionality.
   * `relaxed` - This is the current and now default dynamic follow profile just with a cool name. Also slight closer than previously at high speeds.
   * `roadtrip` - This profile is for road trips mainly where you're on two lane highways and don't want to be following particularly closely; at night for example.
 <img src=".media/photos/df_profiles.jpg?raw=true" height="350">
