@@ -182,9 +182,9 @@ int spin(int argc, char** argv) {
       nvgFontSize(vg, 96.0f);
       nvgText(vg, fb_w/2, (fb_h*2/3)+24, spintext, NULL);
     } else if (has_extra) {
-      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
       nvgFontSize(vg, 59.0f);
-      nvgTextBox(vg, fb_w/2, (fb_h*2/3)+24+96, 2000, "cereal/messaging/messaging.cc:61:24: error: out-of-line definition of 'create123' does not match any declaration in 'PubSocket'; did you mean 'create'?", NULL);
+      nvgTextBox(vg, fb_w/2, (fb_h*2/3)+24+96, fb_w-240, "cereal/messaging/messaging.cc:61:24: error: out-of-line definition of 'create123' does not match any declaration in 'PubSocket'; did you mean 'create'?", NULL);
     }
 
     nvgEndFrame(vg);
