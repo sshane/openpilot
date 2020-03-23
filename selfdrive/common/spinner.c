@@ -184,7 +184,7 @@ int spin(int argc, char** argv) {
     } else if (has_extra) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 59.0f);
-      nvgText(vg, fb_w/2, (fb_h*2/3)+24+96, fb_w-240, "compiling...", NULL);
+      nvgText(vg, fb_w/2, (fb_h*2/3)+24+96, "compiling...", NULL);
     }
 
     nvgEndFrame(vg);
