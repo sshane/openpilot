@@ -58,9 +58,9 @@ SubSocket * SubSocket::create(Context * context, std::string endpoint, std::stri
   }
 }
 
-PubSocket * PubSocket::create123(){
+PubSocket * PubSocket::create(){
   PubSocket * s;
-  if (std::getenv("ZMQ"))
+  if (std::getenv("ZMQ")){
     s = new ZMQPubSocket();
   } else {
     s = new MSGQPubSocket();
