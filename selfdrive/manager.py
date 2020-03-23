@@ -101,7 +101,7 @@ if not prebuilt:
       if line.startswith(prefix):
         i = int(line[len(prefix):])
         if spinner is not None:
-          spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), "hfjdshfj sdfjshdjfh dsjk hfjksdh fkjsdh kjfsdhkj fsd jfhsdkj fhjksdhfkjsd")
+          spinner.update("%d" % (scons_finished_progress * (i / TOTAL_SCONS_NODES)), "cereal/messaging/messaging.cc:61:24: error: out-of-line definition of 'create123' does not match any declaration in 'PubSocket'; did you mean 'create'?")
       elif len(line):
         line = line.decode('utf8')
         if 'error: ' in line:
