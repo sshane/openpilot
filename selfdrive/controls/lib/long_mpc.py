@@ -174,10 +174,10 @@ class LongitudinalMpc():
     y = [0.641, 0.506, 0.418, 0.334, 0.24, 0.115, 0.065, 0.0, -0.049, -0.068, -0.142, -0.221]  # modification values
     TR_mod.append(interp(self.lead_data['v_lead'] - self.car_data['v_ego'], x, y))
 
-    if not self.sng:  # todo: test to see if limitting the accel mod when not in sng is better
-      x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
-      y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
-      TR_mod.append(interp(self.calculate_lead_accel(), x, y))
+    # if not self.sng:  # todo: test to see if limitting the accel mod when not in sng is better
+    x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
+    y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
+    TR_mod.append(interp(self.calculate_lead_accel(), x, y))
 
     profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
     profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)

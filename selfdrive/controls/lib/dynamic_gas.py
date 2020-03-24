@@ -45,17 +45,17 @@ class DynamicGas:
         gas_mod = -interp(lead_data['v_rel'], x, y)
 
         x = [0.44704, 1.1176, 1.34112]  # lead accel mod
-        y = [1.0, 0.85, 0.75]  # maximum we can reduce gas_mod is 40 percent (never increases mod)
+        y = [1.0, 0.75, 0.625]  # maximum we can reduce gas_mod is 40 percent (never increases mod)
         gas_mod *= interp(lead_data['a_lead'], x, y)
 
-        x = [0.6096, 3.048, 8, 10, 12]  # as lead gets further from car, lessen gas mod
-        y = [1.0, 0.9, 0.65, 0.3, 0]
+        x = [6.1, 9.15, 15.24]  # as lead gets further from car, lessen gas mod/reduction
+        y = [1.0, 0.75, 0.0]
         gas_mod *= interp(lead_data['x_lead'], x, y)
 
         new_gas = gas + gas_mod
 
         x = [1.78816, 6.0, 8.9408]  # slowly ramp mods down as we approach 20 mph
-        y = [new_gas, (new_gas * 0.8 + gas * 0.2), gas]
+        y = [new_gas, (new_gas * 0.6 + gas * 0.4), gas]
         gas = interp(v_ego, x, y)
       else:
         x = [-3.12928, -1.78816, -0.89408, 0, 0.33528, 1.78816, 2.68224]  # relative velocity mod
@@ -71,7 +71,7 @@ class DynamicGas:
 
         if blinker_status:
           x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-          y = [1.0, 1.3, 1.475]
+          y = [1.0, 1.2875, 1.4625]
           gas *= interp(v_ego, x, y)
 
     return clip(gas, 0.0, 1.0)

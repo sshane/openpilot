@@ -26,7 +26,7 @@ AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distract
 if travis:
   _A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30]
 else:
-  _A_CRUISE_MIN_V = [-1.4, -1.2, -.8, -.65, -.37]
+  _A_CRUISE_MIN_V = [-1.3, -1.05, -0.765, -0.625, -0.36]
 _A_CRUISE_MIN_BP = [0., 5., 10., 20., 40.]
 
 # need fast accel at very low speed for stop and go
