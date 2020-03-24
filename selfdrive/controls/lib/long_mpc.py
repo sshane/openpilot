@@ -179,6 +179,7 @@ class LongitudinalMpc():
     profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
     profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)
 
+    # if self.sng:  # only if we're in sng todo: test this
     x = [sng_speed / 5.0, sng_speed]  # as we approach 0, apply 10% more distance
     y = [1.1, 1.0]
     profile_mod_pos *= interp(self.car_data['v_ego'], x, y)
