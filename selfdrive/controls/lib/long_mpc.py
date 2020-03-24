@@ -92,14 +92,14 @@ class LongitudinalMpc():
 
   def change_cost(self, TR):
     TRs = [0.9, 1.8, 2.7]
-    costs = [1.0, 0.1, 0.05]
+    costs = [1.0, 0.11, 0.05]
     cost = interp(TR, TRs, costs)
     if self.last_cost != cost:
       self.libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.last_cost = cost
 
   def store_df_data(self):
-    v_lead_retention = 1.9  # keep only last x seconds
+    v_lead_retention = 2.0  # keep only last x seconds
     v_ego_retention = 2.5
 
     cur_time = sec_since_boot()
@@ -119,16 +119,13 @@ class LongitudinalMpc():
       elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
       if elapsed > min_consider_time:  # if greater than min time (not 0)
         a_calculated = (self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']) / elapsed  # delta speed / delta time
-
         if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
           # both are negative or positive and calculated is greater than current
           return a_calculated
-
         if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
           if a_lead < -a_calculated * 0.55:
             # half of accel over time is less than current positive accel, we're not decelerating after long decel
             return a_calculated
-
         if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
           if -a_lead < a_calculated * 0.45:
             # half of accel over time is greater than current negative accel, we're not accelerating after long accel
@@ -181,6 +178,10 @@ class LongitudinalMpc():
 
     profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
     profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)
+
+    x = [sng_speed / 5.0, sng_speed]  # as we approach 0, apply 10% more distance
+    y = [1.1, 1.0]
+    profile_mod_pos *= interp(self.car_data['v_ego'], x, y)
 
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
