@@ -11,19 +11,27 @@ def apply_deadzone(error, deadzone):
   return error
 
 class PIDController():
-  def __init__(self, k_p, k_i, k_f=1., pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, convert=None):
-    self._k_p = k_p # proportional gain
-    self._k_i = k_i # integral gain
+  def __init__(self, k_p, k_i, k_d, k_f=1., pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, convert=None):
+    self._k_p = k_p  # proportional gain
+    self._k_i = k_i  # integral gain
+    self._k_d = k_d  # derivative gain
     self.k_f = k_f  # feedforward gain
+
+    self.p = 0.0
+    self.i = 0.0
+    self.d = 0.0
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
 
     self.sat_count_rate = 1.0 / rate
     self.i_unwind_rate = 0.3 / rate
-    self.i_rate = 1.0 / rate
+    self.rate = 1.0 / rate
     self.sat_limit = sat_limit
     self.convert = convert
+
+    self.last_error = 0.0
+    self.last_setpoint = 0.0
 
     self.reset()
 
@@ -34,6 +42,10 @@ class PIDController():
   @property
   def k_i(self):
     return interp(self.speed, self._k_i[0], self._k_i[1])
+
+  @property
+  def k_d(self):
+    return interp(self.speed, self._k_d[0], self._k_d[1])
 
   def _check_saturation(self, control, check_saturation, error):
     saturated = (control < self.neg_limit) or (control > self.pos_limit)
@@ -50,6 +62,7 @@ class PIDController():
   def reset(self):
     self.p = 0.0
     self.i = 0.0
+    self.d = 0.0
     self.f = 0.0
     self.sat_count = 0.0
     self.saturated = False
@@ -64,9 +77,11 @@ class PIDController():
 
     if override:
       self.i -= self.i_unwind_rate * float(np.sign(self.i))
+      self.d = 0.0
     else:
-      i = self.i + error * self.k_i * self.i_rate
-      control = self.p + self.f + i
+      i = self.i + error * self.k_i * self.rate
+      self.d = self.k_d * ((error - self.last_error) / self.rate)
+      control = self.p + self.f + i + self.d
 
       if self.convert is not None:
         control = self.convert(control, speed=self.speed)
@@ -78,7 +93,13 @@ class PIDController():
          not freeze_integrator:
         self.i = i
 
+    self.last_error = error
+    self.last_setpoint = setpoint
     control = self.p + self.f + self.i
+    with open('/data/accel_pid', 'a') as f:
+      f.write('{}\n'.format(abs(setpoint - self.last_setpoint) / self.rate))
+    if abs(setpoint - self.last_setpoint) / self.rate < 0.22352:  # if cruising with minimal setpoint change
+      control += self.d  # then use derivative
     if self.convert is not None:
       control = self.convert(control, speed=self.speed)
 
