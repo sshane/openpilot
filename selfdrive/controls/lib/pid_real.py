@@ -81,7 +81,7 @@ class PIDController():
     else:
       i = self.i + error * self.k_i * self.rate
       self.d = self.k_d * ((error - self.last_error) / self.rate)
-      control = self.p + self.f + i + self.d
+      control = self.p + self.f + i  # don't add d here
 
       if self.convert is not None:
         control = self.convert(control, speed=self.speed)
@@ -93,8 +93,6 @@ class PIDController():
          not freeze_integrator:
         self.i = i
 
-    self.last_error = error
-    self.last_setpoint = setpoint
     control = self.p + self.f + self.i
     with open('/data/accel_pid', 'a') as f:
       f.write('{}\n'.format(abs(setpoint - self.last_setpoint) / self.rate))
@@ -104,6 +102,9 @@ class PIDController():
       control = self.convert(control, speed=self.speed)
 
     self.saturated = self._check_saturation(control, check_saturation, error)
+
+    self.last_error = error
+    self.last_setpoint = setpoint
 
     self.control = clip(control, self.neg_limit, self.pos_limit)
     return self.control
