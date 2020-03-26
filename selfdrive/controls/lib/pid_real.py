@@ -114,8 +114,8 @@ class PIDController():
         self.i = i
 
     control = self.p + self.f + self.i
-    with open('/data/accel_pid', 'a') as f:
-      f.write('{}\n'.format(abs(setpoint - self.last_setpoint) / self.rate))
+    # with open('/data/accel_pid', 'a') as f:
+    #   f.write('{}\n'.format(abs(setpoint - self.last_setpoint) / self.rate))
     if abs(setpoint - self.last_setpoint) / self.rate < self.max_accel_d:  # if cruising with minimal setpoint change
       control += self.d  # then use derivative
     if self.convert is not None:
