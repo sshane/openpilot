@@ -41,7 +41,6 @@ class PIDController():
     self.reset()
 
   def get_live_params(self):
-    self.last_error_idx = self.error_idx
     self.enable_derivative = self.op_params.get('enable_derivative', True)
     self.error_idx = self.op_params.get('error_idx', -1)
     self.derivative = self.op_params.get('derivative', 0.16)
@@ -83,9 +82,9 @@ class PIDController():
   def set_d(self, error):
     if len(self.past_errors) >= -self.error_idx and self.enable_derivative:
       last_error = self.past_errors[self.error_idx]
-      rate = -self.last_error_idx / 100
+      rate = -self.error_idx / 100
       self.d = self.k_d * ((error - last_error) / rate)
-    else:
+    else:  # wait until we gather enough data to allow index get
       self.d = 0.0
 
   def update(self, setpoint, measurement, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False):
