@@ -50,7 +50,7 @@ class opParams:
     self.default_params = {'derivative': {'default': 0.16, 'allowed_types': [float, int], 'description': 'The d tuning value', 'live': True},
                            'error_idx': {'default': -1, 'allowed_types': [int], 'description': 'A negative Python index, when multiplied by 1/100 it yields the seconds in past to use as last error', 'live': True},
                            'enable_derivative': {'default': True, 'allowed_types': [bool], 'description': 'Weather to use derivative for longcontrol', 'live': True},
-                           'max_accel_d': {'default': 1, 'allowed_types': [int, float], 'description': 'The maximum absolute acceleration to allow derivative to affect longcontrol, in mph', 'live': True},
+                           'max_accel_d': {'default': 1, 'allowed_types': [int, float], 'description': 'The maximum absolute acceleration to allow derivative to affect longcontrol, in mph/s', 'live': True},
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
