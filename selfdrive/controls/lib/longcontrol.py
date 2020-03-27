@@ -59,15 +59,15 @@ class LongControl():
   def __init__(self, CP, compute_gb):
     self.long_control_state = LongCtrlState.off  # initialized to off
 
-    kdBP = [0., 35.]
-    kdV = [0.1, 0.22]
+    kdBP = [0., 5., 35.]
+    kdV = [0.05, 0.1, 1.3]
 
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
-                            (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                            (kdBP, kdV),
-                            rate=RATE,
-                            sat_limit=0.8,
-                            convert=compute_gb)
+                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
+                             (kdBP, kdV),
+                             rate=RATE,
+                             sat_limit=0.8,
+                             convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 

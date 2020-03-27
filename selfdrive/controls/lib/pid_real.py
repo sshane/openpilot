@@ -24,7 +24,6 @@ class PIDController():
 
     self.p = 0.0
     self.i = 0.0
-    self.d = 0.0
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
@@ -54,9 +53,13 @@ class PIDController():
   def k_i(self):
     return interp(self.speed, self._k_i[0], self._k_i[1])
 
+  # @property
+  # def k_d(self):
+  #   return self.derivative
+
   @property
   def k_d(self):
-    return self.derivative
+    return interp(self.speed, self._k_d[0], self._k_d[1])
 
   def _check_saturation(self, control, check_saturation, error):
     saturated = (control < self.neg_limit) or (control > self.pos_limit)
@@ -73,19 +76,18 @@ class PIDController():
   def reset(self):
     self.p = 0.0
     self.i = 0.0
-    self.d = 0.0
     self.f = 0.0
     self.sat_count = 0.0
     self.saturated = False
     self.control = 0
 
-  def set_d(self, error):
+  def get_d(self, error):
     if len(self.past_errors) >= -self.error_idx and self.enable_derivative:
       last_error = self.past_errors[self.error_idx]
       rate = -self.error_idx / 100
-      self.d = self.k_d * ((error - last_error) / rate)
+      return self.k_d * ((error - last_error) / rate)
     else:  # wait until we gather enough data to allow index get
-      self.d = 0.0
+      return 0.0
 
   def update(self, setpoint, measurement, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False):
     self.get_live_params()
@@ -97,11 +99,9 @@ class PIDController():
 
     if override:
       self.i -= self.i_unwind_rate * float(np.sign(self.i))
-      self.d = 0.0
     else:
       i = self.i + error * self.k_i * self.rate
-      self.set_d(error)
-      control = self.p + self.f + i  # don't add d here
+      control = self.p + self.f + i
 
       if self.convert is not None:
         control = self.convert(control, speed=self.speed)
@@ -113,11 +113,13 @@ class PIDController():
          not freeze_integrator:
         self.i = i
 
-    control = self.p + self.f + self.i
-    # with open('/data/accel_pid', 'a') as f:
-    #   f.write('{}\n'.format(abs(setpoint - self.last_setpoint) / self.rate))
     if abs(setpoint - self.last_setpoint) / self.rate < self.max_accel_d:  # if cruising with minimal setpoint change
-      control += self.d  # then use derivative
+      d = self.get_d(error) * self.rate
+      if (self.i > 0 and self.i + d > 0) or (self.i < 0 and self.i + d < 0):  # and if adding d doesn't make i cross 0
+        # then subtract derivative from integral
+        self.i += d
+
+    control = self.p + self.f + self.i
     if self.convert is not None:
       control = self.convert(control, speed=self.speed)
 
