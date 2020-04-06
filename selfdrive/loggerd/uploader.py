@@ -243,7 +243,7 @@ def uploader_fn(exit_event):
     allow_raw_upload = (params.get("IsUploadRawEnabled") != b"0")
     on_hotspot = is_on_hotspot()
     on_wifi = is_on_wifi()
-    should_upload = on_wifi and not on_hotspot
+    should_upload = on_wifi and on_hotspot
 
     if exit_event.is_set():
       return
