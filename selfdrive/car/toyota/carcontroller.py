@@ -2,9 +2,10 @@ from cereal import car
 from common.numpy_fast import clip
 from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, make_can_msg
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
-                                           create_accel_command, create_acc_cancel_command, create_fcw_command
+                                           create_accel_command, create_acc_cancel_command, create_fcw_command, create_lead_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
 from opendbc.can.packer import CANPacker
+import cereal.messaging as messaging
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -51,9 +52,12 @@ class CarController():
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
+    self.sm = messaging.SubMaster(['radarState'])
 
     self.last_fault_frame = -200
     self.steer_rate_limited = False
+    self.lead_rel_speed = 255
+    self.lead_long_dist = 255
 
     self.fake_ecus = set()
     if CP.enableCamera: self.fake_ecus.add(Ecu.fwdCamera)
@@ -63,6 +67,11 @@ class CarController():
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
+
+    self.sm.update(0)
+    if self.sm.updated['radarState']:
+      self.lead_rel_speed = self.sm['radarState'].leadOne.vRel
+      self.lead_long_dist = self.sm['radarState'].leadOne.dRel
 
     # *** compute control surfaces ***
 
@@ -113,6 +122,7 @@ class CarController():
 
     can_sends = []
 
+    can_sends.append(create_lead_command(self.packer, self.lead_rel_speed, self.lead_long_dist))
     #*** control msgs ***
     #print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
 
