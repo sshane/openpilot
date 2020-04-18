@@ -52,6 +52,12 @@ def create_acc_cancel_command(packer):
   }
   return packer.make_can_msg("PCM_CRUISE", 0, values)
 
+def create_lead_command(packer, lead_rel_speed, lead_long_dist):
+  values = {
+    "LEAD_REL_SPEED": lead_rel_speed,
+    "LEAD_LONG_DIST": lead_long_dist,
+  }
+  return packer.make_can_msg("LEAD_INFO", 0, values)
 
 def create_fcw_command(packer, fcw):
   values = {
