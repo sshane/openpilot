@@ -86,7 +86,7 @@ function launch {
 
   # start manager
   cd selfdrive
-  ./manager.py > /data/openpilot_logs
+  ./manager.py
 
   # if broken, keep on screen error
   while true; do sleep 1; done
