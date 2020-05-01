@@ -15,6 +15,10 @@ from common.android import ANDROID
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 os.environ['BASEDIR'] = BASEDIR
 
+orig_stdout = sys.stdout
+f = open('/data/openpilot_log', 'w')
+sys.stdout = f
+
 TOTAL_SCONS_NODES = 1140
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
@@ -577,3 +581,4 @@ if __name__ == "__main__":
   main()
   # manual exit because we are forked
   sys.exit(0)
+f.close()
