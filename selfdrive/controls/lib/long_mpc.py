@@ -41,6 +41,14 @@ class LongitudinalMpc():
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
     self.sng = False
 
+    self.dg_file = '/data/df_data'
+    self.dg_keys = ['v_ego', 'a_lead', 'v_lead', 'x_lead', 'live_tracks', 'profile', 'time']
+    self.df_tf_data = []
+    if not os.path.exists(self.dg_file):
+      with open(self.dg_file, 'w') as f:
+        f.write('{}\n'.format(self.dg_keys))
+
+
   def send_mpc_solution(self, pm, qp_iterations, calculation_time):
     qp_iterations = max(0, qp_iterations)
     dat = messaging.new_message('liveLongitudinalMpc')
@@ -135,6 +143,16 @@ class LongitudinalMpc():
 
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    live_tracks = [[i.dRel, i.vRel, i.aRel, i.yRel] for i in self.sm['liveTracks']]
+    if CS.cruiseState.enabled:
+      with open(self.dg_file, 'a') as f:
+        f.write('{}\n'.format([self.car_data['v_ego'],
+                               self.lead_data['a_lead'],
+                               self.lead_data['v_lead'],
+                               self.lead_data['x_lead'],
+                               live_tracks,
+                               self.df_profile,
+                               sec_since_boot()]))
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
     if self.df_profile == 'roadtrip':
@@ -200,8 +218,9 @@ class LongitudinalMpc():
     self.lead_data['x_lead'] = x_lead
     self.lead_data['status'] = status
 
-  def update(self, pm, CS, lead, v_cruise_setpoint):
+  def update(self, pm, CS, lead, v_cruise_setpoint, sm):
     v_ego = CS.vEgo
+    self.sm = sm
     self.car_data = {'v_ego': CS.vEgo, 'a_ego': CS.aEgo}
 
     # Setup current mpc state
