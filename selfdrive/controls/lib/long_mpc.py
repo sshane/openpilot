@@ -1,6 +1,7 @@
 import os
 import math
 
+import numpy as np
 import cereal.messaging as messaging
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
@@ -11,6 +12,7 @@ from common.op_params import opParams
 from common.numpy_fast import interp, clip
 from common.travis_checker import travis
 from selfdrive.config import Conversions as CV
+from selfdrive.auto_df.best_so_far import predict
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
@@ -40,6 +42,14 @@ class LongitudinalMpc():
     self.last_cost = 0.0
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
     self.sng = False
+
+    self.model_data = []
+    self.scales = {'v_ego': [-0.06112159043550491, 33.70709991455078], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 30.952558517456055], 'x_lead': [2.4600000381469727, 139.52000427246094]}
+    self.input_len = 200
+
+  def norm(self, x, name):
+    self.x = x
+    return np.interp(x, self.scales[name], [0, 1])
 
   def send_mpc_solution(self, pm, qp_iterations, calculation_time):
     qp_iterations = max(0, qp_iterations)
@@ -112,6 +122,10 @@ class LongitudinalMpc():
     self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
     self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': cur_time})
 
+    self.model_data.append([self.norm(self.car_data['v_ego'], 'v_ego'), self.norm(self.lead_data['a_lead'], 'a_lead'), self.norm(self.lead_data['v_lead'], 'v_lead'), self.norm(self.lead_data['x_lead'], 'x_lead')])
+    while len(self.model_data) > self.input_len:
+      del self.model_data[0]
+
   def calculate_lead_accel(self):
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
     a_lead = self.lead_data['a_lead']
@@ -134,7 +148,12 @@ class LongitudinalMpc():
     return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def dynamic_follow(self, CS):
-    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    # self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    if len(self.model_data) == self.input_len:
+      profile_map = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
+      pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
+      self.df_profile = profile_map[np.argmax(pred)]
+
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
     if self.df_profile == 'roadtrip':
