@@ -144,7 +144,7 @@ class LongitudinalMpc():
   def dynamic_follow(self, CS):
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
     live_tracks = [[i.dRel, i.vRel, i.aRel, i.yRel] for i in self.sm['liveTracks']]
-    if CS.cruiseState.enabled:
+    if CS.cruiseState.enabled and self.mpc_id == 1:
       with open(self.dg_file, 'a') as f:
         f.write('{}\n'.format([self.car_data['v_ego'],
                                self.lead_data['a_lead'],
