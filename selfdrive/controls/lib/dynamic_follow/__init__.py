@@ -21,10 +21,8 @@ class DynamicFollow:
 
     if not travis and mpc_id == 1:
       self.pm = messaging.PubMaster(['dynamicFollowData'])
-      self.sm = messaging.SubMaster(['dynamicFollowButton'])
     else:
       self.pm = None
-      self.sm = None
 
     self.scales = {'v_ego': [-0.06112159043550491, 33.70709991455078], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 30.952558517456055], 'x_lead': [2.4600000381469727, 139.52000427246094]}
     self.input_len = 200
@@ -45,9 +43,8 @@ class DynamicFollow:
 
   def update(self, CS, libmpc):
     self.update_car(CS)
-    if self.sm is not None:
-      self.sm.update(0)
-      self.df_profile, df_changed = self.df_alert_manager.update(self.sm)  # could output profile from button or prediction if in auto
+    if self.mpc_id == 1:
+      self.df_profile, df_changed = self.df_alert_manager.update()  # could output profile from button or prediction if in auto
       if self.df_alert_manager.is_auto:
         self._get_pred()
 
