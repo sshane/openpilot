@@ -35,8 +35,8 @@ class dfAlertManager:
       elif self.is_auto:
         profile_pred = self.sm['dynamicFollowData'].profilePred
         if profile_pred != self.profile_pred:
-          changed = self.prediction_profile != profile_pred
           self.prediction_profile = profile_pred
+          changed = self.prediction_profile != profile_pred
           return self.prediction_profile, changed
     print('current profile: {}'.format(self.current_profile))
     return self.current_profile, changed
