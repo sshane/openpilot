@@ -45,9 +45,10 @@ class DynamicFollow:
 
   def update(self, CS, libmpc):
     self.update_car(CS)
-    self.sm.update(0)
+    if self.sm is not None:
+      self.sm.update(0)
     self.df_profile, df_changed = self.df_alert_manager.update(self.sm)  # could output profile from button or prediction if in auto
-    if self.df_alert_manager.is_auto:
+    if self.df_alert_manager.is_auto and self.sm is not None:
       self._get_pred()
 
     if not self.lead_data.status or travis:
