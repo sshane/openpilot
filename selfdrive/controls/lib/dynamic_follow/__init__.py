@@ -125,7 +125,7 @@ class DynamicFollow:
     if len(self.model_data) == self.input_len:
       pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
       print(pred)
-      self.df_pred = np.argmax(pred)
+      self.df_pred = int(np.argmax(pred))
       print(self.df_pred)
 
   def _get_TR(self, CS):
