@@ -22,28 +22,37 @@ class CarData:
   a_ego = 0.0
 
 
+class DFData:
+  v_leads = []
+  v_egos = []
+
+
 class DynamicFollow:
   def __init__(self, mpc_id):
     self.mpc_id = mpc_id
     self.op_params = opParams()
     self.default_TR = 1.8
-    self.TR = self.default_TR
 
     if not travis and mpc_id == 1:
       self.pm = messaging.PubMaster(['smiskolData'])
     else:
       self.pm = None
 
-    self.car_data = CarData()
-    self.lead_data = LeadData()
-    self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
-    self.last_cost = 0.0
-    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
-    self.sng = False
-
-    self.model_data = []
     self.scales = {'v_ego': [-0.06112159043550491, 33.70709991455078], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 30.952558517456055], 'x_lead': [2.4600000381469727, 139.52000427246094]}
     self.input_len = 200
+    self.setup_changing_variables()
+
+  def setup_changing_variables(self):
+    self.TR = self.default_TR
+    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+
+    self.sng = False
+    self.car_data = CarData()
+    self.lead_data = LeadData()
+    self.df_data = DFData()  # dynamic follow data
+
+    self.last_cost = 0.0
+    self.model_data = []
 
   def update(self, CS, libmpc):
     self.update_car(CS)
@@ -82,13 +91,13 @@ class DynamicFollow:
 
     cur_time = sec_since_boot()
     if self.lead_data.status:
-      self.df_data['v_leads'] = [sample for sample in self.df_data['v_leads'] if
-                                 cur_time - sample['time'] <= v_lead_retention
-                                 and not self.lead_data.new_lead]  # reset when new lead
-      self.df_data['v_leads'].append({'v_lead': self.lead_data.v_lead, 'time': cur_time})
+      self.df_data.v_leads = [sample for sample in self.df_data.v_leads if
+                              cur_time - sample['time'] <= v_lead_retention
+                              and not self.lead_data.new_lead]  # reset when new lead
+      self.df_data.v_leads.append({'v_lead': self.lead_data.v_lead, 'time': cur_time})
 
-    self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
-    self.df_data['v_egos'].append({'v_ego': self.car_data.v_ego, 'time': cur_time})
+    self.df_data.v_egos = [sample for sample in self.df_data.v_egos if cur_time - sample['time'] <= v_ego_retention]
+    self.df_data.v_egos.append({'v_ego': self.car_data.v_ego, 'time': cur_time})
 
     self.model_data.append([self._norm(self.car_data.v_ego, 'v_ego'),
                             self._norm(self.lead_data.a_lead, 'a_lead'),
@@ -100,10 +109,10 @@ class DynamicFollow:
   def _calculate_lead_accel(self):
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
     a_lead = self.lead_data.a_lead
-    if len(self.df_data['v_leads']):  # if not empty
-      elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
+    if len(self.df_data.v_leads):  # if not empty
+      elapsed = self.df_data.v_leads[-1]['time'] - self.df_data.v_leads[0]['time']
       if elapsed > min_consider_time:  # if greater than min time (not 0)
-        a_calculated = (self.df_data['v_leads'][-1]['v_lead'] - self.df_data['v_leads'][0]['v_lead']) / elapsed  # delta speed / delta time
+        a_calculated = (self.df_data.v_leads[-1]['v_lead'] - self.df_data.v_leads[0]['v_lead']) / elapsed  # delta speed / delta time
         if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
           # both are negative or positive and calculated is greater than current
           return a_calculated
@@ -147,7 +156,7 @@ class DynamicFollow:
     if self.car_data.v_ego > sng_speed:  # keep sng distance until we're above sng speed again
       self.sng = False
 
-    if (self.car_data.v_ego >= sng_speed or self.df_data['v_egos'][0]['v_ego'] >= self.car_data.v_ego) and not self.sng:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use sng_TR and slowly decrease
+    if (self.car_data.v_ego >= sng_speed or self.df_data.v_egos[0]['v_ego'] >= self.car_data.v_ego) and not self.sng:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use sng_TR and slowly decrease
       TR = interp(self.car_data.v_ego, x_vel, y_dist)
     else:  # this allows us to get closer to the lead car when stopping, while being able to have smooth stop and go when reaccelerating
       self.sng = True

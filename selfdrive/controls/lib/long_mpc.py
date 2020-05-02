@@ -1,7 +1,6 @@
 import os
 import math
 
-import numpy as np
 import cereal.messaging as messaging
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
@@ -9,9 +8,7 @@ from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
 from selfdrive.controls.lib.longitudinal_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
-from common.numpy_fast import interp, clip
-from common.travis_checker import travis
-from selfdrive.config import Conversions as CV
+from common.numpy_fast import interp
 from selfdrive.controls.lib.dynamic_follow import DynamicFollow
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
