@@ -32,7 +32,7 @@ class DynamicFollow:
 
   def setup_changing_variables(self):
     self.TR = self.default_TR
-    self.df_profile, df_changed = self.df_alert_manager.update(self.sm)
+    self.df_profile, df_changed = self.df_alert_manager.update()
     self.df_pred = self.df_profile
 
     self.sng = False
@@ -47,9 +47,9 @@ class DynamicFollow:
     self.update_car(CS)
     if self.sm is not None:
       self.sm.update(0)
-    self.df_profile, df_changed = self.df_alert_manager.update(self.sm)  # could output profile from button or prediction if in auto
-    if self.df_alert_manager.is_auto and self.sm is not None:
-      self._get_pred()
+      self.df_profile, df_changed = self.df_alert_manager.update(self.sm)  # could output profile from button or prediction if in auto
+      if self.df_alert_manager.is_auto:
+        self._get_pred()
 
     if not self.lead_data.status or travis:
       self.TR = self.default_TR

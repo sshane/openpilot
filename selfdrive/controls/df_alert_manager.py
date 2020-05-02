@@ -15,7 +15,7 @@ class dfAlertManager:
   def is_auto(self):
     return self.current_profile == self.df_profiles.auto
 
-  def update(self, sm):
+  def update(self, sm=None):
     changed = False
     if self.offset is None:
       changed = True
