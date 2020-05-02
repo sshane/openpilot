@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 import cereal.messaging as messaging
 from common.realtime import sec_since_boot
@@ -10,7 +8,18 @@ from common.travis_checker import travis
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.dynamic_follow.auto_df.best_so_far import predict
 
-LOG_MPC = os.environ.get('LOG_MPC', False)
+
+class LeadData:
+  v_lead = None
+  x_lead = None
+  a_lead = None
+  status = False
+  new_lead = False
+
+
+class CarData:
+  v_ego = 0.0
+  a_ego = 0.0
 
 
 class DynamicFollow:
@@ -25,8 +34,8 @@ class DynamicFollow:
     else:
       self.pm = None
 
-    self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
-    self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False, 'new_lead': False}
+    self.car_data = CarData()
+    self.lead_data = LeadData()
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
@@ -37,7 +46,7 @@ class DynamicFollow:
     self.input_len = 200
 
   def update(self, CS, libmpc):
-    if not self.lead_data['status'] or travis:
+    if not self.lead_data.status or travis:
       self.TR = self.default_TR
     else:
       self._store_df_data()
@@ -71,22 +80,25 @@ class DynamicFollow:
     v_ego_retention = 2.5
 
     cur_time = sec_since_boot()
-    if self.lead_data['status']:
+    if self.lead_data.status:
       self.df_data['v_leads'] = [sample for sample in self.df_data['v_leads'] if
                                  cur_time - sample['time'] <= v_lead_retention
-                                 and not self.lead_data['new_lead']]  # reset when new lead
-      self.df_data['v_leads'].append({'v_lead': self.lead_data['v_lead'], 'time': cur_time})
+                                 and not self.lead_data.new_lead]  # reset when new lead
+      self.df_data['v_leads'].append({'v_lead': self.lead_data.v_lead, 'time': cur_time})
 
     self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
-    self.df_data['v_egos'].append({'v_ego': self.car_data['v_ego'], 'time': cur_time})
+    self.df_data['v_egos'].append({'v_ego': self.car_data.v_ego, 'time': cur_time})
 
-    self.model_data.append([self._norm(self.car_data['v_ego'], 'v_ego'), self._norm(self.lead_data['a_lead'], 'a_lead'), self._norm(self.lead_data['v_lead'], 'v_lead'), self._norm(self.lead_data['x_lead'], 'x_lead')])
+    self.model_data.append([self._norm(self.car_data.v_ego, 'v_ego'),
+                            self._norm(self.lead_data.a_lead, 'a_lead'),
+                            self._norm(self.lead_data.v_lead, 'v_lead'),
+                            self._norm(self.lead_data.x_lead, 'x_lead')])
     while len(self.model_data) > self.input_len:
       del self.model_data[0]
 
   def _calculate_lead_accel(self):
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
-    a_lead = self.lead_data['a_lead']
+    a_lead = self.lead_data.a_lead
     if len(self.df_data['v_leads']):  # if not empty
       elapsed = self.df_data['v_leads'][-1]['time'] - self.df_data['v_leads'][0]['time']
       if elapsed > min_consider_time:  # if greater than min time (not 0)
@@ -131,35 +143,35 @@ class DynamicFollow:
     sng_TR = 1.7  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
 
-    if self.car_data['v_ego'] > sng_speed:  # keep sng distance until we're above sng speed again
+    if self.car_data.v_ego > sng_speed:  # keep sng distance until we're above sng speed again
       self.sng = False
 
-    if (self.car_data['v_ego'] >= sng_speed or self.df_data['v_egos'][0]['v_ego'] >= self.car_data['v_ego']) and not self.sng:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use sng_TR and slowly decrease
-      TR = interp(self.car_data['v_ego'], x_vel, y_dist)
+    if (self.car_data.v_ego >= sng_speed or self.df_data['v_egos'][0]['v_ego'] >= self.car_data.v_ego) and not self.sng:  # if above 15 mph OR we're decelerating to a stop, keep shorter TR. when we reaccelerate, use sng_TR and slowly decrease
+      TR = interp(self.car_data.v_ego, x_vel, y_dist)
     else:  # this allows us to get closer to the lead car when stopping, while being able to have smooth stop and go when reaccelerating
       self.sng = True
       x = [sng_speed / 3.0, sng_speed]  # decrease TR between 5 and 15 mph from 1.8s to defined TR above at 15mph while accelerating
       y = [sng_TR, interp(sng_speed, x_vel, y_dist)]
-      TR = interp(self.car_data['v_ego'], x, y)
+      TR = interp(self.car_data.v_ego, x, y)
 
     TR_mod = []
     # Dynamic follow modifications (the secret sauce)
     x = [-20.0383, -15.6978, -11.2053, -7.8781, -5.0407, -3.2167, -1.6122, 0.0, 0.6847, 1.3772, 1.9007, 2.7452]  # relative velocity values
     y = [0.641, 0.506, 0.418, 0.334, 0.24, 0.115, 0.065, 0.0, -0.049, -0.068, -0.142, -0.221]  # modification values
-    TR_mod.append(interp(self.lead_data['v_lead'] - self.car_data['v_ego'], x, y))
+    TR_mod.append(interp(self.lead_data.v_lead - self.car_data.v_ego, x, y))
 
     # if not self.sng:  # todo: test to see if limitting the accel mod when not in sng is better
     x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
     y = [0.265, 0.187, 0.096, 0.057, 0.033, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mod.append(interp(self._calculate_lead_accel(), x, y))
 
-    profile_mod_pos = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_pos)
-    profile_mod_neg = interp(self.car_data['v_ego'], profile_mod_x, profile_mod_neg)
+    profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
+    profile_mod_neg = interp(self.car_data.v_ego, profile_mod_x, profile_mod_neg)
 
     # if self.sng:  # only if we're in sng todo: test this
     x = [sng_speed / 5.0, sng_speed]  # as we approach 0, apply x% more distance
     y = [1.1, 1.0]
-    profile_mod_pos *= interp(self.car_data['v_ego'], x, y)
+    profile_mod_pos *= interp(self.car_data.v_ego, x, y)
 
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
@@ -167,12 +179,12 @@ class DynamicFollow:
     if CS.leftBlinker or CS.rightBlinker and self.df_profile != 'traffic':
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .75, .65]  # reduce TR when changing lanes
-      TR *= interp(self.car_data['v_ego'], x, y)
+      TR *= interp(self.car_data.v_ego, x, y)
     return clip(TR, 0.9, 2.7)
 
   def update_lead(self, v_lead=None, a_lead=None, x_lead=None, status=False, new_lead=False):
-    self.lead_data['v_lead'] = v_lead
-    self.lead_data['a_lead'] = a_lead
-    self.lead_data['x_lead'] = x_lead
-    self.lead_data['status'] = status
-    self.lead_data['new_lead'] = new_lead
+    self.lead_data.v_lead = v_lead
+    self.lead_data.a_lead = a_lead
+    self.lead_data.x_lead = x_lead
+    self.lead_data.status = status
+    self.lead_data.new_lead = new_lead
