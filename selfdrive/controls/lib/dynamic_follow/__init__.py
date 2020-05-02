@@ -95,7 +95,7 @@ class DynamicFollow:
       dat = messaging.new_message()
       dat.init('dynamicFollowData')
       dat.dynamicFollowData.mpcTR = self.TR
-      dat.dynamicFollowData.profile_pred = self.df_pred
+      dat.dynamicFollowData.profilePred = self.df_pred
       self.pm.send('dynamicFollowData', dat)
 
   def _change_cost(self, libmpc):

@@ -1948,7 +1948,7 @@ struct Sentinel {
 
 struct DynamicFollowData {
   mpcTR @0 :Float32;
-  profile_pred @0 :UInt16;
+  profilePred @1 :UInt16;
 }
 
 struct DynamicFollowButton {
