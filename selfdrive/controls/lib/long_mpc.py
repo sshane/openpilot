@@ -8,7 +8,6 @@ from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
 from selfdrive.controls.lib.longitudinal_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
-from common.numpy_fast import interp
 from selfdrive.controls.lib.dynamic_follow import DynamicFollow
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
@@ -59,14 +58,6 @@ class LongitudinalMpc():
   def set_cur_state(self, v, a):
     self.cur_state[0].v_ego = v
     self.cur_state[0].a_ego = a
-
-  def change_cost(self, TR):
-    TRs = [0.9, 1.8, 2.7]
-    costs = [1.0, 0.125, 0.05]
-    cost = interp(TR, TRs, costs)
-    if self.last_cost != cost:
-      self.libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
-      self.last_cost = cost
 
   def update(self, pm, CS, lead, v_cruise_setpoint):
     v_ego = CS.vEgo
