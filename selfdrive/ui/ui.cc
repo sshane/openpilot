@@ -94,7 +94,7 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
     if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
       s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping df button
       s->scene.dfButtonStatus++;
-      if (s->scene.dfButtonStatus > 2) {
+      if (s->scene.dfButtonStatus > 3) {
         s->scene.dfButtonStatus = 0;
       }
       send_df(s, s->scene.dfButtonStatus);

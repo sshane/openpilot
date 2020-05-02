@@ -26,7 +26,7 @@ from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 from common.travis_checker import travis
 from common.op_params import opParams
-from selfdrive.controls.df_alert_manager import DfAlertManager
+from selfdrive.controls.df_alert_manager import dfAlertManager
 
 LANE_DEPARTURE_THRESHOLD = 0.1
 
@@ -148,9 +148,10 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  df_alert = df_alert_manager.update(sm_smiskol)
-  if df_alert is not None:
-    AM.add(frame, 'dfButtonAlert', enabled, extra_text_1=df_alert, extra_text_2='Dynamic follow: {} profile active'.format(df_alert))
+  df_profile, df_changed = df_alert_manager.update(sm_smiskol)
+  if df_changed:
+    df_profile = df_alert_manager.df_profiles.to_profile[df_profile]
+    AM.add(frame, 'dfButtonAlert', enabled, extra_text_1=df_profile, extra_text_2='Dynamic follow: {} profile active'.format(df_profile))
 
   # DISABLED
   if state == State.disabled:
@@ -269,7 +270,7 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
   params_loc = {}
   if not travis:
     params_loc['lead_one'] = sm_smiskol['radarState'].leadOne
-    params_loc['mpc_TR'] = sm_smiskol['smiskolData'].mpcTR
+    params_loc['mpc_TR'] = sm_smiskol['dynamicFollowData'].mpcTR
     params_loc['live_tracks'] = sm_smiskol['liveTracks']
     params_loc['has_lead'] = plan.hasLead
     params_loc['CS'] = CS
@@ -467,7 +468,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None,):
                               'model'])
 
   if sm_smiskol is None:
-    sm_smiskol = messaging.SubMaster(['radarState', 'smiskolData', 'liveTracks', 'dynamicFollowButton'])
+    sm_smiskol = messaging.SubMaster(['radarState', 'dynamicFollowData', 'liveTracks', 'dynamicFollowButton'])
 
 
   if can_sock is None:
@@ -539,7 +540,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None,):
 
   prof = Profiler(False)  # off by default
   op_params = opParams()
-  df_alert_manager = DfAlertManager(op_params)
+  df_alert_manager = dfAlertManager(op_params)
 
   while True:
     sm_smiskol.update(0)

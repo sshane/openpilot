@@ -7,6 +7,7 @@ from common.numpy_fast import interp, clip
 from common.travis_checker import travis
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.dynamic_follow.auto_df.best_so_far import predict
+from selfdrive.controls.df_alert_manager import dfAlertManager
 
 
 class LeadData:
@@ -22,21 +23,34 @@ class CarData:
   a_ego = 0.0
 
 
-class DFData:
+class dfData:
   v_leads = []
   v_egos = []
+
+
+class dfProfiles:
+  traffic = 0
+  relaxed = 1
+  roadtrip = 2
+  auto = 3
+  to_profile = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip', 3: 'auto'}
+  to_idx = {v: k for k, v in to_profile.items()}
 
 
 class DynamicFollow:
   def __init__(self, mpc_id):
     self.mpc_id = mpc_id
     self.op_params = opParams()
+    self.df_profiles = dfProfiles()
+    self.df_alert_manager = dfAlertManager(self.op_params)
     self.default_TR = 1.8
 
     if not travis and mpc_id == 1:
-      self.pm = messaging.PubMaster(['smiskolData'])
+      self.pm = messaging.PubMaster(['dynamicFollowData'])
+      self.sm = messaging.SubMaster(['dynamicFollowButton'])
     else:
       self.pm = None
+      self.sm = None
 
     self.scales = {'v_ego': [-0.06112159043550491, 33.70709991455078], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 30.952558517456055], 'x_lead': [2.4600000381469727, 139.52000427246094]}
     self.input_len = 200
@@ -44,18 +58,24 @@ class DynamicFollow:
 
   def setup_changing_variables(self):
     self.TR = self.default_TR
-    self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+    self.df_profile, df_changed = self.df_alert_manager.update(self.sm)
+    self.df_pred = self.df_profile
 
     self.sng = False
     self.car_data = CarData()
     self.lead_data = LeadData()
-    self.df_data = DFData()  # dynamic follow data
+    self.df_data = dfData()  # dynamic follow data
 
     self.last_cost = 0.0
     self.model_data = []
 
   def update(self, CS, libmpc):
     self.update_car(CS)
+    self.sm.update(0)
+    self.df_profile, df_changed = self.df_alert_manager.update(self.sm)
+    if self.df_alert_manager.is_auto:
+      self._get_pred()
+
     if not self.lead_data.status or travis:
       self.TR = self.default_TR
     else:
@@ -64,18 +84,19 @@ class DynamicFollow:
 
     if not travis:
       self._change_cost(libmpc)
-      self._send_cur_TR()
+      self._send_cur_state()
 
   def _norm(self, x, name):
     self.x = x
     return np.interp(x, self.scales[name], [0, 1])
 
-  def _send_cur_TR(self):
+  def _send_cur_state(self):
     if self.mpc_id == 1 and self.pm is not None:
       dat = messaging.new_message()
-      dat.init('smiskolData')
-      dat.smiskolData.mpcTR = self.TR
-      self.pm.send('smiskolData', dat)
+      dat.init('dynamicFollowData')
+      dat.dynamicFollowData.mpcTR = self.TR
+      dat.dynamicFollowData.profile_pred = self.df_pred
+      self.pm.send('dynamicFollowData', dat)
 
   def _change_cost(self, libmpc):
     TRs = [0.9, 1.8, 2.7]
@@ -127,20 +148,24 @@ class DynamicFollow:
 
     return a_lead  # if above doesn't execute, we'll return measured a_lead
 
-  def _get_TR(self, CS):
-    # self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
+  def _get_pred(self):
     if len(self.model_data) == self.input_len:
-      profile_map = {0: 'traffic', 1: 'relaxed', 2: 'roadtrip'}
       pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
-      self.df_profile = profile_map[np.argmax(pred)]
+      self.df_pred = np.argmax(pred)
 
+  def _get_TR(self, CS):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
-    if self.df_profile == 'roadtrip':
+
+    df_profile = self.df_profile
+    if self.df_alert_manager.is_auto:
+      df_profile = self.df_pred
+
+    if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3847, 1.3946, 1.4078, 1.4243, 1.4507, 1.4837, 1.5327, 1.553, 1.581, 1.617, 1.653, 1.687, 1.74]  # TRs
       profile_mod_pos = [0.99, 0.9025, 0.815, 0.55]
       profile_mod_neg = [1.0, 1.18, 1.382, 1.787]
-    elif self.df_profile == 'traffic':  # for in congested traffic
+    elif df_profile == self.df_profiles.traffic:  # for in congested traffic
       x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
       y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
       profile_mod_pos = [1.05, 1.375, 2.99, 3.8]
@@ -186,7 +211,7 @@ class DynamicFollow:
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mod])  # alter TR modification according to profile
     TR += TR_mod
 
-    if CS.leftBlinker or CS.rightBlinker and self.df_profile != 'traffic':
+    if CS.leftBlinker or CS.rightBlinker and df_profile != self.df_profiles.traffic:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .75, .65]  # reduce TR when changing lanes
       TR *= interp(self.car_data.v_ego, x, y)

@@ -77,7 +77,7 @@ carParams: [8071, true, 0.02, 1]
 frontFrame: [8072, true, 10.]
 dMonitoringState: [8073, true, 5., 1]
 
-smiskolData: [8074, false, 20.]
+dynamicFollowData: [8074, false, 20.]
 dynamicFollowButton: [8075, false, 0.]
 
 testModel: [8040, false, 0.]
