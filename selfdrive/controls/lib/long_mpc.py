@@ -86,7 +86,6 @@ class LongitudinalMpc():
       if (v_lead < 0.1 or -a_lead / 2.0 > v_lead):
         v_lead = 0.0
         a_lead = 0.0
-      self.dynamic_follow.update_lead(v_lead, a_lead, x_lead, lead.status)
 
       self.a_lead_tau = lead.aLeadTau
       self.new_lead = False
@@ -94,12 +93,13 @@ class LongitudinalMpc():
         self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
         self.new_lead = True
 
+      self.dynamic_follow.update_lead(v_lead, a_lead, x_lead, lead.status, self.new_lead)
       self.prev_lead_status = True
       self.prev_lead_x = x_lead
       self.cur_state[0].x_l = x_lead
       self.cur_state[0].v_l = v_lead
     else:
-      self.dynamic_follow.update_lead(None, None, None, False)
+      self.dynamic_follow.update_lead(new_lead=self.new_lead)
       self.prev_lead_status = False
       # Fake a fast lead car, so mpc keeps running
       self.cur_state[0].x_l = 50.0

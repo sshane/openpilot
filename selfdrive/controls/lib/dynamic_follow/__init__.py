@@ -1,12 +1,8 @@
 import os
-import math
 
 import numpy as np
 import cereal.messaging as messaging
-from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
-from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
-from selfdrive.controls.lib.longitudinal_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
 from common.numpy_fast import interp, clip
@@ -17,7 +13,7 @@ from selfdrive.controls.lib.dynamic_follow.auto_df.best_so_far import predict
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
 
-class DynamicFollow():
+class DynamicFollow:
   def __init__(self, mpc_id):
     self.mpc_id = mpc_id
     self.op_params = opParams()
@@ -30,7 +26,7 @@ class DynamicFollow():
       self.pm = None
 
     self.car_data = {'v_ego': 0.0, 'a_ego': 0.0}
-    self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False}
+    self.lead_data = {'v_lead': None, 'x_lead': None, 'a_lead': None, 'status': False, 'new_lead': False}
     self.df_data = {"v_leads": [], "v_egos": []}  # dynamic follow data
     self.last_cost = 0.0
     self.df_profile = self.op_params.get('dynamic_follow', 'relaxed').strip().lower()
@@ -78,7 +74,7 @@ class DynamicFollow():
     if self.lead_data['status']:
       self.df_data['v_leads'] = [sample for sample in self.df_data['v_leads'] if
                                  cur_time - sample['time'] <= v_lead_retention
-                                 and not self.new_lead]  # reset when new lead
+                                 and not self.lead_data['new_lead']]  # reset when new lead
       self.df_data['v_leads'].append({'v_lead': self.lead_data['v_lead'], 'time': cur_time})
 
     self.df_data['v_egos'] = [sample for sample in self.df_data['v_egos'] if cur_time - sample['time'] <= v_ego_retention]
@@ -174,8 +170,9 @@ class DynamicFollow():
       TR *= interp(self.car_data['v_ego'], x, y)
     return clip(TR, 0.9, 2.7)
 
-  def update_lead(self, v_lead=None, a_lead=None, x_lead=None, status=False):
+  def update_lead(self, v_lead=None, a_lead=None, x_lead=None, status=False, new_lead=False):
     self.lead_data['v_lead'] = v_lead
     self.lead_data['a_lead'] = a_lead
     self.lead_data['x_lead'] = x_lead
     self.lead_data['status'] = status
+    self.lead_data['new_lead'] = new_lead
