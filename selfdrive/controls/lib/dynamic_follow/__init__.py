@@ -46,6 +46,7 @@ class DynamicFollow:
     self.input_len = 200
 
   def update(self, CS, libmpc):
+    self.update_car(CS)
     if not self.lead_data.status or travis:
       self.TR = self.default_TR
     else:
@@ -188,3 +189,7 @@ class DynamicFollow:
     self.lead_data.x_lead = x_lead
     self.lead_data.status = status
     self.lead_data.new_lead = new_lead
+
+  def update_car(self, CS):
+    self.car_data.v_ego = CS.vEgo
+    self.car_data.a_ego = CS.aEgo
