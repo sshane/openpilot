@@ -149,9 +149,12 @@ class DynamicFollow:
     return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def _get_pred(self):
+    print('DF AUTO MODE')
     if len(self.model_data) == self.input_len:
       pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
+      print(pred)
       self.df_pred = np.argmax(pred)
+      print(self.df_pred)
 
   def _get_TR(self, CS):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
