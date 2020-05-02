@@ -1,4 +1,4 @@
-from selfdrive.controls.lib.dynamic_follow import dfProfiles
+from selfdrive.controls.lib.dynamic_follow.support import dfProfiles
 
 
 class dfAlertManager:
