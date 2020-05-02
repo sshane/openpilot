@@ -8,6 +8,7 @@ class dfAlertManager:
     self.df_profiles = dfProfiles()
     self.sm = messaging.SubMaster(['dynamicFollowButton', 'dynamicFollowData'])
     self.current_profile = self.df_profiles.to_idx[self.op_params.get('dynamic_follow', default='relaxed').strip().lower()]
+    self.prediction_profile = 0
 
     self.offset = None
     self.profile_pred = None
@@ -34,7 +35,7 @@ class dfAlertManager:
       elif self.is_auto:
         profile_pred = self.sm['dynamicFollowData'].profilePred
         if profile_pred != self.profile_pred:
-          changed = True
-          self.current_profile = profile_pred
+          self.prediction_profile = profile_pred
+          return self.prediction_profile, True
     print('current profile: {}'.format(self.current_profile))
     return self.current_profile, changed
