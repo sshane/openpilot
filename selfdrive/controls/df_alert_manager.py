@@ -38,6 +38,7 @@ class dfAlertManager:
       if self.is_auto:
         if not self.last_auto:
           self.auto_time = sec_since_boot()
+          self.last_auto = True
         profile_pred = self.sm['dynamicFollowData'].profilePred
         changed = self.prediction_profile != profile_pred
         self.prediction_profile = profile_pred
