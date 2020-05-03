@@ -18,6 +18,7 @@ class DynamicFollow:
     self.df_profiles = dfProfiles()
     self.df_alert_manager = dfAlertManager(self.op_params)
     self.default_TR = 1.8
+    self.predict_rate = 1 / 5.
 
     if not travis and mpc_id == 1:
       self.pm = messaging.PubMaster(['dynamicFollowData'])
@@ -39,13 +40,14 @@ class DynamicFollow:
     self.df_data = dfData()  # dynamic follow data
 
     self.last_cost = 0.0
+    self.last_predict_time = 0.0
     self.model_data = []
 
   def update(self, CS, libmpc):
     self.update_car(CS)
     if self.mpc_id == 1:
       self.df_profile, df_changed = self.df_alert_manager.update()  # could output profile from button or prediction if in auto
-      if self.df_alert_manager.is_auto:
+      if self.df_alert_manager.is_auto and self.lead_data.status:
         self._get_pred()
 
     if not self.lead_data.status or travis:
@@ -121,12 +123,12 @@ class DynamicFollow:
     return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def _get_pred(self):
-    print('DF AUTO MODE')
-    if len(self.model_data) == self.input_len:
-      pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
-      print(pred)
-      self.df_pred = int(np.argmax(pred))
-      print(self.df_pred)
+    cur_time = sec_since_boot()
+    if cur_time - self.last_predict_time > self.predict_rate:
+      if len(self.model_data) == self.input_len:
+        pred = predict(np.array(self.model_data, dtype=np.float32).flatten())
+        self.df_pred = int(np.argmax(pred))
+        self.last_predict_time = cur_time
 
   def _get_TR(self, CS):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
