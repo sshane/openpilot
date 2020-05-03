@@ -35,7 +35,7 @@ class dfAlertManager:
         self.op_params.put('dynamic_follow', new_profile)  # save current profile for next drive
         self.current_profile = new_profile
         self.last_button_status = status
-      if self.is_auto:
+      elif self.is_auto:
         if not self.last_auto:
           self.auto_time = sec_since_boot()
           self.last_auto = True
