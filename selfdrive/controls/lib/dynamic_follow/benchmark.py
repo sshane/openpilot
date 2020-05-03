@@ -1,4 +1,4 @@
-from selfdrive.controls.lib.dynamic_follow.auto_df.best_so_far import predict
+from selfdrive.controls.lib.dynamic_follow.auto_df import predict
 import time
 import numpy as np
 

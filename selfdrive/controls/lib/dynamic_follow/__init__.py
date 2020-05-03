@@ -6,7 +6,7 @@ from common.op_params import opParams
 from common.numpy_fast import interp, clip
 from common.travis_checker import travis
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.dynamic_follow.auto_df.best_so_far import predict
+from selfdrive.controls.lib.dynamic_follow.auto_df import predict
 from selfdrive.controls.df_alert_manager import dfAlertManager
 from selfdrive.controls.lib.dynamic_follow.support import LeadData, CarData, dfData, dfProfiles
 
