@@ -159,7 +159,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
       if df_alert_manager.is_auto:
         df_alert += 'NoSound'
         df_text += ' (auto)'
-    AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_profile))
+    AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_text))
 
   # DISABLED
   if state == State.disabled:
