@@ -37,6 +37,9 @@ HwType = log.HealthData.HwType
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
+op_params = opParams()
+df_alert_manager = dfAlertManager(op_params)
+
 
 def add_lane_change_event(events, path_plan):
   if path_plan.laneChangeState == LaneChangeState.preLaneChange:
@@ -132,7 +135,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   return CS, events, cal_perc, mismatch_counter, can_error_counter
 
 
-def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, df_alert_manager):
+def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol):
   """Compute conditional state transitions and execute actions on state transitions"""
   enabled = isEnabled(state)
 
@@ -148,10 +151,15 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  df_profile, df_changed = df_alert_manager.update()
+  df_profile, df_changed, auto_time = df_alert_manager.update()
   if df_changed:
-    df_profile = df_alert_manager.df_profiles.to_profile[df_profile]
-    AM.add(frame, 'dfButtonAlert', enabled, extra_text_1=df_profile, extra_text_2='Dynamic follow: {} profile active'.format(df_profile))
+    df_text = df_alert_manager.df_profiles.to_profile[df_profile]
+    df_alert = 'dfButtonAlert'
+    if sec_since_boot() - df_alert_manager.auto_time > 2:
+      if df_alert_manager.is_auto:
+        df_alert += 'NoSound'
+        df_text += ' (auto)'
+    AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_profile))
 
   # DISABLED
   if state == State.disabled:
@@ -539,8 +547,6 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None,):
   internet_needed = params.get("Offroad_ConnectivityNeeded", encoding='utf8') is not None
 
   prof = Profiler(False)  # off by default
-  op_params = opParams()
-  df_alert_manager = dfAlertManager(op_params)
 
   while True:
     sm_smiskol.update(0)
@@ -586,7 +592,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None,):
     if not read_only:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
-        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol, df_alert_manager)
+        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol)
       prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)

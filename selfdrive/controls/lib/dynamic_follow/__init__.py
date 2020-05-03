@@ -31,7 +31,7 @@ class DynamicFollow:
 
   def setup_changing_variables(self):
     self.TR = self.default_TR
-    self.df_profile, df_changed = self.df_alert_manager.update()
+    self.df_profile, df_changed, auto_time = self.df_alert_manager.update()
     self.df_pred = self.df_profile
 
     self.sng = False
@@ -46,7 +46,7 @@ class DynamicFollow:
   def update(self, CS, libmpc):
     self.update_car(CS)
     if self.mpc_id == 1:
-      self.df_profile, df_changed = self.df_alert_manager.update()  # could output profile from button or prediction if in auto
+      self.df_profile, df_changed, auto_time = self.df_alert_manager.update()  # could output profile from button or prediction if in auto
       if self.df_alert_manager.is_auto and self.lead_data.status:
         self._get_pred()
 
