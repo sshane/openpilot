@@ -5,6 +5,7 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
                                            create_accel_command, create_acc_cancel_command, create_fcw_command, create_lead_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
 from opendbc.can.packer import CANPacker
+from common.travis_checker import travis
 import cereal.messaging as messaging
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
@@ -104,6 +105,11 @@ class CarController():
       apply_steer_req = 0
     else:
       apply_steer_req = 1
+
+    if abs(CS.out.steeringRate) > 100 and not travis:
+      apply_steer = 0
+      apply_steer_req = 0
+      self.steer_rate_limited = True
 
     if not enabled and CS.pcm_acc_status:
       # send pcm acc cancel cmd if drive is disabled but pcm is still on, or if the system can't be activated

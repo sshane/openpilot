@@ -6,6 +6,8 @@ from common.realtime import DT_CTRL
 from selfdrive.car import gen_empty_fingerprint
 from selfdrive.controls.lib.drive_helpers import EventTypes as ET, create_event
 from selfdrive.controls.lib.vehicle_model import VehicleModel
+from common.travis_checker import travis
+from common.op_params import opParams
 
 GearShifter = car.CarState.GearShifter
 
@@ -25,6 +27,7 @@ class CarInterfaceBase():
     self.CS = CarState(CP)
     self.cp = self.CS.get_can_parser(CP)
     self.cp_cam = self.CS.get_cam_can_parser(CP)
+    self.disengage_on_gas = opParams().get('disengage_on_gas', default=True)
 
     self.CC = None
     if CarController is not None:
@@ -96,7 +99,7 @@ class CarInterfaceBase():
       events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
     if cs_out.espDisabled:
       events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if cs_out.gasPressed:
+    if cs_out.gasPressed and self.disengage_on_gas:
       events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
     # TODO: move this stuff to the capnp strut
@@ -108,7 +111,7 @@ class CarInterfaceBase():
     # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
     # Optionally allow to press gas at zero speed to resume.
     # e.g. Chrysler does not spam the resume button yet, so resuming with gas is handy. FIXME!
-    if (cs_out.gasPressed and (not self.gas_pressed_prev) and cs_out.vEgo > gas_resume_speed) or \
+    if (cs_out.gasPressed and (not self.gas_pressed_prev) and self.disengage_on_gas and cs_out.vEgo > gas_resume_speed) or \
        (cs_out.brakePressed and (not self.brake_pressed_prev or not cs_out.standstill)):
       events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
 

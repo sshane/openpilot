@@ -1,310 +1,157 @@
-[![](https://i.imgur.com/UelUjKAh.png)](#)
+Stock Additions 0.7.4
+=====
 
-Table of Contents
-=======================
+This branch is simply stock openpilot with some additions to help it drive as smooth as possible on my 2017 Toyota Corolla w/ comma pedal.
 
-* [What is openpilot?](#what-is-openpilot)
-* [Integration with Stock Features](#integration-with-stock-features)
-* [Supported Hardware](#supported-hardware)
-* [Supported Cars](#supported-cars)
-* [Community Maintained Cars and Features](#community-maintained-cars-and-features)
-* [Installation Instructions](#installation-instructions)
-* [Limitations of openpilot ALC and LDW](#limitations-of-openpilot-alc-and-ldw)
-* [Limitations of openpilot ACC and FCW](#limitations-of-openpilot-acc-and-fcw)
-* [Limitations of openpilot DM](#limitations-of-openpilot-dm)
-* [User Data and comma Account](#user-data-and-comma-account)
-* [Safety and Testing](#safety-and-testing)
-* [Testing on PC](#testing-on-pc)
-* [Community and Contributing](#community-and-contributing)
-* [Directory Structure](#directory-structure)
-* [Licensing](#licensing)
+Want to request a feature or create a bug report? [Open an issue here!](https://github.com/ShaneSmiskol/openpilot/issues/new/choose)
 
----
+Need to contact me for any other reason? My Discord username is: `Shane Smiskol#6175`
 
-What is openpilot?
-------
+-----
 
-[openpilot](http://github.com/commaai/openpilot) is an open source driver assistance system. Currently, openpilot performs the functions of Adaptive Cruise Control (ACC), Automated Lane Centering (ALC), Forward Collision Warning (FCW) and Lane Departure Warning (LDW) for a growing variety of supported [car makes, models and model years](#supported-cars). In addition, while openpilot is engaged, a camera based Driver Monitoring (DM) feature alerts distracted and asleep drivers.
+Highlight Features
+=====
 
-<table>
-  <tr>
-    <td><a href="https://www.youtube.com/watch?v=mgAbfr42oI8" title="YouTube" rel="noopener"><img src="https://i.imgur.com/kAtT6Ei.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=394rJKeh76k" title="YouTube" rel="noopener"><img src="https://i.imgur.com/lTt8cS2.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=1iNOc3cq8cs" title="YouTube" rel="noopener"><img src="https://i.imgur.com/ANnuSpe.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=Vr6NgrB-zHw" title="YouTube" rel="noopener"><img src="https://i.imgur.com/Qypanuq.png"></a></td>
-  </tr>
-  <tr>
-    <td><a href="https://www.youtube.com/watch?v=Ug41KIKF0oo" title="YouTube" rel="noopener"><img src="https://i.imgur.com/3caZ7xM.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=NVR_CdG1FRg" title="YouTube" rel="noopener"><img src="https://i.imgur.com/bAZOwql.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=tkEvIdzdfUE" title="YouTube" rel="noopener"><img src="https://i.imgur.com/EFINEzG.png"></a></td>
-    <td><a href="https://www.youtube.com/watch?v=_P-N1ewNne4" title="YouTube" rel="noopener"><img src="https://i.imgur.com/gAyAq22.png"></a></td>
-  </tr>
-</table>
+* [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles)
+* [**Dynamic gas**](#dynamic-gas)
+* [**PI > PID for longcontrol**](#Long-control-uses-a-PID-loop)
+* [**Customize this branch (opEdit Parameter class)**](#Customize-this-branch-opEdit-Parameter-class)
+* [**Live tuning support**](#Live-tuning-support)
+* [**Custom wheel offset to reduce lane hugging**](#Custom-wheel-offset-to-reduce-lane-hugging)
+* [**Automatic updates**](#Automatic-updates)
 
-Integration with Stock Features
-------
+Documentation
+=====
+* [**Quick Installation**](#Quick-installation)
+* [**Branches**](#Branches)
 
-In all supported cars:
-* Stock Lane Keep Assist (LKA) and stock ALC are replaced by openpilot ALC, which only functions when openpilot is engaged by the user.
-* Stock LDW is replaced by openpilot LDW.
+-----
 
-Additionally, on specific supported cars (see ACC column in [supported cars](#supported-cars)):
-* Stock ACC is replaced by openpilot ACC.
-* openpilot FCW operates in addition to stock FCW.
+Dynamic follow (3 profiles)
+-----
+This is my dynamic follow from 0.5, where it changes your TR (following distance) dynamically based on multiple vehicle factors, as well as data from the lead vehicle. [Here's an old write up from a while ago explaining how it works exactly. Some of it might be out of date, but how it functions is the same.](https://github.com/ShaneSmiskol/openpilot/blob/dynamic-follow/README.md) The goal is to essentially make the driving experience more smooth and increase safety, braking and accelerating sooner.
 
-openpilot should preserve all other vehicle's stock features, including, but are not limited to: FCW, Automatic Emergency Braking (AEB), auto high-beam, blind spot warning, and side collision warning.
+Now you can choose a profile based on traffic and your driving preference. There are three profiles currently:
+  * `traffic` - Meant to keep you a bit closer in traffic, hopefully reducing cut-ins. Use with caution, as you do with any fork adding custom functionality.
+  * `relaxed` - This is the current and now default dynamic follow profile just with a cool name. Also slight closer than previously at high speeds.
+  * `roadtrip` - This profile is for road trips mainly where you're on two lane highways and don't want to be following particularly closely; at night for example.
+<img src=".media/photos/df_profiles.jpg?raw=true" height="350">
 
-Supported Hardware
-------
+**How to choose a profile:** The easiest way is to use the new on-screen profile changing button! Once you're on a drive, you can simply tap the button on the bottom right of the screen to cycle between the profiles.
 
-At the moment, openpilot supports the [EON DevKit](https://comma.ai/shop/products/eon-dashcam-devkit) and the [comma two](https://comma.ai/shop/products/comma-two-devkit). A [car harness](https://comma.ai/shop/products/car-harness) is recommended to connect the EON or comma two to the car. In the future, we'd like to support other platforms as well, like gaming PCs.
+Dynamic gas
+-----
+Dynamic gas aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by reducing the maximum gas that can be applied based on your current velocity, the relative velocity of the lead, the acceleration of the lead, and the distance of the lead. This usually results in quicker and smoother acceleration from a standstill without the jerking you get in stock openpilot with comma pedal (ex. taking off from a traffic light). It tries to coast if the lead is just inching up, it doesn’t use maximum gas as soon as the lead inches forward. When you are above 20 mph, relative velocity and the current following distance in seconds is taken into consideration.
 
-Supported Cars
-------
+All cars that have a comma pedal are supported! However to get the smoothest acceleration, I've custom tuned gas curve profiles for the following cars:
 
-| Make      | Model (US Market Reference)   | Supported Package | ACC              | No ACC accel below | No ALC below      |
-| ----------| ------------------------------| ------------------| -----------------| -------------------| ------------------|
-| Acura     | ILX 2016-18                   | AcuraWatch Plus   | openpilot        | 25mph<sup>6</sup>  | 25mph             |
-| Acura     | RDX 2016-18                   | AcuraWatch Plus   | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Chrysler  | Pacifica 2017-18              | Adaptive Cruise   | Stock            | 0mph               | 9mph              |
-| Chrysler  | Pacifica Hybrid 2017-18       | Adaptive Cruise   | Stock            | 0mph               | 9mph              |
-| Chrysler  | Pacifica Hybrid 2019-20       | Adaptive Cruise   | Stock            | 0mph               | 39mph             |
-| Honda     | Accord 2018-19                | All               | Stock            | 0mph               | 3mph              |
-| Honda     | Accord Hybrid 2018-19         | All               | Stock            | 0mph               | 3mph              |
-| Honda     | Civic Hatchback 2017-19       | Honda Sensing     | Stock            | 0mph               | 12mph             |
-| Honda     | Civic Sedan/Coupe 2016-18     | Honda Sensing     | openpilot        | 0mph               | 12mph             |
-| Honda     | Civic Sedan/Coupe 2019        | Honda Sensing     | Stock            | 0mph               | 2mph<sup>4</sup>  |
-| Honda     | CR-V 2015-16                  | Touring           | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Honda     | CR-V 2017-19                  | Honda Sensing     | Stock            | 0mph               | 12mph             |
-| Honda     | CR-V Hybrid 2017-2019         | Honda Sensing     | Stock            | 0mph               | 12mph             |
-| Honda     | Fit 2018-19                   | Honda Sensing     | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Honda     | Insight 2019                  | Honda Sensing     | Stock            | 0mph               | 3mph              |
-| Honda     | Odyssey 2018-20               | Honda Sensing     | openpilot        | 25mph<sup>6</sup>  | 0mph              |
-| Honda     | Passport 2019                 | All               | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Honda     | Pilot 2016-18                 | Honda Sensing     | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Honda     | Pilot 2019                    | All               | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Honda     | Ridgeline 2017-19             | Honda Sensing     | openpilot        | 25mph<sup>6</sup>  | 12mph             |
-| Hyundai   | Elantra 2017-19<sup>1</sup>   | SCC + LKAS        | Stock            | 19mph              | 34mph             |
-| Hyundai   | Genesis 2018<sup>1</sup>      | All               | Stock            | 19mph              | 34mph             |
-| Hyundai   | Santa Fe 2019<sup>1</sup>     | All               | Stock            | 0mph               | 0mph              |
-| Jeep      | Grand Cherokee 2016-18        | Adaptive Cruise   | Stock            | 0mph               | 9mph              |
-| Jeep      | Grand Cherokee 2019           | Adaptive Cruise   | Stock            | 0mph               | 39mph             |
-| Kia       | Optima 2019<sup>1</sup>       | SCC + LKAS        | Stock            | 0mph               | 0mph              |
-| Kia       | Sorento 2018<sup>1</sup>      | All               | Stock            | 0mph               | 0mph              |
-| Kia       | Stinger 2018<sup>1</sup>      | SCC + LKAS        | Stock            | 0mph               | 0mph              |
-| Lexus     | CT Hybrid 2017-18             | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Lexus     | ES 2019                       | All               | openpilot        | 0mph               | 0mph              |
-| Lexus     | ES Hybrid 2019                | All               | openpilot        | 0mph               | 0mph              |
-| Lexus     | IS 2017-2019                  | All               | Stock            | 22mph              | 0mph              |
-| Lexus     | IS Hybrid 2017                | All               | Stock            | 0mph               | 0mph              |
-| Lexus     | NX Hybrid 2018                | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Lexus     | RX 2016-17                    | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Lexus     | RX 2020                       | All               | openpilot        | 0mph               | 0mph              |
-| Lexus     | RX Hybrid 2016-19             | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Subaru    | Crosstrek 2018-19             | EyeSight          | Stock            | 0mph               | 0mph              |
-| Subaru    | Impreza 2019-20               | EyeSight          | Stock            | 0mph               | 0mph              |
-| Toyota    | Avalon 2016                   | TSS-P             | Stock<sup>5</sup>| 20mph<sup>6</sup>  | 0mph              |
-| Toyota    | Avalon 2017-18                | All               | Stock<sup>5</sup>| 20mph<sup>6</sup>  | 0mph              |
-| Toyota    | Camry 2018-19                 | All               | Stock            | 0mph<sup>2</sup>   | 0mph              |
-| Toyota    | Camry Hybrid 2018-19          | All               | Stock            | 0mph<sup>2</sup>   | 0mph              |
-| Toyota    | C-HR 2017-19                  | All               | Stock            | 0mph               | 0mph              |
-| Toyota    | C-HR Hybrid 2017-19           | All               | Stock            | 0mph               | 0mph              |
-| Toyota    | Corolla 2017-19               | All               | Stock<sup>5</sup>| 20mph<sup>6</sup>  | 0mph              |
-| Toyota    | Corolla 2020                  | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Corolla Hatchback 2019-20     | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Corolla Hybrid 2020           | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Highlander 2017-19            | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Highlander Hybrid 2017-19     | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Highlander 2020               | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Prius 2016                    | TSS-P             | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Prius 2017-19                 | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Prius Prime 2017-20           | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Rav4 2016                     | TSS-P             | Stock<sup>5</sup>| 20mph<sup>6</sup>  | 0mph              |
-| Toyota    | Rav4 2017-18                  | All               | Stock<sup>5</sup>| 20mph<sup>6</sup>  | 0mph              |
-| Toyota    | Rav4 2019                     | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Rav4 Hybrid 2016              | TSS-P             | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Rav4 Hybrid 2017-18           | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Toyota    | Rav4 Hybrid 2019-20           | All               | openpilot        | 0mph               | 0mph              |
-| Toyota    | Sienna 2018                   | All               | Stock<sup>5</sup>| 0mph               | 0mph              |
-| Volkswagen| Golf 2016-19<sup>3</sup>      | Driver Assistance | Stock            | 0mph               | 0mph              |
+pedal cars:
+  * 2017 Toyota Corolla (non-TSS2)
+  * Toyota RAV4 (non-TSS2)
+  * 2017 Honda Civic
+  * 2019 Honda Pilot
 
-<sup>1</sup>Requires a [panda](https://comma.ai/shop/products/panda-obd-ii-dongle) and open sourced [Hyundai giraffe](https://github.com/commaai/neo/tree/master/giraffe/hyundai), designed for the 2019 Sante Fe; pinout may differ for other Hyundai and Kia models. <br />
-<sup>2</sup>28mph for Camry 4CYL L, 4CYL LE and 4CYL SE which don't have Full-Speed Range Dynamic Radar Cruise Control. <br />
-<sup>3</sup>Requires a [custom connector](https://community.comma.ai/wiki/index.php/Volkswagen#Integration_at_R242_Camera) for the [car harness](https://comma.ai/shop/products/car-harness) <br />
-<sup>4</sup>2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph. <br />
+non-pedal cars:
+  * None yet
 
-Community Maintained Cars and Features
-------
+If you have a car without a pedal, or you do have one but I haven't created a profile for you yet, please let me know and we can develop one for your car to test.
 
-| Make      | Model (US Market Reference)   | Supported Package | ACC              | No ACC accel below | No ALC below |
-| ----------| ------------------------------| ------------------| -----------------| -------------------| -------------|
-| Buick     | Regal 2018<sup>7</sup>        | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
-| Cadillac  | ATS 2018<sup>7</sup>          | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
-| Chevrolet | Malibu 2017<sup>7</sup>       | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
-| Chevrolet | Volt 2017-18<sup>7</sup>      | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
-| GMC       | Acadia Denali 2018<sup>7</sup>| Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
-| Holden    | Astra 2017<sup>7</sup>        | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
+~~*TODO: Need to factor in distance, as it will not accelerate to get closer to the stopped lead if you engage at ~0mph far back from the lead.*~~ Update: Added lead distance into dynamic gas, now just need to tune and test.
 
-<sup>5</sup>When disconnecting the Driver Support Unit (DSU), openpilot ACC will replace stock ACC. For DSU locations, see [Toyota Wiki page](https://community.comma.ai/wiki/index.php/Toyota). ***NOTE: disconnecting the DSU disables Automatic Emergency Braking (AEB).*** <br />
-<sup>6</sup>[Comma Pedal](https://community.comma.ai/wiki/index.php/Comma_Pedal) is used to provide stop-and-go capability to some of the openpilot-supported cars that don't currently support stop-and-go. Here is how to [build a Comma Pedal](https://medium.com/@jfrux/comma-pedal-building-with-macrofab-6328bea791e8). ***NOTE: The Comma Pedal is not officially supported by [comma](https://comma.ai).*** <br />
-<sup>7</sup>Requires a [panda](https://comma.ai/shop/products/panda-obd-ii-dongle) and [community built giraffe](https://zoneos.com/volt/). ***NOTE: disconnecting the ASCM disables Automatic Emergency Braking (AEB).*** <br />
+Long control uses a PID loop
+-----
+I've added a custom implementation of derivative to the PI loop controlling the gas and brake output sent to your car. Derivative (change in error) is calculated based on the current and last error and added to the class's integral variable. It's essentially winding down integral according to derivative. It helps fix overshoot on some cars with the comma pedal and increases responsiveness (like when going up and down hills) on all other cars! Still need to figure out the tuning, right now it's using the same derivative gain for all cars. Test it out and let me know what you think!
 
-Community Maintained Cars and Features are not verified by comma to meet our [safety model](SAFETY.md). Be extra cautious using them. They are only available after enabling the toggle in `Settings->Developer->Enable Community Features`.
+Customize this branch (opEdit Parameter class)
+-----
+This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
+```python
+cd /data/openpilot
+python op_edit.py
+```
 
-Installation Instructions
-------
+Features:
+- You can misspell parameter names and opEdit should be able to figure out which parameter you want. Ex. `cmra off` would be parsed as: `camera_offset`
+  - You can also still enter the corresponding parameter index while choose parameters to edit
+- Type `a` to add a parameter, `d` to delete a parameter, or `l` to toggle live tuning only mode
+- Shows a detailed description for each parameter once you choose it
+- Parameter value type restriction. Ensures a user cannot save an unsupported value type for any parameters, breaking the fork
+- Remembers which mode you were last in and initializes opEdit with that mode (live tuning or not)
+- Case insensitive boolean entrance. Type `false` to save `False (bool)` and vice versa
 
-Install openpilot on a EON by entering ``https://openpilot.comma.ai`` during the installer setup.
+Some parameters you can use to customize this fork:
+- `camera_offset`: Your camera offset to use in lane_planner.py. Helps fix lane hugging
+- `awareness_factor`: The multiplier for driver monitoring, max is 3.5x (this is only in effect when driver monitoring isn't active)
+- `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
+- `alca_min_speed`: The minimum speed allowed for an automatic lane change
+- `steer_ratio`: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead
+- `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
+- `no_ota_updates`: Set this to True to disable all automatic updates. Reboot to take effect
+- `dynamic_gas`: Whether to use dynamic gas if your car is supported
 
-Follow this [video instructions](https://youtu.be/3nlkomHathI) to properly mount the EON on the windshield. Note: openpilot features an automatic pose calibration routine and openpilot performance should not be affected by small pitch and yaw misalignments caused by imprecise EON mounting.
+A list of parameters that you can modify are [located here](common/op_params.py#L50).
 
-Before placing the device on your windshield, check the state and local laws and ordinances where you drive. Some state laws prohibit or restrict the placement of objects on the windshield of a motor vehicle.
+An archive of opParams [lives here.](https://github.com/ShaneSmiskol/op_params)
 
-You will be able to engage openpilot after reviewing the onboarding screens and finishing the calibration procedure.
+Parameters are stored at `/data/op_params.json`
 
-Limitations of openpilot ALC and LDW
-------
+Live tuning support
+-----
+Parameters supporting live updating: `camera_offset`, `lane_hug_angle_offset`, `dynamic_follow`, `steer_ratio`
+- Just start opEdit with the instructions above and pick a parameter. It will let you know if it supports live tuning, if so, updates will take affect within 5 seconds!
 
-openpilot ALC and openpilot LDW do not automatically drive the vehicle or reduce the amount of attention that must be paid to operate your vehicle. The driver must always keep control of the steering wheel and be ready to correct the openpilot ALC action at all times.
+<img src=".media/gifs/op_tune.gif?raw=true" width="600">
 
-While changing lanes, openpilot is not capable of looking next to you or checking your blind spot. Only nudge the wheel to initiate a lane change after you have confirmed it's safe to do so.
+Dynamic lane speed
+-----
+*This feature is disabled until I can figure out how to improve it. Probably going to be replaced by comma's upcoming end 2 end long model.*
 
-Many factors can impact the performance of openpilot ALC and openpilot LDW, causing them to be unable to function as intended. These include, but are not limited to:
+This is a feature that reduces your cruising speed if many vehicles around you are significantly slower than you. This works with and without an openpilot-identified lead. Ex.: It will slow you down if traveling in an open lane with cars in adjacent lanes that are slower than you. Or if the lead in front of the lead is slowing down, as well as cars in other lanes far ahead. The most it will slow you down is some average of: (the set speed and the average of the surrounding cars) The more the radar points, the more weight goes to the speeds of surrounding vehicles.
 
-* Poor visibility (heavy rain, snow, fog, etc.) or weather conditions that may interfere with sensor operation.
-* The road facing camera is obstructed, covered or damaged by mud, ice, snow, etc.
-* Obstruction caused by applying excessive paint or adhesive products (such as wraps, stickers, rubber coating, etc.) onto the vehicle.
-* The EON is mounted incorrectly.
-* When in sharp curves, like on-off ramps, intersections etc...; openpilot is designed to be limited in the amount of steering torque it can produce.
-* In the presence of restricted lanes or construction zones.
-* When driving on highly banked roads or in presence of strong cross-wind.
-* Extremely hot or cold temperatures.
-* Bright light (due to oncoming headlights, direct sunlight, etc.).
-* Driving on hills, narrow, or winding roads.
+Custom wheel offset to reduce lane hugging
+-----
+***Update**: The performance of this modification is iffy at best, but it definitely is more apparent than just tuning your camera offset value. Removing the immediate angle offset can have some weird oscillating effect when it's windy or on roads with camber (slant to one side). Will be left in, but disabled by default.*
 
-The list above does not represent an exhaustive list of situations that may interfere with proper operation of openpilot components. It is the driver's responsibility to be in control of the vehicle at all times.
+With the `LaneHugging` module you can specify a custom angle offset to be added to your desired steering angle. Simply find the angle your wheel is at when you're driving on a straight highway. By default, this is disabled, to enable you can:
+- Use the `opEdit` class in the root directory of openpilot. To use it, simply open an `ssh` shell and enter the commands below:
+    ```python
+    cd /data/openpilot
+    python op_edit.py
+    ```
+    You'll be greeted with a list of your parameters you can explore, enter the number corresponding to `lane_hug_direction`. Your options are to enter `'left'` or `'right'` for whichever direction your car has a tendency to hug toward. `None` will disable the feature.
+    Finally you'll need to enter your absolute angle offset (negative will be converted to positive) with the `opParams` parameter: `lane_hug_angle_offset`.
+    
+    The lane hugging mod is enabled only if `lane_hug_direction` is `'left'` or `'right'`. **Warning: the learned steering offset from openpilot will no longer be used if this mod is active.**
 
-Limitations of openpilot ACC and FCW
-------
+Automatic updates
+-----
+When a new update is available on GitHub for this fork, your EON will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
+- your EON has been inactive or offroad for more than 5 minutes.
 
-openpilot ACC and openpilot FCW are not systems that allow careless or inattentive driving. It is still necessary for the driver to pay close attention to the vehicle’s surroundings and to be ready to re-take control of the gas and the brake at all times.
+Therefore, if the EON sees an update while you're driving it will reboot 5 minutes after you stop your drive, it resets the timer if you start driving again before the 5 minutes is up.
 
-Many factors can impact the performance of openpilot ACC and openpilot FCW, causing them to be unable to function as intended. These include, but are not limited to:
+Documentation
+=====
 
-* Poor visibility (heavy rain, snow, fog, etc.) or weather conditions that may interfere with sensor operation.
-* The road facing camera or radar are obstructed, covered, or damaged by mud, ice, snow, etc.
-* Obstruction caused by applying excessive paint or adhesive products (such as wraps, stickers, rubber coating, etc.) onto the vehicle.
-* The EON is mounted incorrectly.
-* Approaching a toll booth, a bridge or a large metal plate.
-* When driving on roads with pedestrians, cyclists, etc...
-* In presence of traffic signs or stop lights, which are not detected by openpilot at this time.
-* When the posted speed limit is below the user selected set speed. openpilot does not detect speed limits at this time.
-* In presence of vehicles in the same lane that are not moving.
-* When abrupt braking maneuvers are required. openpilot is designed to be limited in the amount of deceleration and acceleration that it can produce.
-* When surrounding vehicles perform close cut-ins from neighbor lanes.
-* Driving on hills, narrow, or winding roads.
-* Extremely hot or cold temperatures.
-* Bright light (due to oncoming headlights, direct sunlight, etc.).
-* Interference from other equipment that generates radar waves.
+Quick Installation
+-----
+To install Stock Additions, just run the following on your EON/C2:
 
-The list above does not represent an exhaustive list of situations that may interfere with proper operation of openpilot components. It is the driver's responsibility to be in control of the vehicle at all times.
+```
+cd /data/
+mv openpilot openpilot.old  # or equivalent
+git clone -b stock_additions --single-branch https://github.com/shanesmiskol/openpilot --depth 1
+reboot
+```
 
-Limitations of openpilot DM
-------
+This branch is only ~70MB enabling fast cloning of this fork! It will contain the latest from `stock_additions` squashed down to one commit. See below for more branch information.
 
-openpilot DM should not be considered an exact measurements of the status of alertness of the driver.
+Branches
+-----
+Most of the branches on this fork are development branches I use as various openpilot tests. The few that more permanent are the following:
+  * [`stock_additions`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions): This is similar to stock openpilot's release branch. Will receive occasional and tested updates to Stock Additions.
+  * [`stock_additions-devel`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-devel): My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommendeded as a daily driver.
+  * [`stock_additions-release`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-release): The release-release branch sort of. Contains the latest of the `stock_additions` branch in one commit so cloning times are quick. 
+  * [`traffic_lights-074`](https://github.com/ShaneSmiskol/openpilot/tree/traffic_lights-074):  The development branch testing our traffic light detection model [found here](https://github.com/ShaneSmiskol/traffic-lights).
 
-Many factors can impact the performance of openpilot DM, causing it to be unable to function as intended. These include, but are not limited to:
-
-* Low light conditions, such as driving at night or in dark tunnels.
-* Bright light (due to oncoming headlights, direct sunlight, etc.).
-* The driver face is partially or completely outside field of view of the driver facing camera.
-* Right hand driving vehicles.
-* The driver facing camera is obstructed, covered, or damaged.
-
-The list above does not represent an exhaustive list of situations that may interfere with proper operation of openpilot components. A driver should not rely on openpilot DM to assess their level of attention.
-
-User Data and comma Account
-------
-
-By default, openpilot uploads the driving data to our servers. You can also access your data by pairing with the comma connect app ([iOS](https://apps.apple.com/us/app/comma-connect/id1456551889), [Android](https://play.google.com/store/apps/details?id=ai.comma.connect&hl=en_US)). We use your data to train better models and improve openpilot for everyone.
-
-openpilot is open source software: the user is free to disable data collection if they wish to do so.
-
-openpilot logs the road facing camera, CAN, GPS, IMU, magnetometer, thermal sensors, crashes, and operating system logs.
-The driver facing camera is only logged if you explicitly opt-in in settings. The microphone is not recorded.
-
-By using openpilot, you agree to [our Privacy Policy](https://my.comma.ai/privacy). You understand that use of this software or its related services will generate certain types of user data, which may be logged and stored at the sole discretion of comma. By accepting this agreement, you grant an irrevocable, perpetual, worldwide right to comma for the use of this data.
-
-Safety and Testing
-----
-
-* openpilot observes ISO26262 guidelines, see [SAFETY.md](SAFETY.md) for more detail.
-* openpilot has software in the loop [tests](run_docker_tests.sh) that run on every commit.
-* The safety model code lives in panda and is written in C, see [code rigor](https://github.com/commaai/panda#code-rigor) for more details.
-* panda has software in the loop [safety tests](https://github.com/commaai/panda/tree/master/tests/safety).
-* Internally, we have a hardware in the loop Jenkins test suite that builds and unit tests the various processes.
-* panda has additional hardware in the loop [tests](https://github.com/commaai/panda/blob/master/Jenkinsfile).
-* We run the latest openpilot in a testing closet containing 10 EONs continuously replaying routes.
-
-Testing on PC
-------
-
-Check out the tools directory in master: lots of tools you can use to replay driving data, test and develop openpilot from your pc.
-
-Community and Contributing
-------
-
-openpilot is developed by [comma](https://comma.ai/) and by users like you. We welcome both pull requests and issues on [GitHub](http://github.com/commaai/openpilot). Bug fixes and new car ports are encouraged.
-
-You can add support for your car by following guides we have written for [Brand](https://medium.com/@comma_ai/how-to-write-a-car-port-for-openpilot-7ce0785eda84) and [Model](https://medium.com/@comma_ai/openpilot-port-guide-for-toyota-models-e5467f4b5fe6) ports. Generally, a car with adaptive cruise control and lane keep assist is a good candidate. [Join our Discord](https://discord.comma.ai) to discuss car ports: most car makes have a dedicated channel.
-
-Want to get paid to work on openpilot? [comma is hiring](https://comma.ai/jobs/). We also have a [bounty program](https://comma.ai/bounties.html).
-
-And [follow us on Twitter](https://twitter.com/comma_ai).
-
-Directory Structure
-------
-    .
-    ├── apk                 # The apk files used for the UI
-    ├── cereal              # The messaging spec and libs used for all logs on EON
-    ├── common              # Library like functionality we've developed here
-    ├── installer/updater   # Manages auto-updates of openpilot
-    ├── opendbc             # Files showing how to interpret data from cars
-    ├── panda               # Code used to communicate on CAN
-    ├── phonelibs           # Libraries used on EON
-    ├── pyextra             # Libraries used on EON
-    └── selfdrive           # Code needed to drive the car
-        ├── assets          # Fonts and images for UI
-        ├── athena          # Allows communication with the app
-        ├── boardd          # Daemon to talk to the board
-        ├── camerad         # Driver to capture images from the camera sensors
-        ├── car             # Car specific code to read states and control actuators
-        ├── common          # Shared C/C++ code for the daemons
-        ├── controls        # Perception, planning and controls
-        ├── debug           # Tools to help you debug and do car ports
-        ├── locationd       # Soon to be home of precise location
-        ├── logcatd         # Android logcat as a service
-        ├── loggerd         # Logger and uploader of car data
-        ├── modeld          # Driving and monitoring model runners
-        ├── proclogd        # Logs information from proc
-        ├── sensord         # IMU / GPS interface code
-        ├── tests           # Unit tests, system tests and a car simulator
-        └── ui              # The UI
-
-To understand how the services interact, see `cereal/service_list.yaml`.
-
-Licensing
-------
-
-openpilot is released under the MIT license. Some parts of the software are released under other licenses as specified.
-
-Any user of this software shall indemnify and hold harmless comma.ai, Inc. and its directors, officers, employees, agents, stockholders, affiliates, subcontractors and customers from and against all allegations, claims, actions, suits, demands, damages, liabilities, obligations, losses, settlements, judgments, costs and expenses (including without limitation attorneys’ fees and costs) which arise out of, relate to or result from any use of this software by user.
-
-**THIS IS ALPHA QUALITY SOFTWARE FOR RESEARCH PURPOSES ONLY. THIS IS NOT A PRODUCT.
-YOU ARE RESPONSIBLE FOR COMPLYING WITH LOCAL LAWS AND REGULATIONS.
-NO WARRANTY EXPRESSED OR IMPLIED.**
-
----
-
-<img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/1061157-bc7e9bf3b246ece7322e6ffe653f6af8-medium_jpg.jpg?buster=1458363130" width="75"></img> <img src="https://cdn-images-1.medium.com/max/1600/1*C87EjxGeMPrkTuVRVWVg4w.png" width="225"></img>
+The branches which have a version number appended to them are past archive versions of Stock Additions.

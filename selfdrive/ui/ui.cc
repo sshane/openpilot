@@ -6,6 +6,9 @@
 #include <sys/mman.h>
 #include <sys/resource.h>
 
+#include <capnp/serialize.h>
+#include "cereal/gen/cpp/log.capnp.h"
+
 #include <czmq.h>
 
 #include "common/util.h"
@@ -71,6 +74,34 @@ static void navigate_to_home(UIState *s) {
 #else
   // computer UI doesn't have offroad home
 #endif
+}
+
+static void send_df(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  cereal::Event::Builder event = msg.initRoot<cereal::Event>();
+  auto dfStatus = event.initDynamicFollowButton();
+  dfStatus.setStatus(status);
+
+  auto words = capnp::messageToFlatArray(msg);
+  auto bytes = words.asBytes();
+  s->dynamicfollowbutton_sock->send((char*)bytes.begin(), bytes.size());
+}
+
+static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
+  //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
+  if (s->awake && s->vision_connected && s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
+  int padding = 40;
+    if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
+      s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping df button
+      s->scene.dfButtonStatus++;
+      if (s->scene.dfButtonStatus > 3) {
+        s->scene.dfButtonStatus = 0;
+      }
+      send_df(s, s->scene.dfButtonStatus);
+      return true;
+    }
+  }
+  return false;
 }
 
 static void handle_sidebar_touch(UIState *s, int touch_x, int touch_y) {
@@ -152,6 +183,7 @@ static void ui_init(UIState *s) {
   s->thermal_sock = SubSocket::create(s->ctx, "thermal");
   s->health_sock = SubSocket::create(s->ctx, "health");
   s->ubloxgnss_sock = SubSocket::create(s->ctx, "ubloxGnss");
+  s->dynamicfollowbutton_sock = PubSocket::create(s->ctx, "dynamicFollowButton");
 
   assert(s->model_sock != NULL);
   assert(s->controlsstate_sock != NULL);
@@ -161,6 +193,7 @@ static void ui_init(UIState *s) {
   assert(s->thermal_sock != NULL);
   assert(s->health_sock != NULL);
   assert(s->ubloxgnss_sock != NULL);
+  assert(s->dynamicfollowbutton_sock != NULL);
 
   s->poller = Poller::create({
                               s->model_sock,
@@ -219,6 +252,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .front_box_height = ui_info.front_box_height,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
+      .dfButtonStatus = 0,
   };
 
   s->rgb_width = back_bufs.width;
@@ -922,7 +956,9 @@ int main(int argc, char* argv[]) {
     if (touched == 1) {
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
-      handle_vision_touch(s, touch_x, touch_y);
+      if (!handle_df_touch(s, touch_x, touch_y)){  // disables sidebar from popping out when tapping df button
+        handle_vision_touch(s, touch_x, touch_y);
+      }
     }
 
     if (!s->vision_connected) {

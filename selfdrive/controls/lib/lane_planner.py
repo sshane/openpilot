@@ -1,8 +1,10 @@
+from common.op_params import opParams
 from common.numpy_fast import interp
 import numpy as np
 from cereal import log
 
-CAMERA_OFFSET = 0.06  # m from center car to camera
+op_params = opParams()
+
 
 def compute_path_pinv(l=50):
   deg = 3
@@ -16,11 +18,22 @@ def model_polyfit(points, path_pinv):
   return np.dot(path_pinv, [float(x) for x in points])
 
 
-def calc_d_poly(l_poly, r_poly, p_poly, l_prob, r_prob, lane_width):
+def eval_poly(poly, x):
+  return poly[3] + poly[2]*x + poly[1]*x**2 + poly[0]*x**3
+
+
+def calc_d_poly(l_poly, r_poly, p_poly, l_prob, r_prob, lane_width, v_ego):
   # This will improve behaviour when lanes suddenly widen
-  lane_width = min(2.5, lane_width)
-  l_prob = l_prob * interp(abs(l_poly[3]), [2, 2.5], [1.0, 0.0])
-  r_prob = r_prob * interp(abs(r_poly[3]), [2, 2.5], [1.0, 0.0])
+  # these numbers were tested on 2000segments and found to work well
+  lane_width = min(4.0, lane_width)
+  width_poly = l_poly - r_poly
+  prob_mods = []
+  for t_check in [0.0, 1.5, 3.0]:
+    width_at_t = eval_poly(width_poly, t_check * (v_ego + 7))
+    prob_mods.append(interp(width_at_t, [4.0, 5.0], [1.0, 0.0]))
+  mod = min(prob_mods)
+  l_prob = mod * l_prob
+  r_prob = mod * r_prob
 
   path_from_left_lane = l_poly.copy()
   path_from_left_lane[3] -= lane_width / 2.0
@@ -71,6 +84,7 @@ class LanePlanner():
 
   def update_d_poly(self, v_ego):
     # only offset left and right lane lines; offsetting p_poly does not make sense
+    CAMERA_OFFSET = op_params.get('camera_offset', 0.06)
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
 
@@ -82,7 +96,7 @@ class LanePlanner():
     self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                       (1 - self.lane_width_certainty) * speed_lane_width
 
-    self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width)
+    self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width, v_ego)
 
   def update(self, v_ego, md):
     self.parse_model(md)

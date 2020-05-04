@@ -9,6 +9,8 @@ from selfdrive.config import Conversions as CV
 from common.params import Params
 import cereal.messaging as messaging
 from cereal import log
+from common.op_params import opParams
+from selfdrive.controls.lane_hugging import LaneHugging
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
@@ -62,6 +64,11 @@ class PathPlanner():
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
 
+    self.lane_hugging = LaneHugging()
+    self.op_params = opParams()
+    self.alca_nudge_required = self.op_params.get('alca_nudge_required', default=True)
+    self.alca_min_speed = self.op_params.get('alca_min_speed', default=30.0)
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -94,7 +101,7 @@ class PathPlanner():
 
     # Lane change logic
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
-    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
+    below_lane_change_speed = v_ego < self.alca_min_speed * CV.MPH_TO_MS
 
     if sm['carState'].leftBlinker:
       self.lane_change_direction = LaneChangeDirection.left
@@ -105,9 +112,11 @@ class PathPlanner():
       self.lane_change_state = LaneChangeState.off
       self.lane_change_direction = LaneChangeDirection.none
     else:
-      torque_applied = sm['carState'].steeringPressed and \
-                       ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or \
-                        (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right))
+      torque_applied = True
+      if self.alca_nudge_required:
+        torque_applied = sm['carState'].steeringPressed and \
+                         ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or \
+                          (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right))
 
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
@@ -161,6 +170,7 @@ class PathPlanner():
     self.LP.update_d_poly(v_ego)
 
     # account for actuation delay
+    angle_offset = self.lane_hugging.modify_offset(float(angle_offset), self.lane_change_direction, self.lane_change_state)
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
 
     v_ego_mpc = max(v_ego, 5.0)  # avoid mpc roughness due to low speed
@@ -208,7 +218,7 @@ class PathPlanner():
 
     plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
     plan_send.pathPlan.rateSteers = float(rate_desired)
-    plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffsetAverage)
+    plan_send.pathPlan.angleOffset = self.lane_hugging.modify_offset(float(sm['liveParameters'].angleOffsetAverage), self.lane_change_direction, self.lane_change_state)
     plan_send.pathPlan.mpcSolutionValid = bool(plan_solution_valid)
     plan_send.pathPlan.paramsValid = bool(sm['liveParameters'].valid)
     plan_send.pathPlan.sensorValid = bool(sm['liveParameters'].sensorValid)
