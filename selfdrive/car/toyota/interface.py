@@ -331,7 +331,7 @@ class CarInterface(CarInterfaceBase):
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
     ret.buttonEvents = []
 
-    if candidate == CAR.OLD_CAR:
+    if self.candidate == CAR.OLD_CAR:
       ret.canValid = True #self.cp.can_valid and self.cp_cam.can_valid
     else:
       ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
@@ -339,7 +339,7 @@ class CarInterface(CarInterfaceBase):
     # events
     events = self.create_common_events(ret)
 
-    if candidate != CAR.OLD_CAR:
+    if self.candidate != CAR.OLD_CAR:
       if self.cp_cam.can_invalid_cnt >= 200 and self.CP.enableCamera:
         events.append(create_event('invalidGiraffeToyota', [ET.PERMANENT]))
     if self.CS.low_speed_lockout and self.CP.openpilotLongitudinalControl:
