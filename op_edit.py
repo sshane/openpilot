@@ -122,11 +122,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if key_info.has_description:
         to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')))
       if key_info.has_allowed_types:
-        if key_info.is_list:
-          print('This is a list param!')
-        else:
-          print('This is not a list param!')
-
         to_print.append('>>  Allowed types: {}'.format(', '.join([i.__name__ for i in key_info.allowed_types])))
       if key_info.live:
         to_print.append('>>  This parameter supports live tuning! Updates should take affect within 5 seconds')
@@ -135,6 +130,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         print('\n{}\n'.format('\n'.join(to_print)))
 
       print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
+
+      if key_info.is_list:
+        print('Enter index to edit (0 to {})'.format(len(old_value)))
+        choice_idx = input('>> ').strip()
+        print('editing {}'.format(old_value[int(choice_idx)]))
+        return
+      else:
+        print('This is not a list param!')
+
       while True:
         print('\nEnter your new value:')
         new_value = input('>> ').strip()
