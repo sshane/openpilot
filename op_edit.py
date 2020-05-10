@@ -62,7 +62,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       # extras = ['---\na. Add new parameter',
       #           'd. Delete parameter',
       #           'l. Toggle live tuning']
-      to_print += ['---\n'] + ['{}. {}'.format(e, extras[e]) for e in extras]
+      to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
 
       print('\n'.join(to_print))
       print('\nChoose a parameter to edit (by index or name):')
