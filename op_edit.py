@@ -59,11 +59,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'l': 'Toggle live tuning',
                 'e': 'Exit opEdit'}
 
-      # extras = ['---\na. Add new parameter',
-      #           'd. Delete parameter',
-      #           'l. Toggle live tuning']
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-
       print('\n'.join(to_print))
       print('\nChoose a parameter to edit (by index or name):')
 
@@ -92,16 +88,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         return 'continue', choice
       return 'change', choice
 
-    if choice == '':
-      print('Exiting opEdit!')
-      return 'exit', choice
-
     if choice in ['a', 'add']:  # add new parameter
       return 'add', choice
     elif choice in ['d', 'delete', 'del']:  # delete parameter
       return 'delete', choice
     elif choice in ['l', 'live']:  # live tuning mode
       return 'live', choice
+    elif choice in ['exit', 'e', '']:
+      print('Exiting opEdit!')
+      return 'exit', choice
     else:  # find most similar param to user's input
       param_sims = [(idx, self.str_sim(choice, param)) for idx, param in enumerate(self.params)]
       param_sims = [param for param in param_sims if param[1] > 0.5]
