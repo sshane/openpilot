@@ -131,7 +131,7 @@ class opParams:
         allowed_types = self.default_params[key]['allowed_types']
         if isinstance(allowed_types, list) and len(allowed_types) > 0:
           key_info.has_allowed_types = True
-          key_info.allowed_types = allowed_types
+          key_info.allowed_types = list(allowed_types)
           if list in [type(typ) for typ in allowed_types]:
             key_info.is_list = True
             print(key_info.allowed_types)
