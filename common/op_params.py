@@ -134,6 +134,7 @@ class opParams:
           key_info.allowed_types = allowed_types
           if list in [type(typ) for typ in allowed_types]:
             key_info.is_list = True
+            print(key_info.allowed_types)
             key_info.allowed_types.remove(list)
             key_info.allowed_types = key_info.allowed_types[0]
 
