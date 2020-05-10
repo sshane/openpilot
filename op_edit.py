@@ -122,14 +122,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if key_info.has_description:
         to_print.append('>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')))
       if key_info.has_allowed_types:
-        allowed_types = []
         if key_info.is_list:
           print('This is a list param!')
         else:
           print('This is not a list param!')
-        for typ in key_info.allowed_types:
-          print(type(typ))
-        to_print.append('>>  Allowed types: {}'.format(', '.join([str(i).split("'")[1] for i in key_info.allowed_types])))
+
+        to_print.append('>>  Allowed types: {}'.format(', '.join([i.__name__ for i in key_info.allowed_types])))
       if key_info.live:
         to_print.append('>>  This parameter supports live tuning! Updates should take affect within 5 seconds')
 
