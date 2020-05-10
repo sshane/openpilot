@@ -53,10 +53,16 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       live = ['(live!)' if self.op_params.key_info(i).live else '' for i in self.params]
 
       to_print = ['{}. {}: {}  {}'.format(idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
-      extras = ['---\na. Add new parameter',
-                'd. Delete parameter',
-                'l. Toggle live tuning']
-      to_print += extras
+
+      extras = {'a': 'Add new parameter',
+                'd': 'Delete parameter',
+                'l': 'Toggle live tuning',
+                'e': 'Exit opEdit'}
+
+      # extras = ['---\na. Add new parameter',
+      #           'd. Delete parameter',
+      #           'l. Toggle live tuning']
+      to_print += ['---\n'] + ['{}. {}'.format(e, extras[e]) for e in extras]
 
       print('\n'.join(to_print))
       print('\nChoose a parameter to edit (by index or name):')
