@@ -85,8 +85,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      # print('\n'.join(to_print))
-      self.blue('\n'.join(to_print), end='\n')
+      to_print = [self.blue(line) for line in to_print]
+      print('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
