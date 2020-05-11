@@ -56,7 +56,6 @@ class opParams:
                            'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
                            'hide_auto_df_alerts': {'default': False, 'allowed_types': [bool], 'description': 'Set to True to hide the alert that shows what profile the model has chosen'},
                            'log_data': {'default': False, 'allowed_types': [bool]},
-                           'list_param': {'default': [0.0, 5.2, 35.5], 'allowed_types': [list, [float, int]], 'description': 'List test param', 'live': True},
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
