@@ -213,7 +213,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
-        self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+        self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), end='\n')
         break
 
   def cyan(self, msg, end=''):
