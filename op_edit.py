@@ -170,7 +170,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         return
 
       if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
-        print('Must be an integar within list range!')
+        self.message('Must be an integar within list range!')
         continue
 
       while True:
