@@ -15,7 +15,7 @@ class STYLES:
   ENDC = '\033[0m' + CWHITE
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
-  CBLUE   = '\33[34m'
+  CBLUE = '\33[44m'
 
   # success = OKGREEN + UNDERLINE
   # fail = OKGREEN + UNDERLINE
