@@ -238,6 +238,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def str_color(self, msg, style, surround, underline=False):
     if style == 'success':
+      print('okgreen')
       style = STYLES.OKGREEN
     elif style == 'fail':
       style = STYLES.FAIL
