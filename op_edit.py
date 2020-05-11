@@ -6,14 +6,18 @@ import difflib
 
 
 class STYLES:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+  HEADER = '\033[95m'
+  OKBLUE = '\033[94m'
+  OKGREEN = '\033[92m'
+  WARNING = '\033[93m'
+  FAIL = '\033[91m'
+  ENDC = '\033[0m'
+  BOLD = '\033[1m'
+  UNDERLINE = '\033[4m'
+
+  # success = OKGREEN + UNDERLINE
+  # fail = OKGREEN + UNDERLINE
+
 
 
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
@@ -194,20 +198,42 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__), style='fail')
           continue
 
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
-        print(self.str_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__)))
+        # print(self.str_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__)))
         break
 
-  def str_color(self, msg, fail=False):
-    if fail:
-      return '{}{}{}'.format(STYLES.FAIL, msg, STYLES.ENDC)
-    else:
-      return '{}{}{}'.format(STYLES.OKGREEN, msg, STYLES.ENDC)
+  def message(self, msg, sleep_time=None, end='', style=None, surround=True):
+    end_text = '\n' + end
+    if sleep_time is None:
+      sleep_time = self.sleep_time
+    if style is not None:
+      msg = self.str_color(msg, style=style, surround=surround)
+
+    print(msg, flush=True, end=end_text)
+    time.sleep(sleep_time)
+
+  def str_color(self, msg, style, surround):
+    if style == 'success':
+      style = STYLES.OKGREEN
+    elif style == 'fail':
+      style = STYLES.FAIL
+
+    if surround:
+      msg = '{}--------\n{}{}\n{}--------'.format(style, STYLES.UNDERLINE, msg, STYLES.ENDC + style)
+
+    return msg
+
+    # if style == 'success':
+    #   return '{}{}{}'.format(STYLES.FAIL, msg, STYLES.ENDC)
+    # elif style == 'fail':
+    #   return '{}{}{}'.format(STYLES.OKGREEN, msg, STYLES.ENDC)
+    # else:
+    #   return msg
 
   def input_with_options(self, options, default=None):
     """
@@ -285,12 +311,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       else:
         self.message('Not saved!')
       return
-
-  def message(self, msg, sleep_time=None, end='\n', fail=True):
-    if sleep_time is None:
-      sleep_time = self.sleep_time
-    print(self.str_color('--------\n{}\n--------'.format(msg), fail=fail), flush=True, end=end)
-    time.sleep(sleep_time)
 
 
 opEdit()
