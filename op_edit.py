@@ -84,7 +84,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      self.error('\n'.join(to_print), surround=False)
+      self.error('\n'.join(to_print), surround=False, sleep_time=0)
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
@@ -119,7 +119,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     elif choice in ['l', 'live']:  # live tuning mode
       return 'live', choice
     elif choice in ['exit', 'e', '']:
-      self.error('Exiting opEdit!')
+      self.error('Exiting opEdit!', sleep_time=0)
       return 'exit', choice
     else:  # find most similar param to user's input
       param_sims = [(idx, self.str_sim(choice, param)) for idx, param in enumerate(self.params)]
@@ -156,7 +156,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
 
       if key_info.is_list:
-        self.change_param_list(old_value, key_info, chosen_key)
+        self.change_param_list(old_value, key_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 
       while True:
