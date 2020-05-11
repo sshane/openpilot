@@ -8,7 +8,7 @@ import difflib
 class STYLES:
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
-  OKBLUE = '\033[35m'
+  CYAN = '\033[36m'
   OKGREEN = '\033[92m'
   CWHITE = '\33[37m'
   ENDC = '\033[0m' + CWHITE
@@ -85,7 +85,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      to_print = [self.blue(line) for line in to_print]
+      to_print = [self.cyan(line) for line in to_print]
       print('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
@@ -219,7 +219,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         break
 
-  def blue(self, msg, end=''):
+  def cyan(self, msg, end=''):
     msg = self.str_color(msg, style='blue')
     # print(msg, flush=True, end='\n' + end)
     return msg
@@ -272,8 +272,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       style = STYLES.PROMPT
     elif style == 'info':
       style = STYLES.INFO
-    elif style == 'blue':
-      style = STYLES.OKBLUE
+    elif style == 'cyan':
+      style = STYLES.CYAN
 
     if underline:
       underline = STYLES.UNDERLINE
