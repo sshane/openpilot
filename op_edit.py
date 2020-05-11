@@ -331,7 +331,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.op_params.delete(key)
         self.success('Deleted!')
       else:
-        self.info('Not saved!')
+        self.info('Not deleted!')
       return
 
   def add_parameter(self):
