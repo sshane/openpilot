@@ -20,7 +20,7 @@ class STYLES:
   INFO = CBLUE
   SUCCESS = OKGREEN
   PROMPT = '\033[45m'
-  PROMPT = WARNING
+  PROMPT = '\033[93m'
 
 
   # success = OKGREEN + UNDERLINE
