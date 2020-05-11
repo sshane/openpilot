@@ -200,7 +200,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         continue
 
       while True:
-        self.info('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__), sleep_time=0)
+        self.info('Chosen index: {}'.format(choice_idx), sleep_time=0)
+        self.info('Value: {} (type: {})'.format(old_value[choice_idx], type(old_value[choice_idx]).__name__), sleep_time=0)
         self.prompt('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
