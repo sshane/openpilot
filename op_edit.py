@@ -146,39 +146,90 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       print('Current value: {} (type: {})'.format(old_value, type(old_value).__name__))
 
-      if key_info.is_list:
-        self.change_param_list(old_value, key_info, chosen_key)
-        return
+      # if key_info.is_list:
+      #   self.change_param_list(old_value, key_info, chosen_key)
+      #   return
 
       while True:
-        print('\nEnter your new value:')
-        new_value = input('>> ').strip()
-        if new_value == '':
-          self.message('Exiting this parameter...', 0.5)
-          return
+        if key_info.is_list:
+          self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
+          choice_idx = self.str_eval(input('>> '))
+          if choice_idx == '':
+            self.info('Exiting this parameter...', 0.5)
+            return
 
-        new_value = self.str_eval(new_value)
-        if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
-          continue
+          if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
+            self.error('Must be an integar within list range!')
+            continue
 
-        if key_info.live:  # stay in live tuning interface
-          self.op_params.put(chosen_key, new_value)
-          print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
-        else:  # else ask to save and break
-          print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
-          print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
-          print('\nDo you want to save this?')
-          if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
-            self.op_params.put(chosen_key, new_value)
-            self.message('Saved!')
-          else:
-            self.message('Not saved!')
-          return
+          while True:
+            self.info('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
+
+            loop_output = self.edit_loop(key_info, chosen_key, old_value, choice_idx)
+            if loop_output == 'continue':
+              continue
+            elif loop_output == 'break':
+              return
+
+  def edit_loop(self, key_info, chosen_key, old_value, choice_idx=None):
+    print('\nEnter your new value:')
+    new_value = input('>> ').strip()
+    if new_value == '':
+      self.message('Exiting this parameter...', 0.5)
+      return 'exit'
+
+    new_value = self.str_eval(new_value)
+    if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
+      self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
+      # continue
+      return 'continue'
+
+    if key_info.live or key_info.is_list:  # stay in live tuning interface
+      if key_info.is_list:
+        old_value[choice_idx] = new_value
+        self.op_params.put(chosen_key, old_value)
+      else:
+        self.op_params.put(chosen_key, new_value)
+      print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+    else:  # else ask to save and break
+      print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
+      print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
+      print('\nDo you want to save this?')
+      if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
+        self.op_params.put(chosen_key, new_value)
+        self.message('Saved!')
+      else:
+        self.message('Not saved!')
+      return 'exit'
+
+
+        # print('\nEnter your new value:')
+        # new_value = input('>> ').strip()
+        # if new_value == '':
+        #   self.message('Exiting this parameter...', 0.5)
+        #   return
+        #
+        # new_value = self.str_eval(new_value)
+        # if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
+        #   self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
+        #   continue
+        #
+        # if key_info.live:  # stay in live tuning interface
+        #   self.op_params.put(chosen_key, new_value)
+        #   print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+        # else:  # else ask to save and break
+        #   print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
+        #   print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
+        #   print('\nDo you want to save this?')
+        #   if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
+        #     self.op_params.put(chosen_key, new_value)
+        #     self.message('Saved!')
+        #   else:
+        #     self.message('Not saved!')
+        #   return
 
   def change_param_list(self, old_value, key_info, chosen_key):
     while True:
-      # print(STYLES.WARNING+'Enter index to edit (0 to 2):'+STYLES.ENDC)
       self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
