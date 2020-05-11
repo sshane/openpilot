@@ -207,7 +207,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     if success:
       return '{}{}{}'.format(STYLES.OKGREEN + STYLES.UNDERLINE, msg, STYLES.ENDC)
     else:
-      return '{}{}{}'.format(STYLES.WARNING + STYLES.UNDERLINE, msg, STYLES.ENDC)
+      return '{}{}{}'.format(STYLES.FAIL + STYLES.UNDERLINE, msg, STYLES.ENDC)
 
   def input_with_options(self, options, default=None):
     """
