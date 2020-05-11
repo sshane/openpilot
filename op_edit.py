@@ -200,7 +200,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
-        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.BOLD)
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.HEADER)
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN)
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.FAIL)
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.UNDERLINE)
         break
 
   def print_color(self, msg, style=STYLES.WARNING):
