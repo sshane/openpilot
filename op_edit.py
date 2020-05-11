@@ -132,9 +132,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
 
       if key_info.is_list:
-        print('Enter index to edit (0 to {})'.format(len(old_value)))
-        choice_idx = input('>> ').strip()
-        print('editing {}'.format(old_value[int(choice_idx)]))
+        self.change_param_list(old_value)
+
         return
       else:
         print('This is not a list param!')
@@ -146,7 +145,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.message('Exiting this parameter...', 0.5)
             return
 
-        new_value = self.parse_input(new_value)
+        new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
             self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
             continue
@@ -165,6 +164,17 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.message('Not saved!')
           return
 
+  def change_param_list(self, old_value):
+    while True:
+      print('\nEnter index to edit (0 to {})'.format(len(old_value) - 1))
+      choice_idx = self.str_eval(input('>> '))
+      if choice_idx == '':
+        return
+      if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
+        print('Must be an integar within list range!')
+        continue
+      print('editing {}'.format(old_value[int(choice_idx)]))
+
   def input_with_options(self, options, default=None):
     """
     Takes in a list of options and asks user to make a choice.
@@ -177,7 +187,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     argmax = sims.index(max(sims))
     return argmax, sims[argmax]
 
-  def parse_input(self, dat):
+  def str_eval(self, dat):
     dat = dat.strip()
     try:
       dat = ast.literal_eval(dat)
@@ -193,7 +203,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def delete_parameter(self):
     while True:
       print('Enter the name of the parameter to delete:')
-      key = self.parse_input(input('>> '))
+      key = self.str_eval(input('>> '))
 
       if key == '':
         return
@@ -219,7 +229,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def add_parameter(self):
     while True:
       print('Type the name of your new parameter:')
-      key = self.parse_input(input('>> '))
+      key = self.str_eval(input('>> '))
 
       if key == '':
         return
@@ -229,7 +239,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       print("Enter the data you'd like to save with this parameter:")
       value = input('>> ').strip()
-      value = self.parse_input(value)
+      value = self.str_eval(value)
 
       print('Parameter name: {}'.format(key))
       print('Parameter value: {} (type: {})'.format(value, str(type(value)).split("'")[1]))
