@@ -6,28 +6,24 @@ import difflib
 
 
 class STYLES:
-  HEADER = '\033[95m'
-  OKBLUE = '\033[94m'
-  CYAN = '\033[36m'
+  # HEADER = '\033[95m'
+  # OKBLUE = '\033[94m'
+  # CBLUE = '\33[44m'
+  # BOLD = '\033[1m'
   OKGREEN = '\033[92m'
   CWHITE = '\33[37m'
   ENDC = '\033[0m' + CWHITE
-  BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
-  CBLUE = '\33[44m'
 
+  RED = '\033[91m'
+  PURPLE_BG = '\33[45m'
+  YELLOW = '\033[93m'
 
-  FAIL = '\033[91m'
-  INFO = CBLUE
-  INFO = '\33[45m'
+  FAIL = RED
+  INFO = PURPLE_BG
   SUCCESS = OKGREEN
-  # PROMPT = '\033[45m'
-  PROMPT = '\033[93m'
-
-
-  # success = OKGREEN + UNDERLINE
-  # fail = OKGREEN + UNDERLINE
-
+  PROMPT = YELLOW
+  CYAN = '\033[36m'
 
 
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
@@ -265,7 +261,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def str_color(self, msg, style, surround=False, underline=False):
     if style == 'success':
       style = STYLES.SUCCESS
-      # style = STYLES.OKBLUE
     elif style == 'fail':
       style = STYLES.FAIL
     elif style == 'prompt':
@@ -286,13 +281,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       msg = '{}{}{}'.format(style + underline, msg, STYLES.ENDC)
 
     return msg
-
-    # if style == 'success':
-    #   return '{}{}{}'.format(STYLES.FAIL, msg, STYLES.ENDC)
-    # elif style == 'fail':
-    #   return '{}{}{}'.format(STYLES.OKGREEN, msg, STYLES.ENDC)
-    # else:
-    #   return msg
 
   def input_with_options(self, options, default=None):
     """
