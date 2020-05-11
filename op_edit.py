@@ -33,22 +33,22 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def run_init(self):
     if self.username is None:
       print('\nWelcome to the opParams command line editor!')
-      print('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
+      self.prompt('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
 
       username_choice = self.input_with_options(['Y', 'n', 'don\'t ask again'], default='n')[0]
       if username_choice == 0:
-        print('Please enter your Discord username so the developers can reach out if a crash occurs:')
+        self.prompt('Please enter your Discord username so the developers can reach out if a crash occurs:')
         username = ''
         while username == '':
           username = input('>> ').strip()
-        self.message('Thanks! Saved your Discord username\n'
+        self.success('Thanks! Saved your Discord username\n'
                      'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
         self.op_params.put('username', username)
         self.username = username
       elif username_choice == 2:
         self.op_params.put('username', False)
-        self.message('Got it, bringing you into opEdit\n'
-                     'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
+        self.info('Got it, bringing you into opEdit\n'
+                  'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
     else:
       print('\nWelcome to the opParams command line editor, {}!'.format(self.username))
 
@@ -76,7 +76,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
       print('\n'.join(to_print))
-      print('\nChoose a parameter to edit (by index or name):')
+      self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
@@ -99,7 +99,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       choice = int(choice)
       choice -= 1
       if choice not in range(opt_len):  # number of options to choose from
-        self.message('Not in range!')
+        self.error('Not in range!')
         return 'continue', choice
       return 'change', choice
 
@@ -119,7 +119,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         chosen_param = sorted(param_sims, key=lambda param: param[1], reverse=True)[0]
         return 'change', chosen_param[0]  # return idx
 
-    self.message('Invalid choice!')
+    self.error('Invalid choice!')
     return 'continue', choice
 
   def str_sim(self, a, b):
@@ -131,7 +131,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       key_info = self.op_params.key_info(chosen_key)
 
       old_value = self.params[chosen_key]
-      print('Chosen parameter: {}'.format(chosen_key))
+      self.info('Chosen parameter: {}'.format(chosen_key))
 
       to_print = []
       if key_info.has_description:
@@ -144,36 +144,36 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      print('Current value: {} (type: {})'.format(old_value, type(old_value).__name__))
+      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__))
 
       if key_info.is_list:
         self.change_param_list(old_value, key_info, chosen_key)
         return
 
       while True:
-        print('\nEnter your new value:')
+        self.prompt('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
-          self.message('Exiting this parameter...', 0.5)
+          self.info('Exiting this parameter...', 0.5)
           return
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
+          self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
         if key_info.live:  # stay in live tuning interface
           self.op_params.put(chosen_key, new_value)
-          print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+          self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
           print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
           print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
-          print('\nDo you want to save this?')
+          self.prompt('\nDo you want to save this?')
           if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
             self.op_params.put(chosen_key, new_value)
-            self.message('Saved!')
+            self.success('Saved!')
           else:
-            self.message('Not saved!')
+            self.info('Not saved!')
           return
 
   def change_param_list(self, old_value, key_info, chosen_key):
@@ -219,10 +219,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
 
-  def error(self, msg, sleep_time=None, end=''):
+  def error(self, msg, sleep_time=None, end='', surround=True):
     if sleep_time is None:
       sleep_time = self.sleep_time
-    msg = self.str_color(msg, style='fail', surround=True, underline=False)
+    msg = self.str_color(msg, style='fail', surround=surround)
 
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
@@ -235,15 +235,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
 
-  def message(self, msg, sleep_time=None, end='', style=None, surround=True):
-    end_text = '\n' + end
-    if sleep_time is None:
-      sleep_time = self.sleep_time
-    if style is not None:
-      msg = self.str_color(msg, style=style, surround=surround)
-
-    print(msg, flush=True, end=end_text)
-    time.sleep(sleep_time)
+  # def message(self, msg, sleep_time=None, end='', style=None, surround=True):
+  #   end_text = '\n' + end
+  #   if sleep_time is None:
+  #     sleep_time = self.sleep_time
+  #   if style is not None:
+  #     msg = self.str_color(msg, style=style, surround=surround)
+  #
+  #   print(msg, flush=True, end=end_text)
+  #   time.sleep(sleep_time)
 
   def str_color(self, msg, style, surround=False, underline=False):
     if style == 'success':
@@ -302,54 +302,54 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def delete_parameter(self):
     while True:
-      print('Enter the name of the parameter to delete:')
+      self.prompt('Enter the name of the parameter to delete:')
       key = self.str_eval(input('>> '))
 
       if key == '':
         return
       if not isinstance(key, str):
-        self.message('Input must be a string!')
+        self.error('Input must be a string!')
         continue
       if key not in self.params:
-        self.message("Parameter doesn't exist!")
+        self.error("Parameter doesn't exist!")
         continue
 
       value = self.params.get(key)
       print('Parameter name: {}'.format(key))
       print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
-      print('Do you want to delete this?')
+      self.prompt('Do you want to delete this?')
 
       if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
         self.op_params.delete(key)
-        self.message('Deleted!')
+        self.success('Deleted!')
       else:
-        self.message('Not saved!')
+        self.info('Not saved!')
       return
 
   def add_parameter(self):
     while True:
-      print('Type the name of your new parameter:')
+      self.prompt('Type the name of your new parameter:')
       key = self.str_eval(input('>> '))
 
       if key == '':
         return
       if not isinstance(key, str):
-        self.message('Input must be a string!')
+        self.error('Input must be a string!')
         continue
 
-      print("Enter the data you'd like to save with this parameter:")
+      self.prompt("Enter the data you'd like to save with this parameter:")
       value = input('>> ').strip()
       value = self.str_eval(value)
 
       print('Parameter name: {}'.format(key))
       print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
-      print('Do you want to save this?')
+      self.prompt('Do you want to save this?')
 
       if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
         self.op_params.put(key, value)
-        self.message('Saved!')
+        self.success('Saved!')
       else:
-        self.message('Not saved!')
+        self.info('Not saved!')
       return
 
 
