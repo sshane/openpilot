@@ -84,7 +84,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      print('\n'.join(to_print))
+      self.blue('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
@@ -216,6 +216,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         break
 
+  def blue(self, msg):
+    msg = self.str_color(msg, style='blue')
+    print(msg, flush=True)
+
   def prompt(self, msg, end=''):
     msg = self.str_color(msg, style='prompt')
     print(msg, flush=True, end='\n' + end)
@@ -264,6 +268,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       style = STYLES.PROMPT
     elif style == 'info':
       style = STYLES.INFO
+    elif style == 'blue':
+      style = STYLES.OKBLUE
 
     if underline:
       underline = STYLES.UNDERLINE
