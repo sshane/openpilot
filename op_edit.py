@@ -204,7 +204,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.HEADER)
         # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN)
         self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN + STYLES.UNDERLINE + STYLES.BOLD)
-        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.FAIL + STYLES.UNDERLINE + STYLES.BOLD)
+        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN + STYLES.UNDERLINE)
         # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.UNDERLINE)
         break
 
