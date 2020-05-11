@@ -203,11 +203,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         print(self.str_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), success=True))
         break
 
-  def str_color(self, msg, success=True):
-    if success:
-      return '{}{}{}'.format(STYLES.OKGREEN + STYLES.UNDERLINE, msg, STYLES.ENDC)
-    else:
+  def str_color(self, msg, fail=True):
+    if fail:
       return '{}{}{}'.format(STYLES.FAIL + STYLES.UNDERLINE, msg, STYLES.ENDC)
+    else:
+      return '{}{}{}'.format(STYLES.OKGREEN + STYLES.UNDERLINE, msg, STYLES.ENDC)
 
   def input_with_options(self, options, default=None):
     """
@@ -286,10 +286,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.message('Not saved!')
       return
 
-  def message(self, msg, sleep_time=None, end='\n', success=False):
+  def message(self, msg, sleep_time=None, end='\n', fail=True):
     if sleep_time is None:
       sleep_time = self.sleep_time
-    print(self.str_color('--------\n{}\n--------'.format(msg), success=success), flush=True, end=end)
+    print(self.str_color('--------\n{}\n--------'.format(msg), fail=fail), flush=True, end=end)
     time.sleep(sleep_time)
 
 
