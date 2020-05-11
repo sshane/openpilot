@@ -151,11 +151,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
-
       if key_info.is_list:
         self.change_param_list(old_value, key_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
+
+      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
 
       while True:
         self.prompt('\nEnter your new value:')
@@ -185,6 +185,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def change_param_list(self, old_value, key_info, chosen_key):
     while True:
+      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
       self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
