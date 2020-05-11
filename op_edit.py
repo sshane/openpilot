@@ -15,6 +15,7 @@ class STYLES:
   ENDC = '\033[0m' + CWHITE
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
+  CBLUE   = '\33[34m'
 
   # success = OKGREEN + UNDERLINE
   # fail = OKGREEN + UNDERLINE
@@ -255,7 +256,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     elif style == 'prompt':
       style = STYLES.WARNING
     elif style == 'info':
-      style = STYLES.HEADER
+      style = STYLES.CBLUE
 
     if underline:
       underline = STYLES.UNDERLINE
