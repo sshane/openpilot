@@ -270,12 +270,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.message('Not saved!')
       return
 
-  def message(self, msg, sleep_time=None):
+  def message(self, msg, sleep_time=None, end='\n'):
     if sleep_time is None:
       sleep_time = self.sleep_time
-    print('--------\n{}\n--------'.format(msg), flush=True)
+    print('--------\n{}\n--------'.format(msg), flush=True, end=end)
     time.sleep(sleep_time)
-    print()
 
 
 opEdit()
