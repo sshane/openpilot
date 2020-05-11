@@ -163,7 +163,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def change_param_list(self, old_value, key_info, chosen_key):
     while True:
-      print('\nEnter index to edit (0 to {})'.format(len(old_value) - 1))
+      print('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
         self.message('Exiting this parameter...', 0.5)
