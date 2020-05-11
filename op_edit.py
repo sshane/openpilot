@@ -8,6 +8,7 @@ import difflib
 class STYLES:
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
+  OKBLUE = '\033[104m'
   OKGREEN = '\033[92m'
   CWHITE = '\33[37m'
   ENDC = '\033[0m' + CWHITE
