@@ -217,14 +217,19 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end=end_text)
     time.sleep(sleep_time)
 
-  def str_color(self, msg, style, surround):
+  def str_color(self, msg, style, surround, underline=True):
     if style == 'success':
       style = STYLES.OKGREEN
     elif style == 'fail':
       style = STYLES.FAIL
 
+    if underline:
+      underline = STYLES.UNDERLINE
+    else:
+      underline = ''
+
     if surround:
-      msg = '{}--------\n{}{}\n{}--------{}'.format(style, STYLES.UNDERLINE, msg, STYLES.ENDC + style, STYLES.ENDC)
+      msg = '{}--------\n{}{}\n{}--------{}'.format(style, underline, msg, STYLES.ENDC + style, STYLES.ENDC)
 
     return msg
 
