@@ -9,13 +9,18 @@ class STYLES:
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
   OKGREEN = '\033[92m'
-  WARNING = '\033[45m'
-  FAIL = '\033[91m'
   CWHITE = '\33[37m'
   ENDC = '\033[0m' + CWHITE
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
   CBLUE = '\33[44m'
+
+
+  FAIL = '\033[91m'
+  INFO = CBLUE
+  SUCCESS = OKGREEN
+  PROMPT = '\033[32m'
+
 
   # success = OKGREEN + UNDERLINE
   # fail = OKGREEN + UNDERLINE
@@ -249,14 +254,14 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def str_color(self, msg, style, surround=False, underline=False):
     if style == 'success':
-      style = STYLES.OKGREEN
+      style = STYLES.SUCCESS
       # style = STYLES.OKBLUE
     elif style == 'fail':
       style = STYLES.FAIL
     elif style == 'prompt':
-      style = STYLES.WARNING
+      style = STYLES.PROMPT
     elif style == 'info':
-      style = STYLES.CBLUE
+      style = STYLES.INFO
 
     if underline:
       underline = STYLES.UNDERLINE
