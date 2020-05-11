@@ -179,7 +179,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         new_value = input('>> ').strip()
         if new_value == '':
           self.message('Exiting this list item...', 0.5)
-          return
+          break
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
