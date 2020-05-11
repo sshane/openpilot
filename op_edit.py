@@ -174,8 +174,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         continue
 
       while True:
-        print('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
-        print('\nEnter your new value:')
+        print('\nChosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
+        print('Enter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
           self.message('Exiting this list item...', 0.5)
