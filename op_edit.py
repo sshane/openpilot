@@ -211,7 +211,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         break
 
   def prompt(self, msg, end=''):
-    msg = self.str_color(msg, style='prompt', surround=True, underline=False)
+    msg = self.str_color(msg, style='prompt')
     print(msg, flush=True, end='\n' + end)
 
   def error(self, msg, sleep_time=None, end=''):
@@ -240,7 +240,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end=end_text)
     time.sleep(sleep_time)
 
-  def str_color(self, msg, style, surround, underline=False):
+  def str_color(self, msg, style, surround=False, underline=False):
     if style == 'success':
       # style = STYLES.OKGREEN
       style = STYLES.OKBLUE
