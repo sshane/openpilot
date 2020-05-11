@@ -5,6 +5,17 @@ import ast
 import difflib
 
 
+class STYLES:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
@@ -189,7 +200,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
-        print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+        print(STYLES.OKBLUE + 'Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         break
 
 
