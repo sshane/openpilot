@@ -249,16 +249,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
 
-  # def message(self, msg, sleep_time=None, end='', style=None, surround=True):
-  #   end_text = '\n' + end
-  #   if sleep_time is None:
-  #     sleep_time = self.sleep_time
-  #   if style is not None:
-  #     msg = self.str_color(msg, style=style, surround=surround)
-  #
-  #   print(msg, flush=True, end=end_text)
-  #   time.sleep(sleep_time)
-
   def str_color(self, msg, style, surround=False, underline=False):
     if style == 'success':
       style = STYLES.SUCCESS
