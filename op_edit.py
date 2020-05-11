@@ -220,7 +220,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def blue(self, msg, end=''):
     msg = self.str_color(msg, style='blue')
-    print(msg, flush=True, end='\n' + end)
+    # print(msg, flush=True, end='\n' + end)
+    return msg
 
   def prompt(self, msg, end=''):
     msg = self.str_color(msg, style='prompt')
