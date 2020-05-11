@@ -224,7 +224,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       style = STYLES.FAIL
 
     if surround:
-      msg = '{}--------\n{}{}\n{}--------'.format(style, STYLES.UNDERLINE, msg, STYLES.ENDC + style)
+      msg = '{}--------\n{}{}\n{}--------{}'.format(style, STYLES.UNDERLINE, msg, STYLES.ENDC + style, STYLES.ENDC)
 
     return msg
 
