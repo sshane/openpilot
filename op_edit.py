@@ -186,15 +186,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         return
 
       if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
-        self.message('Must be an integar within list range!')
+        self.error('Must be an integar within list range!')
         continue
 
       while True:
-        print('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
-        print('\nEnter your new value:')
+        self.info('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
+        self.prompt('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
-          self.message('Exiting this list item...', 0.5)
+          self.info('Exiting this list item...', 0.5)
           break
 
         new_value = self.str_eval(new_value)
@@ -213,6 +213,14 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def prompt(self, msg, end=''):
     msg = self.str_color(msg, style='prompt')
     print(msg, flush=True, end='\n' + end)
+
+  def info(self, msg, sleep_time=None, end=''):
+    if sleep_time is None:
+      sleep_time = self.sleep_time
+    msg = self.str_color(msg, style='info')
+
+    print(msg, flush=True, end='\n' + end)
+    time.sleep(sleep_time)
 
   def error(self, msg, sleep_time=None, end=''):
     if sleep_time is None:
@@ -248,6 +256,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       style = STYLES.FAIL
     elif style == 'prompt':
       style = STYLES.WARNING
+    elif style == 'info':
+      style = STYLES.HEADER
 
     if underline:
       underline = STYLES.UNDERLINE
