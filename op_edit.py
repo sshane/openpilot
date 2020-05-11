@@ -213,7 +213,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def error(self, msg, sleep_time=None, end=''):
     if sleep_time is None:
       sleep_time = self.sleep_time
-    msg = self.str_color(msg, style='fail', surround=True, underline=True)
+    msg = self.str_color(msg, style='fail', surround=True, underline=False)
 
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
