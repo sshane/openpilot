@@ -198,14 +198,33 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__), style='fail')
+          # self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__), style='fail')
+          self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
         # print(self.str_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__)))
+        self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         break
+
+
+  def error(self, msg, sleep_time=None, end=''):
+    if sleep_time is None:
+      sleep_time = self.sleep_time
+    msg = self.str_color(msg, style='fail', surround=True, underline=True)
+
+    print(msg, flush=True, end='\n' + end)
+    time.sleep(sleep_time)
+
+  def success(self, msg, sleep_time=None, end=''):
+    if sleep_time is None:
+      sleep_time = self.sleep_time
+    msg = self.str_color(msg, style='success', surround=False, underline=True)
+
+    print(msg, flush=True, end='\n' + end)
+    time.sleep(sleep_time)
 
   def message(self, msg, sleep_time=None, end='', style=None, surround=True):
     end_text = '\n' + end
@@ -217,7 +236,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end=end_text)
     time.sleep(sleep_time)
 
-  def str_color(self, msg, style, surround, underline=True):
+  def str_color(self, msg, style, surround, underline=False):
     if style == 'success':
       style = STYLES.OKGREEN
     elif style == 'fail':
