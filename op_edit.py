@@ -132,23 +132,20 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
 
       if key_info.is_list:
-        self.change_param_list(old_value)
-
+        self.change_param_list(old_value, key_info, chosen_key)
         return
-      else:
-        print('This is not a list param!')
 
       while True:
         print('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
-            self.message('Exiting this parameter...', 0.5)
-            return
+          self.message('Exiting this parameter...', 0.5)
+          return
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-            self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
-            continue
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+          continue
 
         if key_info.live:  # stay in live tuning interface
           self.op_params.put(chosen_key, new_value)
@@ -164,16 +161,37 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.message('Not saved!')
           return
 
-  def change_param_list(self, old_value):
+  def change_param_list(self, old_value, key_info, chosen_key):
     while True:
       print('\nEnter index to edit (0 to {})'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
+        self.message('Exiting this parameter...', 0.5)
         return
+
       if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
         print('Must be an integar within list range!')
         continue
-      print('editing {}'.format(old_value[int(choice_idx)]))
+
+      while True:
+        print('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
+        print('\nEnter your new value:')
+        new_value = input('>> ').strip()
+        if new_value == '':
+          self.message('Exiting this list item...', 0.5)
+          return
+
+        new_value = self.str_eval(new_value)
+        if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+          continue
+
+        old_value[choice_idx] = new_value
+
+        self.op_params.put(chosen_key, old_value)
+        print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
+        return
+
 
   def input_with_options(self, options, default=None):
     """
