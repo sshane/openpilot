@@ -190,7 +190,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         self.op_params.put(chosen_key, old_value)
         print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
-        return
+        break
 
 
   def input_with_options(self, options, default=None):
