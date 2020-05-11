@@ -18,8 +18,9 @@ class STYLES:
 
   FAIL = '\033[91m'
   INFO = CBLUE
+  INFO = '\33[45m'
   SUCCESS = OKGREEN
-  PROMPT = '\033[45m'
+  # PROMPT = '\033[45m'
   PROMPT = '\033[93m'
 
 
