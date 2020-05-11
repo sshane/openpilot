@@ -220,7 +220,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         break
 
   def cyan(self, msg, end=''):
-    msg = self.str_color(msg, style='blue')
+    msg = self.str_color(msg, style='cyan')
     # print(msg, flush=True, end='\n' + end)
     return msg
 
