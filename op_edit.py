@@ -178,12 +178,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def change_param_list(self, old_value, key_info, chosen_key):
     while True:
-      print(STYLES.HEADER+'Enter index to edit (0 to 2):'+STYLES.ENDC)
-      print(STYLES.OKBLUE+'Enter index to edit (0 to 2):'+STYLES.ENDC)
-      print(STYLES.WARNING+'Enter index to edit (0 to 2):'+STYLES.ENDC)
-      print(STYLES.BOLD+'Enter index to edit (0 to 2):'+STYLES.ENDC)
-      print(STYLES.UNDERLINE+'Enter index to edit (0 to 2):'+STYLES.ENDC)
-      print('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
+      # print(STYLES.WARNING+'Enter index to edit (0 to 2):'+STYLES.ENDC)
+      self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
         self.message('Exiting this parameter...', 0.5)
@@ -214,6 +210,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         break
 
+  def prompt(self, msg, end=''):
+    msg = self.str_color(msg, style='prompt', surround=True, underline=False)
+    print(msg, flush=True, end='\n' + end)
 
   def error(self, msg, sleep_time=None, end=''):
     if sleep_time is None:
@@ -243,9 +242,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def str_color(self, msg, style, surround, underline=False):
     if style == 'success':
-      style = STYLES.OKGREEN
+      # style = STYLES.OKGREEN
+      style = STYLES.OKBLUE
     elif style == 'fail':
       style = STYLES.FAIL
+    elif style == 'prompt':
+      style = STYLES.WARNING
 
     if underline:
       underline = STYLES.UNDERLINE
