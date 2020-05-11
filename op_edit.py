@@ -140,7 +140,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      print('Current value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
+      print('Current value: {} (type: {})'.format(old_value, type(old_value).__name__))
 
       if key_info.is_list:
         self.change_param_list(old_value, key_info, chosen_key)
@@ -155,15 +155,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
         if key_info.live:  # stay in live tuning interface
           self.op_params.put(chosen_key, new_value)
-          print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, str(type(new_value)).split("'")[1]))
+          print('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
-          print('\nOld value: {} (type: {})'.format(old_value, str(type(old_value)).split("'")[1]))
-          print('New value: {} (type: {})'.format(new_value, str(type(new_value)).split("'")[1]))
+          print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
+          print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
           print('\nDo you want to save this?')
           if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
             self.op_params.put(chosen_key, new_value)
@@ -194,22 +194,20 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(str(type(new_value)).split("'")[1]))
+          self.message(self.str_color('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__), success=False))
           continue
 
         old_value[choice_idx] = new_value
 
         self.op_params.put(chosen_key, old_value)
-        # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.BOLD)
-        # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.HEADER)
-        # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN)
-        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN + STYLES.UNDERLINE + STYLES.BOLD)
-        self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.OKGREEN + STYLES.UNDERLINE)
-        # self.print_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), style=STYLES.UNDERLINE)
+        print(self.str_color('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), success=True))
         break
 
-  def print_color(self, msg, style=STYLES.WARNING):
-    print('{}{}{}'.format(style, msg, STYLES.ENDC))
+  def str_color(self, msg, success=True):
+    if success:
+      return '{}{}{}'.format(STYLES.OKGREEN + STYLES.UNDERLINE, msg, STYLES.ENDC)
+    else:
+      return '{}{}{}'.format(STYLES.WARNING + STYLES.UNDERLINE, msg, STYLES.ENDC)
 
   def input_with_options(self, options, default=None):
     """
@@ -252,7 +250,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       value = self.params.get(key)
       print('Parameter name: {}'.format(key))
-      print('Parameter value: {} (type: {})'.format(value, str(type(value)).split("'")[1]))
+      print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
       print('Do you want to delete this?')
 
       if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
@@ -278,7 +276,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       value = self.str_eval(value)
 
       print('Parameter name: {}'.format(key))
-      print('Parameter value: {} (type: {})'.format(value, str(type(value)).split("'")[1]))
+      print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
       print('Do you want to save this?')
 
       if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
