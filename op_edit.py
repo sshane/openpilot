@@ -182,7 +182,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
-        self.message('Exiting this parameter...', 0.5)
+        self.info('Exiting this parameter...', 0.5)
         return
 
       if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
