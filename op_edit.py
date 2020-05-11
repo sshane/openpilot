@@ -194,7 +194,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
         new_value = self.str_eval(new_value)
         if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
-          self.message(self.str_color('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__), success=False))
+          self.message('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
         old_value[choice_idx] = new_value
@@ -286,10 +286,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.message('Not saved!')
       return
 
-  def message(self, msg, sleep_time=None, end='\n'):
+  def message(self, msg, sleep_time=None, end='\n', success=False):
     if sleep_time is None:
       sleep_time = self.sleep_time
-    print('--------\n{}\n--------'.format(msg), flush=True, end=end)
+    print(self.str_color('--------\n{}\n--------'.format(msg), success=success), flush=True, end=end)
     time.sleep(sleep_time)
 
 
