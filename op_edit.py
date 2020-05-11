@@ -41,7 +41,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def run_init(self):
     if self.username is None:
-      self.success('\nWelcome to the opParams command line editor!')
+      self.success('\nWelcome to the opParams command line editor!', sleep_time=0)
       self.prompt('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
 
       username_choice = self.input_with_options(['Y', 'n', 'don\'t ask again'], default='n')[0]
@@ -59,16 +59,16 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.info('Got it, bringing you into opEdit\n'
                   'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
     else:
-      self.success('\nWelcome to the opParams command line editor, {}!'.format(self.username))
+      self.success('\nWelcome to the opParams command line editor, {}!'.format(self.username), sleep_time=0)
 
     self.run_loop()
 
   def run_loop(self):
     while True:
       if not self.live_tuning:
-        self.info('Here are your parameters:\n')
+        self.info('Here are your parameters:', end='\n', sleep_time=0)
       else:
-        self.info('Here are your live parameters:', end='\n')
+        self.info('Here are your live parameters:', end='\n', sleep_time=0)
       self.params = self.op_params.get(force_update=True)
       if self.live_tuning:  # only display live tunable params
         self.params = {k: v for k, v in self.params.items() if self.op_params.key_info(k).live}
@@ -84,7 +84,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      self.blue('\n'.join(to_print))
+      self.error('\n'.join(to_print), surround=False)
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
@@ -140,7 +140,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       key_info = self.op_params.key_info(chosen_key)
 
       old_value = self.params[chosen_key]
-      self.info('Chosen parameter: {}'.format(chosen_key))
+      self.info('Chosen parameter: {}'.format(chosen_key), sleep_time=0)
 
       to_print = []
       if key_info.has_description:
@@ -153,7 +153,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__))
+      self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
 
       if key_info.is_list:
         self.change_param_list(old_value, key_info, chosen_key)
@@ -182,7 +182,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.op_params.put(chosen_key, new_value)
             self.success('Saved!')
           else:
-            self.info('Not saved!')
+            self.info('Not saved!', sleep_time=0)
           return
 
   def change_param_list(self, old_value, key_info, chosen_key):
@@ -198,7 +198,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         continue
 
       while True:
-        self.info('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__))
+        self.info('Chosen index: {}, value: {} (type: {})'.format(choice_idx, old_value[choice_idx], type(old_value[choice_idx]).__name__), sleep_time=0)
         self.prompt('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
