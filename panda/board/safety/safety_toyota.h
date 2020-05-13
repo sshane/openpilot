@@ -20,6 +20,8 @@ const int TOYOTA_STANDSTILL_THRSLD = 100;  // 1kph
 const int TOYOTA_GAS_INTERCEPTOR_THRSLD = 475;  // ratio between offset and gain from dbc file
 
 const AddrBus TOYOTA_TX_MSGS[] = {{0x283, 0}, {0x2E6, 0}, {0x2E7, 0}, {0x33E, 0}, {0x344, 0}, {0x365, 0}, {0x366, 0}, {0x4CB, 0},  // DSU bus 0
+                                  {0x367, 0}, {0x414, 0}, {0x489, 0}, {0x48a, 0}, {0x48b, 0}, {0x4d3, 0}, // CAM bus 0
+                                  {0x130, 1}, {0x240, 1}, {0x241, 1}, {0x244, 1}, {0x245, 1}, {0x248, 1}, {0x466, 1}, // CAM bus 1
                                   {0x128, 1}, {0x141, 1}, {0x160, 1}, {0x161, 1}, {0x470, 1},  // DSU bus 1
                                   {0x2E4, 0}, {0x411, 0}, {0x412, 0}, {0x343, 0}, {0x1D2, 0},  // LKAS + ACC
                                   {0x200, 0}, {0x750, 0}};  // interceptor + Blindspot monitor

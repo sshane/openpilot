@@ -147,6 +147,8 @@ def fingerprint(logcan, sendcan, has_relay):
     car_fingerprint = fixed_fingerprint
     source = car.CarParams.FingerprintSource.fixed
 
+  # force Corolla for testing purposes.
+  car_fingerprint = "TOYOTA COROLLA 2017"
   cloudlog.warning("fingerprinted %s", car_fingerprint)
   client.captureMessage("fingerprinted {}".format(car_fingerprint), level='info')
   return car_fingerprint, finger, vin, car_fw, source
