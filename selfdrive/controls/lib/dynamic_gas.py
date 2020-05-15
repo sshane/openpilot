@@ -81,7 +81,7 @@ class DynamicGas:
         self.supported_car = True
     else:
       y = [0.35, 0.47, 0.43, 0.35, 0.3, 0.3, 0.3229, 0.34784, 0.36765, 0.38, 0.396, 0.409, 0.425, 0.478, 0.55, 0.621, 0.7]
-      self.supported_car = True
+      self.supported_car = False
 
     self.gasMaxBP, self.gasMaxV = x, y
 

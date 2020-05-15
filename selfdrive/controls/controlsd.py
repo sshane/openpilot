@@ -25,7 +25,6 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 
-from common.op_params import opParams
 from selfdrive.controls.df_alert_manager import dfAlertManager
 
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -38,10 +37,6 @@ HwType = log.HealthData.HwType
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
-
-op_params = opParams()
-df_alert_manager = dfAlertManager(op_params)
-hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
 
 
 def add_lane_change_event(events, path_plan):
@@ -459,8 +454,11 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   return CC, events_bytes
 
 
-def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params_test=None):
-  if op_params_test is not None:
+def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params=None):
+  df_alert_manager = dfAlertManager(op_params)
+  hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
+
+  if op_params is not None:
     print('-------------------\nGOT OP_PARAMS!\n-------------------')
   else:
     print('-------------------\nDIDNT GET OP_PARAMS!\n-------------------')
@@ -630,8 +628,8 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params
     prof.display()
 
 
-def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params_test=None):
-  controlsd_thread(sm, pm, logcan, sm_smiskol, op_params_test)
+def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params=None):
+  controlsd_thread(sm, pm, logcan, sm_smiskol, op_params)
 
 
 if __name__ == "__main__":
