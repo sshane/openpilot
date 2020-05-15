@@ -15,7 +15,9 @@ def thread_test_write(op_p):
 def thread_test_read(op_p):
   for _ in range(1000):
     time.sleep(0.01)
-    if op_p.get('test_param') is None:
+    p = op_p.get('test_param')
+    print(p)
+    if p is None:
       print('error reading!')
 
 
