@@ -462,6 +462,8 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
 def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params_test=None):
   if op_params_test is not None:
     print('-------------------\nGOT OP_PARAMS!\n-------------------')
+  else:
+    print('-------------------\nDIDNT GET OP_PARAMS!\n-------------------')
   gc.disable()
 
   # start the loop
