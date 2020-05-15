@@ -117,7 +117,6 @@ class opParams:
 
   def put(self, key, value):
     # with self.lock:
-    print('here!')
     self.params.update({key: value})
     self._write()
 
