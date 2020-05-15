@@ -87,6 +87,8 @@ class DynamicFollow:
       self._change_cost(libmpc)
       self._send_cur_state()
 
+    return self.TR
+
   def _norm(self, x, name):
     self.x = x
     return np.interp(x, self.scales[name], [0, 1])

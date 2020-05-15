@@ -459,7 +459,9 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   return CC, events_bytes
 
 
-def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
+def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params_test=None):
+  if op_params_test is not None:
+    print('-------------------\nGOT OP_PARAMS!\n-------------------')
   gc.disable()
 
   # start the loop
@@ -626,8 +628,8 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
     prof.display()
 
 
-def main(sm=None, pm=None, logcan=None, sm_smiskol=None):
-  controlsd_thread(sm, pm, logcan, sm_smiskol)
+def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params_test=None):
+  controlsd_thread(sm, pm, logcan, sm_smiskol, op_params_test)
 
 
 if __name__ == "__main__":

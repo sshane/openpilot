@@ -8,6 +8,8 @@ from selfdrive.swaglog import cloudlog
 def launcher(proc):
   try:
     # import the process
+    print(proc)
+    print('---here\n')
     mod = importlib.import_module(proc)
 
     # rename the process
