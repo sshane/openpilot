@@ -39,8 +39,8 @@ class opParams:
                                                                                                                     'Replaces both offsets from the calibration learner to help fix lane hugging.\n'
                                                                                                                     'Enter absolute value here, direction is determined by parameter \'lane_hug_direction\''), 'live': True},
                            'dynamic_follow': {'default': 'auto', 'allowed_types': [str], 'description': "Can be: ('traffic', 'relaxed', 'roadtrip'): Left to right increases in following distance.\n"
-                                                                                                           "All profiles support dynamic follow so you'll get your preferred distance while\n"
-                                                                                                           "retaining the smoothness and safety of dynamic follow!", 'hide': True},
+                                                                                                        "All profiles support dynamic follow so you'll get your preferred distance while\n"
+                                                                                                        "retaining the smoothness and safety of dynamic follow!"},
                            'alca_nudge_required': {'default': True, 'allowed_types': [bool], 'description': ('Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                                                              'If False, lane change will occur IMMEDIATELY after signaling'), 'live': False},
                            'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)', 'live': False},
