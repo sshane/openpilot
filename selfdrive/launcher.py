@@ -20,7 +20,7 @@ def launcher(proc, op_params):
 
     # exec the process
     if proc == 'selfdrive.controls.controlsd':
-      mod.main(op_params)
+      mod.main(op_params=op_params)
     else:
       mod.main()
   except KeyboardInterrupt:
