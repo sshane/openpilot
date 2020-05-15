@@ -159,11 +159,31 @@ class DynamicFollow:
     return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def _calculate_relative_accel(self):
+    """
+    Moving window returning the following: (final relative velocity - initial relative velocity) / dT
+    I'm not sure what this is. Change in relative velocity, so relative velocity acceleration?
+
+    Output properties:
+      When the lead is starting to decelerate, and our car remains the same speed, the output decreases (and vice versa)
+      However when our car finally starts to decelerate at the same rate as the lead car, the output will move to near 0
+
+      Relative velocity is a misleading term here, it doesn't matter what our actual relative velocity is,
+        as long as we lose the same speed units as the lead, the output will be 0:
+          >>> a = [(15 - 18), (14 - 17)]
+          >>> (a[-1] - a[0]) / 1
+          > 0.0
+
+      Likewise, if we are decelerating at a quicker rate than the lead, the output will be positive and vice versa
+
+    So I think the following is incorrect:
+      ~~~So wait, then is this just a fancy relative velocity calculation? But over time? Need to test to see if it has any meaningful differences~~~
+    """
+
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
     if len(self.df_data.v_rels) > 0:  # if not empty
-      elapsed = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
-      if elapsed > min_consider_time:
-        return (self.df_data.v_rels[-1]['v_rel'] - self.df_data.v_rels[0]['v_rel']) / elapsed  # delta speed / delta time
+      dT = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
+      if dT > min_consider_time:
+        return (self.df_data.v_rels[-1]['v_rel'] - self.df_data.v_rels[0]['v_rel']) / dT  # delta speed / delta time
     return None
 
   def _get_pred(self):
