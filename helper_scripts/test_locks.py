@@ -19,9 +19,11 @@ def thread_test_read(op_p):
       print('error reading!')
 
 
-threads = 10
-for i in range(threads):
+
+for i in range(2):
   Thread(target=thread_test_write, args=(op_params,)).start()
+
+for i in range(8):
   Thread(target=thread_test_read, args=(op_params,)).start()
 
 print('started all threads...')
