@@ -122,10 +122,10 @@ class opParams:
     self._write()
 
   def delete(self, key):
-    with self.lock:
-      if key in self.params:
-        del self.params[key]
-        self._write()
+    # with self.lock:
+    if key in self.params:
+      del self.params[key]
+      self._write()
 
   def key_info(self, key):
     key_info = KeyInfo()
