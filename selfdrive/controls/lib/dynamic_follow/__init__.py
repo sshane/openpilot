@@ -220,6 +220,8 @@ class DynamicFollow:
       # todo: this should help us slow sooner if the lead is slowing down and we haven't started slowing down yet
       a_moving = self._calculate_relative_accel()
       if a_moving is not None:
+        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+        y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
         TR_mods.append(interp(a_moving, x, y))  # use a_lead values for now
 
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
