@@ -116,9 +116,9 @@ class opParams:
     return default  # not in params
 
   def put(self, key, value):
-    with self.lock:
-      self.params.update({key: value})
-      self._write()
+    # with self.lock:
+    self.params.update({key: value})
+    self._write()
 
   def delete(self, key):
     with self.lock:

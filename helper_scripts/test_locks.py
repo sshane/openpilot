@@ -7,7 +7,7 @@ op_params = opParams()
 
 def thread_test(op_p):
   for _ in range(1000):
-    time.sleep(0.05)
+    time.sleep(0.01)
     op_p.put('test_param', 15)
 
 
