@@ -24,7 +24,6 @@ from selfdrive.controls.lib.alertmanager import AlertManager
 from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
-
 from selfdrive.controls.df_alert_manager import dfAlertManager
 
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -454,14 +453,7 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   return CC, events_bytes
 
 
-def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params=None):
-  df_alert_manager = dfAlertManager(op_params)
-  hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
-
-  if op_params is not None:
-    print('-------------------\nGOT OP_PARAMS!\n-------------------')
-  else:
-    print('-------------------\nDIDNT GET OP_PARAMS!\n-------------------')
+def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
   gc.disable()
 
   # start the loop
@@ -628,8 +620,19 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None, op_params
     prof.display()
 
 
-def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params=None):
-  controlsd_thread(sm, pm, logcan, sm_smiskol, op_params)
+op_params = None
+df_alert_manager = None
+hide_auto_df_alerts = None
+
+
+def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params_rec=None):
+  global op_params
+  global df_alert_manager
+  global hide_auto_df_alerts
+  op_params = op_params_rec
+  df_alert_manager = dfAlertManager(op_params)
+  hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
+  controlsd_thread(sm, pm, logcan, sm_smiskol)
 
 
 if __name__ == "__main__":
