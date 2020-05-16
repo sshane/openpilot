@@ -7,13 +7,15 @@ import numpy as np
 op_params = opParams()
 
 
-def thread_test_write(op_p):
+def thread_test_write():
+  op_p = opParams()
   for _ in range(500):
     time.sleep(0.01)
     op_p.put('camera_offset', np.random.randint(0, 100))
 
 
-def thread_test_read(op_p):
+def thread_test_read():
+  op_p = opParams()
   for _ in range(500):
     time.sleep(0.01)
     p = op_p.get('camera_offset')
@@ -24,10 +26,10 @@ def thread_test_read(op_p):
 # queue = Queue()
 
 for i in range(2):
-  Thread(target=thread_test_write, args=(op_params,)).start()
+  Thread(target=thread_test_write).start()
   # Process(target=thread_test_write, args=(op_params,)).start()
 
 for i in range(8):
-  Thread(target=thread_test_read, args=(op_params,)).start()
+  Thread(target=thread_test_read).start()
   # Process(target=thread_test_read, args=(op_params,)).start()
 print('started all threads...')
