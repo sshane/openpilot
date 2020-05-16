@@ -8,14 +8,14 @@ op_params = opParams()
 
 
 def thread_test_write(op_p):
-  for _ in range(100):
-    # time.sleep(0.01)
+  for _ in range(500):
+    time.sleep(0.01)
     op_p.put('camera_offset', np.random.randint(0, 100))
 
 
 def thread_test_read(op_p):
-  for _ in range(100):
-    # time.sleep(0.01)
+  for _ in range(500):
+    time.sleep(0.01)
     p = op_p.get('camera_offset')
     if p is None:
       print('error reading!')
