@@ -19,13 +19,13 @@ class dfManager:
     self.df_profiles = dfProfiles()
     self.sm = messaging.SubMaster(['dynamicFollowButton', 'dynamicFollowData'])
 
-    self.cur_df_profile = self.op_params.get('dynamic_follow', default='auto').strip().lower()
-    if not isinstance(self.cur_df_profile, str) or self.cur_df_profile not in self.df_profiles.to_idx:
-      self.cur_df_profile = self.df_profiles.default  # relaxed
+    self.cur_user_profile = self.op_params.get('dynamic_follow', default='auto').strip().lower()
+    if not isinstance(self.cur_user_profile, str) or self.cur_user_profile not in self.df_profiles.to_idx:
+      self.cur_user_profile = self.df_profiles.default  # relaxed
     else:
-      self.cur_df_profile = self.df_profiles.to_idx[self.cur_df_profile]
+      self.cur_user_profile = self.df_profiles.to_idx[self.cur_user_profile]
 
-    self.cur_pred_profile = 0
+    self.cur_model_profile = 0
     self.alert_duration = 2.0
 
     self.offset = None
@@ -35,7 +35,7 @@ class dfManager:
 
   @property
   def is_auto(self):
-    return self.cur_df_profile == self.df_profiles.auto
+    return self.cur_user_profile == self.df_profiles.auto
 
   @property
   def can_show_alert(self):
@@ -47,7 +47,9 @@ class dfManager:
 
     if self.offset is None:  # first time running
       df_out.changed = True
-      self.offset = self.cur_df_profile  # ensure we start at the user's current profile
+      self.offset = self.cur_user_profile  # ensure we start at the user's current profile
+      df_out.user_profile = self.cur_user_profile
+      df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
       return df_out
 
     button_status = self.sm['dynamicFollowButton'].status
@@ -59,14 +61,14 @@ class dfManager:
       self.change_time = sec_since_boot()
       df_out.changed = True
       self.op_params.put('dynamic_follow', self.df_profiles.to_profile[df_out.user_profile])  # save current profile for next drive
-      self.cur_df_profile = df_out.user_profile
+      self.cur_user_profile = df_out.user_profile
 
     elif self.is_auto:
       df_out.model_profile = self.sm['dynamicFollowData'].profilePred
       df_out.model_profile_text = self.df_profiles.to_profile[df_out.model_profile]
       df_out.is_auto = True
-      if self.cur_pred_profile != df_out.model_profile and self.can_show_alert:
+      if self.cur_model_profile != df_out.model_profile and self.can_show_alert:
         df_out.changed = True  # to hide pred alerts until user-selected auto alert has finished
-      self.cur_pred_profile = df_out.model_profile
+      self.cur_model_profile = df_out.model_profile
 
     return df_out
