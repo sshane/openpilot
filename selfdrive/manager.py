@@ -89,7 +89,6 @@ spinner.update("0")
 
 if not prebuilt:
   for retry in [True, False]:
-    break
     # run scons
     env = os.environ.copy()
     env['SCONS_PROGRESS'] = "1"
@@ -478,7 +477,7 @@ def manager_thread():
     if msg.thermal.freeSpace < 0.05:
       logger_dead = True
 
-    if True or (msg.thermal.started and "driverview" not in running):
+    if msg.thermal.started and "driverview" not in running:
       for p in car_started_processes:
         if p == "loggerd" and logger_dead:
           kill_managed_process(p)
