@@ -16,6 +16,7 @@ while 1:
   dat.init('dynamicFollowButton')
   dat.dynamicFollowButton.status = df_button
   pm.send('dynamicFollowButton', dat)
+  print('sent')
 
 
   i = input()
