@@ -46,8 +46,7 @@ class DynamicFollow:
 
   def _setup_changing_variables(self):
     self.TR = self.default_TR
-    if self.mpc_id == 2:
-      self.df_profile = self.df_profiles.relaxed  # todo: should be able to remove this line
+    self.user_profile = self.df_profiles.relaxed  # just a starting point
     self.model_profile = self.df_profiles.relaxed
 
     self.sng = False
@@ -59,33 +58,12 @@ class DynamicFollow:
     self.last_predict_time = 0.0
     self.auto_df_model_data = []
 
-  def _get_profile(self):
-    df_out = self.df_manager.update()
-    # need to check is_auto from df_manager since df_out's will be False
-    # if button status has changed, even if it's returning auto profile
-    if self.df_manager.is_auto and self.lead_data.status:
-      self._get_pred()
-      return self.model_profile
-    else:
-      return df_out.user_profile
-
-  def gather_data(self):
-    self.sm.update(0)
-    live_tracks = [[i.dRel, i.vRel, i.aRel, i.yRel] for i in self.sm['liveTracks']]
-    if self.car_data.cruise_enabled:
-      self.data_collector.update([self.car_data.v_ego,
-                                  self.lead_data.a_lead,
-                                  self.lead_data.v_lead,
-                                  self.lead_data.x_lead,
-                                  live_tracks,
-                                  self.df_profile,
-                                  sec_since_boot()])
-
   def update(self, CS, libmpc):
     self.update_car(CS)
     if self.mpc_id == 1:
-      self.df_profile = self._get_profile()  # can be the user-selected profile, or the model's predicted profile
-      self.gather_data()
+      # self.df_profile = self._get_profile()  # can be the user-selected profile, or the model's predicted profile
+      self._get_profiles()
+      self._gather_data()
 
     if not self.lead_data.status or travis or self.mpc_id != 1:
       self.TR = self.default_TR
@@ -98,6 +76,37 @@ class DynamicFollow:
       self._send_cur_state()
 
     return self.TR
+
+  def _get_profiles(self):
+    df_out = self.df_manager.update()
+    self.user_profile = df_out.user_profile
+
+    if self.df_manager.is_auto and self.lead_data.status:
+      self.model_profile = self._get_pred()  # only predict with lead
+
+      # self.model_profile = df_out.model_profile  # don't need to use this since it
+      # essentially just sends it over to df_manager and back over. skip the lag
+
+    # todo: old, remove below
+    # # need to check is_auto from df_manager since df_out's will be False
+    # # if button status has changed, even if it's returning auto profile
+    # if self.df_manager.is_auto and self.lead_data.status:
+    #   self._get_pred()
+    #   return self.model_profile
+    # else:
+    #   return df_out.user_profile
+
+  def _gather_data(self):
+    self.sm.update(0)
+    live_tracks = [[i.dRel, i.vRel, i.aRel, i.yRel] for i in self.sm['liveTracks']]
+    if self.car_data.cruise_enabled:
+      self.data_collector.update([self.car_data.v_ego,
+                                  self.lead_data.a_lead,
+                                  self.lead_data.v_lead,
+                                  self.lead_data.x_lead,
+                                  live_tracks,
+                                  self.user_profile,
+                                  sec_since_boot()])
 
   def _norm(self, x, name):
     self.x = x
@@ -149,26 +158,26 @@ class DynamicFollow:
   def _remove_old_entries(self, lst, cur_time, retention):
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
-  def _calculate_lead_accel(self):  # todo: remove?
-    min_consider_time = 1.0  # minimum amount of time required to consider calculation
-    a_lead = self.lead_data.a_lead
-    if len(self.df_data.v_leads):  # if not empty
-      elapsed = self.df_data.v_leads[-1]['time'] - self.df_data.v_leads[0]['time']
-      if elapsed > min_consider_time:  # if greater than min time (not 0)
-        a_calculated = (self.df_data.v_leads[-1]['v_lead'] - self.df_data.v_leads[0]['v_lead']) / elapsed  # delta speed / delta time
-        if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
-          # both are negative or positive and calculated is greater than current
-          return a_calculated
-        if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
-          if a_lead < -a_calculated * 0.55:
-            # half of accel over time is less than current positive accel, we're not decelerating after long decel
-            return a_calculated
-        if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
-          if -a_lead < a_calculated * 0.45:
-            # half of accel over time is greater than current negative accel, we're not accelerating after long accel
-            return a_calculated
-
-    return a_lead  # if above doesn't execute, we'll return measured a_lead
+  # def _calculate_lead_accel(self):  # todo: remove?
+  #   min_consider_time = 1.0  # minimum amount of time required to consider calculation
+  #   a_lead = self.lead_data.a_lead
+  #   if len(self.df_data.v_leads):  # if not empty
+  #     elapsed = self.df_data.v_leads[-1]['time'] - self.df_data.v_leads[0]['time']
+  #     if elapsed > min_consider_time:  # if greater than min time (not 0)
+  #       a_calculated = (self.df_data.v_leads[-1]['v_lead'] - self.df_data.v_leads[0]['v_lead']) / elapsed  # delta speed / delta time
+  #       if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
+  #         # both are negative or positive and calculated is greater than current
+  #         return a_calculated
+  #       if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
+  #         if a_lead < -a_calculated * 0.55:
+  #           # half of accel over time is less than current positive accel, we're not decelerating after long decel
+  #           return a_calculated
+  #       if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
+  #         if -a_lead < a_calculated * 0.45:
+  #           # half of accel over time is greater than current negative accel, we're not accelerating after long accel
+  #           return a_calculated
+  #
+  #   return a_lead  # if above doesn't execute, we'll return measured a_lead
 
   def _calculate_relative_accel(self):
     """
@@ -203,18 +212,24 @@ class DynamicFollow:
     if cur_time - self.last_predict_time > self.predict_rate:
       if len(self.auto_df_model_data) == self.model_input_len:
         pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
-        self.model_profile = int(np.argmax(pred))
         self.last_predict_time = cur_time
+        # self.model_profile = int(np.argmax(pred))
+        return int(np.argmax(pred))
 
   def _get_TR(self):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
 
-    if self.df_profile == self.df_profiles.roadtrip:
+    if self.df_manager.is_auto:  # decide which profile to use, model profile will be updated before this
+      df_profile = self.model_profile
+    else:
+      df_profile = self.user_profile
+
+    if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]  # TRs
       profile_mod_pos = [0.98, 0.915, 0.83, 0.55]
       profile_mod_neg = [1.0575, 1.18, 1.39, 1.825]
-    elif self.df_profile == self.df_profiles.traffic:  # for in congested traffic
+    elif df_profile == self.df_profiles.traffic:  # for in congested traffic
       x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
       y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
       profile_mod_pos = [1.05, 1.375, 2.99, 3.8]
@@ -269,7 +284,7 @@ class DynamicFollow:
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mods])  # alter TR modification according to profile
     TR += TR_mod
 
-    if self.car_data.left_blinker or self.car_data.right_blinker and self.df_profile != self.df_profiles.traffic:
+    if self.car_data.left_blinker or self.car_data.right_blinker and df_profile != self.df_profiles.traffic:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .75, .65]  # reduce TR when changing lanes
       TR *= interp(self.car_data.v_ego, x, y)
