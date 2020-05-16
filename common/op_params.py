@@ -97,6 +97,7 @@ class opParams:
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
     with self.lock:
+      print(self.last_read_time)
       self._update_params(key, force_update)
     if key is None:
       return self._get_all()
