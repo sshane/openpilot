@@ -2,10 +2,6 @@
 import os
 import json
 from selfdrive.swaglog import cloudlog
-from threading import Lock
-from common.params import FileLock, fsync_dir
-import tempfile
-
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -70,10 +66,9 @@ class opParams:
     self.params = {}
     self.params_file = "/data/op_params.json"
     self.last_read_time = sec_since_boot()
-    self.read_frequency = 1.0  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 5.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio', 'uniqueID', 'use_kd', 'kd', 'restrict_sign_change', 'write_errors', 'reset_integral']  # a list of params you want to delete (unused)
-    self.lock = Lock()
     self.run_init()  # restores, reads, and updates params
 
   def run_init(self):  # does first time initializing of default params
@@ -98,9 +93,7 @@ class opParams:
       self._write()
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
-    with self.lock:
-      print(self.last_read_time)
-      self._update_params(key, force_update)
+    self._update_params(key, force_update)
     if key is None:
       return self._get_all()
 
@@ -124,34 +117,13 @@ class opParams:
     return default  # not in params
 
   def put(self, key, value):
-    with self.lock:
-      self.params.update({key: value})
-      self._write()
-
-  def write_db(self, key, value):
-    prev_umask = os.umask(0)
-    lock = FileLock(self.params_file+"/.lock", True)
-    lock.acquire()
-
-    try:
-      self.params.update({key: value})
-      tmp_path = tempfile.mktemp(prefix=".tmp", dir='/data')
-      with open(tmp_path, "w") as f:
-        json.dump(self.params, f, indent=2, sort_keys=True)
-        f.flush()
-        os.fsync(f.fileno())
-
-      os.rename(tmp_path, self.params_file)
-      # fsync_dir(os.path.dirname(self.params_file))
-    finally:
-      os.umask(prev_umask)
-      lock.release()
+    self.params.update({key: value})
+    self._write()
 
   def delete(self, key):
-    with self.lock:
-      if key in self.params:
-        del self.params[key]
-        self._write()
+    if key in self.params:
+      del self.params[key]
+      self._write()
 
   def key_info(self, key):
     key_info = KeyInfo()
