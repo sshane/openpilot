@@ -113,7 +113,7 @@ class DynamicFollow:
 
   def _change_cost(self, libmpc):
     TRs = [0.9, 1.8, 2.7]
-    costs = [1.0, 0.13, 0.05]
+    costs = [1.0, 0.15, 0.05]
     cost = interp(self.TR, TRs, costs)
     if self.last_cost != cost:
       libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
