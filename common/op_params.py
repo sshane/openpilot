@@ -3,6 +3,8 @@ import os
 import json
 from selfdrive.swaglog import cloudlog
 from threading import Lock
+from common.params import FileLock, fsync_dir
+import tempfile
 
 try:
   from common.realtime import sec_since_boot
@@ -125,6 +127,25 @@ class opParams:
     with self.lock:
       self.params.update({key: value})
       self._write()
+
+  def write_db(self, key, value):
+    prev_umask = os.umask(0)
+    lock = FileLock(self.params_file+"/.lock", True)
+    lock.acquire()
+
+    try:
+      self.params.update({key: value})
+      tmp_path = tempfile.mktemp(prefix=".tmp", dir='/data')
+      with open(tmp_path, "w") as f:
+        json.dump(self.params, f, indent=2, sort_keys=True)
+        f.flush()
+        os.fsync(f.fileno())
+
+      os.rename(tmp_path, self.params_file)
+      # fsync_dir(os.path.dirname(self.params_file))
+    finally:
+      os.umask(prev_umask)
+      lock.release()
 
   def delete(self, key):
     with self.lock:
