@@ -121,7 +121,7 @@ class DynamicFollow:
     cur_time = sec_since_boot()
 
     # Store lead velocity for better decision between cur lead accel and lead accel over time
-    # if self.lead_data.status:
+    # if self.lead_data.status:  # todo: remove?
     #   if self.lead_data.new_lead:
     #     self.df_data.v_leads = []  # reset when new lead
     #   else:
@@ -147,7 +147,7 @@ class DynamicFollow:
   def _remove_old_entries(self, lst, cur_time, retention):
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
-  def _calculate_lead_accel(self):
+  def _calculate_lead_accel(self):  # todo: remove?
     min_consider_time = 1.0  # minimum amount of time required to consider calculation
     a_lead = self.lead_data.a_lead
     if len(self.df_data.v_leads):  # if not empty
@@ -247,13 +247,14 @@ class DynamicFollow:
     y = [0.265, 0.1877, 0.0984, 0.0574, 0.034, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    if self.car_data.v_ego >= 10 * CV.MPH_TO_MS:
-      # todo: this should help us slow sooner if the lead is slowing down and we haven't started slowing down yet
-      a_moving = self._calculate_relative_accel()
-      if a_moving is not None:
-        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-        y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
-        TR_mods.append(interp(a_moving, x, y))  # use a_lead values for now
+    # if self.car_data.v_ego >= 10 * CV.MPH_TO_MS:
+    # todo: this should help us slow sooner if the lead is slowing down and we haven't started slowing down yet
+    a_moving = self._calculate_relative_accel()
+    if a_moving is not None:
+      x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+      y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
+      tmp_variable_doesnt_matter = interp(a_moving, x, y) * self.op_params.get('v_rel_acc_modifier', 1.0)
+      TR_mods.append(tmp_variable_doesnt_matter)
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
