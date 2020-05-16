@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 import os
 import json
-import time
 from selfdrive.swaglog import cloudlog
-# from threading import Lock
-from multiprocessing import Lock
+from threading import Lock
+
+try:
+  from common.realtime import sec_since_boot
+except ImportError:
+  import time
+  sec_since_boot = time.time
 travis = False
 
 
@@ -63,7 +67,7 @@ class opParams:
 
     self.params = {}
     self.params_file = "/data/op_params.json"
-    self.last_read_time = time.time()
+    self.last_read_time = sec_since_boot()
     self.read_frequency = 1.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio', 'uniqueID', 'use_kd', 'kd', 'restrict_sign_change', 'write_errors', 'reset_integral']  # a list of params you want to delete (unused)
@@ -193,9 +197,9 @@ class opParams:
 
   def _update_params(self, key, force_update):
     if force_update or self.key_info(key).live:  # if is a live param, we want to get updates while openpilot is running
-      if not travis and (time.time() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
+      if not travis and (sec_since_boot() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
         if self._read():
-          self.last_read_time = time.time()
+          self.last_read_time = sec_since_boot()
 
   def _read(self):
     try:
