@@ -284,7 +284,7 @@ def start_managed_process(name):
   proc = managed_processes[name]
   if isinstance(proc, str):
     cloudlog.info("starting python %s" % proc)
-    running[name] = Process(name=name, target=launcher, args=(proc, op_params))
+    running[name] = Process(name=name, target=launcher, args=(proc,))
   else:
     pdir, pargs = proc
     cwd = os.path.join(BASEDIR, pdir)

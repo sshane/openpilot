@@ -5,11 +5,9 @@ import cereal.messaging as messaging
 import selfdrive.crash as crash
 from selfdrive.swaglog import cloudlog
 
-def launcher(proc, op_params):
+def launcher(proc):
   try:
     # import the process
-    print(proc)
-    print('---here\n')
     mod = importlib.import_module(proc)
 
     # rename the process
@@ -19,10 +17,7 @@ def launcher(proc, op_params):
     messaging.context = messaging.Context()
 
     # exec the process
-    if proc == 'selfdrive.controls.controlsd':
-      mod.main(op_params_rec=op_params)
-    else:
-      mod.main()
+    mod.main()
   except KeyboardInterrupt:
     cloudlog.warning("child %s got SIGINT" % proc)
   except Exception:
