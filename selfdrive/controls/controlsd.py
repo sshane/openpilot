@@ -24,7 +24,7 @@ from selfdrive.controls.lib.alertmanager import AlertManager
 from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
-from selfdrive.controls.df_alert_manager import dfAlertManager
+from selfdrive.controls.lib.dynamic_follow.df_manager import dfManager
 from common.op_params import opParams
 
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -39,7 +39,7 @@ LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 op_params = opParams()
-df_alert_manager = dfAlertManager(op_params)
+df_manager = dfManager(op_params)
 hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
 
 
@@ -156,16 +156,26 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  df_profile, df_changed, change_time = df_alert_manager.update()
-  if df_changed:
-    df_text = df_alert_manager.df_profiles.to_profile[df_profile]
+  # df_profile, df_changed, change_time = df_manager.update()
+  df_out = df_manager.update()
+  if df_out.changed:
     df_alert = 'dfButtonAlert'
-    if sec_since_boot() - change_time > df_alert_manager.alert_duration and df_alert_manager.is_auto:
-      if not hide_auto_df_alerts and CS.cruiseState.enabled:
+    if df_out.is_auto and not hide_auto_df_alerts:
+      if CS.cruiseState.enabled:
         df_alert += 'NoSound'
-        AM.add(frame, df_alert, enabled, extra_text_1=df_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_text))
+        AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
     else:
-      AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_text))
+      AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
+
+  # if df_out.changed:  # old
+  #   df_text = df_manager.df_profiles.to_profile[df_out.df_profile]
+  #   df_alert = 'dfButtonAlert'
+  #   if sec_since_boot() - change_time > df_manager.alert_duration and df_out.is_auto:
+  #     if not hide_auto_df_alerts and CS.cruiseState.enabled:
+  #       df_alert += 'NoSound'
+  #       AM.add(frame, df_alert, enabled, extra_text_1=df_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_text))
+  #   else:
+  #     AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_text))
 
   # DISABLED
   if state == State.disabled:
