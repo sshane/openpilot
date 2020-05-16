@@ -47,6 +47,7 @@ class DynamicFollow:
   def _setup_changing_variables(self):
     self.TR = self.default_TR
     # self.df_profile = self._get_profile()  # todo: should be able to remove this line
+    self.model_profile = 1
 
     self.sng = False
     self.car_data = CarData()
