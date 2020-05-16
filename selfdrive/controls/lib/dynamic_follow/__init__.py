@@ -48,7 +48,7 @@ class DynamicFollow:
     self.TR = self.default_TR
     if self.mpc_id == 2:
       self.df_profile = self.df_profiles.relaxed  # todo: should be able to remove this line
-    # self.model_profile = 1
+    self.model_profile = self.df_profiles.relaxed
 
     self.sng = False
     self.car_data = CarData()
@@ -108,8 +108,7 @@ class DynamicFollow:
       dat = messaging.new_message()
       dat.init('dynamicFollowData')
       dat.dynamicFollowData.mpcTR = self.TR
-      if self.df_manager.is_auto:
-        dat.dynamicFollowData.profilePred = self.model_profile
+      dat.dynamicFollowData.profilePred = self.model_profile
       self.pm.send('dynamicFollowData', dat)
 
   def _change_cost(self, libmpc):
