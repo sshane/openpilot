@@ -46,7 +46,8 @@ class DynamicFollow:
 
   def _setup_changing_variables(self):
     self.TR = self.default_TR
-    # self.df_profile = self._get_profile()  # todo: should be able to remove this line
+    if self.mpc_id == 2:
+      self.df_profile = self.df_profiles.relaxed  # todo: should be able to remove this line
     # self.model_profile = 1
 
     self.sng = False
