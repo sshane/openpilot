@@ -25,6 +25,7 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 from selfdrive.controls.df_alert_manager import dfAlertManager
+from common.op_params import opParams
 
 LANE_DEPARTURE_THRESHOLD = 0.1
 STEER_ANGLE_SATURATION_TIMEOUT = 1.0 / DT_CTRL
@@ -36,6 +37,10 @@ HwType = log.HealthData.HwType
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
+
+op_params = opParams()
+df_alert_manager = dfAlertManager(op_params)
+hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
 
 
 def add_lane_change_event(events, path_plan):
@@ -620,18 +625,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
     prof.display()
 
 
-op_params = None
-df_alert_manager = None
-hide_auto_df_alerts = None
-
-
-def main(sm=None, pm=None, logcan=None, sm_smiskol=None, op_params_rec=None):
-  global op_params
-  global df_alert_manager
-  global hide_auto_df_alerts
-  op_params = op_params_rec
-  df_alert_manager = dfAlertManager(op_params)
-  hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
+def main(sm=None, pm=None, logcan=None, sm_smiskol=None):
   controlsd_thread(sm, pm, logcan, sm_smiskol)
 
 
