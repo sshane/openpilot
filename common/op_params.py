@@ -3,7 +3,8 @@ import os
 import json
 import time
 from selfdrive.swaglog import cloudlog
-from threading import Lock
+# from threading import Lock
+from multiprocessing import Lock
 travis = False
 
 
