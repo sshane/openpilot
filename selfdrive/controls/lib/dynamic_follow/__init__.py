@@ -87,7 +87,7 @@ class DynamicFollow:
       self.df_profile = self._get_profile()  # can be the user-selected profile, or the model's predicted profile
       self.gather_data()
 
-    if not self.lead_data.status or travis:
+    if not self.lead_data.status or travis or self.mpc_id != 1:
       self.TR = self.default_TR
     else:
       self._store_df_data()

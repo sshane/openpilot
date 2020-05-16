@@ -16,8 +16,7 @@ LOG_MPC = os.environ.get('LOG_MPC', False)
 class LongitudinalMpc():
   def __init__(self, mpc_id):
     self.mpc_id = mpc_id
-    if self.mpc_id == 1:
-      self.dynamic_follow = DynamicFollow(mpc_id)
+    self.dynamic_follow = DynamicFollow(mpc_id)
     self.setup_mpc()
     self.v_mpc = 0.0
     self.v_mpc_future = 0.0
@@ -80,15 +79,13 @@ class LongitudinalMpc():
         self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
         self.new_lead = True
 
-      if self.mpc_id == 1:
-        self.dynamic_follow.update_lead(v_lead, a_lead, x_lead, lead.status, self.new_lead)
+      self.dynamic_follow.update_lead(v_lead, a_lead, x_lead, lead.status, self.new_lead)
       self.prev_lead_status = True
       self.prev_lead_x = x_lead
       self.cur_state[0].x_l = x_lead
       self.cur_state[0].v_l = v_lead
     else:
-      if self.mpc_id == 1:
-        self.dynamic_follow.update_lead(new_lead=self.new_lead)
+      self.dynamic_follow.update_lead(new_lead=self.new_lead)
       self.prev_lead_status = False
       # Fake a fast lead car, so mpc keeps running
       self.cur_state[0].x_l = 50.0
@@ -98,10 +95,7 @@ class LongitudinalMpc():
 
     # Calculate mpc
     t = sec_since_boot()
-    if self.mpc_id == 1:
-      TR = self.dynamic_follow.update(CS, self.libmpc)  # update dynamic follow
-    else:
-      TR = 1.8
+    TR = self.dynamic_follow.update(CS, self.libmpc)  # update dynamic follow
     n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, TR)
     duration = int((sec_since_boot() - t) * 1e9)
 
