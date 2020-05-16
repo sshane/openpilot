@@ -14,7 +14,7 @@ while 1:
   df_button = int(input('df button: '))
   dat = messaging.new_message()
   dat.init('dynamicFollowButton')
-  dat.dynamicFollowData.status = df_button
+  dat.dynamicFollowButton.status = df_button
   pm.send('dynamicFollowButton', dat)
 
 
