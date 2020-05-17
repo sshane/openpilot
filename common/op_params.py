@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import time
+t = time.time()
 import os
+print(time.time() - t)
+t = time.time()
 import json
+print(time.time() - t)
 t = time.time()
 from selfdrive.swaglog import cloudlog
 print(time.time() - t)
