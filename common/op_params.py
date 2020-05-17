@@ -223,9 +223,10 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-for i in range(100000):
+n = 100000
+for i in range(n):
   # op_params.get('test_param', force_update=True)
   op_params.get('camera_offset')
 t = sec_since_boot() - t
 print('read time: {}'.format(t))
-print('rate: {} Hz'.format(round(10000 / t, 3)))
+print('rate: {} Hz'.format(round(n / t, 3)))
