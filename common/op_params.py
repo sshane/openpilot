@@ -199,6 +199,7 @@ class opParams:
           self.last_read_time = sec_since_boot()
 
   def _read(self):
+    print('reading')
     try:
       with open(self.params_file, "r") as f:
         self.params = json.loads(f.read())
