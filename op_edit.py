@@ -350,5 +350,5 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.info('Not saved!')
       return
 
-print('here!')
+
 opEdit()
