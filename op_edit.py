@@ -95,7 +95,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
-      print(choice)
       if parsed == 'continue':
         continue
       elif parsed == 'add':
@@ -106,6 +105,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       elif parsed == 'delete':
         self.delete_parameter()
       elif parsed == 'live':
+        self.last_choice = None
         self.live_tuning = not self.live_tuning
         self.op_params.put('op_edit_live_mode', self.live_tuning)  # for next opEdit startup
       elif parsed == 'exit':
