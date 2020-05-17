@@ -201,8 +201,8 @@ class opParams:
   def _read(self):
     try:
       with open(self.params_file, "r") as f:
-        # self.params = json.load(f)
-        self.params = literal_eval(f.read())
+        self.params = json.load(f)
+        # self.params = literal_eval(f.read())
       return True
     except Exception as e:
       print('opParams ERROR: {}'.format(e))
@@ -213,7 +213,7 @@ class opParams:
     if not travis:
       with open(self.params_file, "w") as f:
         # json.dump(self.params, f, indent=2, sort_keys=True)
-        f.write(json.dumps(self.params, sort_keys=True))
+        f.write(json.dumps(self.params, indent=2, sort_keys=True))
         # f.write(str(self.params))
 
 
