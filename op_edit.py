@@ -81,10 +81,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
           line = STYLES.OKGREEN + line
-        # line = '{}{}. {}: {}  {}'.format(STYLES.OKGREEN if idx == self.last_choice and self.last_choice is not None else '', idx + 1, param, values_list[idx], live[idx])
         to_print.append(line)
-
-      # to_print = ['{}{}. {}: {}  {}'.format(STYLES.OKGREEN if idx == self.last_choice and self.last_choice is not None else '', idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
 
       extras = {'a': 'Add new parameter',
                 'd': 'Delete parameter',
@@ -92,7 +89,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      to_print = [self.cyan(line) for line in to_print]
+      # to_print = [self.cyan(line) for line in to_print]
       print('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
