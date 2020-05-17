@@ -81,6 +81,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
           line = STYLES.OKGREEN + line
+        else:
+          line = STYLES.CYAN + line
         to_print.append(line)
 
       extras = {'a': 'Add new parameter',
