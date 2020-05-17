@@ -78,7 +78,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       to_print = []
       for idx, param in enumerate(self.params):
-        line = '{}{}. {}: {}  {}'.format(STYLES.OKGREEN if idx == self.last_choice and self.last_choice is not None else '', idx + 1, i, values_list[idx], live[idx])
+        line = '{}{}. {}: {}  {}'.format(STYLES.OKGREEN if idx == self.last_choice and self.last_choice is not None else '', idx + 1, param, values_list[idx], live[idx])
         to_print.append(line)
 
       # to_print = ['{}{}. {}: {}  {}'.format(STYLES.OKGREEN if idx == self.last_choice and self.last_choice is not None else '', idx + 1, i, values_list[idx], live[idx]) for idx, i in enumerate(self.params)]
