@@ -201,7 +201,8 @@ class opParams:
   def _read(self):
     try:
       with open(self.params_file, "r") as f:
-        self.params = json.load(f)
+        # self.params = json.load(f)
+        self.params = literal_eval(f)
       return True
     except Exception as e:
       print('opParams ERROR: {}'.format(e))
