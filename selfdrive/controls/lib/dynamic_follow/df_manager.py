@@ -25,6 +25,8 @@ class dfManager:
     else:
       self.cur_user_profile = self.df_profiles.to_idx[self.cur_user_profile]
 
+    self.offset = self.cur_user_profile
+
     self.cur_model_profile = 0
     self.alert_duration = 2.0
 
@@ -45,12 +47,12 @@ class dfManager:
     self.sm.update(0)
     df_out = dfReturn()
 
-    if self.offset is None:  # first time running
-      df_out.changed = True
-      self.offset = self.cur_user_profile  # ensure we start at the user's current profile
-      df_out.user_profile = self.cur_user_profile
-      df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
-      return df_out
+    # if self.offset is None:  # first time running
+    #   df_out.changed = True
+    #   self.offset = self.cur_user_profile  # ensure we start at the user's current profile
+    #   df_out.user_profile = self.cur_user_profile
+    #   df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
+    #   return df_out
 
     button_status = self.sm['dynamicFollowButton'].status
     df_out.user_profile = (button_status + self.offset) % len(self.df_profiles.to_profile)
