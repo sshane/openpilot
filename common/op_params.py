@@ -209,7 +209,7 @@ class opParams:
         self.params = json.load(f)
       return True
     except Exception as e:
-      cloudlog.error(e)
+      print(e)
       self.params = self._format_default_params()
       return False
 
