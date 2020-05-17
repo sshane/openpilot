@@ -85,8 +85,7 @@ class opParams:
     if os.path.isfile(self.params_file):
       if self._read():
         to_write = not self._add_default_params()  # if new default data has been added
-        if self._delete_old:  # or if old params have been deleted
-          to_write = True
+        to_write = self._delete_old or to_write  # or if old params have been deleted
       else:  # don't overwrite corrupted params, just print
         print("opParams ERROR: Can't read op_params.json file")
     else:
@@ -173,9 +172,9 @@ class opParams:
   @property
   def _delete_old(self):
     deleted = False
-    for i in self.to_delete:
-      if i in self.params:
-        del self.params[i]
+    for param in self.to_delete:
+      if param in self.params:
+        del self.params[param]
         deleted = True
     return deleted
 
@@ -213,8 +212,8 @@ class opParams:
     if not travis:
       with open(self.params_file, "w") as f:
         # json.dump(self.params, f, indent=2, sort_keys=True)
-        f.write(json.dumps(self.params, indent=2, sort_keys=True))
-      # os.chmod(self.params_file, 0o764)
+        # f.write(json.dumps(self.params, indent=2, sort_keys=True))
+        f.write(str(self.params))
 
 
 op_params = opParams()
