@@ -69,7 +69,7 @@ class opParams:
     self.params = {}
     self.params_file = "/data/op_params.json"
     self.last_read_time = sec_since_boot()
-    self.read_frequency = 1.0  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio', 'uniqueID', 'use_kd', 'kd', 'restrict_sign_change', 'write_errors', 'reset_integral']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
@@ -223,9 +223,12 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-n = 500000
+n = 250000
 for i in range(n):
   # op_params.get('test_param', force_update=True)
+  op_params.get('camera_offset')
+  op_params.get('camera_offset')
+  op_params.get('camera_offset')
   op_params.get('camera_offset')
 t = sec_since_boot() - t
 print('read time: {}'.format(t))
