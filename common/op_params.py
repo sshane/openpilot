@@ -69,7 +69,7 @@ class opParams:
     self.params = {}
     self.params_file = "/data/op_params.json"
     self.last_read_time = sec_since_boot()
-    self.read_frequency = 2.0  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 1.0  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['dynamic_lane_speed', 'longkiV', 'following_distance', 'static_steer_ratio', 'uniqueID', 'use_kd', 'kd', 'restrict_sign_change', 'write_errors', 'reset_integral']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
@@ -195,11 +195,11 @@ class opParams:
   def _update_params(self, key_info, force_update):
     if force_update or key_info.live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and (sec_since_boot() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
+        print('reading')
         if self._read():
           self.last_read_time = sec_since_boot()
 
   def _read(self):
-    print('reading')
     try:
       with open(self.params_file, "r") as f:
         self.params = json.loads(f.read())
@@ -223,7 +223,7 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-n = 100000
+n = 500000
 for i in range(n):
   # op_params.get('test_param', force_update=True)
   op_params.get('camera_offset')
