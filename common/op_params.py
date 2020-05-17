@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+import time
+t = time.time()
 import os
 import json
 from selfdrive.swaglog import cloudlog
+print(time.time() - t)
 try:
   from common.realtime import sec_since_boot
 except ImportError:
