@@ -66,7 +66,7 @@ class dfManager:
       self.op_params.put('dynamic_follow', self.df_profiles.to_profile[df_out.user_profile])  # save current profile for next drive
       self.cur_user_profile = df_out.user_profile
 
-    elif self.is_auto:
+    if self.is_auto:
       df_out.model_profile = self.sm['dynamicFollowData'].profilePred
       df_out.model_profile_text = self.df_profiles.to_profile[df_out.model_profile]
       df_out.is_auto = True
