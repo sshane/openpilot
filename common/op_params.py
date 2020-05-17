@@ -93,7 +93,7 @@ class opParams:
         if self._delete_old:  # or if old params have been deleted
           to_write = True
       else:  # don't overwrite corrupted params, just print
-        print("ERROR: Can't read op_params.json file")
+        print("opParams ERROR: Can't read op_params.json file")
     else:
       to_write = True  # user's first time running a fork with op_params, write default params
 
@@ -112,7 +112,7 @@ class opParams:
         if type(value) in key_info.allowed_types:
           return value  # all good, returning user's value
 
-        print('op_params: User\'s value is not valid!')
+        print('opParams WARNING: User\'s value is not valid!')
         if key_info.has_default:  # invalid value type, try to use default value
           if type(key_info.default) in key_info.allowed_types:  # actually check if the default is valid
             # return default value because user's value of key is not in the allowed_types to avoid crashing openpilot
@@ -209,7 +209,7 @@ class opParams:
         self.params = json.load(f)
       return True
     except Exception as e:
-      print('op_params: {}'.format(e)))
+      print('opParams ERROR: {}'.format(e))
       self.params = self._format_default_params()
       return False
 
