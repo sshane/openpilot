@@ -201,9 +201,8 @@ class opParams:
   def _read(self):
     try:
       with open(self.params_file, "r") as f:
-        # self.params = json.load(f)
+        self.params = json.load(f)
         # self.params = json.loads(f.read())
-        self.params = literal_eval(f.read().replace('\n', '').replace(' ', '').replace('null', 'None').replace('false', 'False').replace('true', 'True'))
       return True
     except Exception as e:
       print('opParams ERROR: {}'.format(e))
@@ -226,7 +225,7 @@ for i in range(2000):
 print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-for i in range(2000):
+for i in range(20000):
   op_params.get('test_param', force_update=True)
   op_params.get('test_param1', force_update=True)
 print('read time: {}'.format(sec_since_boot() - t))
