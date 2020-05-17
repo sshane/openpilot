@@ -25,12 +25,10 @@ class dfManager:
     else:
       self.cur_user_profile = self.df_profiles.to_idx[self.cur_user_profile]
 
-    self.offset = self.cur_user_profile
-
     self.cur_model_profile = 0
     self.alert_duration = 2.0
 
-    self.offset = None
+    self.offset = self.cur_user_profile
     self.profile_pred = None
     self.last_button_status = 0
     self.change_time = sec_since_boot()
