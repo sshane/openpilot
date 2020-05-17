@@ -212,9 +212,7 @@ class opParams:
   def _write(self):
     if not travis:
       with open(self.params_file, "w") as f:
-        # json.dump(self.params, f, indent=2, sort_keys=True)
-        f.write(json.dumps(self.params, indent=2, sort_keys=True))
-        # f.write(str(self.params))
+        f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
 
 op_params = opParams()
