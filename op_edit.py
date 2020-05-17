@@ -63,7 +63,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.run_loop()
 
   def run_loop(self):
-    first_run = True
     while True:
       if not self.live_tuning:
         self.info('Here are your parameters:', end='\n', sleep_time=0)
@@ -91,19 +90,18 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'e': 'Exit opEdit'}
 
       to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
-      # to_print = [self.cyan(line) for line in to_print]
       print('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
-      self.last_choice = choice
       print(choice)
       if parsed == 'continue':
         continue
       elif parsed == 'add':
         self.add_parameter()
       elif parsed == 'change':
+        self.last_choice = choice
         self.change_parameter(choice)
       elif parsed == 'delete':
         self.delete_parameter()
@@ -112,7 +110,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.op_params.put('op_edit_live_mode', self.live_tuning)  # for next opEdit startup
       elif parsed == 'exit':
         return
-      first_run = False
 
   def parse_choice(self, choice, opt_len):
     if choice.isdigit():
