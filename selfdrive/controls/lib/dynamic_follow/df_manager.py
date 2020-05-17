@@ -53,8 +53,9 @@ class dfManager:
     #   df_out.user_profile = self.cur_user_profile
     #   df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
     #   return df_out
-
     button_status = self.sm['dynamicFollowButton'].status
+    print(self.offset)
+    print(button_status)
     df_out.user_profile = (button_status + self.offset) % len(self.df_profiles.to_profile)
     df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
 
