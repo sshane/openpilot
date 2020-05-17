@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 import time
-
-t = time.time()
 from ast import literal_eval
-print(time.time() - t)
-
+import os
 t = time.time()
 import json
 print(time.time() - t)
