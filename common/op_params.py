@@ -220,13 +220,13 @@ class opParams:
 
 op_params = opParams()
 t = sec_since_boot()
-for i in range(1000):
+for i in range(10000):
   op_params.put('test_param', [0, 5, 99.85, 45.45])
   op_params.put('test_param1', 45.987)
 print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-for i in range(1000):
+for i in range(10000):
   op_params.get('test_param', force_update=True)
   op_params.get('test_param1', force_update=True)
 print('read time: {}'.format(sec_since_boot() - t))
