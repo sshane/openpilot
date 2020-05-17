@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-import time
 from ast import literal_eval
 import os
-t = time.time()
 import json
-print(time.time() - t)
-
-t = time.time()
-# try:
-from common.realtime import sec_since_boot
-# except ImportError:
-#   import time
-#   sec_since_boot = time.time
-print(time.time() - t)
+try:
+  from common.realtime import sec_since_boot
+except ImportError:
+  import time
+  sec_since_boot = time.time
+  print("opParams WARNING: using python time.time() instead of faster sec_since_boot")
 
 travis = False
 
@@ -218,3 +213,17 @@ class opParams:
       with open(self.params_file, "w") as f:
         json.dump(self.params, f, indent=2, sort_keys=True)
       os.chmod(self.params_file, 0o764)
+
+
+op_params = opParams()
+t = sec_since_boot()
+for i in range(1000):
+  op_params.put('test_param', [0, 5, 99.85, 45.45])
+  op_params.put('test_param1', 45.987)
+print('write time: {}'.format(sec_since_boot() - t))
+
+t = sec_since_boot()
+for i in range(1000):
+  op_params.get('test_param')
+  op_params.get('test_param1')
+print('read time: {}'.format(sec_since_boot() - t))
