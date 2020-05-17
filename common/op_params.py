@@ -97,14 +97,14 @@ class opParams:
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
     t = sec_since_boot()
-    self._update_params(key, force_update)
+    key_info = self.key_info(key)
+    self._update_params(key_info, force_update)
     t1 = sec_since_boot() - t
     if key is None:
       return self._get_all()
 
     if key in self.params:
       t = sec_since_boot()
-      key_info = self.key_info(key)
       t2 = sec_since_boot() - t
       if key_info.has_allowed_types:
         value = self.params[key]
@@ -134,7 +134,7 @@ class opParams:
 
   def key_info(self, key):
     key_info = KeyInfo()
-    if key is None:
+    if key is None or key not in self.default_params:
       return key_info
     if key in self.default_params:
       if 'allowed_types' in self.default_params[key]:
@@ -196,8 +196,8 @@ class opParams:
       return ''
     return None  # unknown type
 
-  def _update_params(self, key, force_update):
-    if force_update or self.key_info(key).live:  # if is a live param, we want to get updates while openpilot is running
+  def _update_params(self, key_info, force_update):
+    if force_update or key_info.live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and (sec_since_boot() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
         if self._read():
           self.last_read_time = sec_since_boot()
