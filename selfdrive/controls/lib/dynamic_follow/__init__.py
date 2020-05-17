@@ -85,7 +85,7 @@ class DynamicFollow:
     self.user_profile = df_out.user_profile
 
     if self.df_manager.is_auto and self.lead_data.status:
-      self.model_profile = self._get_pred()  # only predict with lead
+      self._get_pred()  # only predict with lead, sets self.model_profile
 
       # self.model_profile = df_out.model_profile  # don't need to use this since it
       # essentially just sends it over to df_manager and back over. skip the lag
@@ -216,8 +216,7 @@ class DynamicFollow:
       if len(self.auto_df_model_data) == self.model_input_len:
         pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
         self.last_predict_time = cur_time
-        # self.model_profile = int(np.argmax(pred))
-        return int(np.argmax(pred))
+        self.model_profile = int(np.argmax(pred))
 
   def _get_TR(self):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
