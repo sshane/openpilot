@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-from common.op_params import opParams
 import time
+t = time.time()
+from common.op_params import opParams
+print(time.time() - t)
 import ast
 import difflib
 
@@ -28,7 +30,9 @@ class STYLES:
 
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
+    t = time.time()
     self.op_params = opParams()
+    print(time.time() - t)
     self.params = None
     self.sleep_time = 1.0
     self.live_tuning = self.op_params.get('op_edit_live_mode', False)
