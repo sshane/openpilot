@@ -94,6 +94,7 @@ class opParams:
 
     if to_write:
       self._write()
+      os.chmod(self.params_file, 0o764)
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
     self._update_params(key, force_update)
