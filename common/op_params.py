@@ -236,3 +236,5 @@ for i in range(10000):
 t = sec_since_boot() - t
 print('read time: {}'.format(t))
 print('rate: {} Hz'.format(round(10000 / t, 3)))
+print(sum(t1s))
+print(sum(t2s))
