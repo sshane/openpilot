@@ -96,16 +96,20 @@ class opParams:
       os.chmod(self.params_file, 0o764)
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
+    t = sec_since_boot()
     self._update_params(key, force_update)
+    t1 = sec_since_boot() - t
     if key is None:
       return self._get_all()
 
     if key in self.params:
+      t = sec_since_boot()
       key_info = self.key_info(key)
+      t2 = sec_since_boot() - t
       if key_info.has_allowed_types:
         value = self.params[key]
         if type(value) in key_info.allowed_types:
-          return value  # all good, returning user's value
+          return value, t1, t2  # all good, returning user's value
 
         print('opParams WARNING: User\'s value is not valid!')
         if key_info.has_default:  # invalid value type, try to use default value
@@ -222,9 +226,13 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
+t1s = []
+t2s = []
 for i in range(10000):
   # op_params.get('test_param', force_update=True)
-  op_params.get('test_param1', force_update=True)
+  v, t1, t2 = op_params.get('camera_offset', force_update=True)
+  t1s.append(t1)
+  t2s.append(t2)
 t = sec_since_boot() - t
 print('read time: {}'.format(t))
 print('rate: {} Hz'.format(round(10000 / t, 3)))
