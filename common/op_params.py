@@ -5,9 +5,7 @@ import os
 t = time.time()
 import json
 print(time.time() - t)
-t = time.time()
-from selfdrive.swaglog import cloudlog
-print(time.time() - t)
+
 t = time.time()
 try:
   from common.realtime import sec_since_boot
@@ -15,6 +13,7 @@ except ImportError:
   import time
   sec_since_boot = time.time
 print(time.time() - t)
+
 travis = False
 
 
@@ -94,7 +93,7 @@ class opParams:
         if self._delete_old:  # or if old params have been deleted
           to_write = True
       else:  # don't overwrite corrupted params, just print
-        cloudlog.error("ERROR: Can't read op_params.json file")
+        print("ERROR: Can't read op_params.json file")
     else:
       to_write = True  # user's first time running a fork with op_params, write default params
 
@@ -113,7 +112,7 @@ class opParams:
         if type(value) in key_info.allowed_types:
           return value  # all good, returning user's value
 
-        cloudlog.warning('op_params: User\'s value is not valid!')
+        print('op_params: User\'s value is not valid!')
         if key_info.has_default:  # invalid value type, try to use default value
           if type(key_info.default) in key_info.allowed_types:  # actually check if the default is valid
             # return default value because user's value of key is not in the allowed_types to avoid crashing openpilot
