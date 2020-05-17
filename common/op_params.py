@@ -222,7 +222,9 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-for i in range(20000):
+for i in range(10000):
   op_params.get('test_param', force_update=True)
   op_params.get('test_param1', force_update=True)
-print('read time: {}'.format(sec_since_boot() - t))
+t = sec_since_boot() - t
+print('read time: {}'.format(t))
+print('rate: {} Hz'.format(round(20000 / t, 3)))
