@@ -222,15 +222,9 @@ op_params = opParams()
 # print('write time: {}'.format(sec_since_boot() - t))
 
 t = sec_since_boot()
-t1s = []
-t2s = []
 for i in range(10000):
   # op_params.get('test_param', force_update=True)
-  v, t1, t2 = op_params.get('camera_offset', force_update=True)
-  t1s.append(t1)
-  t2s.append(t2)
+  op_params.get('camera_offset', force_update=True)
 t = sec_since_boot() - t
 print('read time: {}'.format(t))
 print('rate: {} Hz'.format(round(10000 / t, 3)))
-print(sum(t1s))
-print(sum(t2s))
