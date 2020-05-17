@@ -1,7 +1,7 @@
 Stock Additions 0.7.5
 ========================
  * Various opEdit improvements, colors, highlighting of last explored param, quicker messages
- * New Dynamic follow modification to help slow and accelerate quicker
+ * New Dynamic Follow modification to help slow and accelerate sooner
  * Live parameters update quicker
  * dfManager reliability improvements
 
