@@ -224,6 +224,9 @@ class DynamicFollow:
       df_profile = self.model_profile
     else:
       df_profile = self.user_profile
+     
+    with open("/data/df_profile", "a") as f:
+      f.write('{}\n'.format(df_profile))
 
     if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]  # TRs
@@ -234,13 +237,12 @@ class DynamicFollow:
       y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
       profile_mod_pos = [1.05, 1.375, 2.99, 3.8]
       profile_mod_neg = [0.79, .1, 0.0, 0.0]
-    elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
+    #elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
+    else:
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
       profile_mod_pos = [1.0] * 4
       profile_mod_neg = [1.0] * 4
-    else:
-      print('DF PROFILE: {}'.format(df_profile))
-      raise Exception('Profile not valid!')
+
 
     sng_TR = 1.8  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
