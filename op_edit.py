@@ -34,6 +34,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.live_tuning = self.op_params.get('op_edit_live_mode', False)
     self.username = self.op_params.get('username', None)
 
+    self.last_choice = None
+
     self.run_init()
 
   def run_init(self):
@@ -88,6 +90,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       choice = input('>> ').strip()
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
+      self.last_choice = choice
       print(choice)
       if parsed == 'continue':
         continue
