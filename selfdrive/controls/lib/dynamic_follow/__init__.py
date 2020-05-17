@@ -35,7 +35,7 @@ class DynamicFollow:
 
     self.v_lead_retention = 2.0  # keep only last x seconds
     self.v_ego_retention = 2.5
-    self.v_rel_retention = 2.0
+    self.v_rel_retention = 1.6
 
     self._setup_collector()
     self._setup_changing_variables()
@@ -281,6 +281,7 @@ class DynamicFollow:
     if a_moving is not None:
       x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
       y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
+      print('working! a_moving: {}'.format(a_moving))
       tmp_variable_doesnt_matter = interp(a_moving, x, y) * self.op_params.get('v_rel_acc_modifier', 1.0)
       TR_mods.append(tmp_variable_doesnt_matter)
 
