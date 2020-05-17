@@ -5,11 +5,13 @@ import os
 import json
 from selfdrive.swaglog import cloudlog
 print(time.time() - t)
+t = time.time()
 try:
   from common.realtime import sec_since_boot
 except ImportError:
   import time
   sec_since_boot = time.time
+print(time.time() - t)
 travis = False
 
 
