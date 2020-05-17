@@ -96,20 +96,16 @@ class opParams:
       os.chmod(self.params_file, 0o764)
 
   def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
-    t = sec_since_boot()
-    key_info = self.key_info(key)
-    self._update_params(key_info, force_update)
-    t1 = sec_since_boot() - t
     if key is None:
       return self._get_all()
 
+    key_info = self.key_info(key)
+    self._update_params(key_info, force_update)
     if key in self.params:
-      t = sec_since_boot()
-      t2 = sec_since_boot() - t
       if key_info.has_allowed_types:
         value = self.params[key]
         if type(value) in key_info.allowed_types:
-          return value, t1, t2  # all good, returning user's value
+          return value  # all good, returning user's value
 
         print('opParams WARNING: User\'s value is not valid!')
         if key_info.has_default:  # invalid value type, try to use default value
