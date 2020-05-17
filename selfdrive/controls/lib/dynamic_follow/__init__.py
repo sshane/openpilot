@@ -79,13 +79,14 @@ class DynamicFollow:
 
   def _get_profiles(self):
     df_out = self.df_manager.update()
-    with open("/data/user_profile", "a") as f:
-      f.write('{}\n'.format(df_out.user_profile))
-    
     self.user_profile = df_out.user_profile
+    if df_out.is_auto:
+      self._get_pred()  # sets self.model_profile, all other checks are inside function
 
-    if self.df_manager.is_auto and self.lead_data.status:
-      self._get_pred()  # only predict with lead, sets self.model_profile
+    with open("/data/user_profile", "a") as f:
+      f.write('{}\n'.format(self.user_profile))
+    with open("/data/model_profile", "a") as f:
+      f.write('{}\n'.format(self.model_profile))
 
       # self.model_profile = df_out.model_profile  # don't need to use this since it
       # essentially just sends it over to df_manager and back over. skip the lag
@@ -212,11 +213,12 @@ class DynamicFollow:
 
   def _get_pred(self):
     cur_time = sec_since_boot()
-    if cur_time - self.last_predict_time > self.predict_rate:
-      if len(self.auto_df_model_data) == self.model_input_len:
-        pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
-        self.last_predict_time = cur_time
-        self.model_profile = int(np.argmax(pred))
+    if self.car_data.cruise_enabled and self.lead_data.status:
+      if cur_time - self.last_predict_time > self.predict_rate:
+        if len(self.auto_df_model_data) == self.model_input_len:
+          pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
+          self.last_predict_time = cur_time
+          self.model_profile = int(np.argmax(pred))
 
   def _get_TR(self):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
@@ -224,11 +226,13 @@ class DynamicFollow:
 
     if self.df_manager.is_auto:  # decide which profile to use, model profile will be updated before this
       df_profile = self.model_profile
+      using_p = 'using model profile'
     else:
       df_profile = self.user_profile
-     
+      using_p = 'using user profile'
+
     with open("/data/df_profile", "a") as f:
-      f.write('{}\n'.format(df_profile))
+      f.write('{}: {}\n'.format(using_p, df_profile))
 
     if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]  # TRs
