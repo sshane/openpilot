@@ -79,6 +79,12 @@ class DynamicFollow:
 
   def _get_profiles(self):
     df_out = self.df_manager.update()
+    with open("/data/user_profile", "a") as f:
+
+
+
+      f.write('{}\n'.format(df_out.user_profile))
+    
     self.user_profile = df_out.user_profile
 
     if self.df_manager.is_auto and self.lead_data.status:
