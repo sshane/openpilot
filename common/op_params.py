@@ -195,7 +195,6 @@ class opParams:
   def _update_params(self, key_info, force_update):
     if force_update or key_info.live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and (sec_since_boot() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
-        print('reading')
         if self._read():
           self.last_read_time = sec_since_boot()
 
@@ -213,23 +212,3 @@ class opParams:
     if not travis:
       with open(self.params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
-
-
-op_params = opParams()
-# t = sec_since_boot()
-# for i in range(5000):
-#   op_params.put('test_param', [0, 5, 99.85, 45.45])
-#   op_params.put('test_param1', 45.987)
-# print('write time: {}'.format(sec_since_boot() - t))
-
-t = sec_since_boot()
-n = 250000
-for i in range(n):
-  # op_params.get('test_param', force_update=True)
-  op_params.get('camera_offset')
-  op_params.get('camera_offset')
-  op_params.get('camera_offset')
-  op_params.get('camera_offset')
-t = sec_since_boot() - t
-print('read time: {}'.format(t))
-print('rate: {} Hz'.format(round(n / t, 3)))
