@@ -213,7 +213,7 @@ class opParams:
       with open(self.params_file, "w") as f:
         # json.dump(self.params, f, indent=2, sort_keys=True)
         f.write(json.dumps(self.params, indent=2, sort_keys=True))
-      os.chmod(self.params_file, 0o764)
+      # os.chmod(self.params_file, 0o764)
 
 
 op_params = opParams()
