@@ -137,6 +137,15 @@ class DynamicFollow:
     while len(self.auto_df_model_data) > self.model_input_len:
       del self.auto_df_model_data[0]
 
+  def _get_pred(self):
+    cur_time = sec_since_boot()
+    if self.car_data.cruise_enabled and self.lead_data.status:
+      if cur_time - self.last_predict_time > self.predict_rate:
+        if len(self.auto_df_model_data) == self.model_input_len:
+          pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
+          self.last_predict_time = cur_time
+          self.model_profile = int(np.argmax(pred))
+
   def _remove_old_entries(self, lst, cur_time, retention):
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
@@ -156,15 +165,6 @@ class DynamicFollow:
       if dT > min_consider_time:
         return (self.df_data.v_rels[-1]['v_rel'] - self.df_data.v_rels[0]['v_rel']) / dT  # delta speed / delta time
     return None
-
-  def _get_pred(self):
-    cur_time = sec_since_boot()
-    if self.car_data.cruise_enabled and self.lead_data.status:
-      if cur_time - self.last_predict_time > self.predict_rate:
-        if len(self.auto_df_model_data) == self.model_input_len:
-          pred = predict(np.array(self.auto_df_model_data[::self.split_every], dtype=np.float32).flatten())
-          self.last_predict_time = cur_time
-          self.model_profile = int(np.argmax(pred))
 
   def _get_TR(self):
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
