@@ -281,8 +281,12 @@ class DynamicFollow:
     if a_moving is not None:
       x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
       y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
-      print('working! a_moving: {}'.format(a_moving))
+      print('a_moving: {}'.format(round(a_moving, 4)))
       tmp_variable_doesnt_matter = interp(a_moving, x, y) * self.op_params.get('v_rel_acc_modifier', 1.0)
+      if tmp_variable_doesnt_matter > 0:
+        print('ADDING: {} sec'.format(round(tmp_variable_doesnt_matter, 4)))
+      else:
+        print('SUBTRACTING: {} sec'.format(round(tmp_variable_doesnt_matter, 4)))
       TR_mods.append(tmp_variable_doesnt_matter)
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics

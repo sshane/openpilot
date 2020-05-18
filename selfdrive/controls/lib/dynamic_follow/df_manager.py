@@ -10,6 +10,7 @@ class dfReturn:
   model_profile_text = None  # same as model_profile, but is its text representation
   changed = False  # true if either profile from model or user changes profile
   is_auto = False  # true if auto
+  last_is_auto = False
 
 
 class dfManager:
@@ -33,6 +34,7 @@ class dfManager:
     self.last_button_status = 0
     self.change_time = sec_since_boot()
     self.first_run = True
+    self.last_is_auto = False
 
   @property
   def is_auto(self):
@@ -62,6 +64,7 @@ class dfManager:
     if self.last_button_status != button_status:  # TODO: could replace this with self.cur_user_profile != df_out.user_profile
       self.last_button_status = button_status
       self.change_time = sec_since_boot()
+      self.last_is_auto = False
       df_out.changed = True
       self.op_params.put('dynamic_follow', self.df_profiles.to_profile[df_out.user_profile])  # save current profile for next drive
       self.cur_user_profile = df_out.user_profile
@@ -70,6 +73,8 @@ class dfManager:
       df_out.model_profile = self.sm['dynamicFollowData'].profilePred
       df_out.model_profile_text = self.df_profiles.to_profile[df_out.model_profile]
       df_out.is_auto = True
+      df_out.last_is_auto = self.last_is_auto
+      self.last_is_auto = True
       if self.cur_model_profile != df_out.model_profile and self.can_show_alert:
         df_out.changed = True  # to hide pred alerts until user-selected auto alert has finished
       self.cur_model_profile = df_out.model_profile

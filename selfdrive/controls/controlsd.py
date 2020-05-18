@@ -160,7 +160,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   df_out = df_manager.update()
   if df_out.changed:
     df_alert = 'dfButtonAlert'
-    if df_out.is_auto and not hide_auto_df_alerts:
+    if df_out.is_auto and df_out.last_is_auto and not hide_auto_df_alerts:
       if CS.cruiseState.enabled:
         df_alert += 'NoSound'
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
