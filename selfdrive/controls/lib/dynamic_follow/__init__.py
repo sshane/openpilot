@@ -212,7 +212,7 @@ class DynamicFollow:
     TR_mods.append(interp(self.lead_data.v_lead - self.car_data.v_ego, x, y))
 
     x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
-    y = [0.265, 0.1877, 0.0984, 0.0574, 0.034, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
+    y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
     rel_accel = self._calculate_relative_accel()  # change in relative velocity over time, so relative acceleration?
