@@ -172,13 +172,8 @@ class DynamicFollow:
 
     if self.df_manager.is_auto:  # decide which profile to use, model profile will be updated before this
       df_profile = self.model_profile
-      using_p = 'using model profile'
     else:
       df_profile = self.user_profile
-      using_p = 'using user profile'
-
-    with open("/data/df_profile", "a") as f:
-      f.write('{}: {}\n'.format(using_p, df_profile))
 
     if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]  # TRs
