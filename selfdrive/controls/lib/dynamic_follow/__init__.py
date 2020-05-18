@@ -20,22 +20,23 @@ class DynamicFollow:
     self.op_params = opParams()
     self.df_profiles = dfProfiles()
     self.df_manager = dfManager(self.op_params)
-    self.default_TR = 1.8
-    self.predict_rate = 1 / 5.
 
     if not travis and mpc_id == 1:
       self.pm = messaging.PubMaster(['dynamicFollowData'])
     else:
       self.pm = None
 
-    self.scales = {'v_ego': [-0.06112159043550491, 37.96522521972656], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 35.27671432495117], 'x_lead': [2.4600000381469727, 139.52000427246094]}
-    self.mpc_rate = 1 / 20.
+    # Model variables
+    self.model_scales = {'v_ego': [-0.06112159043550491, 37.96522521972656], 'a_lead': [-2.982128143310547, 3.3612186908721924], 'v_lead': [0.0, 35.27671432495117], 'x_lead': [2.4600000381469727, 139.52000427246094]}
+    self.predict_rate = 1 / 4.
     self.split_every = 3
     self.model_input_len = 200 * self.split_every
 
+    # Dynamic follow variables
+    self.default_TR = 1.8
     self.v_lead_retention = 2.0  # keep only last x seconds
     self.v_ego_retention = 2.5
-    self.v_rel_retention = 1.6
+    self.v_rel_retention = 1.5
 
     self._setup_collector()
     self._setup_changing_variables()
@@ -61,7 +62,6 @@ class DynamicFollow:
   def update(self, CS, libmpc):
     self.update_car(CS)
     if self.mpc_id == 1:
-      # self.df_profile = self._get_profile()  # can be the user-selected profile, or the model's predicted profile
       self._get_profiles()
       self._gather_data()
 
@@ -83,23 +83,6 @@ class DynamicFollow:
     if df_out.is_auto:
       self._get_pred()  # sets self.model_profile, all other checks are inside function
 
-    with open("/data/user_profile", "a") as f:
-      f.write('{}\n'.format(self.user_profile))
-    with open("/data/model_profile", "a") as f:
-      f.write('{}\n'.format(self.model_profile))
-
-      # self.model_profile = df_out.model_profile  # don't need to use this since it
-      # essentially just sends it over to df_manager and back over. skip the lag
-
-    # todo: old, remove below
-    # # need to check is_auto from df_manager since df_out's will be False
-    # # if button status has changed, even if it's returning auto profile
-    # if self.df_manager.is_auto and self.lead_data.status:
-    #   self._get_pred()
-    #   return self.model_profile
-    # else:
-    #   return df_out.user_profile
-
   def _gather_data(self):
     self.sm.update(0)
     live_tracks = [[i.dRel, i.vRel, i.aRel, i.yRel] for i in self.sm['liveTracks']]
@@ -114,7 +97,7 @@ class DynamicFollow:
 
   def _norm(self, x, name):
     self.x = x
-    return np.interp(x, self.scales[name], [0, 1])
+    return np.interp(x, self.model_scales[name], [0, 1])
 
   def _send_cur_state(self):
     if self.mpc_id == 1 and self.pm is not None:
@@ -134,18 +117,13 @@ class DynamicFollow:
 
   def _store_df_data(self):
     cur_time = sec_since_boot()
-
-    # Store lead velocity for better decision between cur lead accel and lead accel over time
-    # if self.lead_data.status:  # todo: remove?
-    #   if self.lead_data.new_lead:
-    #     self.df_data.v_leads = []  # reset when new lead
-    #   else:
-    #     self.df_data.v_leads = self._remove_old_entries(self.df_data.v_leads, cur_time, self.v_lead_retention)
-    #   self.df_data.v_leads.append({'v_lead': self.lead_data.v_lead, 'time': cur_time})
-
     # Store custom relative accel over time
-    self.df_data.v_rels = self._remove_old_entries(self.df_data.v_rels, cur_time, self.v_rel_retention)
-    self.df_data.v_rels.append({'v_rel': self.lead_data.v_lead - self.car_data.v_ego, 'time': cur_time})
+    if self.lead_data.status:
+      if self.lead_data.new_lead:
+        self.df_data.v_rels = []  # reset when new lead
+      else:
+        self.df_data.v_rels = self._remove_old_entries(self.df_data.v_rels, cur_time, self.v_rel_retention)
+      self.df_data.v_rels.append({'v_rel': self.lead_data.v_lead - self.car_data.v_ego, 'time': cur_time})
 
     # Store our velocity for better sng
     self.df_data.v_egos = self._remove_old_entries(self.df_data.v_egos, cur_time, self.v_ego_retention)
@@ -162,49 +140,17 @@ class DynamicFollow:
   def _remove_old_entries(self, lst, cur_time, retention):
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
-  # def _calculate_lead_accel(self):  # todo: remove?
-  #   min_consider_time = 1.0  # minimum amount of time required to consider calculation
-  #   a_lead = self.lead_data.a_lead
-  #   if len(self.df_data.v_leads):  # if not empty
-  #     elapsed = self.df_data.v_leads[-1]['time'] - self.df_data.v_leads[0]['time']
-  #     if elapsed > min_consider_time:  # if greater than min time (not 0)
-  #       a_calculated = (self.df_data.v_leads[-1]['v_lead'] - self.df_data.v_leads[0]['v_lead']) / elapsed  # delta speed / delta time
-  #       if a_lead * a_calculated > 0 and abs(a_calculated) > abs(a_lead):
-  #         # both are negative or positive and calculated is greater than current
-  #         return a_calculated
-  #       if a_calculated < 0 <= a_lead:  # accel over time is negative and current accel is zero or positive
-  #         if a_lead < -a_calculated * 0.55:
-  #           # half of accel over time is less than current positive accel, we're not decelerating after long decel
-  #           return a_calculated
-  #       if a_lead <= 0 < a_calculated:  # accel over time is positive and current accel is zero or negative
-  #         if -a_lead < a_calculated * 0.45:
-  #           # half of accel over time is greater than current negative accel, we're not accelerating after long accel
-  #           return a_calculated
-  #
-  #   return a_lead  # if above doesn't execute, we'll return measured a_lead
-
   def _calculate_relative_accel(self):
     """
     Moving window returning the following: (final relative velocity - initial relative velocity) / dT
-    I'm not sure what this is. Change in relative velocity, so relative velocity acceleration?
-
     Output properties:
       When the lead is starting to decelerate, and our car remains the same speed, the output decreases (and vice versa)
       However when our car finally starts to decelerate at the same rate as the lead car, the output will move to near 0
-
-      Relative velocity is a misleading term here, it doesn't matter what our actual relative velocity is,
-        as long as we lose the same speed units as the lead, the output will be 0:
-          >>> a = [(15 - 18), (14 - 17)]
-          >>> (a[-1] - a[0]) / 1
-          > 0.0
-
-      Likewise, if we are decelerating at a quicker rate than the lead, the output will be positive and vice versa
-
-    So I think the following is incorrect:
-      ~~~So wait, then is this just a fancy relative velocity calculation? But over time? Need to test to see if it has any meaningful differences~~~
+        >>> a = [(15 - 18), (14 - 17)]
+        >>> (a[-1] - a[0]) / 1
+        > 0.0
     """
-
-    min_consider_time = 1.0  # minimum amount of time required to consider calculation
+    min_consider_time = 0.5  # minimum amount of time required to consider calculation
     if len(self.df_data.v_rels) > 0:  # if not empty
       dT = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
       if dT > min_consider_time:
@@ -243,12 +189,12 @@ class DynamicFollow:
       y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]
       profile_mod_pos = [1.05, 1.375, 2.99, 3.8]
       profile_mod_neg = [0.79, .1, 0.0, 0.0]
-    #elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
-    else:
+    elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
       profile_mod_pos = [1.0] * 4
       profile_mod_neg = [1.0] * 4
-
+    else:
+      raise Exception('Unknown profile type: {}'.format(df_profile))
 
     sng_TR = 1.8  # reacceleration stop and go TR
     sng_speed = 15.0 * CV.MPH_TO_MS
@@ -265,7 +211,6 @@ class DynamicFollow:
       TR = interp(self.car_data.v_ego, x, y)
 
     TR_mods = []
-
     # Dynamic follow modifications (the secret sauce)
     x = [-20.0288, -15.6871, -11.1965, -7.8645, -4.9472, -3.0541, -2.2244, -1.4383, -0.6671, -0.3313, -0.1671, 0.0, 0.6845, 1.3682, 1.898, 2.7316]  # relative velocity values
     y = [0.6492, 0.5155, 0.4235, 0.3357, 0.2491, 0.1278, 0.1092, 0.0841, 0.0509, 0.0209, 0.0051, 0, -0.0443, -0.066, -0.1425, -0.2218]  # modification values
@@ -275,26 +220,22 @@ class DynamicFollow:
     y = [0.265, 0.1877, 0.0984, 0.0574, 0.034, 0.024, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    # if self.car_data.v_ego >= 10 * CV.MPH_TO_MS:
-    # todo: this should help us slow sooner if the lead is slowing down and we haven't started slowing down yet
-    a_moving = self._calculate_relative_accel()
-    if a_moving is not None:
-      x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-      y = [0.35, 0.3, 0.125, 0.075, 0.06, 0, -0.06, -0.075, -0.125, -0.3, -0.35]
-      print('a_moving: {}'.format(round(a_moving, 4)))
-      tmp_variable_doesnt_matter = interp(a_moving, x, y) * self.op_params.get('v_rel_acc_modifier', 1.0)
-      if tmp_variable_doesnt_matter > 0:
-        print('ADDING: {} sec\n---'.format(round(tmp_variable_doesnt_matter, 4)))
-      else:
-        print('SUBTRACTING: {} sec\n---'.format(round(tmp_variable_doesnt_matter, 4)))
-      TR_mods.append(tmp_variable_doesnt_matter)
+    rel_accel = self._calculate_relative_accel()  # change in relative velocity over time, so relative acceleration?
+    if rel_accel is not None:  # if available
+      v_ego_margin = 2 * CV.MPH_TO_MS
+      a_lead_margin = CV.MPH_TO_MS / 2
+      if self.lead_data.v_lead <= self.car_data.v_ego + v_ego_margin and self.lead_data.a_lead <= a_lead_margin:
+        # This causes issues when the lead is accelerating, so restrict with conditions
+        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+        y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+        TR_mods.append(interp(rel_accel, x, y))
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
     profile_mod_neg = interp(self.car_data.v_ego, profile_mod_x, profile_mod_neg)
 
     x = [sng_speed / 5.0, sng_speed]  # as we approach 0, apply x% more distance
-    y = [1.075, 1.0]
+    y = [1.05, 1.0]
     profile_mod_pos *= interp(self.car_data.v_ego, x, y)  # but only for currently positive mods
 
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mods])  # alter TR modification according to profile

@@ -16,7 +16,6 @@ class CarData:
 
 
 class dfData:
-  v_leads = []
   v_egos = []
   v_rels = []
 
