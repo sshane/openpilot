@@ -284,9 +284,9 @@ class DynamicFollow:
       print('a_moving: {}'.format(round(a_moving, 4)))
       tmp_variable_doesnt_matter = interp(a_moving, x, y) * self.op_params.get('v_rel_acc_modifier', 1.0)
       if tmp_variable_doesnt_matter > 0:
-        print('ADDING: {} sec'.format(round(tmp_variable_doesnt_matter, 4)))
+        print('ADDING: {} sec\n---'.format(round(tmp_variable_doesnt_matter, 4)))
       else:
-        print('SUBTRACTING: {} sec'.format(round(tmp_variable_doesnt_matter, 4)))
+        print('SUBTRACTING: {} sec\n---'.format(round(tmp_variable_doesnt_matter, 4)))
       TR_mods.append(tmp_variable_doesnt_matter)
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
