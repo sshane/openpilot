@@ -183,6 +183,9 @@ class DynamicFollow:
         v_ego_change = v_ego_end - v_ego_start
         v_lead_change = v_lead_end - v_lead_start
 
+        if v_lead_change - v_ego_change == 0 or v_lead_change + v_ego_change == 0:
+          return None
+
         initial_v_rel = v_lead_start - v_ego_start
         cur_v_rel = v_lead_end - v_ego_end
 
