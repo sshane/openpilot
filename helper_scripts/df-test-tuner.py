@@ -17,17 +17,17 @@ for y_ in y:
 
   y_new.append(y_)
 plt.plot(x, y_new, 'go-', label='new a_rel_accel mod')
-
+y = y_new
 
 # poly = np.polyfit(x, y, 6)
 # x = np.linspace(min(x), max(x), 100)
 # y = np.polyval(poly, x)
 # plt.plot(x, y, label='poly fit')
-# x = np.array(x) * CV.MPH_TO_MS
+x = np.array(x) * CV.MPH_TO_MS
 
 to_round = True
 if to_round:
-  x = np.round(x, 6)
+  x = np.round(x, 4)
   y = np.round(y, 5)
   print('x = {}'.format(x.tolist()))
   print('y = {}'.format(y.tolist()))

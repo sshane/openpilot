@@ -111,7 +111,7 @@ class DynamicFollow:
 
   def _change_cost(self, libmpc):
     TRs = [0.9, 1.8, 2.7]
-    costs = [1.0, 0.15, 0.05]
+    costs = [1.0, 0.115, 0.05]
     cost = interp(self.TR, TRs, costs)
     if self.last_cost != cost:
       libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
@@ -174,7 +174,7 @@ class DynamicFollow:
       elapsed_time = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
       if elapsed_time > min_consider_time:
         x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-        y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+        y = [0.3245, 0.277, 0.11075, 0.08106, 0.06325, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
 
         v_lead_start = self.df_data.v_rels[0]['v_lead']
         v_ego_start = self.df_data.v_rels[0]['v_ego']
