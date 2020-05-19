@@ -270,8 +270,8 @@ class DynamicFollow:
 
     TR_mods = []
     # Dynamic follow modifications (the secret sauce)
-    x = [-20.0288, -15.6871, -11.1965, -7.8645, -4.9472, -3.0541, -2.2244, -1.4383, -0.6671, -0.3313, -0.1671, 0.0, 0.6845, 1.3682, 1.898, 2.7316]  # relative velocity values
-    y = [0.6492, 0.5155, 0.4235, 0.3357, 0.2491, 0.1278, 0.1092, 0.0841, 0.0509, 0.0209, 0.0051, 0, -0.0443, -0.066, -0.1425, -0.2218]  # modification values
+    x = [-20.0288, -15.6871, -11.1965, -7.8645, -4.9472, -3.0541, -2.2244, -1.5045, -0.7908, -0.3196, 0.0, 0.5588, 1.3682, 1.898, 2.7316, 4.4704]  # relative velocity values
+    y = [0.62323, 0.49488, 0.40656, 0.32227, 0.23914, 0.12269, 0.10483, 0.08074, 0.04886, 0.0072, 0.0, -0.05648, -0.0792, -0.15675, -0.23289, -0.315]  # modification values
     TR_mods.append(interp(self.lead_data.v_lead - self.car_data.v_ego, x, y))
 
     x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
@@ -281,13 +281,6 @@ class DynamicFollow:
     rel_accel_mod = self._calculate_relative_accel_new()
     if rel_accel_mod is not None:  # if available
       TR_mods.append(rel_accel_mod)
-      # v_ego_margin = 2 * CV.MPH_TO_MS
-      # a_lead_margin = CV.MPH_TO_MS / 2
-      # if self.lead_data.v_lead <= self.car_data.v_ego + v_ego_margin and self.lead_data.a_lead <= a_lead_margin:
-      #   # This causes issues when the lead is accelerating, so restrict with conditions
-      #   x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-      #   y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
-      #   TR_mods.append(interp(rel_accel, x, y))
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
