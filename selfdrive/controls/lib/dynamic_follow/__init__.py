@@ -35,6 +35,7 @@ class DynamicFollow:
 
     # Dynamic follow variables
     self.default_TR = 1.8
+    self.TR = 1.8
     # self.v_lead_retention = 2.0  # keep only last x seconds
     self.v_ego_retention = 2.5
     self.v_rel_retention = 1.5
@@ -104,7 +105,7 @@ class DynamicFollow:
     if self.mpc_id == 1 and self.pm is not None:
       dat = messaging.new_message()
       dat.init('dynamicFollowData')
-      dat.dynamicFollowData.mpcTR = self.TR
+      dat.dynamicFollowData.mpcTR = 1.8  # self.TR
       dat.dynamicFollowData.profilePred = self.model_profile
       self.pm.send('dynamicFollowData', dat)
 
