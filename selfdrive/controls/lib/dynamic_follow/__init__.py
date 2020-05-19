@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import cereal.messaging as messaging
 from common.realtime import sec_since_boot
@@ -34,7 +35,7 @@ class DynamicFollow:
 
     # Dynamic follow variables
     self.default_TR = 1.8
-    self.v_lead_retention = 2.0  # keep only last x seconds
+    # self.v_lead_retention = 2.0  # keep only last x seconds
     self.v_ego_retention = 2.5
     self.v_rel_retention = 1.5
 
@@ -123,7 +124,7 @@ class DynamicFollow:
         self.df_data.v_rels = []  # reset when new lead
       else:
         self.df_data.v_rels = self._remove_old_entries(self.df_data.v_rels, cur_time, self.v_rel_retention)
-      self.df_data.v_rels.append({'v_rel': self.lead_data.v_lead - self.car_data.v_ego, 'time': cur_time})
+      self.df_data.v_rels.append({'v_ego': self.car_data.v_ego, 'v_lead': self.lead_data.v_lead, 'time': cur_time})
 
     # Store our velocity for better sng
     self.df_data.v_egos = self._remove_old_entries(self.df_data.v_egos, cur_time, self.v_ego_retention)
@@ -149,21 +150,79 @@ class DynamicFollow:
   def _remove_old_entries(self, lst, cur_time, retention):
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
-  def _calculate_relative_accel(self):
-    """
-    Moving window returning the following: (final relative velocity - initial relative velocity) / dT
-    Output properties:
-      When the lead is starting to decelerate, and our car remains the same speed, the output decreases (and vice versa)
-      However when our car finally starts to decelerate at the same rate as the lead car, the output will move to near 0
-        >>> a = [(15 - 18), (14 - 17)]
-        >>> (a[-1] - a[0]) / 1
-        > 0.0
-    """
+  # def _calculate_relative_accel(self):
+  #   """
+  #   Moving window returning the following: (final relative velocity - initial relative velocity) / dT
+  #   Output properties:
+  #     When the lead is starting to decelerate, and our car remains the same speed, the output decreases (and vice versa)
+  #     However when our car finally starts to decelerate at the same rate as the lead car, the output will move to near 0
+  #       >>> a = [(15 - 18), (14 - 17)]
+  #       >>> (a[-1] - a[0]) / 1
+  #       > 0.0
+  #   """
+  #   min_consider_time = 0.5  # minimum amount of time required to consider calculation
+  #   if len(self.df_data.v_rels) > 0:  # if not empty
+  #     dT = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
+  #     if dT > min_consider_time:
+  #       return (self.df_data.v_rels[-1]['v_rel'] - self.df_data.v_rels[0]['v_rel']) / dT  # delta speed / delta time
+  #   return None
+
+  def _calculate_relative_accel_new(self):
     min_consider_time = 0.5  # minimum amount of time required to consider calculation
     if len(self.df_data.v_rels) > 0:  # if not empty
-      dT = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
-      if dT > min_consider_time:
-        return (self.df_data.v_rels[-1]['v_rel'] - self.df_data.v_rels[0]['v_rel']) / dT  # delta speed / delta time
+      elapsed_time = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
+      if elapsed_time > min_consider_time:
+        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+        y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+
+        v_lead_start = self.df_data.v_rels[0]['v_lead']
+        v_ego_start = self.df_data.v_rels[0]['v_ego']
+        v_lead_end = self.df_data.v_rels[-1]['v_lead']
+        v_ego_end = self.df_data.v_rels[-1]['v_ego']
+
+        v_ego_change = v_ego_end - v_ego_start
+        v_lead_change = v_lead_end - v_lead_start
+
+        initial_v_rel = v_lead_start - v_ego_start
+        cur_v_rel = v_lead_end - v_ego_end
+
+        delta_v_rel = (cur_v_rel - initial_v_rel) / elapsed_time
+
+        neg_pos = False
+        if v_ego_change == 0 or v_lead_change == 0:  # FIXME: this all is a mess, but works. need to simplify
+          lead_factor = v_lead_change / (v_lead_change - v_ego_change)
+
+        elif (v_ego_change < 0) != (v_lead_change < 0):  # one is negative and one is positive, or ^ = XOR
+          lead_factor = v_lead_change / (v_lead_change - v_ego_change)
+          if v_ego_change > 0 > v_lead_change:
+            delta_v_rel = -delta_v_rel  # switch when appropriate
+          neg_pos = True
+
+        elif v_ego_change * v_lead_change > 0:  # both are negative or both are positive
+          lead_factor = v_lead_change / (v_lead_change + v_ego_change)
+          if v_ego_change > 0 and v_lead_change > 0:
+            if v_ego_change < v_lead_change:
+              delta_v_rel = -delta_v_rel  # switch when appropriate
+          elif v_ego_change > v_lead_change:
+            delta_v_rel = -delta_v_rel
+
+        else:
+          raise Exception('Uncovered case! Should be impossible to be be here')
+
+        if not neg_pos:
+          rel_vel_mod = (-delta_v_rel * abs(lead_factor)) + (delta_v_rel * (1 - abs(lead_factor)))
+        else:
+          rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
+
+        calc_mod = np.interp(rel_vel_mod, x, y)
+        if v_lead_end > v_ego_end and np.mean(calc_mod) >= 0:
+          # if we're accelerating quicker than lead but lead is still faster, reduce mod
+          x = np.array([0, 2, 4, 8]) * CV.MPH_TO_MS
+          y = [1.0, -0.25, -0.65, -0.95]
+          v_rel_mod = np.interp(v_lead_end - v_ego_end, x, y)
+          calc_mod *= v_rel_mod
+        return calc_mod
+
     return None
 
   def _get_TR(self):
@@ -215,15 +274,16 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.009, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    rel_accel = self._calculate_relative_accel()  # change in relative velocity over time, so relative acceleration?
-    if rel_accel is not None:  # if available
-      v_ego_margin = 2 * CV.MPH_TO_MS
-      a_lead_margin = CV.MPH_TO_MS / 2
-      if self.lead_data.v_lead <= self.car_data.v_ego + v_ego_margin and self.lead_data.a_lead <= a_lead_margin:
-        # This causes issues when the lead is accelerating, so restrict with conditions
-        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-        y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
-        TR_mods.append(interp(rel_accel, x, y))
+    rel_accel_mod = self._calculate_relative_accel_new()
+    if rel_accel_mod is not None:  # if available
+      TR_mods.append(rel_accel_mod)
+      # v_ego_margin = 2 * CV.MPH_TO_MS
+      # a_lead_margin = CV.MPH_TO_MS / 2
+      # if self.lead_data.v_lead <= self.car_data.v_ego + v_ego_margin and self.lead_data.a_lead <= a_lead_margin:
+      #   # This causes issues when the lead is accelerating, so restrict with conditions
+      #   x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+      #   y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+      #   TR_mods.append(interp(rel_accel, x, y))
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
