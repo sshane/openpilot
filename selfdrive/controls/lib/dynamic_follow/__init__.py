@@ -230,7 +230,7 @@ class DynamicFollow:
     return None
 
   def _get_TR(self):
-    return 0.4
+    # return 0.4
     x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]  # velocities
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
 
@@ -281,10 +281,9 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    # rel_accel_mod = self._calculate_relative_accel_new()
-    # if rel_accel_mod is not None:  # if available
-    #  # TR_mods.append(rel_accel_mod)
-    #  # pass
+    rel_accel_mod = self._calculate_relative_accel_new()
+    if rel_accel_mod is not None:  # if available
+     TR_mods.append(rel_accel_mod)
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
