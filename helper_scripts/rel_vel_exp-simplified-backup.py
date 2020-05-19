@@ -17,11 +17,11 @@ x = np.array([-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.
 y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.075, -0.09375, -0.125, -0.3, -0.35]
 
 
-v_ego_start = 60
-v_ego_end = 65
+v_ego_start = 0
+v_ego_end = 5.4587
 
-v_lead_start = 70
-v_lead_end = 72
+v_lead_start = 10
+v_lead_end = 12
 time = 2
 
 v_egos = np.linspace(v_ego_start, v_ego_end, res)
@@ -83,11 +83,17 @@ for v_rel in v_rels:
     rel_accels3.append((-p1 * abs(lead_factor)) + (p1 * (1 - abs(lead_factor))))
 
 print('lead_factor: {}'.format(lead_factor))
-
 calc_TRs = [np.interp(accel, x, y) + TR for accel in rel_accels]
 calc_TRs2 = [np.interp(accel, x, y) + TR for accel in rel_accels2]
-calc_TRs3 = [np.interp(accel, x, y) + TR for accel in rel_accels3]
+calc_mods = np.interp(rel_accels3, x, y)
+if v_lead_end > v_ego_end and np.mean(calc_mods) > 0:
+  print('modding')
+  x = [0, 2, 4, 8]
+  y = [1.0, -0.25, -0.65, -0.95]
+  v_rel_mod = np.interp(v_lead_end - v_ego_end, x, y)
+  calc_mods *= v_rel_mod
 
+calc_TRs3 = calc_mods + TR
 # plt.plot(rel_accels, label='rel_accel')
 plt.figure(1)
 plt.plot(np.linspace(0, 1, res), calc_TRs, label='TRs')
