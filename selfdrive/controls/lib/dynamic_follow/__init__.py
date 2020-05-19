@@ -280,9 +280,10 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    rel_accel_mod = self._calculate_relative_accel_new()
-    if rel_accel_mod is not None:  # if available
-      TR_mods.append(rel_accel_mod)
+    # rel_accel_mod = self._calculate_relative_accel_new()
+    # if rel_accel_mod is not None:  # if available
+      # TR_mods.append(rel_accel_mod)
+      # pass
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
