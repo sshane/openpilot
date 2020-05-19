@@ -8,18 +8,20 @@ def to_mph(x):
 def to_ms(x):
   return [i * 0.44704 for i in x]
 
+
 p_mod_x = [5., 30., 55., 80.]
 for v_ego in p_mod_x:
-  if v_ego != 5.:
+  if v_ego != 80.:
     continue
-  # roadtrip
-  x_vel = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
+  # traffic
+  x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
   x_vel = to_mph(x_vel)
-  y_dist = [1.4109, 1.4196, 1.431, 1.4454, 1.4684, 1.4971, 1.5397, 1.56, 1.588, 1.624, 1.66, 1.694, 1.747]  # TRs
+  y_dist = [1.3781, 1.3791, 1.3112, 1.2442, 1.2306, 1.2112, 1.2775, 1.1977, 1.0963, 0.9435, 0.9067, 0.8749]  # avg. 7.3 ft closer from 18 to 90 mph
+
   TR_traffic = interp(v_ego, x_vel, y_dist)
 
-  traffic_mod_pos = [0.98, 0.915, 0.83, 0.55]
-  traffic_mod_neg = [1.02, 1.18, 1.39, 1.825]
+  traffic_mod_pos = [1.0, 1.55, 2.6, 3.75]
+  traffic_mod_neg = [0.84, .4, 0.1, 0.075]
 
   traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
   traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
@@ -35,14 +37,22 @@ for v_ego in p_mod_x:
   relaxed_mod_neg = interp(v_ego, p_mod_x, relaxed_mod_neg)
 
 
-  x_rel = [-44.824474802000005, -35.11503673200001, -25.065583782, -17.622837014, -11.275743458, -7.195564898000001, -3.6063946680000005, 0.0, 1.531632818, 3.0807137680000003, 4.251751858, 6.140847688000001]
-  y_rel = [0.641, 0.506, 0.418, 0.334, 0.24, 0.115, 0.065, 0.0, -0.049, -0.068, -0.142, -0.221]  # modification values
+  x_rel = [-20.0288, -15.6871, -11.1965, -7.8645, -4.9472, -3.0541, -2.2244, -1.5045, -0.7908, -0.3196, 0.0, 0.5588, 1.3682, 1.898, 2.7316, 4.4704]  # relative velocity values
+  x_rel = to_mph(x_rel)
+  y_rel = [0.62323, 0.49488, 0.40656, 0.32227, 0.23914, 0.12269, 0.10483, 0.08074, 0.04886, 0.0072, 0.0, -0.05648, -0.0792, -0.15675, -0.23289, -0.315]  # modification values
+
   TR_mod_pos = interp(-10, x_rel, y_rel)
   TR_mod_neg = interp(3.6, x_rel, y_rel)
   print('v_ego: {}'.format(v_ego))
   print('traffic: {}'.format(TR_traffic))
-  print('pos: {}, neg: {}'.format(TR_traffic + TR_mod_pos * traffic_mod_pos, TR_traffic + TR_mod_neg * traffic_mod_neg))
+  pos_traffic = TR_traffic + TR_mod_pos * traffic_mod_pos
+  neg_traffic = TR_traffic + TR_mod_neg * traffic_mod_neg
+  print('pos: {}, neg: {}'.format(pos_traffic, neg_traffic))
   print()
   print('relaxed: {}'.format(TR_relaxed))
-  print('pos: {}, neg: {}'.format(TR_relaxed + TR_mod_pos * relaxed_mod_pos, TR_relaxed + TR_mod_neg * relaxed_mod_neg))
+  pos_relaxed = TR_relaxed + TR_mod_pos * relaxed_mod_pos
+  neg_relaxed = TR_relaxed + TR_mod_neg * relaxed_mod_neg
+  print('pos: {}, neg: {}'.format(pos_relaxed, neg_relaxed))
+  print('pos difference: {}%'.format(100*(1 - (pos_traffic / pos_relaxed))))
+  print('neg difference: {}%'.format(100*(1 - (neg_traffic / neg_relaxed))))
   print('------')
