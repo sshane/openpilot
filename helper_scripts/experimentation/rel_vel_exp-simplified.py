@@ -13,15 +13,14 @@ def _print(msg):
 
 
 x = np.array([-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]) * 2.2369
-# y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
-y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.075, -0.09375, -0.125, -0.3, -0.35]
+y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
 
 
-v_ego_start = 60
-v_ego_end = 56
+v_ego_start = 25
+v_ego_end = 21
 
-v_lead_start = 60
-v_lead_end = 58
+v_lead_start = 25
+v_lead_end = 26
 time = 2
 
 v_egos = np.linspace(v_ego_start, v_ego_end, res)
@@ -48,23 +47,21 @@ for v_rel in v_rels:
   diff_mod = False
   if v_ego_change == 0 or v_lead_change == 0:
     _print('zero')
-    lead_factor = 1
-    rel_accels3.append(math.copysign(p1, v_lead_change - v_ego_change) * lead_factor)
-    continue  # this or just setting lead_factor to 0 works
+    lead_factor = v_lead_change / (v_lead_change - v_ego_change)
+    # rel_accels3.append(math.copysign(p1, v_lead_change - v_ego_change) * lead_factor)
+    # continue  # this or just setting lead_factor to 0 works
   elif (v_ego_change < 0) != (v_lead_change < 0):  # one is negative and one is positive, or ^ = XOR
     lead_factor = v_lead_change / (v_lead_change - v_ego_change)
     if v_ego_change > 0 > v_lead_change:
       p1 = -p1
     diff_mod = True
-  elif v_ego_change > 0 and v_lead_change > 0:
+  elif v_ego_change * v_lead_change > 0:
     _print('here2')
-    lead_factor = v_lead_change / abs(v_lead_change + v_ego_change)
-    if v_ego_change > v_lead_change:
-      p1 = -p1
-  elif v_ego_change < 0 and v_lead_change < 0:
-    _print('here3')
-    lead_factor = v_lead_change / abs(v_lead_change + v_ego_change)
-    if abs(v_ego_change) > abs(v_lead_change):
+    lead_factor = v_lead_change / (v_lead_change + v_ego_change)
+    if v_ego_change > 0 and v_lead_change > 0:
+      if v_ego_change < v_lead_change:
+        p1 = -p1
+    elif v_ego_change > v_lead_change:
       p1 = -p1
 
   if not diff_mod:
@@ -80,12 +77,12 @@ print('lead_factor: {}'.format(lead_factor))
 calc_TRs = [np.interp(accel, x, y) + TR for accel in rel_accels]
 calc_TRs2 = [np.interp(accel, x, y) + TR for accel in rel_accels2]
 calc_mods = np.interp(rel_accels3, x, y)
-# if v_lead_end > v_ego_end and np.mean(calc_mods) > 0:
-#   print('modding')
-#   x = [0, 2, 4, 8]
-#   y = [1.0, -0.25, -0.65, -0.95]
-#   v_rel_mod = np.interp(v_lead_end - v_ego_end, x, y)
-#   calc_mods *= v_rel_mod
+if v_lead_end > v_ego_end and np.mean(calc_mods) >= 0:
+  print('modding')
+  x = [0, 2, 4, 8]
+  y = [1.0, -0.25, -0.65, -0.95]
+  v_rel_mod = np.interp(v_lead_end - v_ego_end, x, y)
+  calc_mods *= v_rel_mod
 
 calc_TRs3 = calc_mods + TR
 # plt.plot(rel_accels, label='rel_accel')
