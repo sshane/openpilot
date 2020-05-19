@@ -105,7 +105,7 @@ class DynamicFollow:
     if self.mpc_id == 1 and self.pm is not None:
       dat = messaging.new_message()
       dat.init('dynamicFollowData')
-      dat.dynamicFollowData.mpcTR = self.TR
+      dat.dynamicFollowData.mpcTR = 1.8  # self.TR
       dat.dynamicFollowData.profilePred = self.model_profile
       self.pm.send('dynamicFollowData', dat)
 
