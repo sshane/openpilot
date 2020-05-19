@@ -95,6 +95,9 @@ class LongitudinalMpc():
     # Calculate mpc
     t = sec_since_boot()
     TR = self.dynamic_follow.update(CS, self.libmpc)  # update dynamic follow
+    if self.mpc_id == 1:
+      with open('/data/TRs', 'a') as f:
+        f.write('TR: {}, lead: {}\n'.format(TR, self.dynamic_follow.lead_data.status))
     n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, TR)
     duration = int((sec_since_boot() - t) * 1e9)
 
@@ -115,7 +118,7 @@ class LongitudinalMpc():
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
         cloudlog.warning("Longitudinal mpc %d reset - backwards: %s crashing: %s nan: %s" % (
-                          self.mpc_id, backwards, crashing, nans))
+          self.mpc_id, backwards, crashing, nans))
 
       self.libmpc.init(MPC_COST_LONG.TTC, MPC_COST_LONG.DISTANCE,
                        MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
