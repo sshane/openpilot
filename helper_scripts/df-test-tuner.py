@@ -2,12 +2,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 from selfdrive.config import Conversions as CV
 
-x = np.array([-10.020356120257695, -6.29071224051539, -3.5180297065139587, -2.4894863994273444, -1.4788385826771655, -0.6021832498210451, 0.0, 0.32793486041517544, 1.1506800286327845, 1.544157122405154, 2.0807981388690053])  # lead acceleration values
-y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.009*1.7, -0.042, -0.053, -0.059]  # modification values
-plt.plot(x, y, 'bo-', label='current a_lead mod')
+x = [-5.999910522548318, -4.000089477451683, -2.0000447387258413, -0.9999105225483179, -0.49995526127415896, 0.0, 0.49995526127415896, 0.9999105225483179, 2.0000447387258413, 4.000089477451683, 5.999910522548318]
+y = [0.35, 0.3, 0.125, 0.09375, 0.075, 0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+plt.plot(x, y, 'bo-', label='current a_rel_accel mod')
 
 plt.plot([min(x), max(x)], [0, 0], 'r--')
 plt.plot([0, 0], [min(y), max(y)], 'r--')
+
+
+y_new = []
+for y_ in y:
+  if y_ > 0:
+    y_ = (y_ * 0.95) - 0.008
+
+  y_new.append(y_)
+plt.plot(x, y_new, 'go-', label='new a_rel_accel mod')
+
 
 # poly = np.polyfit(x, y, 6)
 # x = np.linspace(min(x), max(x), 100)

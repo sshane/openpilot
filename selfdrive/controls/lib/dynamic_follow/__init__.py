@@ -219,7 +219,7 @@ class DynamicFollow:
           rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
 
         calc_mod = np.interp(rel_vel_mod, x, y)
-        if v_lead_end > v_ego_end and np.mean(calc_mod) >= 0:
+        if v_lead_end > v_ego_end and calc_mod >= 0:
           # if we're accelerating quicker than lead but lead is still faster, reduce mod
           x = np.array([0, 2, 4, 8]) * CV.MPH_TO_MS
           y = [1.0, -0.25, -0.65, -0.95]
