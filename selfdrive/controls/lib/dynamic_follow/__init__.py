@@ -68,7 +68,7 @@ class DynamicFollow:
       self._gather_data()
 
     if not self.lead_data.status or travis or self.mpc_id != 1:
-      self.TR = self.default_TR
+      self.TR = self._get_TR()
     else:
       self._store_df_data()
       self.TR = self._get_TR()
