@@ -284,7 +284,7 @@ class DynamicFollow:
 
     rel_accel_mod = self._calculate_relative_accel_new()
     if rel_accel_mod is not None:  # if available
-     TR_mods.append(rel_accel_mod)
+     TR_mods.append(rel_accel_mod * self.op_params.get('v_rel_acc_modifier', 1.0))
 
     # Profile modifications - Designed so that each profile reacts similarly to changing lead dynamics
     profile_mod_pos = interp(self.car_data.v_ego, profile_mod_x, profile_mod_pos)
