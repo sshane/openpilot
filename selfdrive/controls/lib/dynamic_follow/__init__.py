@@ -5,7 +5,6 @@ from common.realtime import sec_since_boot
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
 from common.numpy_fast import interp, clip
-from common.travis_checker import travis
 from selfdrive.config import Conversions as CV
 from cereal.messaging import SubMaster
 
@@ -13,6 +12,7 @@ from selfdrive.controls.lib.dynamic_follow.auto_df import predict
 from selfdrive.controls.lib.dynamic_follow.df_manager import dfManager
 from selfdrive.controls.lib.dynamic_follow.support import LeadData, CarData, dfData, dfProfiles
 from common.data_collector import DataCollector
+travis = False
 
 
 class DynamicFollow:
@@ -63,8 +63,9 @@ class DynamicFollow:
 
   def update(self, CS, libmpc):
     self.update_car(CS)
+    self._get_profiles()
+
     if self.mpc_id == 1:
-      self._get_profiles()
       self._gather_data()
 
     if not self.lead_data.status:
@@ -80,9 +81,10 @@ class DynamicFollow:
     return self.TR
 
   def _get_profiles(self):
+    """This receives profile change updates from dfManager and runs the auto-df prediction if auto mode"""
     df_out = self.df_manager.update()
     self.user_profile = df_out.user_profile
-    if df_out.is_auto:
+    if df_out.is_auto:  # todo: find some way to share prediction between the two mpcs to reduce processing overhead
       self._get_pred()  # sets self.model_profile, all other checks are inside function
 
   def _gather_data(self):
