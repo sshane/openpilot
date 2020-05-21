@@ -16,12 +16,12 @@ for v_ego in p_mod_x:
   # traffic
   x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
   x_vel = to_mph(x_vel)
-  y_dist = [1.3781, 1.3791, 1.3112, 1.2442, 1.2306, 1.2112, 1.2775, 1.1977, 1.0963, 0.9435, 0.9067, 0.8749]  # avg. 7.3 ft closer from 18 to 90 mph
+  y_dist = [1.3781, 1.3791, 1.3457, 1.3134, 1.3145, 1.318, 1.3485, 1.257, 1.144, 0.979, 0.9461, 0.9156]  # avg. 7.3 ft closer from 18 to 90 mph
 
   TR_traffic = interp(v_ego, x_vel, y_dist)
 
-  traffic_mod_pos = [1.0, 1.55, 2.6, 3.75]
-  traffic_mod_neg = [0.84, .4, 0.1, 0.075]
+  traffic_mod_pos = [1.07, 1.55, 2.6, 3.75]
+  traffic_mod_neg = [0.84, .275, 0.1, 0.05]
 
   traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
   traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
