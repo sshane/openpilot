@@ -260,7 +260,7 @@ class DynamicFollow:
       raise Exception('Unknown profile type: {}'.format(df_profile))
 
     sng_TR = 1.8  # reacceleration stop and go TR
-    sng_speed = 15.0 * CV.MPH_TO_MS
+    sng_speed = 18.0 * CV.MPH_TO_MS
 
     if self.car_data.v_ego > sng_speed:  # keep sng distance until we're above sng speed again
       self.sng = False
@@ -270,7 +270,7 @@ class DynamicFollow:
       TR = interp(self.car_data.v_ego, x_vel, y_dist)
     else:  # this allows us to get closer to the lead car when stopping, while being able to have smooth stop and go when reaccelerating
       self.sng = True
-      x = [sng_speed / 3.0, sng_speed]  # decrease TR between 5 and 15 mph from 1.8s to defined TR above at 15mph while accelerating
+      x = [sng_speed * 0.7, sng_speed]  # decrease TR between 12.6 and 18 mph from 1.8s to defined TR above at 18mph while accelerating
       y = [sng_TR, interp(sng_speed, x_vel, y_dist)]
       TR = interp(self.car_data.v_ego, x, y)
 
