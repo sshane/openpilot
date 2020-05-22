@@ -59,8 +59,8 @@ class opParams:
                            'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'},
                            'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
                            'hide_auto_df_alerts': {'default': False, 'allowed_types': [bool], 'description': 'Set to True to hide the alert that shows what profile the model has chosen'},
-                           'log_data': {'default': False, 'allowed_types': [bool]},
-                           'v_rel_acc_modifier': {'default': 1.0, 'allowed_types': [float, int], 'live': True},
+                           'v_rel_acc_modifier': {'default': 1.0, 'allowed_types': [float, int], 'description': 'A float from 0 to 1, gets multiplied by the new relative velocity over time modification\n'
+                                                                                                                'for dynamic follow. Play around with it and let me know what\'s best for you!', 'live': True},
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
 
