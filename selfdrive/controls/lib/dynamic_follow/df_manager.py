@@ -31,7 +31,6 @@ class dfManager:
 
     self.offset = self.cur_user_profile
     self.profile_pred = None
-    self.last_button_status = 0
     self.change_time = sec_since_boot()
     self.first_run = True
     self.last_is_auto = False
@@ -51,18 +50,11 @@ class dfManager:
       df_out.changed = True  # to show alert on start
       self.first_run = False
 
-    # if self.offset is None:  # first time running
-    #   df_out.changed = True
-    #   self.offset = self.cur_user_profile  # ensure we start at the user's current profile
-    #   df_out.user_profile = self.cur_user_profile
-    #   df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
-    #   return df_out
     button_status = self.sm['dynamicFollowButton'].status
     df_out.user_profile = (button_status + self.offset) % len(self.df_profiles.to_profile)
     df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
 
-    if self.last_button_status != button_status:  # TODO: could replace this with self.cur_user_profile != df_out.user_profile
-      self.last_button_status = button_status
+    if self.cur_user_profile != df_out.user_profile:  # TODO: could replace this with self.cur_user_profile != df_out.user_profile
       self.change_time = sec_since_boot()
       self.last_is_auto = False
       df_out.changed = True

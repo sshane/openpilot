@@ -156,7 +156,6 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  # df_profile, df_changed, change_time = df_manager.update()
   df_out = df_manager.update()
   if df_out.changed:
     df_alert = 'dfButtonAlert'
@@ -166,16 +165,6 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
     else:
       AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
-
-  # if df_out.changed:  # old
-  #   df_text = df_manager.df_profiles.to_profile[df_out.df_profile]
-  #   df_alert = 'dfButtonAlert'
-  #   if sec_since_boot() - change_time > df_manager.alert_duration and df_out.is_auto:
-  #     if not hide_auto_df_alerts and CS.cruiseState.enabled:
-  #       df_alert += 'NoSound'
-  #       AM.add(frame, df_alert, enabled, extra_text_1=df_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_text))
-  #   else:
-  #     AM.add(frame, df_alert, enabled, extra_text_1=df_text, extra_text_2='Dynamic follow: {} profile active'.format(df_text))
 
   # DISABLED
   if state == State.disabled:

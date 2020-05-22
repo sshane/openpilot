@@ -107,7 +107,7 @@ class DynamicFollow:
     if self.mpc_id == 1 and self.pm is not None:
       dat = messaging.new_message()
       dat.init('dynamicFollowData')
-      dat.dynamicFollowData.mpcTR = 1.8  # self.TR
+      dat.dynamicFollowData.mpcTR = 1.8  # self.TR  # FIX THIS! sometimes nonetype
       dat.dynamicFollowData.profilePred = self.model_profile
       self.pm.send('dynamicFollowData', dat)
 
@@ -171,6 +171,15 @@ class DynamicFollow:
   #   return None
 
   def _calculate_relative_accel_new(self):
+    #   """
+    #   Moving window returning the following: (final relative velocity - initial relative velocity) / dT with a few extra mods
+    #   Output properties:
+    #     When the lead is starting to decelerate, and our car remains the same speed, the output decreases (and vice versa)
+    #     However when our car finally starts to decelerate at the same rate as the lead car, the output will move to near 0
+    #       >>> a = [(15 - 18), (14 - 17)]
+    #       >>> (a[-1] - a[0]) / 1
+    #       > 0.0
+    #   """
     min_consider_time = 0.5  # minimum amount of time required to consider calculation
     if len(self.df_data.v_rels) > 0:  # if not empty
       elapsed_time = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
@@ -178,7 +187,7 @@ class DynamicFollow:
         x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
         y = [0.3245, 0.277, 0.11075, 0.08106, 0.06325, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
 
-        v_lead_start = self.df_data.v_rels[0]['v_lead']
+        v_lead_start = self.df_data.v_rels[0]['v_lead']  # setup common variables
         v_ego_start = self.df_data.v_rels[0]['v_ego']
         v_lead_end = self.df_data.v_rels[-1]['v_lead']
         v_ego_end = self.df_data.v_rels[-1]['v_ego']
@@ -191,7 +200,6 @@ class DynamicFollow:
 
         initial_v_rel = v_lead_start - v_ego_start
         cur_v_rel = v_lead_end - v_ego_end
-
         delta_v_rel = (cur_v_rel - initial_v_rel) / elapsed_time
 
         neg_pos = False
@@ -206,16 +214,16 @@ class DynamicFollow:
 
         elif v_ego_change * v_lead_change > 0:  # both are negative or both are positive
           lead_factor = v_lead_change / (v_lead_change + v_ego_change)
-          if v_ego_change > 0 and v_lead_change > 0:
+          if v_ego_change > 0 and v_lead_change > 0:  # both are positive
             if v_ego_change < v_lead_change:
               delta_v_rel = -delta_v_rel  # switch when appropriate
-          elif v_ego_change > v_lead_change:
+          elif v_ego_change > v_lead_change:  # both are negative and v_ego_change > v_lead_change
             delta_v_rel = -delta_v_rel
 
         else:
           raise Exception('Uncovered case! Should be impossible to be be here')
 
-        if not neg_pos:
+        if not neg_pos:  # negative and positive require different mod code to be correct
           rel_vel_mod = (-delta_v_rel * abs(lead_factor)) + (delta_v_rel * (1 - abs(lead_factor)))
         else:
           rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
@@ -223,6 +231,7 @@ class DynamicFollow:
         calc_mod = np.interp(rel_vel_mod, x, y)
         if v_lead_end > v_ego_end and calc_mod >= 0:
           # if we're accelerating quicker than lead but lead is still faster, reduce mod
+          # todo: could remove this since we restrict this mod where called
           x = np.array([0, 2, 4, 8]) * CV.MPH_TO_MS
           y = [1.0, -0.25, -0.65, -0.95]
           v_rel_mod = np.interp(v_lead_end - v_ego_end, x, y)
