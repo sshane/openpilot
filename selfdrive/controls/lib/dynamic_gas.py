@@ -39,7 +39,7 @@ class DynamicGas:
         y = [1.0, 0.75, 0.0]
         gas_mod *= interp(self.lead_data['x_lead'], x, y)
 
-        if not self.CP.enableGasInterceptor:  # this will hopefuly let TSS2 use dynamic gas, need to tune
+        if self.CP.enableGasInterceptor:  # this will hopefuly let TSS2 use dynamic gas, need to tune
           gas_mod *= 0.33
         new_gas = gas + gas_mod
 
@@ -63,13 +63,13 @@ class DynamicGas:
           y = [1.0, 1.2875, 1.4625]
           gas *= interp(v_ego, x, y)
 
-    return float(clip(gas, 0.0, 1.0))
+    return clip(gas, 0.0, 1.0)
 
   def set_profile(self):
     x = [0.0, 1.4082, 2.80311, 4.22661, 5.38271, 6.16561, 7.24781, 8.28308, 10.24465, 12.96402, 15.42303, 18.11903, 20.11703, 24.46614, 29.05805, 32.71015, 35.76326]
     y = [0.234, 0.237, 0.246, 0.26, 0.279, 0.297, 0.332, 0.354, 0.368, 0.377, 0.389, 0.399, 0.411, 0.45, 0.504, 0.558, 0.617]
     self.supported_car = False
-    if self.CP.enableGasInterceptor:
+    if not self.CP.enableGasInterceptor:
       if self.candidate == CAR_TOYOTA.COROLLA:
         x = [0.0, 1.4082, 2.8031, 4.2266, 5.3827, 6.1656, 7.2478, 8.2831, 10.2447, 12.964, 15.423, 18.119, 20.117, 24.4661, 29.0581, 32.7101, 35.7633]
         y = [0.218, 0.222, 0.233, 0.25, 0.273, 0.294, 0.337, 0.362, 0.38, 0.389, 0.398, 0.41, 0.421, 0.459, 0.512, 0.564, 0.621]
