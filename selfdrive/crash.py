@@ -23,9 +23,9 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or not ANDROID:
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
-  from selfdrive.version import origin, branch
+  from selfdrive.version import origin, branch, commit
 
-  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch}
+  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': commit}
   username = op_params.get('username', None)
   if username is not None and isinstance(username, str):
     error_tags['username'] = username
