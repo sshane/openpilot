@@ -73,7 +73,7 @@ python op_edit.py  # or ./op_edit.py
 
 Features:
 - You can misspell parameter names and opEdit should be able to figure out which parameter you want. Ex. `cmra off` would be parsed as: `camera_offset`
-  - You can also still enter the corresponding parameter index while choose parameters to edit
+  - You can also still enter the corresponding parameter index while choosing parameters to edit
 - Type `a` to add a parameter, `d` to delete a parameter, or `l` to toggle live tuning only mode
 - Shows a detailed description for each parameter once you choose it
 - Parameter value type restriction. Ensures a user cannot save an unsupported value type for any parameters, breaking the fork
@@ -85,7 +85,7 @@ Here are the main parameters you can change with this fork:
 - Tuning params:
   - `camera_offset` **`(live!)`**: Your camera offset to use in lane_planner.py. Helps fix lane hugging
   - `steer_ratio` **`(live!)`**: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead
-  - `enable_long_derivative`: This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals
+  - `enable_long_derivative`: This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals or cars with bad long tuning
 - General fork params:
   - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
   - `alca_min_speed`: The minimum speed allowed for an automatic lane change
