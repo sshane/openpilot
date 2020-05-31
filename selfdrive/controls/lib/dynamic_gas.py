@@ -22,7 +22,7 @@ class DynamicGas:
     self.handle_passable(extra_params)
 
     if not self.supported_car:  # disable dynamic gas if car not supported
-      return interp(v_ego, self.CP.gasMaxBP, self.CP.gasMaxV)
+      return float(interp(v_ego, self.CP.gasMaxBP, self.CP.gasMaxV))
 
     gas = interp(v_ego, self.gasMaxBP, self.gasMaxV)
     if self.lead_data['status']:  # if lead
