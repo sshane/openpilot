@@ -97,7 +97,7 @@ class Planner():
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status:
         solutions['mpc2'] = self.mpc2.v_mpc
-      if self.mpc_model.valid and self.use_model:
+      if self.mpc_model.valid and self.use_model and self.mpc_model.v_mpc - self.mpc1.v_mpc < 2.5 * CV.MPH_TO_MS:
         solutions['model'] = self.mpc_model.v_mpc
 
       slowest = min(solutions, key=solutions.get)
