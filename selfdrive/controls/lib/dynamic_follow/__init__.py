@@ -61,6 +61,7 @@ class DynamicFollow:
     self.last_cost = 0.0
     self.last_predict_time = 0.0
     self.auto_df_model_data = []
+    self._get_live_params()  # so they're defined just in case
 
   def update(self, CS, libmpc):
     self._get_live_params()
@@ -224,7 +225,7 @@ class DynamicFollow:
     return None
 
   def global_profile_mod(self, TR, profile_mod_pos, profile_mod_neg):
-    if self.global_df_mod is not None:  # only apply when not in sng
+    if self.global_df_mod is not None:  # only applied when not in sng
       TR *= self.global_df_mod
       profile_mod_pos *= (1 - self.global_df_mod) + 1
       profile_mod_neg *= self.global_df_mod
@@ -277,9 +278,6 @@ class DynamicFollow:
       y = [sng_TR, interp(sng_speed, x_vel, y_dist)]
       TR = interp(self.car_data.v_ego, x, y)
 
-    # with open('/data/mpc_debug_{}.txt'.format(self.mpc_id), 'a') as f:
-    #   f.write('{}\n'.format({'profile': df_profile, 'TR': TR, 'v_ego': self.car_data.v_ego}))
-
     TR_mods = []
     # Dynamic follow modifications (the secret sauce)
     x = [-26.8224, -20.0288, -15.6871, -11.1965, -7.8645, -4.9472, -3.0541, -2.2244, -1.5045, -0.7908, -0.3196, 0.0, 0.5588, 1.3682, 1.898, 2.7316, 4.4704]  # relative velocity values
@@ -305,13 +303,10 @@ class DynamicFollow:
 
     if self.car_data.left_blinker or self.car_data.right_blinker and df_profile != self.df_profiles.traffic:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-      y = [1.0, .75, .65]  # reduce TR when changing lanes
-      TR *= interp(self.car_data.v_ego, x, y)
-    min_TR_clip = 0.9
-    username = self.op_params.get('username', None)
-    if isinstance(username, str) and username.lower() in ['mmmkaay', 'ShaneSmiskol'.lower()]:
-      min_TR_clip = 0.75
-    return clip(TR, min_TR_clip, 2.7)
+      y = [1.0, .75, .65]
+      TR *= interp(self.car_data.v_ego, x, y)  # reduce TR when changing lanes
+
+    return float(clip(TR, self.min_TR, 2.7))
 
   def update_lead(self, v_lead=None, a_lead=None, x_lead=None, status=False, new_lead=False):
     self.lead_data.v_lead = v_lead
@@ -333,3 +328,9 @@ class DynamicFollow:
     self.global_df_mod = self.op_params.get('global_df_mod', None)
     if self.global_df_mod is not None:
       self.global_df_mod = clip(self.global_df_mod, 0.7, 1.1)
+
+    self.min_TR = self.op_params.get('min_TR', None)
+    if self.min_TR is not None:
+      self.min_TR = clip(self.min_TR, 0.8, 1.4)
+    else:
+      self.min_TR = 0.9  # default
