@@ -109,7 +109,7 @@ Here are the main parameters you can change with this fork:
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
   - `global_df_mod` **`(live!)`**: The modifer for the current distance used by dynamic follow. The range is limited from 0.7 to 1.1. Smaller values will get you closer, larger will get you farther. This is applied to ALL profiles!
-  - `min_TR` **`(live!)`**: The minimum allowed following distance in seconds. Default is 0.9 seconds, the range of this param is limited from 0.8 to 1.4. This is applied to ALL profiles!
+  - `min_TR` **`(live!)`**: The minimum allowed following distance in seconds. Default is 0.9 seconds, the range of this mod is limited from 0.8 to 1.4 seconds. This is applied to ALL profiles!
   - `hide_auto_df_alerts`: Hides the alert that shows what profile the model has chosen
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
 
