@@ -45,11 +45,11 @@ class opParams:
                            'dynamic_follow': {'default': 'auto', 'allowed_types': [str], 'description': "Can be: ('traffic', 'relaxed', 'roadtrip'): Left to right increases in following distance.\n"
                                                                                                         "All profiles support dynamic follow so you'll get your preferred distance while\n"
                                                                                                         "retaining the smoothness and safety of dynamic follow!"},
-                           'global_df_mod': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'The modifer for the current distance used by dynamic follow. The range is limited from 0.7 to 1.1\n'
+                           'global_df_mod': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
                                                                                                                         'Smaller values will get you closer, larger will get you farther\n'
                                                                                                                         'This is multiplied by any profile that\'s active. Set to None to disable', 'live': True},
                            'min_TR': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
-                                                                                                                 'The range is limited from 0.8 to 1.4. Set to None to disable', 'live': True},
+                                                                                                                 'The range is limited from 0.85 to 1.3. Set to None to disable', 'live': True},
                            'alca_nudge_required': {'default': True, 'allowed_types': [bool], 'description': ('Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                                                              'If False, lane change will occur IMMEDIATELY after signaling')},
                            'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)'},
