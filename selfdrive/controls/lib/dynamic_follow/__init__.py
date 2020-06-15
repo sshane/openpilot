@@ -234,12 +234,11 @@ class DynamicFollow:
     """
     if self.global_df_mod is None:
       return profile_mod_pos, profile_mod_neg, y_dist
-
-    speeds = [0, self.sng_speed, 18, x_vel[-1]]  # [0, 18 mph, ~40 mph, highest profile mod speed (~78 mph)]
-    mods = [0, 0.1, 0.7, 1]  # how much to limit global_df_mod at each speed, 1 is full effect
     global_df_mod = 1 - self.global_df_mod
 
     # Calculate new TRs
+    speeds = [0, self.sng_speed, 18, x_vel[-1]]  # [0, 18 mph, ~40 mph, highest profile mod speed (~78 mph)]
+    mods = [0, 0.1, 0.7, 1]  # how much to limit global_df_mod at each speed, 1 is full effect
     y_dist_new = [y - (y * global_df_mod * np.interp(x, speeds, mods)) for x, y in zip(x_vel, y_dist)]
 
     # Calculate how to change profile mods based on change in TR
