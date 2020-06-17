@@ -146,6 +146,7 @@ class DynamicFollow:
     # Store data for auto-df model
     self.auto_df_model_data.append([self._norm(self.car_data.v_ego, 'v_ego'),
                                     self._norm(self.lead_data.v_lead, 'v_lead'),
+                                    self._norm(self.lead_data.a_lead, 'a_lead'),
                                     self._norm(self.lead_data.x_lead, 'x_lead')])
     while len(self.auto_df_model_data) > self.model_input_len:
       del self.auto_df_model_data[0]
