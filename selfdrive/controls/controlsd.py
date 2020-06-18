@@ -43,6 +43,8 @@ op_params = opParams()
 df_manager = dfManager(op_params)
 hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
 
+lane_speed = LaneSpeed()
+
 
 def add_lane_change_event(events, path_plan):
   if path_plan.laneChangeState == LaneChangeState.preLaneChange:
@@ -141,7 +143,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   return CS, events, cal_perc, mismatch_counter, can_error_counter
 
 
-def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM):
+def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, path_plan, sm_smiskol):
   """Compute conditional state transitions and execute actions on state transitions"""
   enabled = isEnabled(state)
 
@@ -166,6 +168,9 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
     else:
       AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
+
+  lane_out = lane_speed.update(CS.vEgo, sm_smiskol['radarState'].leadOne, CS.steeringAngle, path_plan.dPoly, sm_smiskol['liveTracks'])
+
 
   # DISABLED
   if state == State.disabled:
@@ -605,7 +610,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
     if not read_only:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
-        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM)
+        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm['pathPlan'], sm_smiskol)
       prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)
