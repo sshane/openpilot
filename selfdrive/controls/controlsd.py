@@ -25,6 +25,7 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 from selfdrive.controls.lib.dynamic_follow.df_manager import dfManager
+from selfdrive.controls.lib.dynamic_follow.lane_speed import LaneSpeed
 from common.op_params import opParams
 
 LANE_DEPARTURE_THRESHOLD = 0.1
