@@ -171,7 +171,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
 
   faster_lane = lane_speed.update(CS.vEgo, sm_smiskol['radarState'].leadOne, CS.steeringAngle, path_plan.dPoly, sm_smiskol['liveTracks'])
   if faster_lane is not None:
-    AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1=faster_lane, extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+    AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1=faster_lane.upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
 
   # DISABLED
   if state == State.disabled:
