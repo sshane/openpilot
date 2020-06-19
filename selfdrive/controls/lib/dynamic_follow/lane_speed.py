@@ -53,12 +53,18 @@ class LaneSpeed:
     self.steer_angle = steer_angle
     self.d_poly = d_poly
     self.live_tracks = live_tracks
+    self.log_data()
 
     self.reset_lanes()
     if abs(steer_angle) < self.max_steer_angle:
       self.group_tracks()
       # self.debug()
       return self.evaluate_lanes()
+
+  def log_data(self):
+    live_tracks = [{'vRel': trk.vRel, 'yRel': trk.vRel, 'dRel': trk.vRel} for trk in self.live_tracks]
+    with open('/data/lane_speed', 'a') as f:
+      f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
 
   def evaluate_lanes(self):
     avg_lane_speeds = {}
