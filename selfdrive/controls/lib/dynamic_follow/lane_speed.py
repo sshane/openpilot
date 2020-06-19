@@ -1,8 +1,8 @@
 # from common.op_params import opParams
-from selfdrive.config import Conversions as CV
-from common.numpy_fast import clip, interp
+# from selfdrive.config import Conversions as CV
+# from common.numpy_fast import clip, interp
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class Lane:
