@@ -159,19 +159,20 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
+  faster_lane = lane_speed.update(CS.vEgo, sm_smiskol['radarState'].leadOne, CS.steeringAngle, path_plan.dPoly, sm_smiskol['liveTracks'])
+  if faster_lane is not None:
+    AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1=faster_lane.upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+
   df_out = df_manager.update()
   if df_out.changed:
     df_alert = 'dfButtonAlert'
     if df_out.is_auto and df_out.last_is_auto:
-      if CS.cruiseState.enabled and not hide_auto_df_alerts:
+      # only show auto alert if engaged, not hiding auto, and time since last lane speed alert is greater than duration
+      if CS.cruiseState.enabled and not hide_auto_df_alerts and sec_since_boot() - lane_speed.last_alert_time >= 4:
         df_alert += 'NoSound'
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
     else:
       AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
-
-  faster_lane = lane_speed.update(CS.vEgo, sm_smiskol['radarState'].leadOne, CS.steeringAngle, path_plan.dPoly, sm_smiskol['liveTracks'])
-  if faster_lane is not None:
-    AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1=faster_lane.upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
 
   # DISABLED
   if state == State.disabled:

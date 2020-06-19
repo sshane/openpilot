@@ -3,6 +3,7 @@
 # from common.numpy_fast import clip, interp
 import numpy as np
 # import matplotlib.pyplot as plt
+from common.realtime import sec_since_boot
 
 
 class Lane:
@@ -45,6 +46,7 @@ class LaneSpeed:
     self.lane_names = ['left', 'middle', 'right']
 
     self.lanes = [Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)]
+    self.last_alert_time = sec_since_boot()
 
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
     # print('steer angle: {}'.format(steer_angle))
@@ -111,6 +113,7 @@ class LaneSpeed:
 
     # reset once we show alert so we don't continually send same alert
     self.get_lane(fastest_name).reset_fastest()
+    self.last_alert_time = sec_since_boot()
 
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
     return self.get_lane(fastest_name).name
