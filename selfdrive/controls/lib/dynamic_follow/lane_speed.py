@@ -136,7 +136,7 @@ class LaneSpeed:
       print()
 
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
   def circle_y(_x, _angle):  # fixme: not sure if this is correct
