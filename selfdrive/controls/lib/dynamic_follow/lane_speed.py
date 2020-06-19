@@ -38,7 +38,8 @@ class LaneSpeed:
     self.lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
     self.track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
     self.faster_than_margin = 0.05  # avg of secondary lane has to be faster by X% to show alert
-    self.min_fastest_time = 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
+    self.min_fastest_time = 0.5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
+    self.max_steer_angle = 40
 
     self.lane_positions = [-self.lane_width, 0, self.lane_width]  # lateral position in meters from center of car to center of lane
     self.lane_names = ['left', 'middle', 'right']
@@ -46,7 +47,7 @@ class LaneSpeed:
     self.lanes = [Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)]
 
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
-    print('steer angle: {}'.format(steer_angle))
+    # print('steer angle: {}'.format(steer_angle))
     self.v_ego = v_ego
     self.lead = lead
     self.steer_angle = steer_angle
@@ -54,12 +55,10 @@ class LaneSpeed:
     self.live_tracks = live_tracks
 
     self.reset_lanes()
-    if abs(steer_angle) < 10 or True:
+    if abs(steer_angle) < self.max_steer_angle:
       self.group_tracks()
       # self.debug()
-      self.evaluate_lanes()
-      return 0, 0, 0
-    return 0, 0, 0
+      return self.evaluate_lanes()
 
   def evaluate_lanes(self):
     avg_lane_speeds = {}
@@ -69,8 +68,8 @@ class LaneSpeed:
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
         avg_lane_speeds[lane.name] = np.mean(track_speeds)
 
-    print('avg_lane_speeds: {}'.format(avg_lane_speeds))
-    print()
+    # print('avg_lane_speeds: {}'.format(avg_lane_speeds))
+    # print()
 
     if 'middle' not in avg_lane_speeds or len(avg_lane_speeds) == 0:
       # if no tracks in middle lane or no secondary lane, we have nothing to compare
@@ -81,20 +80,20 @@ class LaneSpeed:
     fastest = max(avg_lane_speeds, key=lambda x: avg_lane_speeds[x])
     fastest_speed = avg_lane_speeds[fastest]
 
-    print('middle: {}'.format(middle_speed))
-    print('fastest: {}'.format(fastest_speed))
+    # print('middle: {}'.format(middle_speed))
+    # print('fastest: {}'.format(fastest_speed))
 
     if fastest == 'middle':  # already in fastest lane
       return
 
-    print('Fastest lane is {} at an average of {} m/s faster'.format(fastest, fastest_speed - middle_speed))
+    # print('Fastest lane is {} at an average of {} m/s faster'.format(fastest, fastest_speed - middle_speed))
     fastest_percent = (fastest_speed / middle_speed) - 1
 
     if fastest_percent < self.faster_than_margin:  # fastest lane is not above margin, ignore
       # todo: could remove since we wait for a lane to be faster for a bit
       return
 
-    print('Fastest lane is {}% faster!'.format(round(fastest_percent*100, 2)))
+    # print('Fastest lane is {}% faster!'.format(round(fastest_percent*100, 2)))
     # if we are here, there's a faster lane available that's above our minimum margin
 
     self.get_lane(fastest).fastest()  # increment fastest lane
@@ -109,6 +108,7 @@ class LaneSpeed:
 
   def group_tracks(self):
     """Groups tracks based on lateral position and lane width"""
+    # todo: factor in steer angle
     for track in self.live_tracks:
       lane_diffs = [{'diff': abs(lane.pos - track.yRel), 'lane': lane} for lane in self.lanes]
       closest_lane = min(lane_diffs, key=lambda x: x['diff'])
@@ -173,5 +173,6 @@ if DEBUG:
   ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
   ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
   ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  out = ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
   print([(lane.name, lane.fastest_count) for lane in ls.lanes])
+  print('out: {}'.format(out))

@@ -3,8 +3,6 @@ import math
 import numpy as np
 import time
 
-
-
 alin = np.linspace(-80, 80, 100)
 
 for a in alin:
