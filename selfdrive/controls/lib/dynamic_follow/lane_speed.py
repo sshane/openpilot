@@ -2,8 +2,23 @@
 # from selfdrive.config import Conversions as CV
 # from common.numpy_fast import clip, interp
 import numpy as np
-# import matplotlib.pyplot as plt
-from common.realtime import sec_since_boot
+try:
+  from common.realtime import sec_since_boot
+except ImportError:
+  import matplotlib.pyplot as plt
+  import time
+  sec_since_boot = time.time
+
+
+def cluster(data, maxgap):
+  data.sort(key=lambda _trk: _trk.dRel)
+  groups = [[data[0]]]
+  for x in data[1:]:
+    if abs(x.dRel - groups[-1][-1].dRel) <= maxgap:
+      groups[-1].append(x)
+    else:
+      groups.append([x])
+  return groups
 
 
 class Lane:
@@ -14,21 +29,21 @@ class Lane:
 
     self.fastest_count = False
 
-  def fastest(self):
+  def set_fastest(self):
     """Increments this lane's fast count"""
     if self.fastest_count is False:
       self.fastest_count = 0
     else:
       self.fastest_count += 1
 
-  def reset(self):
-    self.tracks = []
-
   def reset_fastest(self):
     self.fastest_count = False
 
-  def add(self, track):
+  def add_track(self, track):
     self.tracks.append(track)
+
+  def reset_tracks(self):
+    self.tracks = []
 
 
 class LaneSpeed:
@@ -40,12 +55,18 @@ class LaneSpeed:
     self.track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
     self.faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self.min_fastest_time = 5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
-    self.max_steer_angle = 100
+    self.max_steer_angle = 100  # max supported steering angle
+    self._setup()
 
-    self.lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
-    self.lane_names = ['left', 'middle', 'right']
+  def _setup(self):
+    lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
+    lane_names = ['left', 'middle', 'right']
+    self.lanes = {name: Lane(name, pos) for name, pos in zip(lane_names, lane_positions)}
 
-    self.lanes = [Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)]
+    self.lane_bounds = {'left': np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2]),
+                        'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
+                        'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
+
     self.last_alert_time = sec_since_boot()
 
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
@@ -53,15 +74,36 @@ class LaneSpeed:
     self.v_ego = v_ego
     # self.lead = lead
     self.steer_angle = steer_angle
-    self.d_poly = list(d_poly)
+    self.d_poly = np.array(list(d_poly))
     self.live_tracks = live_tracks
     self.log_data()
 
     self.reset_lanes()
     if len(d_poly) and abs(steer_angle) < self.max_steer_angle:
+      # self.filter_tracks()  # todo: will remove tracks very close to other tracks
       self.group_tracks()
       # self.debug()
       return self.evaluate_lanes()
+
+  # def filter_tracks(self):  # todo: make cluster() return indexes of live_tracks instead
+  #   print(type(self.live_tracks))
+  #   clustered = cluster(self.live_tracks, 0.048)  # clusters tracks based on dRel
+  #   clustered = [clstr for clstr in clustered if len(clstr) > 1]
+  #   print([[trk.dRel for trk in clstr] for clstr in clustered])
+  #   for clstr in clustered:
+  #     pass
+  #
+  #   # print(c)
+
+  def group_tracks(self):
+    """Groups tracks based on lateral position and lane width"""
+    y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
+    for track, y_offset in zip(self.live_tracks, y_offsets):
+      for lane_name, lane_bounds in self.lane_bounds.items():
+        lane_bounds = lane_bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
+        if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
+          self.lanes[lane_name].add_track(track)
+          break  # skip to next track
 
   def log_data(self):
     live_tracks = [{'vRel': trk.vRel, 'yRel': trk.yRel, 'dRel': trk.dRel} for trk in self.live_tracks]
@@ -71,6 +113,7 @@ class LaneSpeed:
   def evaluate_lanes(self):
     avg_lane_speeds = {}
     for lane in self.lanes:
+      lane = self.lanes[lane]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self.track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
@@ -94,17 +137,17 @@ class LaneSpeed:
     if fastest_name == 'middle':  # already in fastest lane
       return
 
-    # print('Fastest lane is {} at an average of {} m/s faster'.format(fastest, fastest_speed - middle_speed))
-    fastest_percent = (fastest_speed / middle_speed) - 1
+    # print('Fastest lane is {} at an average of {} m/s faster'.format(fastest_name, fastest_speed - middle_speed))
 
+    fastest_percent = (fastest_speed / middle_speed) - 1
     if fastest_percent < self.faster_than_margin:  # fastest lane is not above margin, ignore
       # todo: could remove since we wait for a lane to be faster for a bit
       return
 
     # print('Fastest lane is {}% faster!'.format(round(fastest_percent*100, 2)))
-    # if we are here, there's a faster lane available that's above our minimum margin
 
-    self.get_lane(fastest_name).fastest()  # increment fastest lane
+    # if we are here, there's a faster lane available that's above our minimum margin
+    self.get_lane(fastest_name).set_fastest()  # increment fastest lane
     self.get_lane(self.opposite_lane(fastest_name)).reset_fastest()  # reset slowest lane (opposite, never middle)
 
     if self.get_lane(fastest_name).fastest_count < self.min_fastest_time:
@@ -118,17 +161,10 @@ class LaneSpeed:
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
     return self.get_lane(fastest_name).name
 
-  def group_tracks(self):
-    """Groups tracks based on lateral position and lane width"""
-    for track in self.live_tracks:
-      y_pos = np.polyval(self.d_poly, track.dRel)  # offset lane position based on dPoly and track's longitudinal distance
-      lane_diffs = [{'diff': abs(lane.pos + y_pos - track.yRel), 'lane': lane} for lane in self.lanes]
-      closest_lane = min(lane_diffs, key=lambda x: x['diff'])
-      closest_lane['lane'].add(track)
-
   def get_lane(self, name):
     """Returns lane by name"""
     for lane in self.lanes:
+      lane = self.lanes[lane]
       if lane.name == name:
         return lane
 
@@ -137,10 +173,10 @@ class LaneSpeed:
 
   def reset_lanes(self):
     for lane in self.lanes:
-      lane.reset()
+      self.lanes[lane].reset_tracks()
 
   def debug(self):
-    for lane in self.lanes:
+    for lane in self.lanes.values():
       print('Lane: {}'.format(lane.name))
       for track in lane.tracks:
         print(track.vRel, track.yRel, track.dRel)
@@ -161,7 +197,7 @@ if DEBUG:
       self.yRel = yRel
       self.dRel = dRel
 
-  d_poly = [-7.6073491e-08, 2.0548079e-05, -0.0035241069, -0.021812938]
+  d_poly = [3.2945357553160193e-10, -0.0009911218658089638, -0.009723401628434658, 0.14891201257705688]
 
   keys = ['v_ego', 'a_ego', 'v_lead', 'lead_status', 'x_lead', 'y_lead', 'a_lead', 'a_rel', 'v_lat', 'steer_angle', 'steer_rate', 'track_data', 'time', 'gas', 'brake', 'car_gas', 'left_blinker', 'right_blinker', 'set_speed', 'new_accel', 'gyro']
 
@@ -169,6 +205,8 @@ if DEBUG:
   sample = dict(zip(keys, sample))
   trks = sample['track_data']['tracks']
   trks = [Track(trk['vRel'], trk['yRel'], trk['dRel']) for trk in trks]
+  trks.append(Track(4, -12.8, 103))
+  trks.append(Track(12, -11, 115))
 
   dRel = [t.dRel for t in trks]
   yRel = [t.yRel for t in trks]
@@ -178,16 +216,19 @@ if DEBUG:
   # y_path = circle_y(x_path, steerangle)
   y_path = np.polyval(d_poly, x_path)
   plt.plot([0, 130], [0, 0])
-  plt.plot(x_path, y_path)
+  # plt.plot(x_path, y_path, label='dPoly')
+  plt.plot(x_path, y_path + 3.7 / 2, 'r--', label='left line')
+  plt.plot(x_path, y_path - 3.7 / 2, 'r--', label='right line')
+
+  plt.plot(x_path, y_path + 3.7 / 2 + 3.7, 'g--')
+  plt.plot(x_path, y_path - 3.7 / 2 - 3.7, 'g--')
+
+
   plt.legend()
   plt.show()
 
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  out = ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  print([(lane.name, lane.fastest_count) for lane in ls.lanes])
+  for _ in range(501):
+    out = ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  print([(lane.name, lane.fastest_count) for lane in ls.lanes.values()])
   print('out: {}'.format(out))
+  print([len(ls.lanes[l].tracks) for l in ls.lanes])
