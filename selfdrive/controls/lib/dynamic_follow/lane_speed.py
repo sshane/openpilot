@@ -51,21 +51,21 @@ class LaneSpeed:
     # self.op_params = opParams()
     self.use_lane_speed = True  # self.op_params.get('use_lane_speed', default=True)
 
-    self.lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
-    self.track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
-    self.faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
-    self.min_fastest_time = 5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
-    self.max_steer_angle = 100  # max supported steering angle
+    self._lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
+    self._track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
+    self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
+    self._min_fastest_time = 5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
+    self._max_steer_angle = 100  # max supported steering angle
     self._setup()
 
   def _setup(self):
-    lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
+    lane_positions = [self._lane_width, 0, -self._lane_width]  # lateral position in meters from center of car to center of lane
     lane_names = ['left', 'middle', 'right']
     self.lanes = {name: Lane(name, pos) for name, pos in zip(lane_names, lane_positions)}
 
-    self.lane_bounds = {'left': np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2]),
-                        'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
-                        'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
+    self._lane_bounds = {'left': np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2]),
+                         'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
+                         'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
 
     self.last_alert_time = sec_since_boot()
 
@@ -79,7 +79,7 @@ class LaneSpeed:
     self.log_data()
 
     self.reset_lanes()
-    if len(d_poly) and abs(steer_angle) < self.max_steer_angle:
+    if len(d_poly) and abs(steer_angle) < self._max_steer_angle:
       # self.filter_tracks()  # todo: will remove tracks very close to other tracks
       self.group_tracks()
       # self.debug()
@@ -96,10 +96,10 @@ class LaneSpeed:
   #   # print(c)
 
   def group_tracks(self):
-    """Groups tracks based on lateral position and lane width"""
+    """Groups tracks based on lateral position, dPoly offset, and lane width"""
     y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
     for track, y_offset in zip(self.live_tracks, y_offsets):
-      for lane_name, lane_bounds in self.lane_bounds.items():
+      for lane_name, lane_bounds in self._lane_bounds.items():
         lane_bounds = lane_bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
           self.lanes[lane_name].add_track(track)
@@ -115,7 +115,7 @@ class LaneSpeed:
     for lane in self.lanes:
       lane = self.lanes[lane]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
-      track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self.track_speed_margin]
+      track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
         avg_lane_speeds[lane.name] = np.mean(track_speeds)
 
@@ -140,7 +140,7 @@ class LaneSpeed:
     # print('Fastest lane is {} at an average of {} m/s faster'.format(fastest_name, fastest_speed - middle_speed))
 
     fastest_percent = (fastest_speed / middle_speed) - 1
-    if fastest_percent < self.faster_than_margin:  # fastest lane is not above margin, ignore
+    if fastest_percent < self._faster_than_margin:  # fastest lane is not above margin, ignore
       # todo: could remove since we wait for a lane to be faster for a bit
       return
 
@@ -150,7 +150,7 @@ class LaneSpeed:
     self.get_lane(fastest_name).set_fastest()  # increment fastest lane
     self.get_lane(self.opposite_lane(fastest_name)).reset_fastest()  # reset slowest lane (opposite, never middle)
 
-    if self.get_lane(fastest_name).fastest_count < self.min_fastest_time:
+    if self.get_lane(fastest_name).fastest_count < self._min_fastest_time:
       # fastest lane hasn't been fastest long enough
       return
 
