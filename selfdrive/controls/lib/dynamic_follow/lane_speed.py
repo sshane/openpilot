@@ -38,10 +38,10 @@ class LaneSpeed:
     self.lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
     self.track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
     self.faster_than_margin = 0.05  # avg of secondary lane has to be faster by X% to show alert
-    self.min_fastest_time = 0.5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
+    self.min_fastest_time = 2 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
     self.max_steer_angle = 40
 
-    self.lane_positions = [-self.lane_width, 0, self.lane_width]  # lateral position in meters from center of car to center of lane
+    self.lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
     self.lane_names = ['left', 'middle', 'right']
 
     self.lanes = [Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)]
