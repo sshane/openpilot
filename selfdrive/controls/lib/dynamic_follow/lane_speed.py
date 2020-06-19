@@ -77,13 +77,13 @@ class LaneSpeed:
 
     # we have a middle and secondary lane to compare
     middle_speed = avg_lane_speeds['middle']
-    fastest = max(avg_lane_speeds, key=lambda x: avg_lane_speeds[x])
-    fastest_speed = avg_lane_speeds[fastest]
+    fastest_name = max(avg_lane_speeds, key=lambda x: avg_lane_speeds[x])
+    fastest_speed = avg_lane_speeds[fastest_name]
 
     # print('middle: {}'.format(middle_speed))
     # print('fastest: {}'.format(fastest_speed))
 
-    if fastest == 'middle':  # already in fastest lane
+    if fastest_name == 'middle':  # already in fastest lane
       return
 
     # print('Fastest lane is {} at an average of {} m/s faster'.format(fastest, fastest_speed - middle_speed))
@@ -96,15 +96,16 @@ class LaneSpeed:
     # print('Fastest lane is {}% faster!'.format(round(fastest_percent*100, 2)))
     # if we are here, there's a faster lane available that's above our minimum margin
 
-    self.get_lane(fastest).fastest()  # increment fastest lane
-    self.get_lane(self.opposite_lane(fastest)).reset_fastest()  # reset slowest lane (opposite, never middle)
+    self.get_lane(fastest_name).fastest()  # increment fastest lane
+    self.get_lane(self.opposite_lane(fastest_name)).reset_fastest()  # reset slowest lane (opposite, never middle)
 
-    if self.get_lane(fastest).fastest_count < self.min_fastest_time:
+    if self.get_lane(fastest_name).fastest_count < self.min_fastest_time:
       # fastest lane hasn't been fastest long enough
       return
 
+    self.get_lane(fastest_name).reset_fastest()  # reset once we show alert so we don't continually send same alert
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
-    return self.get_lane(fastest).name
+    return self.get_lane(fastest_name).name
 
   def group_tracks(self):
     """Groups tracks based on lateral position and lane width"""
