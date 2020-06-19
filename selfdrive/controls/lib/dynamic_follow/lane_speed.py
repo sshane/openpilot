@@ -62,7 +62,7 @@ class LaneSpeed:
       return self.evaluate_lanes()
 
   def log_data(self):
-    live_tracks = [{'vRel': trk.vRel, 'yRel': trk.vRel, 'dRel': trk.vRel} for trk in self.live_tracks]
+    live_tracks = [{'vRel': trk.vRel, 'yRel': trk.yRel, 'dRel': trk.dRel} for trk in self.live_tracks]
     with open('/data/lane_speed', 'a') as f:
       f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
 
