@@ -39,7 +39,7 @@ class LaneSpeed:
     self.track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
     self.faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self.min_fastest_time = 5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
-    self.max_steer_angle = 40
+    self.max_steer_angle = 100
 
     self.lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
     self.lane_names = ['left', 'middle', 'right']
@@ -49,14 +49,14 @@ class LaneSpeed:
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
     # print('steer angle: {}'.format(steer_angle))
     self.v_ego = v_ego
-    self.lead = lead
+    # self.lead = lead
     self.steer_angle = steer_angle
-    self.d_poly = d_poly
+    self.d_poly = list(d_poly)
     self.live_tracks = live_tracks
     self.log_data()
 
     self.reset_lanes()
-    if abs(steer_angle) < self.max_steer_angle:
+    if len(d_poly) and abs(steer_angle) < self.max_steer_angle:
       self.group_tracks()
       # self.debug()
       return self.evaluate_lanes()
@@ -109,15 +109,17 @@ class LaneSpeed:
       # fastest lane hasn't been fastest long enough
       return
 
-    self.get_lane(fastest_name).reset_fastest()  # reset once we show alert so we don't continually send same alert
+    # reset once we show alert so we don't continually send same alert
+    self.get_lane(fastest_name).reset_fastest()
+
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
     return self.get_lane(fastest_name).name
 
   def group_tracks(self):
     """Groups tracks based on lateral position and lane width"""
-    # todo: factor in steer angle
     for track in self.live_tracks:
-      lane_diffs = [{'diff': abs(lane.pos - track.yRel), 'lane': lane} for lane in self.lanes]
+      y_pos = np.polyval(self.d_poly, track.dRel)  # offset lane position based on dPoly and track's longitudinal distance
+      lane_diffs = [{'diff': abs(lane.pos + y_pos - track.yRel), 'lane': lane} for lane in self.lanes]
       closest_lane = min(lane_diffs, key=lambda x: x['diff'])
       closest_lane['lane'].add(track)
 
@@ -156,6 +158,7 @@ if DEBUG:
       self.yRel = yRel
       self.dRel = dRel
 
+  d_poly = [-7.6073491e-08, 2.0548079e-05, -0.0035241069, -0.021812938]
 
   keys = ['v_ego', 'a_ego', 'v_lead', 'lead_status', 'x_lead', 'y_lead', 'a_lead', 'a_rel', 'v_lat', 'steer_angle', 'steer_rate', 'track_data', 'time', 'gas', 'brake', 'car_gas', 'left_blinker', 'right_blinker', 'set_speed', 'new_accel', 'gyro']
 
@@ -169,17 +172,19 @@ if DEBUG:
   steerangle = sample['steer_angle']
   plt.scatter(dRel, yRel, label='tracks')
   x_path = np.linspace(0, 130, 100)
-  y_path = circle_y(x_path, steerangle)
+  # y_path = circle_y(x_path, steerangle)
+  y_path = np.polyval(d_poly, x_path)
   plt.plot([0, 130], [0, 0])
   plt.plot(x_path, y_path)
   plt.legend()
   plt.show()
 
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
-  out = ls.update(10, None, steerangle, None, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  # ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
+  out = ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
   print([(lane.name, lane.fastest_count) for lane in ls.lanes])
   print('out: {}'.format(out))
