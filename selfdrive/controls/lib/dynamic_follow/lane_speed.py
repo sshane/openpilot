@@ -56,6 +56,8 @@ class LaneSpeed:
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self._min_fastest_time = 4 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
     self._max_steer_angle = 100  # max supported steering angle
+    self._alert_length = 10  # in seconds
+    self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
     self._setup()
 
   def _setup(self):
@@ -154,7 +156,7 @@ class LaneSpeed:
       # fastest lane hasn't been fastest long enough
       return
 
-    if sec_since_boot() - self.last_alert_time < 10:
+    if sec_since_boot() - self.last_alert_time < self._alert_length + self._extra_wait_time:
       # don't reset fastest lane count or show alert until last alert has gone
       return
 
