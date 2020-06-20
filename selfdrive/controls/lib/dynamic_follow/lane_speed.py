@@ -54,7 +54,7 @@ class LaneSpeed:
     self._lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
     self._track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
-    self._min_fastest_time = 5 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
+    self._min_fastest_time = 4 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
     self._max_steer_angle = 100  # max supported steering angle
     self._setup()
 
@@ -67,7 +67,7 @@ class LaneSpeed:
                          'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
                          'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
 
-    self.last_alert_time = sec_since_boot()
+    self.last_alert_time = 0
 
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
     # print('steer angle: {}'.format(steer_angle))
@@ -152,6 +152,10 @@ class LaneSpeed:
 
     if self.get_lane(fastest_name).fastest_count < self._min_fastest_time:
       # fastest lane hasn't been fastest long enough
+      return
+
+    if sec_since_boot() - self.last_alert_time < 10:
+      # don't reset fastest lane count or show alert until last alert has gone
       return
 
     # reset once we show alert so we don't continually send same alert

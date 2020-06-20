@@ -208,7 +208,7 @@ ALERTS = [
         "Faster lane available: ",
         "",
         AlertStatus.normal, AlertSize.mid,
-        Priority.LOWER, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 4.),
+        Priority.LOWER, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
 
   Alert(
       "ethicalDilemma",
