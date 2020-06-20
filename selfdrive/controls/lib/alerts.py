@@ -196,19 +196,19 @@ ALERTS = [
         "Using profile: ",
         "",
         AlertStatus.normal, AlertSize.mid,
-        Priority.LOWER, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+        Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
 
   Alert("dfButtonAlertNoSound",
         "Using profile: ",
         "",
-        AlertStatus.normal, AlertSize.mid,
+        AlertStatus.normal, AlertSize.small,
         Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
 
   Alert("laneSpeedAlert",
         "Faster lane available: ",
         "",
-        AlertStatus.normal, AlertSize.mid,
-        Priority.LOWER, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
+        AlertStatus.normal, AlertSize.small,
+        Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
 
   Alert(
       "ethicalDilemma",
