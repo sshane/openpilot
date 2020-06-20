@@ -73,22 +73,24 @@ class LaneSpeed:
     self.last_alert_time = 0
 
   def update(self, v_ego, lead, steer_angle, d_poly, live_tracks):
-    # print('steer angle: {}'.format(steer_angle))
     self.v_ego = v_ego
-    # self.lead = lead
+    # self.lead = lead  # fixme: do we need this?
     self.steer_angle = steer_angle
     self.d_poly = np.array(list(d_poly))
     self.live_tracks = live_tracks
     self.log_data()
 
-    self.reset_lanes()
-    if len(d_poly) and abs(steer_angle) < self._max_steer_angle and self.v_ego > self._min_enable_speed:
-      # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
-      self.group_tracks()
-      # self.debug()
-      return self.evaluate_lanes()
+    self.reset(reset_tracks=True)
+    if len(self.d_poly) and abs(steer_angle) < self._max_steer_angle:
+      if self.v_ego > self._min_enable_speed:
+        # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
+        self.group_tracks()
+        # self.debug()
+        return self.evaluate_lanes()
+    else:  # should we reset state when not enabled?
+      self.reset(reset_fastest=True)
 
-  # def filter_tracks(self):  # todo: make cluster() return indexes of live_tracks instead
+  # def filter_tracks(self):  # fixme: make cluster() return indexes of live_tracks instead
   #   print(type(self.live_tracks))
   #   clustered = cluster(self.live_tracks, 0.048)  # clusters tracks based on dRel
   #   clustered = [clstr for clstr in clustered if len(clstr) > 1]
@@ -120,12 +122,12 @@ class LaneSpeed:
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
-        avg_lane_speeds[lane.name] = np.mean(track_speeds)
+        avg_lane_speeds[lane.name] = np.mean(track_speeds)  # todo: something with std?
 
     # print('avg_lane_speeds: {}'.format(avg_lane_speeds))
     # print()
 
-    if 'middle' not in avg_lane_speeds or len(avg_lane_speeds) == 0:
+    if 'middle' not in avg_lane_speeds or len(avg_lane_speeds) < 2:
       # if no tracks in middle lane or no secondary lane, we have nothing to compare
       return
 
@@ -153,7 +155,11 @@ class LaneSpeed:
     self.get_lane(fastest_name).set_fastest()  # increment fastest lane
     self.get_lane(self.opposite_lane(fastest_name)).reset_fastest()  # reset slowest lane (opposite, never middle)
 
-    if self.get_lane(fastest_name).fastest_count < self._min_fastest_time:
+    _f_time_x = [1, 4, 12]  # change the minimum time for fastest based on how many tracks are in fastest lane
+    _f_time_y = [2, 1, 0.6]  # todo: probably need to tune this
+    min_fastest_time = int(self._min_fastest_time * np.interp(len(self.get_lane(fastest_name).tracks), _f_time_x, _f_time_y))
+
+    if self.get_lane(fastest_name).fastest_count < min_fastest_time:
       # fastest lane hasn't been fastest long enough
       return
 
@@ -178,9 +184,12 @@ class LaneSpeed:
   def opposite_lane(self, name):
     return {'left': 'right', 'right': 'left'}[name]
 
-  def reset_lanes(self):
+  def reset(self, reset_tracks=False, reset_fastest=False):
     for lane in self.lanes:
-      self.lanes[lane].reset_tracks()
+      if reset_tracks:
+        self.lanes[lane].reset_tracks()
+      if reset_fastest:
+        self.lanes[lane].reset_fastest()
 
   def debug(self):
     for lane in self.lanes.values():
@@ -214,6 +223,7 @@ if DEBUG:
   trks = [Track(trk['vRel'], trk['yRel'], trk['dRel']) for trk in trks]
   trks.append(Track(4, -12.8, 103))
   trks.append(Track(12, -11, 115))
+  trks.append(Track(32, -11, 115))
 
   dRel = [t.dRel for t in trks]
   yRel = [t.yRel for t in trks]
@@ -234,7 +244,7 @@ if DEBUG:
   plt.legend()
   plt.show()
 
-  for _ in range(501):
+  for _ in range(1):
     out = ls.update(10, None, steerangle, d_poly, trks)  # v_ego, lead, steer_angle, d_poly, live_tracks
   print([(lane.name, lane.fastest_count) for lane in ls.lanes.values()])
   print('out: {}'.format(out))
