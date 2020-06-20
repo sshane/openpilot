@@ -1978,6 +1978,10 @@ struct DynamicFollowButton {
   status @0 :UInt16;
 }
 
+struct LaneSpeed {
+  status @0 :Text;
+}
+
 struct Event {
   # in nanoseconds?
   logMonoTime @0 :UInt64;
@@ -2059,5 +2063,6 @@ struct Event {
 
     dynamicFollowData @74 :DynamicFollowData;
     dynamicFollowButton @75 :DynamicFollowButton;
+    laneSpeed @76 :LaneSpeed;
   }
 }

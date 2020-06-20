@@ -25,7 +25,6 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibration_helpers import Calibration, Filter
 from selfdrive.controls.lib.dynamic_follow.df_manager import dfManager
-from selfdrive.controls.lib.dynamic_follow.lane_speed import LaneSpeed
 from common.op_params import opParams
 
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -42,8 +41,6 @@ LaneChangeDirection = log.PathPlan.LaneChangeDirection
 op_params = opParams()
 df_manager = dfManager(op_params)
 hide_auto_df_alerts = op_params.get('hide_auto_df_alerts', False)
-
-lane_speed = LaneSpeed()
 
 
 def add_lane_change_event(events, path_plan):
@@ -143,7 +140,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   return CS, events, cal_perc, mismatch_counter, can_error_counter
 
 
-def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, path_plan, sm_smiskol):
+def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol):
   """Compute conditional state transitions and execute actions on state transitions"""
   enabled = isEnabled(state)
 
@@ -159,8 +156,8 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  faster_lane = lane_speed.update(CS.vEgo, sm_smiskol['radarState'].leadOne, CS.steeringAngle, path_plan.dPoly, sm_smiskol['liveTracks'])
-  if faster_lane is not None:
+  faster_lane = sm_smiskol['laneSpeed'].status
+  if faster_lane in ['left', 'right']:
     AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1='{} lane faster'.format(faster_lane.upper()), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
 
   df_out = df_manager.update()
@@ -494,7 +491,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
                               'model'])
 
   if sm_smiskol is None:
-    sm_smiskol = messaging.SubMaster(['radarState', 'dynamicFollowData', 'liveTracks', 'dynamicFollowButton'])
+    sm_smiskol = messaging.SubMaster(['radarState', 'dynamicFollowData', 'liveTracks', 'dynamicFollowButton', 'laneSpeed'])
 
   if can_sock is None:
     can_timeout = None if os.environ.get('NO_CAN_TIMEOUT', False) else 100
@@ -612,7 +609,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None, sm_smiskol=None):
     if not read_only:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
-        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm['pathPlan'], sm_smiskol)
+        state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM, sm_smiskol)
       prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)
