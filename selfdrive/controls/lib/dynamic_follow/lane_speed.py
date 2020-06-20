@@ -1,5 +1,5 @@
 # from common.op_params import opParams
-# from selfdrive.config import Conversions as CV
+from selfdrive.config import Conversions as CV
 # from common.numpy_fast import clip, interp
 import numpy as np
 try:
@@ -52,8 +52,9 @@ class LaneSpeed:
     self.use_lane_speed = True  # self.op_params.get('use_lane_speed', default=True)
 
     self._lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
-    self._track_speed_margin = 0.15  # track has to be above X% of v_ego (excludes oncoming)
+    self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
+    self._min_enable_speed = 35 * CV.MPH_TO_MS
     self._min_fastest_time = 4 * 100  # how long should we wait for a specific lane to be faster than middle before alerting; 100 is 1 second
     self._max_steer_angle = 100  # max supported steering angle
     self._alert_length = 10  # in seconds
@@ -81,8 +82,8 @@ class LaneSpeed:
     self.log_data()
 
     self.reset_lanes()
-    if len(d_poly) and abs(steer_angle) < self._max_steer_angle:
-      # self.filter_tracks()  # todo: will remove tracks very close to other tracks
+    if len(d_poly) and abs(steer_angle) < self._max_steer_angle and self.v_ego > self._min_enable_speed:
+      # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
       self.group_tracks()
       # self.debug()
       return self.evaluate_lanes()
