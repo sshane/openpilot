@@ -205,7 +205,7 @@ ALERTS = [
         Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
 
   Alert("laneSpeedAlert",
-        "Faster lane available: ",
+        "",
         "",
         AlertStatus.normal, AlertSize.small,
         Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
