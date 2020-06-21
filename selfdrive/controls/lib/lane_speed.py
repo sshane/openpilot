@@ -82,7 +82,7 @@ class LaneSpeed:
     self.last_alert_time = 0
 
   def start(self):
-    while True:
+    while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
 
@@ -93,7 +93,6 @@ class LaneSpeed:
       self.live_tracks = self.sm['liveTracks']
       self.send_status(self.update())
 
-      time.sleep(np.random.uniform(0, 0.2))
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
         time.sleep(t_sleep)
