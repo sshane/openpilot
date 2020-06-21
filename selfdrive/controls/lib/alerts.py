@@ -207,7 +207,7 @@ ALERTS = [
   Alert("laneSpeedAlert",
         "",
         "",
-        AlertStatus.normal, AlertSize.small,
+        AlertStatus.normal, AlertSize.mid,
         Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
 
   Alert(
