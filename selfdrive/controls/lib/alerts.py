@@ -198,7 +198,7 @@ ALERTS = [
         AlertStatus.normal, AlertSize.mid,
         Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
 
-  Alert("dfButtonAlertNoSound",
+  Alert("dfButtonAlertSilent",
         "Using profile: ",
         "",
         AlertStatus.normal, AlertSize.small,
@@ -208,7 +208,13 @@ ALERTS = [
         "",
         "",
         AlertStatus.normal, AlertSize.mid,
-        Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 10.),
+        Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 0.1),
+
+  Alert("laneSpeedAlertSilent",
+        "",
+        "",
+        AlertStatus.normal, AlertSize.mid,
+        Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
 
   Alert(
       "ethicalDilemma",

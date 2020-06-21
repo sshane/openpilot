@@ -65,6 +65,8 @@ class LaneSpeed:
     self._alert_length = 10  # in seconds
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
 
+    self.fastest_lane = None
+    self.last_fastest_lane = None
     self._setup()
 
   def _setup(self):
@@ -91,7 +93,8 @@ class LaneSpeed:
       self.steer_angle = self.sm['carState'].steeringAngle
       self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
       self.live_tracks = self.sm['liveTracks']
-      self.send_status(self.update())
+      self.update()
+      self.send_status()
 
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
@@ -109,7 +112,7 @@ class LaneSpeed:
         # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
         self.group_tracks()
         # self.debug()
-        return self.evaluate_lanes()
+        self.fastest_lane = self.evaluate_lanes()
     else:  # should we reset state when not enabled?
       self.reset(reset_fastest=True)
 
@@ -168,23 +171,28 @@ class LaneSpeed:
     if self.get_lane(fastest_name).fastest_count < min_fastest_time:
       # fastest lane hasn't been fastest long enough
       return
-    if sec_since_boot() - self.last_alert_time < self._alert_length + self._extra_wait_time:
-      # don't reset fastest lane count or show alert until last alert has gone
-      return
+    # if sec_since_boot() - self.last_alert_time < self._alert_length + self._extra_wait_time:  # todo: might want to modify check based on todo below
+    #   # don't reset fastest lane count or show alert until last alert has gone
+    #   return
 
     # reset once we show alert so we don't continually send same alert
-    self.get_lane(fastest_name).reset_fastest()
-    self.last_alert_time = sec_since_boot()
+    # self.get_lane(fastest_name).reset_fastest()  # todo: don't reset since we want to continue showing alert for as long as a lane is fastest
+    self.last_alert_time = sec_since_boot()  # todo: unused for now, but should restrict next alert based on end of last alert with this
 
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
     return self.get_lane(fastest_name).name
 
-  def send_status(self, status):
+  def send_status(self):
+    status = self.fastest_lane
     if not isinstance(status, str):
       status = 'none'
+
     ls_send = messaging.new_message('laneSpeed')
     ls_send.laneSpeed.status = status.lower()
+    ls_send.laneSpeed.new = self.fastest_lane != self.last_fastest_lane  # only send audible alert once in controlsd, then continue to show silent alert
     self.pm.send('laneSpeed', ls_send)
+
+    self.last_fastest_lane = self.fastest_lane
 
   def get_lane(self, name):
     """Returns lane by name"""

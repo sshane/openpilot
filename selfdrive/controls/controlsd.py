@@ -156,17 +156,22 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  faster_lane = sm_smiskol['laneSpeed'].status
+  faster_lane, faster_lane_new = sm_smiskol['laneSpeed'].status, sm_smiskol['laneSpeed'].new
+  ls_alert_shown = False
   if faster_lane in ['left', 'right']:
-    AM.add(frame, 'laneSpeedAlert', enabled, extra_text_1='{} lane faster'.format(faster_lane.upper()), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+    ls_alert = 'laneSpeedAlert'
+    if not faster_lane_new:
+      ls_alert += 'Silent'
+    AM.add(frame, ls_alert, enabled, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+    ls_alert_shown = True
 
   df_out = df_manager.update()
   if df_out.changed:
     df_alert = 'dfButtonAlert'
     if df_out.is_auto and df_out.last_is_auto:
       # only show auto alert if engaged, not hiding auto, and time since last lane speed alert is greater than duration
-      if CS.cruiseState.enabled and not hide_auto_df_alerts: # and sec_since_boot() - lane_speed.last_alert_time >= 10:
-        df_alert += 'NoSound'
+      if CS.cruiseState.enabled and not hide_auto_df_alerts and not ls_alert_shown:  # and sec_since_boot() - lane_speed.last_alert_time >= 10:
+        df_alert += 'Silent'
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
     else:
       AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
