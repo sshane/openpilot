@@ -93,8 +93,8 @@ class LaneSpeed:
       self.live_tracks = self.sm['liveTracks']
       self.send_status(self.update())
 
-      t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       time.sleep(np.random.uniform(0, 0.1))
+      t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
         time.sleep(t_sleep)
       else:  # don't sleep if lagging
