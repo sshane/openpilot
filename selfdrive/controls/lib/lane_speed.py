@@ -94,6 +94,7 @@ class LaneSpeed:
       self.send_status(self.update())
 
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
+      print('sleeping for: {}'.format(t_sleep))
       if t_sleep > 0:
         time.sleep(t_sleep)
       else:  # don't sleep if lagging
