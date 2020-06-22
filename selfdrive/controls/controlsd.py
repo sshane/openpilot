@@ -157,6 +157,8 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
   faster_lane = sm_smiskol['laneSpeed'].status
+  with open('/data/community/lane_speed_status', 'a') as f:
+    f.write('{}\n'.format(faster_lane))
   ls_alert_shown = False
   if faster_lane in ['left', 'right']:
     ls_alert = 'laneSpeedAlert'
