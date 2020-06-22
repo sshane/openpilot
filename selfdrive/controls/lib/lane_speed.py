@@ -189,7 +189,7 @@ class LaneSpeed:
 
     ls_send = messaging.new_message('laneSpeed')
     ls_send.laneSpeed.status = status.lower()
-    ls_send.laneSpeed.new = self.fastest_lane != self.last_fastest_lane  # only send audible alert once in controlsd, then continue to show silent alert
+    ls_send.laneSpeed.new = self.fastest_lane != self.last_fastest_lane and self.fastest_lane != 'none'  # only send audible alert once in controlsd, then continue to show silent alert
     self.pm.send('laneSpeed', ls_send)
 
     self.last_fastest_lane = self.fastest_lane
