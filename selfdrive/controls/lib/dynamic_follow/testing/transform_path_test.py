@@ -37,7 +37,7 @@ view_frame_from_device_frame = device_frame_from_view_frame.T
 roll = 0
 pitch = 0
 yaw = 0
-height = 1
+height = 0.5
 device_from_road = orient.rot_from_euler([roll, pitch, yaw]).dot(np.diag([1, -1, -1]))
 view_from_road = view_frame_from_device_frame.dot(device_from_road)
 extrinsic_matrix = np.hstack((view_from_road, [[0], [height], [0]])).flatten()
@@ -75,11 +75,12 @@ new_y = []
 OFF = 0.7
 while i < MODEL_PATH_MAX_VERTICES_CNT / 2:
   _x = x[i]
-  _y = y[i]
+  _y = y[i] - OFF
   p_car_space = np.array([_x, _y, 0., 1.])
+
   Ep4 = np.matmul(extrinsic_matrix_eigen, p_car_space)
   Ep = np.array([Ep4[0], Ep4[1], Ep4[2]])
-  KEp = np.dot(intrinsic_matrix, Ep)
+  KEp = np.matmul(intrinsic_matrix, Ep)
   p_image = p_full_frame = np.array([KEp[0] / KEp[2], KEp[1] / KEp[2], 1.])
   print(p_image)
   new_x.append(p_full_frame[0])
@@ -87,7 +88,27 @@ while i < MODEL_PATH_MAX_VERTICES_CNT / 2:
 
   i += 1
 
+new_x_2 = []
+new_y_2 = []
+i = MODEL_PATH_MAX_VERTICES_CNT / 2  # not sure if this second while loop is needed
+while i > 0:
+  i = int(i)
+  _x = x[i]
+  _y = y[i] + OFF
+  p_car_space = np.array([_x, _y, 0., 1.])
+
+  Ep4 = np.matmul(extrinsic_matrix_eigen, p_car_space)
+  Ep = np.array([Ep4[0], Ep4[1], Ep4[2]])
+  KEp = np.matmul(intrinsic_matrix, Ep)
+  p_image = p_full_frame = np.array([KEp[0] / KEp[2], KEp[1] / KEp[2], 1.])
+  print(p_image)
+  new_x_2.append(p_full_frame[0])
+  new_y_2.append(p_full_frame[1])
+
+  i -= 1
+
 plt.plot(new_x, new_y, label='transformed')
+plt.plot(new_x_2, new_y_2, label='transformed')
 
 
 # ep4 = np.matmul(extrinsic_matrix, p_car_space)
