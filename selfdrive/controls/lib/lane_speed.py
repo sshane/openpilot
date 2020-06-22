@@ -81,7 +81,7 @@ class LaneSpeed:
                          'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
                          'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
 
-    self.last_alert_time = 0
+    self.last_alert_end_time = 0
 
   def start(self):
     while True:  # this loop can take up 0.049_ seconds without lagging
@@ -171,7 +171,7 @@ class LaneSpeed:
     if self.get_lane(fastest_name).fastest_count < min_fastest_time:
       # fastest lane hasn't been fastest long enough
       return
-    if sec_since_boot() - self.last_alert_time < self._extra_wait_time:
+    if sec_since_boot() - self.last_alert_end_time < self._extra_wait_time:
       # don't reset fastest lane count or show alert until last alert has gone
       return
 
@@ -192,7 +192,7 @@ class LaneSpeed:
     self.pm.send('laneSpeed', ls_send)
 
     if self.fastest_lane == 'none' and self.last_fastest_lane != 'none':
-      self.last_alert_time = sec_since_boot()
+      self.last_alert_end_time = sec_since_boot()
 
     self.last_fastest_lane = self.fastest_lane
 
