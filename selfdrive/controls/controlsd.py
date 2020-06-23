@@ -174,7 +174,7 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
       # only show auto alert if engaged, not hiding auto, and time since last lane speed alert is greater than duration
       if CS.cruiseState.enabled and not hide_auto_df_alerts and not ls_alert_shown:  # and sec_since_boot() - lane_speed.last_alert_time >= 10:
         df_alert += 'Silent'
-        AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)', extra_text_2='Dynamic follow: {} profile active'.format(df_out.model_profile_text))
+        AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)')
     else:
       AM.add(frame, df_alert, enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
 

@@ -199,7 +199,7 @@ ALERTS = [
         Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
 
   Alert("dfButtonAlertSilent",
-        "Using profile: ",
+        "Dynamic follow: ",
         "",
         AlertStatus.normal, AlertSize.small,
         Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
