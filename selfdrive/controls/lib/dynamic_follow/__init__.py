@@ -131,7 +131,7 @@ class DynamicFollow:
 
     change_time = sec_since_boot() - self.profile_change_time
     change_time_x = [0, 3]  # for three seconds after effective profile has changed
-    change_mod_y = [10, 1]  # multiply cost by multiplier to quickly change distance  # todo: 10 is just to test that it works, should be something like 2 to 5, maybe 3
+    change_mod_y = [7, 1]  # multiply cost by multiplier to quickly change distance  # todo: 10 is just to test that it works, should be something like 2 to 5, maybe 3
     if change_time < change_time[-1]:  # if profile changed in last 3 seconds
       cost *= interp(change_time, change_time_x, change_mod_y)
 
