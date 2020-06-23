@@ -126,12 +126,12 @@ class DynamicFollow:
 
   def _change_cost(self, libmpc):
     TRs = [0.9, 1.8, 2.7]
-    costs = [1.1, 0.125, 0.05]
+    costs = [1.25, 0.2, 0.075]
     cost = interp(self.TR, TRs, costs)
 
     change_time = sec_since_boot() - self.profile_change_time
     change_time_x = [0, 2.5, 5]  # for three seconds after effective profile has changed
-    change_mod_y = [50, 25, 1]  # multiply cost by multiplier to quickly change distance  # todo: 10 is just to test that it works, should be something like 2 to 5, maybe 3
+    change_mod_y = [15, 10, 1]  # multiply cost by multiplier to quickly change distance
     if change_time < change_time_x[-1]:  # if profile changed in last 3 seconds
       cost *= interp(change_time, change_time_x, change_mod_y)
 
