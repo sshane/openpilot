@@ -59,8 +59,8 @@ class DynamicFollow:
     self.user_profile = self.df_profiles.relaxed  # just a starting point
     self.model_profile = self.df_profiles.relaxed
 
-    self.effective_profile = self.user_profile
     self.last_effective_profile = self.user_profile
+    self.profile_change_time = 0
 
     self.sng = False
     self.car_data = CarData()
@@ -89,7 +89,6 @@ class DynamicFollow:
     if not travis:
       self._change_cost(libmpc)
       self._send_cur_state()
-      self.last_effective_profile = self.effective_profile
 
     return self.TR
 
@@ -129,6 +128,13 @@ class DynamicFollow:
     TRs = [0.9, 1.8, 2.7]
     costs = [1.25, 0.4, 0.05]
     cost = interp(self.TR, TRs, costs)
+
+    change_time = sec_since_boot() - self.profile_change_time
+    change_time_x = [0, 3]  # for three seconds after effective profile has changed
+    change_mod_y = [10, 1]  # multiply cost by multiplier to quickly change distance  # todo: 10 is just to test that it works, should be something like 2 to 5, maybe 3
+    if change_time < change_time[-1]:  # if profile changed in last 3 seconds
+      cost *= interp(change_time, change_time_x, change_mod_y)
+
     if self.last_cost != cost:
       libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.last_cost = cost
@@ -263,27 +269,31 @@ class DynamicFollow:
     profile_mod_x = [2.2352, 13.4112, 24.5872, 35.7632]  # profile mod speeds, mph: [5., 30., 55., 80.]
 
     if self.df_manager.is_auto:  # decide which profile to use, model profile will be updated before this
-      self.effective_profile = self.model_profile
+      df_profile = self.model_profile
     else:
-      self.effective_profile = self.user_profile
+      df_profile = self.user_profile
 
-    if self.effective_profile == self.df_profiles.roadtrip:
+    if df_profile != self.last_effective_profile:
+      self.profile_change_time = sec_since_boot()
+    self.last_effective_profile = df_profile
+
+    if df_profile == self.df_profiles.roadtrip:
       y_dist = [1.3978, 1.4132, 1.4318, 1.4536, 1.485, 1.5229, 1.5819, 1.6203, 1.7238, 1.8231, 1.8379, 1.8495, 1.8535]  # TRs
       profile_mod_pos = [0.92, 0.7, 0.25, 0.15]
       profile_mod_neg = [1.1, 1.3, 2.0, 2.3]
-    elif self.effective_profile == self.df_profiles.traffic:  # for in congested traffic
+    elif df_profile == self.df_profiles.traffic:  # for in congested traffic
       x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
       # y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]  # original
       # y_dist = [1.3781, 1.3791, 1.3112, 1.2442, 1.2306, 1.2112, 1.2775, 1.1977, 1.0963, 0.9435, 0.9067, 0.8749]  # avg. 7.3 ft closer from 18 to 90 mph
       y_dist = [1.3781, 1.3791, 1.3457, 1.3134, 1.3145, 1.318, 1.3485, 1.257, 1.144, 0.979, 0.9461, 0.9156]
       profile_mod_pos = [1.05, 1.55, 2.6, 3.75]
       profile_mod_neg = [0.84, .275, 0.1, 0.05]
-    elif self.effective_profile == self.df_profiles.relaxed:  # default to relaxed/stock
+    elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
       y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
       profile_mod_pos = [1.0] * 4
       profile_mod_neg = [1.0] * 4
     else:
-      raise Exception('Unknown profile type: {}'.format(self.effective_profile))
+      raise Exception('Unknown profile type: {}'.format(df_profile))
 
     # Global df mod
     profile_mod_pos, profile_mod_neg, y_dist = self.global_profile_mod(profile_mod_x, profile_mod_pos, profile_mod_neg, x_vel, y_dist)
@@ -327,7 +337,7 @@ class DynamicFollow:
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mods])  # alter TR modification according to profile
     TR += TR_mod
 
-    if self.car_data.left_blinker or self.car_data.right_blinker and self.effective_profile != self.df_profiles.traffic:
+    if self.car_data.left_blinker or self.car_data.right_blinker and df_profile != self.df_profiles.traffic:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .75, .65]
       TR *= interp(self.car_data.v_ego, x, y)  # reduce TR when changing lanes
