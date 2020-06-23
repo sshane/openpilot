@@ -67,6 +67,7 @@ for idx, line in enumerate(data):
   # plt.xlim(0, max_dist)
   ylim = [max(min(min(y), -15), -20), min(max(max(y), 15), 20)]
   preprocessed[-1]['ylim'] = ylim
+  preprocessed[-1]['d_poly'] = dPoly
   # plt.ylim(*ylim)
   # plt.pause(0.01)
 
@@ -102,6 +103,8 @@ for line in preprocessed:
   plt.ylim(*line['ylim'])
   plt.pause(0.001)
   print(time.time() - t)
+  print(line['d_poly'])
+  input()
   # time.sleep(0.01)
   # print(dPoly)
   # input()

@@ -140,13 +140,11 @@ class LaneSpeed:
     return lanes
 
   def evaluate_lanes(self):
-    # avg_lane_speeds = {}
     for lane in self.lanes:
       lane = self.lanes[lane]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
-        # avg_lane_speeds[lane.name] = np.mean(track_speeds)  # todo: something with std?
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
       else:
         lane.avg_speed = None
@@ -174,11 +172,9 @@ class LaneSpeed:
     min_fastest_time = int(min_fastest_time * self._min_fastest_time)  # now get final min_fastest_time
 
     if fastest_lane.fastest_count < min_fastest_time:
-      # fastest lane hasn't been fastest long enough
-      return
+      return  # fastest lane hasn't been fastest long enough
     if sec_since_boot() - self.last_alert_end_time < self._extra_wait_time:
-      # don't reset fastest lane count or show alert until last alert has gone
-      return
+      return  # don't reset fastest lane count or show alert until last alert has gone
 
     # reset once we show alert so we don't continually send same alert
     # self.get_lane(fastest_name).reset_fastest()  # todo: don't reset since we want to continue showing alert for as long as a lane is fastest
@@ -193,20 +189,12 @@ class LaneSpeed:
     ls_send.laneSpeed.new = new_fastest  # only send audible alert once when a lane becomes fastest, then continue to show silent alert
     self.pm.send('laneSpeed', ls_send)
 
-    # if self.fastest_lane == 'none' and self.last_fastest_lane != 'none':  # todo: old, remove me
     if self.fastest_lane != self.last_fastest_lane and self.fastest_lane == 'none':  # todo: is this right?
       self.last_alert_end_time = sec_since_boot()
     elif self.last_fastest_lane in ['left', 'right'] and self.fastest_lane == self.opposite_lane(self.last_fastest_lane):  # or fastest switches
       self.last_alert_end_time = sec_since_boot()
 
     self.last_fastest_lane = self.fastest_lane
-
-  # def get_lane(self, name):
-  #   """Returns lane by name"""
-  #   for lane in self.lanes:
-  #     lane = self.lanes[lane]
-  #     if lane.name == name:
-  #       return lane
 
   def opposite_lane(self, name):
     return {'left': 'right', 'right': 'left'}[name]
