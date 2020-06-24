@@ -295,7 +295,7 @@ class DynamicFollow:
       profile_mod_pos = [1.05, 1.55, 2.6, 3.75]
       profile_mod_neg = [0.84, .275, 0.1, 0.05]
     elif df_profile == self.df_profiles.relaxed:  # default to relaxed/stock
-      y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
+      y_dist = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.521, 1.544, 1.568, 1.588, 1.599, 1.613, 1.634]
       profile_mod_pos = [1.0] * 4
       profile_mod_neg = [1.0] * 4
     else:

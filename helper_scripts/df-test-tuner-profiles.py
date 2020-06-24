@@ -2,26 +2,31 @@ import matplotlib.pyplot as plt
 import numpy as np
 from selfdrive.config import Conversions as CV
 
-x_vel = [0.0, 4.166741231209736, 8.333258768790266, 12.500000000000002, 16.666741231209738, 20.833258768790266, 25.85853614889048, 30.52299570508232, 50.00000000000001, 70.0, 75.0, 80.0, 90.00000000000001]
-y_dist_old = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]  # TRs
-plt.plot(np.array(x_vel), y_dist_old, label='old roadtrip')
+x_vel_relaxed = [0.0, 4.166741231209736, 8.333258768790266, 12.500000000000002, 16.666741231209738, 20.833258768790266, 25.85853614889048, 30.52299570508232, 50.00000000000001, 70.0, 75.0, 80.0, 90.00000000000001]
+y_dist_relaxed = [1.385, 1.394, 1.406, 1.421, 1.444, 1.474, 1.516, 1.534, 1.546, 1.568, 1.579, 1.593, 1.614]
+plt.plot(np.array(x_vel_relaxed), y_dist_relaxed, label='relaxed')
 
 
-x = [0, 23.9, 55, 70, 91]
-y = [1.0, 1.025, 1.1, 1.125, 1.06]
-y_dist_new = [np.interp(x_, x, y) * y_ for x_, y_ in zip(x_vel, y_dist_old)]
+y_dist_relaxed_new = []
+for x_vel, y_dist in zip(x_vel_relaxed, y_dist_relaxed):
+  x = [22, 28, 45, 60]
+  y = [1., 1.01, 1.03, 1.025]
+  y_dist *= ((np.interp(x_vel, x, y) - 1) / 2) + 1
+  y_dist_relaxed_new.append(y_dist)
+
+plt.plot(np.array(x_vel_relaxed), np.round(y_dist_relaxed_new, 3), label='new relaxed')
 
 
-# y_dist_new = [1.3978, 1.4071, 1.4194, 1.4348, 1.4596, 1.4904, 1.5362, 1.5565, 1.5845, 1.6205, 1.6565, 1.6905, 1.7435]
-plt.plot(np.array(x_vel), y_dist_new, label='new roadtrip')
+# x_vel_traffic = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
+# y_dist_traffic = [1.3781, 1.3791, 1.3457, 1.3134, 1.3145, 1.318, 1.3485, 1.257, 1.144, 0.979, 0.9461, 0.9156]
+# plt.plot(np.array(x_vel_traffic) * CV.MS_TO_MPH, y_dist_traffic, label='traffic')
 
-# y_dist = np.mean(np.array([y_dist_old, y_dist_new]).T, axis=1)
-# plt.plot(np.array(x_vel) * CV.MS_TO_MPH, y_dist, label='avg. traffic')
-# print(y_dist.tolist())
-# ft = np.array(traffic_x_vel) * np.array(traffic_y_dist) * 3.28084
-# print(ft.tolist())
-# plt.plot(np.array(traffic_x_vel) * CV.MS_TO_MPH, ft, 'o-', label='traffic profile')
-# plt.plot(np.array(x_vel) * CV.MS_TO_MPH, np.array(x_vel) * np.array(y_dist), 'o-', label='relaxed profile')
+
+x_vel_roadtrip = [0.0, 4.166741231209736, 8.333258768790266, 12.500000000000002, 16.666741231209738, 20.833258768790266, 25.85853614889048, 30.52299570508232, 50.00000000000001, 70.0, 75.0, 80.0, 90.00000000000001]
+y_dist_roadtrip = [1.3978, 1.4132, 1.4318, 1.4536, 1.485, 1.5229, 1.5819, 1.6203, 1.7238, 1.8231, 1.8379, 1.8495, 1.8535]  # TRs
+plt.plot(np.array(x_vel_roadtrip), y_dist_roadtrip, label='roadtrip')
+
+
 
 
 # plt.plot([min(x), max(x)], [0, 0], 'r--')
