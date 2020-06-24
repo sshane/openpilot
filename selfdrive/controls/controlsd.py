@@ -157,8 +157,6 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
   faster_lane = sm_smiskol['laneSpeed'].status
-  # with open('/data/community/lane_speed_status', 'a') as f:
-  #   f.write('{}\n'.format(faster_lane))
   ls_alert_shown = False
   if faster_lane in ['left', 'right']:
     ls_alert = 'laneSpeedAlert'
@@ -171,8 +169,8 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   if df_out.changed:
     df_alert = 'dfButtonAlert'
     if df_out.is_auto and df_out.last_is_auto:
-      # only show auto alert if engaged, not hiding auto, and time since last lane speed alert is greater than duration
-      if CS.cruiseState.enabled and not hide_auto_df_alerts and not ls_alert_shown:  # and sec_since_boot() - lane_speed.last_alert_time >= 10:
+      # only show auto alert if engaged, not hiding auto, and time since lane speed alert not showing
+      if CS.cruiseState.enabled and not hide_auto_df_alerts and not ls_alert_shown:
         df_alert += 'Silent'
         AM.add(frame, df_alert, enabled, extra_text_1=df_out.model_profile_text + ' (auto)')
     else:
