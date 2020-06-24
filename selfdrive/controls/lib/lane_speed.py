@@ -101,7 +101,7 @@ class LaneSpeed:
 
   def update(self):
     # self.log_data()
-    self.reset(reset_tracks=True)
+    self.reset(reset_tracks=True, reset_avg_speed=True)
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]) and abs(self.steer_angle) < self._max_steer_angle:
@@ -159,8 +159,6 @@ class LaneSpeed:
       track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
-      else:
-        lane.avg_speed = None
 
     if 'middle' not in self.lanes_with_avg_speeds(names=True) or len(self.lanes_with_avg_speeds(names=True)) < 2:
       # if no tracks in middle lane or no secondary lane, we have nothing to compare
@@ -195,6 +193,14 @@ class LaneSpeed:
   def send_status(self):
     new_fastest = self.fastest_lane in ['left', 'right'] and self.last_fastest_lane not in ['left', 'right']
     ls_send = messaging.new_message('laneSpeed')
+
+    ls_send.laneSpeed.leftLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['left'].tracks]
+    ls_send.laneSpeed.middleLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['middle'].tracks]
+    ls_send.laneSpeed.rightLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['right'].tracks]
+    ls_send.laneSpeed.leftLaneDistances = [trk.dRel for trk in self.lanes['left'].tracks]
+    ls_send.laneSpeed.middleLaneDistances = [trk.dRel for trk in self.lanes['middle'].tracks]
+    ls_send.laneSpeed.rightLaneDistances = [trk.dRel for trk in self.lanes['right'].tracks]
+
     ls_send.laneSpeed.status = self.fastest_lane
     ls_send.laneSpeed.new = new_fastest  # only send audible alert once when a lane becomes fastest, then continue to show silent alert
     self.pm.send('laneSpeed', ls_send)
@@ -210,11 +216,15 @@ class LaneSpeed:
     """Returns name of opposite lane name"""
     return {'left': 'right', 'right': 'left'}[name]
 
-  def reset(self, reset_tracks=False, reset_fastest=False):
+  def reset(self, reset_tracks=False, reset_fastest=False, reset_avg_speed=False):
     for lane in self.lanes:
       if reset_tracks:
         self.lanes[lane].tracks = []
         self.lanes[lane].oncoming_tracks = []
+
+      if reset_avg_speed:
+        self.lanes[lane].avg_speed = None
+
       if reset_fastest:
         self.lanes[lane].fastest_count = 0
 

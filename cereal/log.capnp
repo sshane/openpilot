@@ -1981,9 +1981,14 @@ struct DynamicFollowButton {
 struct LaneSpeed {
   status @0 :Text;
   new @1 :Bool;
-  leftAvgSpeed @2 :Float32 = -99;
-  middleAvgSpeed @3 :Float32 = -99;
-  rightAvgSpeed @4 :Float32 = -99;
+
+  leftLaneSpeeds @2 :List(Float32);
+  middleLaneSpeeds @3 :List(Float32);
+  rightLaneSpeeds @4 :List(Float32);
+
+  leftLaneDistances @5 :List(Float32);
+  middleLaneDistances @6 :List(Float32);
+  rightLaneDistances @7 :List(Float32);
 }
 
 struct Event {
