@@ -8,3 +8,4 @@ while True:
   print(sm['laneSpeed'].middleAvgSpeed)
   print(sm['laneSpeed'].rightAvgSpeed)
   print('---')
+  input()
