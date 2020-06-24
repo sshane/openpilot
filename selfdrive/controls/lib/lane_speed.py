@@ -44,13 +44,6 @@ class Lane:
     self.fastest_count += 1
 
 
-class LaneSpeedReturn:
-  fastest_lane = 'none'
-  last_fastest_lane = 'none'
-
-  oncoming_lanes = []
-
-
 LANE_SPEED_RATE = 1 / 20.
 
 class LaneSpeed:
