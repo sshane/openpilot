@@ -1980,7 +1980,6 @@ struct DynamicFollowButton {
 
 struct LaneSpeed {
   status @0 :Text;
-  # lastAlertTime @1 :Float32;
   new @1 :Bool;
 }
 

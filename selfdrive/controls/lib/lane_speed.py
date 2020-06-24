@@ -1,4 +1,4 @@
-# from common.op_params import opParams
+from common.op_params import opParams
 
 from selfdrive.config import Conversions as CV
 # from common.numpy_fast import clip, interp
@@ -44,12 +44,18 @@ class Lane:
     self.fastest_count += 1
 
 
+class LaneSpeedReturn:
+  fastest_lane = 'none'
+  last_fastest_lane = 'none'
+
+  oncoming_lanes = []
+
+
 LANE_SPEED_RATE = 1 / 20.
 
 class LaneSpeed:
   def __init__(self):
-    # self.op_params = opParams()
-    self.use_lane_speed = True  # self.op_params.get('use_lane_speed', default=True)
+    self.op_params = opParams()
 
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
@@ -59,8 +65,8 @@ class LaneSpeed:
     # self._alert_length = 10  # in seconds
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
 
-    self.fastest_lane = None
-    self.last_fastest_lane = None
+    self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
+    self.last_fastest_lane = 'none'
     self._setup()
 
   def _setup(self):
@@ -68,9 +74,9 @@ class LaneSpeed:
     self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
-    self.lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
-    self.lane_names = ['left', 'middle', 'right']
-    self.lanes = {name: Lane(name, self.lane_positions[name]) for name in self.lane_names}
+    lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
+    lane_names = ['left', 'middle', 'right']
+    self.lanes = {name: Lane(name, lane_positions[name]) for name in lane_names}
 
     self.last_alert_end_time = 0
 
@@ -78,6 +84,10 @@ class LaneSpeed:
     while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
+
+      _use_lane_speed = self.op_params.get('lane_speed_alerts', default=True)
+      if not _use_lane_speed:  # check every 10 seconds if disabled, no need to run at full rate
+        time.sleep(10)
 
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
@@ -91,7 +101,7 @@ class LaneSpeed:
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
         time.sleep(t_sleep)
-      else:  # don't sleep if lagging
+      elif _use_lane_speed:  # don't sleep if lagging. don't print lagging if sleeping
         print('lane_speed lagging by: {} ms'.format(round(-t_sleep * 1000, 3)))
 
   def update(self):
@@ -103,10 +113,7 @@ class LaneSpeed:
       if self.v_ego > self._min_enable_speed:
         # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
         self.group_tracks()
-        # self.debug()
-        self.fastest_lane = self.evaluate_lanes()
-        if self.fastest_lane is None:
-          self.fastest_lane = 'none'
+        self.get_fastest_lane()
     else:  # should we reset state when not enabled?
       self.reset(reset_fastest=True)
 
@@ -130,7 +137,6 @@ class LaneSpeed:
   #   print([[trk.dRel for trk in clstr] for clstr in clustered])
   #   for clstr in clustered:
   #     pass
-  #
   #   # print(c)
 
   def group_tracks(self):
@@ -150,9 +156,10 @@ class LaneSpeed:
       return [l.name for l in lanes]
     return lanes
 
-  def evaluate_lanes(self):
-    for lane in self.lanes:
-      lane = self.lanes[lane]
+  def get_fastest_lane(self):
+    self.fastest_lane = 'none'
+    for lane_name in self.lanes:
+      lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
@@ -178,7 +185,7 @@ class LaneSpeed:
     self.lanes[self.opposite_lane(fastest_lane.name)].fastest_count = 0  # reset slowest lane (opposite, never middle)
 
     _f_time_x = [1, 4, 12]  # change the minimum time for fastest based on how many tracks are in fastest lane
-    _f_time_y = [2, 1, 0.5]  # todo: probably need to tune this
+    _f_time_y = [2, 1, 0.5]  # this is multiplied by base fastest time todo: probably need to tune this
     min_fastest_time = np.interp(len(fastest_lane.tracks), _f_time_x, _f_time_y)  # get multiplier
     min_fastest_time = int(min_fastest_time * self._min_fastest_time)  # now get final min_fastest_time
 
@@ -191,7 +198,7 @@ class LaneSpeed:
     # self.get_lane(fastest_name).reset_fastest()  # todo: don't reset since we want to continue showing alert for as long as a lane is fastest
 
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
-    return fastest_lane.name
+    self.fastest_lane = fastest_lane.name
 
   def send_status(self):
     new_fastest = self.fastest_lane in ['left', 'right'] and self.last_fastest_lane not in ['left', 'right']
@@ -200,7 +207,7 @@ class LaneSpeed:
     ls_send.laneSpeed.new = new_fastest  # only send audible alert once when a lane becomes fastest, then continue to show silent alert
     self.pm.send('laneSpeed', ls_send)
 
-    if self.fastest_lane != self.last_fastest_lane and self.fastest_lane == 'none':  # todo: is this right?
+    if self.fastest_lane != self.last_fastest_lane and self.fastest_lane == 'none':  # if lane stops being fastest
       self.last_alert_end_time = sec_since_boot()
     elif self.last_fastest_lane in ['left', 'right'] and self.fastest_lane == self.opposite_lane(self.last_fastest_lane):  # or fastest switches
       self.last_alert_end_time = sec_since_boot()
@@ -217,13 +224,6 @@ class LaneSpeed:
         self.lanes[lane].oncoming_tracks = []
       if reset_fastest:
         self.lanes[lane].fastest_count = 0
-
-  def debug(self):
-    for lane in self.lanes.values():
-      print('Lane: {}'.format(lane.name))
-      for track in lane.tracks:
-        print(track.vRel, track.yRel, track.dRel)
-      print()
 
   def log_data(self):
     live_tracks = [{'vRel': trk.vRel, 'yRel': trk.yRel, 'dRel': trk.dRel} for trk in self.live_tracks]
