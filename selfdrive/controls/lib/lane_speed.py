@@ -100,7 +100,6 @@ class LaneSpeed:
         print('lane_speed lagging by: {} ms'.format(round(-t_sleep * 1000, 3)))
 
   def update(self):
-    # self.log_data()
     self.reset(reset_tracks=True, reset_avg_speed=True)
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
@@ -228,10 +227,10 @@ class LaneSpeed:
       if reset_fastest:
         self.lanes[lane].fastest_count = 0
 
-  def log_data(self):
-    live_tracks = [{'vRel': trk.vRel, 'yRel': trk.yRel, 'dRel': trk.dRel} for trk in self.live_tracks]
-    with open('/data/lane_speed', 'a') as f:
-      f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
+  # def log_data(self):
+  #   live_tracks = [{'vRel': trk.vRel, 'yRel': trk.yRel, 'dRel': trk.dRel} for trk in self.live_tracks]
+  #   with open('/data/lane_speed', 'a') as f:
+  #     f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
 
 
 def main():
