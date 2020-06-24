@@ -145,12 +145,9 @@ class LaneSpeed:
           self.lanes[lane_name].tracks.append(track)
           break  # skip to next track
 
-  def lanes_with_avg_speeds(self, names=False):
-    """Returns a list of lane objects where avg_speed not None, returns names instead if names is True"""
-    lanes = [self.lanes[l] for l in self.lanes if self.lanes[l].avg_speed is not None]
-    if names:
-      return [l.name for l in lanes]
-    return lanes
+  def lanes_with_avg_speeds(self):
+    """Returns a dict of lane objects where avg_speed not None"""
+    return {lane: self.lanes[lane] for lane in self.lanes if self.lanes[lane].avg_speed is not None}
 
   def get_fastest_lane(self):
     self.fastest_lane = 'none'
@@ -161,12 +158,13 @@ class LaneSpeed:
       if len(track_speeds):  # filters out oncoming tracks and very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
 
-    if 'middle' not in self.lanes_with_avg_speeds(names=True) or len(self.lanes_with_avg_speeds(names=True)) < 2:
+    lanes_with_avg_speeds = self.lanes_with_avg_speeds()
+    if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
       # if no tracks in middle lane or no secondary lane, we have nothing to compare
       self.reset(reset_fastest=True)  # reset fastest, sanity
       return
 
-    fastest_lane = self.lanes[max(self.lanes, key=lambda x: self.lanes[x].avg_speed)]
+    fastest_lane = self.lanes[max(lanes_with_avg_speeds, key=lambda x: self.lanes[x].avg_speed)]
     if fastest_lane.name == 'middle':  # already in fastest lane
       self.reset(reset_fastest=True)
       return
