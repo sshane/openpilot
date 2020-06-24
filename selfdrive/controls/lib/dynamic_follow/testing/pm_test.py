@@ -3,6 +3,7 @@ from cereal.messaging import PubMaster
 
 pm = PubMaster(['laneSpeed'])
 
+input('press enter')
 msg = messaging.new_message('laneSpeed')
 msg.laneSpeed.leftAvgSpeed = 42.4
 msg.laneSpeed.middleAvgSpeed = 38.4
