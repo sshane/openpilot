@@ -189,9 +189,6 @@ class LaneSpeed:
     if sec_since_boot() - self.last_alert_end_time < self._extra_wait_time:
       return  # don't reset fastest lane count or show alert until last alert has gone
 
-    # reset once we show alert so we don't continually send same alert
-    # self.get_lane(fastest_name).reset_fastest()  # todo: don't reset since we want to continue showing alert for as long as a lane is fastest
-
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
     self.fastest_lane = fastest_lane.name
 
