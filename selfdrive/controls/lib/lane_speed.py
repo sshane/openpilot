@@ -80,8 +80,6 @@ class LaneSpeed:
           self.fastest_lane = 'none'
           self.send_status()
         time.sleep(10)
-        print('LANE_SPEED: SLEEPING')
-      print('LANE_SPEED: ACTIVATE')
 
       t_start = sec_since_boot()
       self.sm.update(0)
