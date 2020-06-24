@@ -235,14 +235,6 @@ class LaneSpeed:
   #     f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
 
 
-def main():
-  lane_speed = LaneSpeed()
-  lane_speed.start()
-
-
-if __name__ == '__main__':
-  main()
-
 class Track:
   def __init__(self, vRel, yRel, dRel):
     self.vRel = vRel
@@ -250,6 +242,14 @@ class Track:
     self.dRel = dRel
 
 TEMP_LIVE_TRACKS = [Track(10, 0, 20), Track(10, 0, 20), Track(20, 4, 20), Track(25, 4, 20)]
+
+def main():
+  lane_speed = LaneSpeed()
+  lane_speed.start()
+
+
+if __name__ == '__main__':
+  main()
 
 
 # DEBUG = False
