@@ -27,6 +27,15 @@ y_dist_roadtrip = [1.3978, 1.4132, 1.4318, 1.4536, 1.485, 1.5229, 1.5819, 1.6203
 plt.plot(np.array(x_vel_roadtrip), y_dist_roadtrip, label='roadtrip')
 
 
+y_dist_roadtrip_new = []
+for x_vel, y_dist in zip(x_vel_roadtrip, y_dist_roadtrip):
+  x = [16, 22, 30, 45, 60, 90]
+  y = [1., 1.015, 1.046666, 1.075, 1.045, 1.08]
+  y_dist *= ((np.interp(x_vel, x, y) - 1) / 2) + 1
+  y_dist_roadtrip_new.append(y_dist)
+
+plt.plot(np.array(x_vel_roadtrip), np.round(y_dist_roadtrip_new, 3), label='new roadtrip')
+
 
 
 # plt.plot([min(x), max(x)], [0, 0], 'r--')
