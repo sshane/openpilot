@@ -94,6 +94,9 @@ class LaneSpeed:
       self.update_lane_bounds()
       self.update()
       self.send_status()
+      print('left: {}'.format([trk.vRel for trk in self.lanes['left'].tracks]))
+      print('middle: {}'.format([trk.vRel for trk in self.lanes['middle'].tracks]))
+      print('right: {}'.format([trk.vRel for trk in self.lanes['right'].tracks]))
       print(self.fastest_lane)
 
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
