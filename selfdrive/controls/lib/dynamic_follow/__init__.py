@@ -108,13 +108,13 @@ class DynamicFollow:
                                   self.lead_data.a_lead,
                                   self.lead_data.v_lead,
                                   self.lead_data.x_lead,
-                                  self.sm_collector['laneSpeed'].leftLaneSpeeds,
-                                  self.sm_collector['laneSpeed'].middleLaneSpeeds,
-                                  self.sm_collector['laneSpeed'].rightLaneSpeeds,
+                                  list(self.sm_collector['laneSpeed'].leftLaneSpeeds),
+                                  list(self.sm_collector['laneSpeed'].middleLaneSpeeds),
+                                  list(self.sm_collector['laneSpeed'].rightLaneSpeeds),
 
-                                  self.sm_collector['laneSpeed'].leftLaneDistances,
-                                  self.sm_collector['laneSpeed'].middleLaneDistances,
-                                  self.sm_collector['laneSpeed'].rightLaneDistances,
+                                  list(self.sm_collector['laneSpeed'].leftLaneDistances),
+                                  list(self.sm_collector['laneSpeed'].middleLaneDistances),
+                                  list(self.sm_collector['laneSpeed'].rightLaneDistances),
                                   self.user_profile,
                                   sec_since_boot()])
 
