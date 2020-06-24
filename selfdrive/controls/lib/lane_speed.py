@@ -147,7 +147,7 @@ class LaneSpeed:
 
   def lanes_with_avg_speeds(self, names=False):
     """Returns a list of lane objects where avg_speed not None, returns names instead if names is True"""
-    lanes = [l for l in self.lanes if l.avg_speed is not None]
+    lanes = [self.lanes[l] for l in self.lanes if self.lanes[l].avg_speed is not None]
     if names:
       return [l.name for l in lanes]
     return lanes
