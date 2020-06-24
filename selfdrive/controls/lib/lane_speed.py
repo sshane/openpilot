@@ -50,7 +50,6 @@ class LaneSpeed:
     # self.op_params = opParams()
     self.use_lane_speed = True  # self.op_params.get('use_lane_speed', default=True)
 
-    self._lane_width = 3.7  # in meters todo: update this based on what openpilot sees/current lane width
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self._min_enable_speed = 0  # 35 * CV.MPH_TO_MS
@@ -64,10 +63,11 @@ class LaneSpeed:
     self._setup()
 
   def _setup(self):
+    self.lane_width = 3.7  # in meters, just a starting point
     self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
-    self.lane_positions = [self._lane_width, 0, -self._lane_width]  # lateral position in meters from center of car to center of lane
+    self.lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
     self.lane_names = ['left', 'middle', 'right']
     self.lanes = {name: Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)}
 
@@ -83,9 +83,13 @@ class LaneSpeed:
       self.sm.update(0)
 
       self.v_ego = self.sm['carState'].vEgo
-      # self.lead = lead  # todo: do we need this?
       self.steer_angle = self.sm['carState'].steeringAngle
       self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
+
+      lane_width = self.sm['pathPlan'].laneWidth
+      if isinstance(lane_width, float) and lane_width > 1:
+        self.lane_width = min(lane_width, 4)  # LanePlanner uses 4 as max width for dPoly calculation
+
       self.live_tracks = self.sm['liveTracks']
       self.update()
       self.send_status()
