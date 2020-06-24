@@ -243,7 +243,7 @@ class Track:
     self.yRel = yRel
     self.dRel = dRel
 
-TEMP_LIVE_TRACKS = [Track(10, 0, 20), Track(10, 0, 20), Track(20, 4, 20), Track(25, 4, 20)]
+TEMP_LIVE_TRACKS = [Track(10, 4, 20), Track(10, 4, 20), Track(20, 0, 20), Track(25, 0, 20)]
 
 def main():
   lane_speed = LaneSpeed()
