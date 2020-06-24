@@ -32,6 +32,7 @@ class Lane:
   def __init__(self, name, pos):
     self.name = name
     self.pos = pos
+    self.bounds = []
     self.tracks = []
     self.oncoming_tracks = []
 
@@ -67,13 +68,9 @@ class LaneSpeed:
     self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
-    self.lane_positions = [self.lane_width, 0, -self.lane_width]  # lateral position in meters from center of car to center of lane
+    self.lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
     self.lane_names = ['left', 'middle', 'right']
-    self.lanes = {name: Lane(name, pos) for name, pos in zip(self.lane_names, self.lane_positions)}
-
-    self._lane_bounds = {'left': np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2]),
-                         'middle': np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]),
-                         'right': np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])}
+    self.lanes = {name: Lane(name, self.lane_positions[name]) for name in self.lane_names}
 
     self.last_alert_end_time = 0
 
@@ -85,12 +82,9 @@ class LaneSpeed:
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
       self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
-
-      lane_width = self.sm['pathPlan'].laneWidth
-      if isinstance(lane_width, float) and lane_width > 1:
-        self.lane_width = min(lane_width, 4)  # LanePlanner uses 4 as max width for dPoly calculation
-
       self.live_tracks = self.sm['liveTracks']
+
+      self.update_lane_bounds()
       self.update()
       self.send_status()
 
@@ -116,6 +110,19 @@ class LaneSpeed:
     else:  # should we reset state when not enabled?
       self.reset(reset_fastest=True)
 
+  def update_lane_bounds(self):
+    lane_width = self.sm['pathPlan'].laneWidth
+    if isinstance(lane_width, float) and lane_width > 1:
+      self.lane_width = min(lane_width, 4)  # LanePlanner uses 4 as max width for dPoly calculation
+
+    self.lanes['left'].pos = self.lane_width  # update with new lane center positions
+    self.lanes['right'].pos = -self.lane_width
+
+    # and now update bounds
+    self.lanes['left'].bounds = np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2])
+    self.lanes['middle'].bounds = np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2])
+    self.lanes['right'].bounds = np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])
+
   # def filter_tracks(self):  # fixme: make cluster() return indexes of live_tracks instead
   #   print(type(self.live_tracks))
   #   clustered = cluster(self.live_tracks, 0.048)  # clusters tracks based on dRel
@@ -130,8 +137,8 @@ class LaneSpeed:
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
     for track, y_offset in zip(self.live_tracks, y_offsets):
-      for lane_name, lane_bounds in self._lane_bounds.items():
-        lane_bounds = lane_bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
+      for lane_name in self.lanes:
+        lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
           self.lanes[lane_name].tracks.append(track)
           break  # skip to next track
