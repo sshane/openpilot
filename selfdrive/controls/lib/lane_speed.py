@@ -75,12 +75,14 @@ class LaneSpeed:
 
   def start(self):
     while True:  # this loop can take up 0.049_ seconds without lagging
+      while not self.op_params.get('lane_speed_alerts', default=True):  # check every 10 seconds if disabled, no need to run at full rate
+        if self.fastest_lane != 'none':
+          self.fastest_lane = 'none'
+          self.send_status()
+        time.sleep(10)
+
       t_start = sec_since_boot()
       self.sm.update(0)
-
-      _use_lane_speed = self.op_params.get('lane_speed_alerts', default=True)
-      if not _use_lane_speed:  # check every 10 seconds if disabled, no need to run at full rate
-        time.sleep(10)
 
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
@@ -94,7 +96,7 @@ class LaneSpeed:
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
         time.sleep(t_sleep)
-      elif _use_lane_speed:  # don't sleep if lagging. don't print lagging if sleeping
+      else:  # don't sleep if lagging
         print('lane_speed lagging by: {} ms'.format(round(-t_sleep * 1000, 3)))
 
   def update(self):
