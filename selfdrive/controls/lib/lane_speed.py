@@ -80,14 +80,16 @@ class LaneSpeed:
           self.fastest_lane = 'none'
           self.send_status()
         time.sleep(10)
+      print('main loop')
+      input('>> ')
 
       t_start = sec_since_boot()
       self.sm.update(0)
 
-      self.v_ego = self.sm['carState'].vEgo
-      self.steer_angle = self.sm['carState'].steeringAngle
-      self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
-      self.live_tracks = self.sm['liveTracks']
+      self.v_ego = 8  # self.sm['carState'].vEgo
+      self.steer_angle = 0  # self.sm['carState'].steeringAngle
+      self.d_poly = [-2.2093094e-05, 0.0016798804, 0.14078693, 0.24536133]  # np.array(list(self.sm['pathPlan'].dPoly))
+      self.live_tracks = TEMP_LIVE_TRACKS  # self.sm['liveTracks']
 
       self.update_lane_bounds()
       self.update()
@@ -241,6 +243,13 @@ def main():
 if __name__ == '__main__':
   main()
 
+class Track:
+  def __init__(self, vRel, yRel, dRel):
+    self.vRel = vRel
+    self.yRel = yRel
+    self.dRel = dRel
+
+TEMP_LIVE_TRACKS = [Track(10, 0, 20), Track(10, 0, 20), Track(20, 4, 20), Track(25, 4, 20)]
 
 
 # DEBUG = False
