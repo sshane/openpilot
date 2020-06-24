@@ -53,7 +53,7 @@ class LaneSpeed:
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self._min_enable_speed = 0  # 35 * CV.MPH_TO_MS
-    self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
+    self._min_fastest_time = 0.01 / LANE_SPEED_RATE  # 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
     self._max_steer_angle = 100  # max supported steering angle
     # self._alert_length = 10  # in seconds
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
@@ -94,6 +94,7 @@ class LaneSpeed:
       self.update_lane_bounds()
       self.update()
       self.send_status()
+      print(self.fastest_lane)
 
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
@@ -177,7 +178,7 @@ class LaneSpeed:
     self.lanes[self.opposite_lane(fastest_lane.name)].fastest_count = 0  # reset slowest lane (opposite, never middle)
 
     _f_time_x = [1, 4, 12]  # change the minimum time for fastest based on how many tracks are in fastest lane
-    _f_time_y = [2, 1, 0.5]  # this is multiplied by base fastest time todo: probably need to tune this
+    _f_time_y = [1.5, 1, 0.5]  # this is multiplied by base fastest time todo: probably need to tune this
     min_fastest_time = np.interp(len(fastest_lane.tracks), _f_time_x, _f_time_y)  # get multiplier
     min_fastest_time = int(min_fastest_time * self._min_fastest_time)  # now get final min_fastest_time
 
