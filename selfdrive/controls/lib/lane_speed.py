@@ -53,7 +53,7 @@ class LaneSpeed:
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
     self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
     self._min_enable_speed = 0  # 35 * CV.MPH_TO_MS
-    self._min_fastest_time = 0.01 / LANE_SPEED_RATE  # 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
+    self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
     self._max_steer_angle = 100  # max supported steering angle
     # self._alert_length = 10  # in seconds
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
@@ -80,24 +80,18 @@ class LaneSpeed:
           self.fastest_lane = 'none'
           self.send_status()
         time.sleep(10)
-      print('main loop')
-      input('>> ')
 
       t_start = sec_since_boot()
       self.sm.update(0)
 
-      self.v_ego = 8  # self.sm['carState'].vEgo
-      self.steer_angle = 0  # self.sm['carState'].steeringAngle
-      self.d_poly = [-2.2093094e-05, 0.0016798804, 0.14078693, 0.24536133]  # np.array(list(self.sm['pathPlan'].dPoly))
-      self.live_tracks = TEMP_LIVE_TRACKS  # self.sm['liveTracks']
+      self.v_ego = self.sm['carState'].vEgo
+      self.steer_angle = self.sm['carState'].steeringAngle
+      self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
+      self.live_tracks = self.sm['liveTracks']
 
       self.update_lane_bounds()
       self.update()
       self.send_status()
-      print('left: {}'.format([trk.vRel for trk in self.lanes['left'].tracks]))
-      print('middle: {}'.format([trk.vRel for trk in self.lanes['middle'].tracks]))
-      print('right: {}'.format([trk.vRel for trk in self.lanes['right'].tracks]))
-      print(self.fastest_lane)
 
       t_sleep = LANE_SPEED_RATE - (sec_since_boot() - t_start)
       if t_sleep > 0:
@@ -237,13 +231,13 @@ class LaneSpeed:
   #     f.write('{}\n'.format({'v_ego': self.v_ego, 'd_poly': self.d_poly, 'steer_angle': self.steer_angle, 'live_tracks': live_tracks}))
 
 
-class Track:
-  def __init__(self, vRel, yRel, dRel):
-    self.vRel = vRel
-    self.yRel = yRel
-    self.dRel = dRel
-
-TEMP_LIVE_TRACKS = [Track(10, 4, 20), Track(10, 4, 20), Track(20, 0, 20), Track(25, 0, 20)]
+# class Track:
+#   def __init__(self, vRel, yRel, dRel):
+#     self.vRel = vRel
+#     self.yRel = yRel
+#     self.dRel = dRel
+#
+# TEMP_LIVE_TRACKS = [Track(10, 4, 20), Track(10, 4, 20), Track(20, 0, 20), Track(25, 0, 20)]
 
 def main():
   lane_speed = LaneSpeed()
