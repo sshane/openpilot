@@ -207,6 +207,7 @@ class LaneSpeed:
     self.last_fastest_lane = self.fastest_lane
 
   def opposite_lane(self, name):
+    """Returns name of opposite lane name"""
     return {'left': 'right', 'right': 'left'}[name]
 
   def reset(self, reset_tracks=False, reset_fastest=False):
