@@ -75,12 +75,6 @@ class LaneSpeed:
 
   def start(self):
     while True:  # this loop can take up 0.049_ seconds without lagging
-      while not self.op_params.get('lane_speed_alerts', default=True):  # check every 10 seconds if disabled, no need to run at full rate
-        if self.fastest_lane != 'none':
-          self.fastest_lane = 'none'
-          self.send_status()
-        time.sleep(10)
-
       t_start = sec_since_boot()
       self.sm.update(0)
 
@@ -149,6 +143,9 @@ class LaneSpeed:
 
   def get_fastest_lane(self):
     self.fastest_lane = 'none'
+    if not self.op_params.get('lane_speed_alerts', default=True):
+      return
+
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
