@@ -700,6 +700,7 @@ static void ui_draw_vision_footer(UIState *s) {
 
   ui_draw_vision_face(s);
   ui_draw_df_button(s);
+  ui_draw_ls_button(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
