@@ -118,7 +118,10 @@ static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
     int padding = 40;
     int btn_x_1 = 1660 - 200;
     int btn_x_2 = 1660 - 50;
+    printf("LS BUTTON touch_x: %d", touch_x);
+    printf("LS BUTTON touch_y: %d", touch_y);
     if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
+      printf("LS BUTTON: touched!");
       s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping ls button
       s->scene.lsButtonStatus++;
       if (s->scene.lsButtonStatus > 2) {
