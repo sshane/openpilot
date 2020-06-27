@@ -635,7 +635,7 @@ static void ui_draw_driver_view(UIState *s) {
 static void ui_draw_ls_button(UIState *s) {
   int btn_w = 150;
   int btn_h = 150;
-  int btn_x = 1920 - btn_w;
+  int btn_x = 1920 - btn_w - 200;  // 150 + 50 padding
   int btn_y = 1080 - btn_h - 50;
 
   nvgBeginPath(s->vg);
