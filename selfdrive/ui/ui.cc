@@ -101,6 +101,34 @@ static void navigate_to_home(UIState *s) {
 #endif
 }
 
+static void send_ls(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  cereal::Event::Builder event = msg.initRoot<cereal::Event>();
+  auto lsStatus = event.initLaneSpeedButton();
+  lsStatus.setStatus(status);
+
+  auto words = capnp::messageToFlatArray(msg);
+  auto bytes = words.asBytes();
+  s->lanespeedbutton_sock->send((char*)bytes.begin(), bytes.size());
+}
+
+static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
+  //lsButton manager
+  if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
+    int padding = 40;
+    if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
+      s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping ls button
+      s->scene.lsButtonStatus++;
+      if (s->scene.lsButtonStatus > 2) {
+        s->scene.lsButtonStatus = 0;
+      }
+      send_ls(s, s->scene.lsButtonStatus);
+      return true;
+    }
+  }
+  return false;
+}
+
 static void send_df(UIState *s, int status) {
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
@@ -115,7 +143,7 @@ static void send_df(UIState *s, int status) {
 static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
   //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
   if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
-  int padding = 40;
+    int padding = 40;
     if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
       s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping df button
       s->scene.dfButtonStatus++;
@@ -257,6 +285,7 @@ static void ui_init(UIState *s) {
   s->dmonitoring_sock = SubSocket::create(s->ctx, "dMonitoringState");
   s->offroad_sock = PubSocket::create(s->ctx, "offroadLayout");
   s->dynamicfollowbutton_sock = PubSocket::create(s->ctx, "dynamicFollowButton");
+  s->lanespeedbutton_sock = PubSocket::create(s->ctx, "laneSpeedButton");
 
   assert(s->model_sock != NULL);
   assert(s->controlsstate_sock != NULL);
@@ -270,6 +299,7 @@ static void ui_init(UIState *s) {
   assert(s->dmonitoring_sock != NULL);
   assert(s->offroad_sock != NULL);
   assert(s->dynamicfollowbutton_sock != NULL);
+  assert(s->lanespeedbutton_sock != NULL);
 
   s->poller = Poller::create({
                               s->model_sock,
@@ -331,6 +361,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
       .dfButtonStatus = 0,
+      .lsButtonStatus = 0,
   };
 
   s->rgb_width = back_bufs.width;
@@ -977,7 +1008,7 @@ int main(int argc, char* argv[]) {
     if (touched == 1) {
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
-      if (!handle_df_touch(s, touch_x, touch_y)){  // disables sidebar from popping out when tapping df button
+      if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y)){  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
       }
     }

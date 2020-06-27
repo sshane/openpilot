@@ -147,6 +147,7 @@ typedef struct UIScene {
 
   float awareness_status;
   int dfButtonStatus;
+  int lsButtonStatus;
 
   // Used to show gps planner status
   bool gps_planner_active;
@@ -218,6 +219,7 @@ typedef struct UIState {
   SubSocket *dmonitoring_sock;
   PubSocket *offroad_sock;
   PubSocket *dynamicfollowbutton_sock;
+  PubSocket *lanespeedbutton_sock;
 
   Poller * poller;
   Poller * ublox_poller;

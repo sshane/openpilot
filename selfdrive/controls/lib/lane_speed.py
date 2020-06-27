@@ -28,6 +28,12 @@ def cluster(data, maxgap):
   return groups
 
 
+class LaneSpeedStatus:
+  off = 0
+  silent = 1
+  audible = 2
+
+
 class Lane:
   def __init__(self, name, pos):
     self.name = name

@@ -1991,6 +1991,10 @@ struct LaneSpeed {
   rightLaneDistances @7 :List(Float32);
 }
 
+struct LaneSpeedButton {
+  status @0 :UInt16;
+}
+
 struct Event {
   # in nanoseconds?
   logMonoTime @0 :UInt64;
@@ -2073,5 +2077,6 @@ struct Event {
     dynamicFollowData @74 :DynamicFollowData;
     dynamicFollowButton @75 :DynamicFollowButton;
     laneSpeed @76 :LaneSpeed;
+    laneSpeedButton @77 :LaneSpeedButton;
   }
 }
