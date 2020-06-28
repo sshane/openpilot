@@ -28,11 +28,12 @@ def cluster(data, maxgap):
   return groups
 
 
-class LaneSpeedStatus:
+class LaneSpeedState:
   off = 0
   silent = 1
   audible = 2
-
+  to_state = {off: 'off', silent: 'silent', audible: 'audible'}
+  to_idx = {v: k for k, v in to_state.items()}
 
 class Lane:
   def __init__(self, name, pos):
@@ -69,8 +70,17 @@ class LaneSpeed:
     self._setup()
 
   def _setup(self):
+    self.ls_state = self.op_params.get('lane_speed_alerts', 'audible').strip().lower()
+    if not isinstance(self.ls_state, str) or self.ls_state not in LaneSpeedState.to_idx:
+      self.ls_state = LaneSpeedState.audible
+      self.op_params.put('lane_speed_alerts', LaneSpeedState.to_state[self.ls_state])
+    else:
+      self.ls_state = LaneSpeedState.to_idx[self.ls_state]
+    self.last_ls_state = self.ls_state
+    self.offset = self.ls_state
+
     self.lane_width = 3.7  # in meters, just a starting point
-    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan'])
+    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan', 'laneSpeedButton'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
     lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
@@ -101,6 +111,7 @@ class LaneSpeed:
 
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
+    self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]) and abs(self.steer_angle) < self._max_steer_angle:
@@ -149,7 +160,7 @@ class LaneSpeed:
 
   def get_fastest_lane(self):
     self.fastest_lane = 'none'
-    if not self.op_params.get('lane_speed_alerts', default=True):
+    if self.ls_state == LaneSpeedState.off:
       return
 
     for lane_name in self.lanes:
@@ -192,8 +203,10 @@ class LaneSpeed:
 
   def send_status(self):
     new_fastest = self.fastest_lane in ['left', 'right'] and self.last_fastest_lane not in ['left', 'right']
-    ls_send = messaging.new_message('laneSpeed')
+    if self.ls_state == LaneSpeedState.silent:
+      new_fastest = False  # be silent
 
+    ls_send = messaging.new_message('laneSpeed')
     ls_send.laneSpeed.leftLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['left'].tracks]
     ls_send.laneSpeed.middleLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['middle'].tracks]
     ls_send.laneSpeed.rightLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['right'].tracks]
@@ -201,8 +214,13 @@ class LaneSpeed:
     ls_send.laneSpeed.middleLaneDistances = [trk.dRel for trk in self.lanes['middle'].tracks]
     ls_send.laneSpeed.rightLaneDistances = [trk.dRel for trk in self.lanes['right'].tracks]
 
-    ls_send.laneSpeed.status = self.fastest_lane
+    ls_send.laneSpeed.fastestLane = self.fastest_lane
     ls_send.laneSpeed.new = new_fastest  # only send audible alert once when a lane becomes fastest, then continue to show silent alert
+
+    if self.last_ls_state != self.ls_state:  # show alert if button tapped and write to opParams
+      self.op_params.put('lane_speed_alerts', LaneSpeedState.to_state[self.ls_state])
+      ls_send.laneSpeed.state = LaneSpeedState.to_state[self.ls_state]
+
     self.pm.send('laneSpeed', ls_send)
 
     if self.fastest_lane != self.last_fastest_lane and self.fastest_lane == 'none':  # if lane stops being fastest
@@ -211,6 +229,7 @@ class LaneSpeed:
       self.last_alert_end_time = sec_since_boot()
 
     self.last_fastest_lane = self.fastest_lane
+    self.last_ls_state = self.ls_state
 
   def opposite_lane(self, name):
     """Returns name of opposite lane name"""

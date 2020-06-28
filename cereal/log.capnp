@@ -1979,16 +1979,17 @@ struct DynamicFollowButton {
 }
 
 struct LaneSpeed {
-  status @0 :Text;
-  new @1 :Bool;
+  fastestLane @0 :Text;
+  state @1 :Text;
+  new @2 :Bool;
 
-  leftLaneSpeeds @2 :List(Float32);
-  middleLaneSpeeds @3 :List(Float32);
-  rightLaneSpeeds @4 :List(Float32);
+  leftLaneSpeeds @3 :List(Float32);
+  middleLaneSpeeds @4 :List(Float32);
+  rightLaneSpeeds @5 :List(Float32);
 
-  leftLaneDistances @5 :List(Float32);
-  middleLaneDistances @6 :List(Float32);
-  rightLaneDistances @7 :List(Float32);
+  leftLaneDistances @6 :List(Float32);
+  middleLaneDistances @7 :List(Float32);
+  rightLaneDistances @8 :List(Float32);
 }
 
 struct LaneSpeedButton {

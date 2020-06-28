@@ -198,6 +198,12 @@ ALERTS = [
         AlertStatus.normal, AlertSize.mid,
         Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
 
+  Alert("lsButtonAlert",
+        "Lane Speed set to: ",
+        "",
+        AlertStatus.normal, AlertSize.mid,
+        Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+
   Alert("dfButtonAlertSilent",
         "Dynamic follow: ",
         "",

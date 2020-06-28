@@ -156,7 +156,11 @@ def state_transition(frame, CS, CP, state, events, soft_disable_timer, v_cruise_
   # entrance in SOFT_DISABLING state
   soft_disable_timer = max(0, soft_disable_timer - 1)
 
-  faster_lane = sm_smiskol['laneSpeed'].status
+  ls_state = sm_smiskol['laneSpeed'].state
+  if ls_state != '':
+    AM.add(frame, 'lsButtonAlert', enabled, extra_text_1=ls_state)
+
+  faster_lane = sm_smiskol['laneSpeed'].fastestLane
   ls_alert_shown = False
   if faster_lane in ['left', 'right']:
     ls_alert = 'laneSpeedAlert'
