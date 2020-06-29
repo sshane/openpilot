@@ -81,6 +81,7 @@ offroadLayout: [8074, false, 0.]
 dynamicFollowData: [8075, false, 20.]
 dynamicFollowButton: [8076, false, 0.]
 laneSpeed: [8077, false, 0.]
+laneSpeedButton: [8078, false, 0.]
 
 testModel: [8040, false, 0.]
 testLiveLocation: [8045, false, 0.]
