@@ -284,9 +284,9 @@ class DynamicFollow:
     self.last_effective_profile = df_profile
 
     if df_profile == self.df_profiles.roadtrip:
-      y_dist = [1.3978, 1.4132, 1.4318, 1.4536, 1.4862, 1.5321, 1.6058, 1.6589, 1.7798, 1.8748, 1.8953, 1.9127, 1.9276]  # TRs
-      profile_mod_pos = [0.92, 0.48, 0.1, 0.03]
-      profile_mod_neg = [1.1, 1.4, 2.2, 2.6]
+      y_dist = [1.5486, 1.556, 1.5655, 1.5773, 1.5964, 1.6246, 1.6715, 1.7057, 1.7859, 1.8542, 1.8697, 1.8833, 1.8961]  # TRs
+      profile_mod_pos = [0.5, 0.35, 0.1, 0.03]
+      profile_mod_neg = [1.3, 1.4, 1.8, 2.0]
     elif df_profile == self.df_profiles.traffic:  # for in congested traffic
       x_vel = [0.0, 1.892, 3.7432, 5.8632, 8.0727, 10.7301, 14.343, 17.6275, 22.4049, 28.6752, 34.8858, 40.35]
       # y_dist = [1.3781, 1.3791, 1.3802, 1.3825, 1.3984, 1.4249, 1.4194, 1.3162, 1.1916, 1.0145, 0.9855, 0.9562]  # original
