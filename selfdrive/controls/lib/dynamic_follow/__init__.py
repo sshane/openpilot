@@ -136,8 +136,8 @@ class DynamicFollow:
     cost = interp(self.TR, TRs, costs)
 
     change_time = sec_since_boot() - self.profile_change_time
-    change_time_x = [0, 0.75, 4]  # for three seconds after effective profile has changed
-    change_mod_y = [1, 10, 1]  # multiply cost by multiplier to quickly change distance
+    change_time_x = [0, 0.5, 4]  # for three seconds after effective profile has changed
+    change_mod_y = [2, 10, 1]  # multiply cost by multiplier to quickly change distance
     if change_time < change_time_x[-1]:  # if profile changed in last 3 seconds
       cost *= interp(change_time, change_time_x, change_mod_y)
 

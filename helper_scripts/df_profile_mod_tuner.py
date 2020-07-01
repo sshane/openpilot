@@ -16,12 +16,12 @@ for v_ego in p_mod_x:
   # profile to tune mods for
   x_vel_tuning = [0.0, 1.8627, 3.7253, 5.588, 7.4507, 9.3133, 11.5598, 13.645, 22.352, 31.2928, 33.528, 35.7632, 40.2336]
   x_vel_tuning = to_mph(x_vel_tuning)
-  y_dist_tuning = [1.3978, 1.4132, 1.4318, 1.4536, 1.4862, 1.5321, 1.6058, 1.6589, 1.7798, 1.8748, 1.8953, 1.9127, 1.9276]
+  y_dist_tuning = [1.5486, 1.556, 1.5655, 1.5773, 1.5964, 1.6246, 1.6715, 1.7057, 1.7859, 1.8542, 1.8697, 1.8833, 1.8961]
 
   TR_tuning = interp(v_ego, x_vel_tuning, y_dist_tuning)
 
-  traffic_mod_pos = [0.92, 0.48, 0.1, 0.03]
-  traffic_mod_neg = [1.1, 1.4, 2.2, 2.6]
+  traffic_mod_pos = [0.5, 0.35, 0.1, 0.03]
+  traffic_mod_neg = [1.3, 1.4, 1.8, 2.0]
 
   traffic_mod_pos = interp(v_ego, p_mod_x, traffic_mod_pos)
   traffic_mod_neg = interp(v_ego, p_mod_x, traffic_mod_neg)
