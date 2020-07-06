@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <assert.h>
+#include <time.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <capnp/serialize.h>
@@ -15,6 +16,7 @@
 #include "common/visionimg.h"
 #include "common/params.h"
 #include "cereal/gen/cpp/log.capnp.h"  // is this needed?
+#include "dashcam.h"
 
 static int last_brightness = -1;
 static void set_brightness(UIState *s, int brightness) {
@@ -362,6 +364,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
       .front_box_height = ui_info.front_box_height,
       .world_objects_visible = false,  // Invisible until we receive a calibration message.
       .gps_planner_active = false,
+      .recording = false,
       .dfButtonStatus = 0,
       .lsButtonStatus = 0,
   };
@@ -1037,17 +1040,23 @@ int main(int argc, char* argv[]) {
       }
     }
 
+    //awake on any touch
+    int touch_x = -1, touch_y = -1;
+    int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
+    if (touched == 1) {
+      set_awake(s, true);
+    }
+
     // manage wakefulness
     if (s->awake_timeout > 0) {
       s->awake_timeout--;
     } else {
       set_awake(s, false);
     }
-    
+
     //dashcam process manage
     if (s->awake && s->vision_connected && s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
       //dashcam button
-      ui_draw_dashcam_button(s);
       //ui_draw_dashcam_button(s);
       //dashcam button clicked
       if (s->active_app == cereal_UiLayoutState_App_home && s->status != STATUS_STOPPED) {
@@ -1059,8 +1068,8 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    
-    
+
+
     // manage hardware disconnect
     if (s->hardware_timeout > 0) {
       s->hardware_timeout--;
@@ -1070,6 +1079,7 @@ int main(int argc, char* argv[]) {
 
     // Don't waste resources on drawing in case screen is off
     if (s->awake) {
+      dashcam(s, touch_x, touch_y);
       ui_draw(s);
       glFinish();
       should_swap = true;

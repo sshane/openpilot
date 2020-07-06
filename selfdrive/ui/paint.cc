@@ -72,7 +72,7 @@ static void draw_chevron(UIState *s, float x_in, float y_in, float sz,
   sz /= (x_in / 3 + 30);
   if (sz > 30) sz = 30;
   if (sz < 15) sz = 15;
-  
+
   // glow
   float g_xo = sz/5;
   float g_yo = sz/10;
@@ -382,7 +382,7 @@ static void ui_draw_world(UIState *s) {
 
   nvgSave(s->vg);
   nvgScissor(s->vg, ui_viz_rx, box_y, ui_viz_rw, box_h);
-  
+
   nvgTranslate(s->vg, ui_viz_rx+ui_viz_ro, box_y + (box_h-inner_height)/2.0);
   nvgScale(s->vg, (float)viz_w / s->fb_w, (float)inner_height / s->fb_h);
   nvgTranslate(s->vg, 240.0f, 0.0);
@@ -674,6 +674,31 @@ static void ui_draw_df_button(UIState *s) {
   nvgText(s->vg, btn_x - 34, btn_y + 50 + 15, "profile", NULL);
 }
 
+static void ui_draw_dashcam_button(UIState *s) {
+  int btn_w = 150;
+  int btn_h = 150;
+  int btn_x = 1920 - btn_w;
+  int btn_y = 1080 - btn_h - 50;
+  nvgBeginPath(s->vg);
+  nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
+  nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
+  nvgStrokeWidth(s->vg, 6);
+  nvgStroke(s->vg);
+
+  nvgFontSize(s->vg, 70);
+
+  if (s->scene.recording) {
+    NVGcolor fillColor = nvgRGBA(255,0,0,150);
+    nvgFillColor(s->vg, fillColor);
+    nvgFill(s->vg);
+    nvgFillColor(s->vg, nvgRGBA(255,255,255,200));
+  } else {
+    nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 200));
+  }
+  nvgText(s->vg,btn_x-38,btn_y+50,"REC",NULL);
+}
+
+
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
   int ui_viz_rx = scene->ui_viz_rx;
@@ -701,6 +726,7 @@ static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
   ui_draw_df_button(s);
   ui_draw_ls_button(s);
+  ui_draw_dashcam_button(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
@@ -805,7 +831,7 @@ void ui_draw(UIState *s) {
   ui_draw_sidebar(s);
   if (s->started && s->active_app == cereal::UiLayoutState::App::NONE && s->status != STATUS_STOPPED && s->vision_seen) {
       ui_draw_vision(s);
-  } 
+  }
   nvgEndFrame(s->vg);
   glDisable(GL_BLEND);
 }
@@ -901,6 +927,12 @@ static const mat4 full_to_wide_frame_transform = {{
   0.0,  0.0, 1.0, 0.0,
   0.0,  0.0, 0.0, 1.0,
 }};
+
+struct tm get_time_struct() {
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  return tm;
+}
 
 void ui_nvg_init(UIState *s) {
   // init drawing
