@@ -174,8 +174,8 @@ class PIDController:
     if self.enable_long_derivative:
       if abs(setpoint - self.last_setpoint) / self.rate < self.max_accel_d:  # if setpoint isn't changing much
         d = self.k_d * (error - self.last_error)
-        # if (self.id > 0 and self.id + d >= 0) or (self.id < 0 and self.id + d <= 0):  # if changing integral doesn't make it cross zero
-        self.id += d
+        if (self.id > 0 and self.id + d >= 0) or (self.id < 0 and self.id + d <= 0):  # if changing integral doesn't make it cross zero
+          self.id += d
 
     control = self.p + self.f + self.id
     if self.convert is not None:
