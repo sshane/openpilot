@@ -137,7 +137,7 @@ class DynamicFollow:
 
     change_time = sec_since_boot() - self.profile_change_time
     change_time_x = [0, 0.5, 4]  # for three seconds after effective profile has changed
-    change_mod_y = [3, 8, 1]  # multiply cost by multiplier to quickly change distance
+    change_mod_y = [3, 6, 1]  # multiply cost by multiplier to quickly change distance
     if change_time < change_time_x[-1]:  # if profile changed in last 3 seconds
       cost_mod = interp(change_time, change_time_x, change_mod_y)
       cost_mod_speeds = [0, 20 * CV.MPH_TO_MS]  # don't change cost too much under 20 mph
