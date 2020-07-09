@@ -56,7 +56,7 @@ class DynamicCameraOffset:
     self.leftLaneOncoming = False
     self.rightLaneOncoming = False
     self.min_enable_speed = 15 * CV.MPH_TO_MS
-    self.min_lane_width_certainty = 0.4
+    self.min_lane_width_certainty = 0.3
     self.hug_left_ratio = 0.25
     self.hug_right_ratio = 0.75  # todo: verify these are correct, think they are now
 
@@ -95,7 +95,7 @@ class DynamicCameraOffset:
       return
     if np.isnan(l_poly[0]) or np.isnan(r_poly[0]):
       return
-    min_poly_prob = np.interp(v_ego, self.poly_prob_speeds, self.poly_probs)
+    min_poly_prob = 0.0  # np.interp(v_ego, self.poly_prob_speeds, self.poly_probs)
     if self.l_prob < min_poly_prob or self.r_prob < min_poly_prob:  # require both lane lines
       return
     if lane_width_certainty < self.min_lane_width_certainty:  # we need to know the current lane width
