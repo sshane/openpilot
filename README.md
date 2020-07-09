@@ -69,6 +69,8 @@ Dynamic camera offset (based on oncoming traffic)
 -----
 This feature automatically adjusts your position in the lane if an adjacent lane has oncoming traffic. For example, if you're on a two-lane highway and the left adjacent lane has oncoming cars, LaneSpeed recognizes those cars and applies an offset to your `CAMERA_OFFSET` to move you over in the lane, keeping you farther from oncoming cars.
 
+This feature is only enabled at 35 mph and up.
+
 **Note that this feature only works reliably under 60 to 65 mph or so. Due to a radar limitation with Toyota, oncoming cars are not picked up at ~70 mph.**
 
 Dynamic gas
