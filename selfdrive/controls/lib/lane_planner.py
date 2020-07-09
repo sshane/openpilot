@@ -64,7 +64,7 @@ class DynamicCameraOffset:
     self.i_rate = 1 / 20
 
     self.poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
-    self.poly_probs = [0.2, 0.25, 0.55, 0.65]  # lane line must exist in direction we're offsetting towards
+    self.poly_probs = [0.1, 0.2, 0.55, 0.65]  # lane line must exist in direction we're offsetting towards
 
   def update(self, v_ego, lane_width_estimate, lane_width_certainty, l_poly, r_poly, l_prob, r_prob):
     self.sm.update(0)
