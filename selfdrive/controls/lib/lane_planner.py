@@ -112,16 +112,13 @@ class DynamicCameraOffset:
     #   return
     if np.isnan(l_poly[0]) or np.isnan(r_poly[0]):
       return
-
-    if self.last_had_oncoming and not self.have_oncoming:
-      self.last_seen_oncoming = sec_since_boot()  # last oncoming, no oncoming currently
+    if v_ego < self.min_enable_speed:
+      return
 
     # # todo: old: only do these checks when currently have oncoming and last not oncoming or 2 seconds after last seen oncoming
     # todo: old: if (not self.last_had_oncoming and self.have_oncoming) or sec_since_boot() - self.last_seen_oncoming > self.keep_offset_for:
-    if time_since_oncoming > self.keep_offset_for:  # only run these checks after 2 seconds past since last oncoming so that we can keep offsetting for 2 seconds after last seen oncoming
+    if time_since_oncoming > self.keep_offset_for:  # todo: do we need these two checks after? or self.left_lane_oncoming or self.right_lane_oncoming:  # only run these checks after 2 seconds past since last oncoming so that we can keep offsetting for 2 seconds after last seen oncoming
       if self.left_lane_oncoming == self.right_lane_oncoming:  # if both false or both true do nothing
-        return
-      if v_ego < self.min_enable_speed:
         return
       min_poly_prob = np.interp(v_ego, self.poly_prob_speeds, self.poly_probs)
       if self.l_prob < min_poly_prob and self.r_prob < min_poly_prob:  # we only need one line and an accurate lane width
@@ -158,6 +155,7 @@ class DynamicCameraOffset:
         times = [1, 2]
         mods = [1, 0]  # keep full offset from 0-1 second, then ramp down from 1-2
         offset *= np.interp(time_since_oncoming, times, mods)  # ramp down offset
+    self.last_seen_oncoming = sec_since_boot()  # last oncoming, no oncoming currently
     return self.camera_offset + offset
 
 
