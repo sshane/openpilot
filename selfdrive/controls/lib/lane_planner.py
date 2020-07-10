@@ -110,6 +110,7 @@ class DynamicCameraOffset:
     return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
 
   def _dynamic_lane_centering(self):
+    self.keeping_right = False
     if self.l_prob < 0.9 or self.r_prob < 0.9 or self.lane_width_certainty < 0.9:
       self.keeping_left = False
       return
