@@ -111,12 +111,12 @@ class DynamicCameraOffset:
 
   def _dynamic_lane_centering(self):
     self.keeping_right = False
-    if self.l_prob < 0.9 or self.r_prob < 0.9 or self.lane_width_certainty < 0.9:
+    if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
       self.keeping_left = False
       return
     self.keeping_left = True
     error = self._get_camera_position() - 0.5
-    k_p = 1.5
+    k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
     offset = error * k_p
     return offset
 
