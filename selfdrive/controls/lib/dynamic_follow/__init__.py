@@ -333,7 +333,7 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    rel_accel_mod = self._calculate_relative_accel_new()
+    rel_accel_mod = self._calculate_relative_accel_new()  # TODO: plot this vs lead.accel - v_ego.accel, might not need to be this complex
     if rel_accel_mod is not None:  # if available
       deadzone = 2 * CV.MPH_TO_MS
       if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
