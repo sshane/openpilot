@@ -85,15 +85,15 @@ class DynamicCameraOffset:
     self.l_poly, self.r_poly = polys
     self.l_prob, self.r_prob = probs
 
-    # dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
-    # self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    # if dynamic_offset is not None:
-    #   return self.camera_offset + dynamic_offset
-
-    offset_to_center = self._dynamic_lane_centering()
+    dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
     self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    if offset_to_center is not None:
-      return self.camera_offset + offset_to_center
+    if dynamic_offset is not None:
+      return self.camera_offset + dynamic_offset
+
+    #offset_to_center = self._dynamic_lane_centering()
+    #self._send_state()  # for alerts, before speed check so alerts don't get stuck on
+    #if offset_to_center is not None:
+    #  return self.camera_offset + offset_to_center
 
     self.last_left_lane_oncoming = self.left_lane_oncoming
     self.last_right_lane_oncoming = self.right_lane_oncoming
