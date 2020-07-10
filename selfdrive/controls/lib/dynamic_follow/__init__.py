@@ -183,6 +183,17 @@ class DynamicFollow:
     return [sample for sample in lst if cur_time - sample['time'] <= retention]
 
   def _calculate_relative_accel_new(self):
+    mods_x = [0, .75, 1.5]
+    mods_y = [3, 1.5, 1]
+
+    a_lead = self.lead_data.a_lead
+    if a_lead < 0:  # more weight to slight lead decel
+      a_lead *= np.interp(abs(self.lead_data.a_lead), mods_x, mods_y)
+    rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+    mod_y = [0.3245 * 1.5, 0.277 * 1.45, 0.11075 * 1.35, 0.08106 * 1.25, 0.06325 * 1.15, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+    return np.interp(a_lead - self.car_data.a_ego, rel_x, mod_y)
+
+
     #   """
     #   Moving window returning the following: (final relative velocity - initial relative velocity) / dT with a few extra mods
     #   Output properties:
