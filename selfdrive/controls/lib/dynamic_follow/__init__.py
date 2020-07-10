@@ -196,8 +196,8 @@ class DynamicFollow:
     if len(self.df_data.v_rels) > 0:  # if not empty
       elapsed_time = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
       if elapsed_time > min_consider_time:
-        x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-        y = [0.3245, 0.277, 0.11075, 0.08106, 0.06325, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+        rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+        mod_y = [0.3245 * 1.5, 0.277 * 1.45, 0.11075 * 1.35, 0.08106 * 1.25, 0.06325 * 1.15, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
 
         v_lead_start = self.df_data.v_rels[0]['v_lead']  # setup common variables
         v_ego_start = self.df_data.v_rels[0]['v_ego']
@@ -240,7 +240,7 @@ class DynamicFollow:
         else:
           rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
 
-        calc_mod = np.interp(rel_vel_mod, x, y)
+        calc_mod = np.interp(rel_vel_mod, rel_x, mod_y)
         if v_lead_end > v_ego_end and calc_mod >= 0:
           # if we're accelerating quicker than lead but lead is still faster, reduce mod
           # todo: could remove this since we restrict this mod where called
