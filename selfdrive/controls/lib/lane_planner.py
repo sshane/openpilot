@@ -85,15 +85,15 @@ class DynamicCameraOffset:
     self.l_poly, self.r_poly = polys
     self.l_prob, self.r_prob = probs
 
-    # dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
-    # self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    # if dynamic_offset is not None:
-    #   return self.camera_offset + dynamic_offset
-
-    offset_to_center = self._dynamic_lane_centering()
+    dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
     self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    if offset_to_center is not None:
-      return self.camera_offset + offset_to_center
+    if dynamic_offset is not None:
+      return self.camera_offset + dynamic_offset
+
+    #offset_to_center = self._dynamic_lane_centering()
+    #self._send_state()  # for alerts, before speed check so alerts don't get stuck on
+    #if offset_to_center is not None:
+    #  return self.camera_offset + offset_to_center
 
     self.last_left_lane_oncoming = self.left_lane_oncoming
     self.last_right_lane_oncoming = self.right_lane_oncoming
@@ -110,12 +110,13 @@ class DynamicCameraOffset:
     return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
 
   def _dynamic_lane_centering(self):
-    if self.l_prob < 0.9 or self.r_prob < 0.9 or self.lane_width_certainty < 0.9:
+    self.keeping_right = False
+    if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
       self.keeping_left = False
       return
     self.keeping_left = True
     error = self._get_camera_position() - 0.5
-    k_p = 1.5
+    k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
     offset = error * k_p
     return offset
 
