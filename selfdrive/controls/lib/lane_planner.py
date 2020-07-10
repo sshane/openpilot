@@ -91,6 +91,7 @@ class DynamicCameraOffset:
     #   return self.camera_offset + dynamic_offset
 
     offset_to_center = self._dynamic_lane_centering()
+    self._send_state()  # for alerts, before speed check so alerts don't get stuck on
     if offset_to_center is not None:
       return self.camera_offset + offset_to_center
 
@@ -110,7 +111,9 @@ class DynamicCameraOffset:
 
   def _dynamic_lane_centering(self):
     if self.l_prob < 0.9 or self.r_prob < 0.9 or self.lane_width_certainty < 0.9:
+      self.keeping_left = False
       return
+    self.keeping_left = True
     error = self._get_camera_position() - 0.5
     k_p = 1.5
     offset = error * k_p
