@@ -163,7 +163,7 @@ class PathPlanner():
     if desire == log.PathPlan.Desire.laneChangeRight or desire == log.PathPlan.Desire.laneChangeLeft:
       self.LP.l_prob *= self.lane_change_ll_prob
       self.LP.r_prob *= self.lane_change_ll_prob
-    self.LP.update_d_poly(v_ego, angle_steers)
+    self.LP.update_d_poly(v_ego, angle_steers, active)
 
     # account for actuation delay
     angle_offset = self.lane_hugging.modify_offset(float(angle_offset), self.lane_change_direction, self.lane_change_state)

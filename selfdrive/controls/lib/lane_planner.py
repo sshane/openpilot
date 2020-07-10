@@ -54,38 +54,40 @@ class DynamicCameraOffset:
     self.pm = PubMaster(['dynamicCameraOffset'])
     self.op_params = opParams()
     self.camera_offset = self.op_params.get('camera_offset', 0.06)
-    self.left_lane_oncoming = False
+
+    self.left_lane_oncoming = False  # these variables change
     self.right_lane_oncoming = False
     self.last_left_lane_oncoming = False
     self.last_right_lane_oncoming = False
+    self.last_oncoming_time = 0
 
-    self.min_enable_speed = 15 * CV.MPH_TO_MS
-    self.min_lane_width_certainty = 0.4
-    self.hug_left_ratio = 0.25
-    self.hug_right_ratio = 0.75
+    self._setup_static()
 
-    self.last_seen_oncoming = 0
-    self.keep_offset_for = 2  # seconds after losing oncoming lane
+  def _setup_static(self):  # these variables are static
+    self._min_enable_speed = 15 * CV.MPH_TO_MS
+    self._min_lane_width_certainty = 0.4
+    self._hug_left_ratio = 0.25
+    self._hug_right_ratio = 0.75
 
-    self.ramp_angles = [0, 25]
-    self.ramp_angle_mods = [1, 0.1]  # multiply offset by this based on angle
+    self._keep_offset_for = 2  # seconds after losing oncoming lane
+    self._ramp_angles = [0, 25]
+    self._ramp_angle_mods = [1, 0.1]  # multiply offset by this based on angle
 
-    self.poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
-    self.poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
+    self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
+    self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
 
-  def update(self, v_ego, lane_width_estimate, lane_width_certainty, l_poly, r_poly, l_prob, r_prob, angle_steers):
+  def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, l_poly, r_poly, l_prob, r_prob):
     self.sm.update(0)
-    self.camera_offset = self.op_params.get('camera_offset', 0.06)
+    self.camera_offset = self.op_params.get('camera_offset', 0.06)  # update base offset from user
     self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
     self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
     self.l_prob = l_prob
     self.r_prob = r_prob
-    self.angle_steers = angle_steers
 
-    dynamic_offset = self._get_camera_offset(v_ego, lane_width_estimate, lane_width_certainty, l_poly, r_poly)
+    dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, l_poly, r_poly)
     self._send_state()  # for alerts, before speed check so alerts don't get stuck on
     if dynamic_offset is not None:
-      return dynamic_offset
+      return self.camera_offset + dynamic_offset
 
     self.last_left_lane_oncoming = self.left_lane_oncoming
     self.last_right_lane_oncoming = self.right_lane_oncoming
@@ -98,32 +100,27 @@ class DynamicCameraOffset:
     self.pm.send('dynamicCameraOffset', dco_send)
 
   @property
-  def last_had_oncoming(self):
-    return self.last_left_lane_oncoming or self.last_right_lane_oncoming
-
-  @property
   def have_oncoming(self):
-    return self.left_lane_oncoming or self.right_lane_oncoming
+    return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
 
-  def _get_camera_offset(self, v_ego, lane_width_estimate, lane_width_certainty, l_poly, r_poly):
+  def _get_camera_offset(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, l_poly, r_poly):
     self.keeping_left, self.keeping_right = False, False  # reset keeping
-    time_since_oncoming = sec_since_boot() - self.last_seen_oncoming
-    # if not engaged: # todo: this
-    #   return
-    if np.isnan(l_poly[0]) or np.isnan(r_poly[0]):
+    time_since_oncoming = sec_since_boot() - self.last_oncoming_time
+    if not active:  # no alert when not engaged
       return
-    if v_ego < self.min_enable_speed:
+    if np.isnan(l_poly[3]) or np.isnan(r_poly[3]):
+      return
+    if v_ego < self._min_enable_speed:
       return
 
-    # # todo: old: only do these checks when currently have oncoming and last not oncoming or 2 seconds after last seen oncoming
-    # todo: old: if (not self.last_had_oncoming and self.have_oncoming) or sec_since_boot() - self.last_seen_oncoming > self.keep_offset_for:
-    if time_since_oncoming > self.keep_offset_for:  # todo: do we need these two checks after? or self.left_lane_oncoming or self.right_lane_oncoming:  # only run these checks after 2 seconds past since last oncoming so that we can keep offsetting for 2 seconds after last seen oncoming
-      if self.left_lane_oncoming == self.right_lane_oncoming:  # if both false or both true do nothing
+    if self.have_oncoming:
+      _min_poly_prob = np.interp(v_ego, self._poly_prob_speeds, self._poly_probs)
+      if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate lane width
         return
-      min_poly_prob = np.interp(v_ego, self.poly_prob_speeds, self.poly_probs)
-      if self.l_prob < min_poly_prob and self.r_prob < min_poly_prob:  # we only need one line and an accurate lane width
+      if lane_width_certainty < self._min_lane_width_certainty:  # we need to know the current lane width with confidence
         return
-      if lane_width_certainty < self.min_lane_width_certainty:  # we need to know the current lane width with confidence
+      self.last_oncoming_time = sec_since_boot()
+    elif time_since_oncoming > self._keep_offset_for:  # only return if we're 2+ seconds after last oncoming so we can ramp down slowly
         return
 
     # offset just for accuracy when calculating where car is in lane, since polys have not been offset yet
@@ -134,7 +131,7 @@ class DynamicCameraOffset:
     # if certainty of both lines are high, then just average equally
     l_prob = self.l_prob / (self.l_prob + self.r_prob)  # this and next line sum to 1
     r_prob = self.r_prob / (self.l_prob + self.r_prob)
-    # be biases towards position found from most probable lane line. left is 1, right is 0. center is 0.5
+    # be biased towards position found from most probable lane line. left is 1, right is 0. center is 0.5
     estimated_lane_position = estimated_lane_pos_left * l_prob + estimated_lane_pos_right * r_prob
 
     k_p = 1.5  # proportional gain, 1.5 was good on my test drive
@@ -142,21 +139,20 @@ class DynamicCameraOffset:
 
     if self.left_lane_oncoming:
       self.keeping_right = True
-      error = estimated_lane_position - self.hug_right_ratio
+      error = estimated_lane_position - self._hug_right_ratio
     else:  # right lane oncoming
       self.keeping_left = True
-      error = estimated_lane_position - self.hug_left_ratio
+      error = estimated_lane_position - self._hug_left_ratio
 
     offset = error * k_p
-    offset *= np.interp(abs(self.angle_steers), self.ramp_angles, self.ramp_angle_mods)
+    offset *= np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)
 
-    if time_since_oncoming < self.keep_offset_for:  # not yet 2 seconds after last oncoming
-      if not self.left_lane_oncoming and not self.right_lane_oncoming:  # only perform if not currently oncoming
-        times = [1, 2]
-        mods = [1, 0]  # keep full offset from 0-1 second, then ramp down from 1-2
-        offset *= np.interp(time_since_oncoming, times, mods)  # ramp down offset
-    self.last_seen_oncoming = sec_since_boot()  # last oncoming, no oncoming currently
-    return self.camera_offset + offset
+    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 2 seconds after last oncoming, ramp down from 1 second
+      times = [self._keep_offset_for / 2, self._keep_offset_for]
+      mods = [1, 0]  # keep full offset from 0-1 second, then ramp down from 1-2
+      offset *= np.interp(time_since_oncoming, times, mods)  # ramp down offset
+
+    return offset
 
 
 class LanePlanner():
@@ -196,9 +192,9 @@ class LanePlanner():
       self.l_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeLeft - 1]
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
-  def update_d_poly(self, v_ego, angle_steers):
+  def update_d_poly(self, v_ego, angle_steers, active):
     # only offset left and right lane lines; offsetting p_poly does not make sense (or does it?)
-    CAMERA_OFFSET = self.dynamic_camera_offset.update(v_ego, self.lane_width, self.lane_width_certainty, self.l_poly, self.r_poly, self.l_prob, self.r_prob, angle_steers)
+    CAMERA_OFFSET = self.dynamic_camera_offset.update(v_ego, active, angle_steers, self.lane_width, self.lane_width_certainty, self.l_poly, self.r_poly, self.l_prob, self.r_prob)
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
     # self.p_poly[3] += CAMERA_OFFSET
