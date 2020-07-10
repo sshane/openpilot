@@ -121,7 +121,7 @@ class VehicleModel():
     self.cF = stiffness_factor * self.cF_orig
     self.cR = stiffness_factor * self.cR_orig
     if type(self.steer_ratio) in [int, float]:
-      self.sR = min(float(self.steer_ratio), 0.01)
+      self.sR = max(float(self.steer_ratio), 0.01)
     else:
       self.sR = steer_ratio
 
