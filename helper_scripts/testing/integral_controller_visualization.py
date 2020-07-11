@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import random
 
 class IController:
   def __init__(self):
     self.i = 0
-    self.k_i = 1.5
-    self.i_rate = 1 / 5
+    self.k_i = 4.5
+    self.i_rate = 1 / 20
 
   def update(self, setpoint, measurement):
     error = setpoint - measurement
@@ -26,7 +27,7 @@ class PController:
     return error * self.k_p
 
 
-setpoint = 0.7
+setpoint = 0.75
 measurement = 0.5
 i = IController()
 # i = PController()
@@ -35,7 +36,14 @@ plt.figure(0)
 plt.plot(0, 0)
 plt.pause(0.05)
 input()
+t_start = time.time()
 while 1:  # this simulates controlling lane position with camera offset
+  if time.time() - t_start > 5:
+    if random.randint(0, 1) == 1:
+      setpoint += 0.1
+    else:
+      setpoint -= 0.1
+    t_start = time.time()
   t = time.time()
   measurement = i.update(setpoint, measurement)
   ms.append(measurement)
@@ -47,7 +55,7 @@ while 1:  # this simulates controlling lane position with camera offset
   plt.pause(0.01)
 
   t_elapsed = time.time() - t
-  if 1/5 - t_elapsed > 0:
-    time.sleep(1/5 - t_elapsed)
+  if 1/20 - t_elapsed > 0:
+    time.sleep(1/20 - t_elapsed)
   else:
-    print('lagging by {}'.format(abs(1/5 - t_elapsed)))
+    print('lagging by {}'.format(abs(1/20 - t_elapsed)))
