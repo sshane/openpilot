@@ -251,8 +251,8 @@ class DynamicFollow:
         else:
           rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
 
-        with open('/data/rel_accel_mod', 'a') as f:
-          f.write('{}\n'.format({'rel_accel_mod': rel_vel_mod, 'delta_v_rel': delta_v_rel, 'a_lead': self.lead_data.a_lead, 'a_ego': self.car_data.a_ego, 'v_lead': self.lead_data.v_lead, 'v_ego': self.car_data.v_ego}))
+        # with open('/data/rel_accel_mod', 'a') as f:
+        #   f.write('{}\n'.format({'rel_accel_mod': rel_vel_mod, 'delta_v_rel': delta_v_rel, 'a_lead': self.lead_data.a_lead, 'a_ego': self.car_data.a_ego, 'v_lead': self.lead_data.v_lead, 'v_ego': self.car_data.v_ego}))
 
         calc_mod = np.interp(rel_vel_mod, rel_x, mod_y)
         if v_lead_end > v_ego_end and calc_mod >= 0:

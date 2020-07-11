@@ -65,7 +65,7 @@ class DynamicCameraOffset:
     self._setup_static()
 
   def _setup_static(self):  # these variables are static
-    self._min_enable_speed = 15 * CV.MPH_TO_MS
+    self._min_enable_speed = 25 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
     self._hug_left_ratio = 0.375
     self._hug_right_ratio = 0.625
@@ -108,16 +108,16 @@ class DynamicCameraOffset:
   def have_oncoming(self):
     return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
 
-  def _dynamic_lane_centering(self):  # not good
-    self.keeping_right = False
-    if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
-      self.keeping_left = False
-      return
-    self.keeping_left = True
-    error = self._get_camera_position() - 0.5
-    k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
-    offset = error * k_p
-    return offset
+  # def _dynamic_lane_centering(self):  # not good
+  #   self.keeping_right = False
+  #   if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
+  #     self.keeping_left = False
+  #     return
+  #   self.keeping_left = True
+  #   error = self._get_camera_position() - 0.5
+  #   k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
+  #   offset = error * k_p
+  #   return offset
 
   def _get_camera_position(self):
     """
@@ -165,7 +165,7 @@ class DynamicCameraOffset:
       right_lane_oncoming = self.last_right_lane_oncoming
 
     estimated_lane_position = self._get_camera_position()
-    k_p = 1.5  # proportional gain, 1.5 was good on my test drive
+    # k_p = 1.5  # proportional gain, 1.5 was good on my test drive
     # k_p = self.op_params.get('dyn_camera_offset_p', 1.0)  # proportional gain, needs to be tuned
 
     hug_modifier = np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)  # don't offset as much when angle is high
@@ -223,8 +223,8 @@ class LanePlanner():
       self.p_poly = model_polyfit(md.path.points, self._path_pinv)  # predicted path
     self.l_prob = md.leftLane.prob  # left line prob
     self.r_prob = md.rightLane.prob  # right line prob
-    with open('/data/lane_planner_data', 'a') as f:
-      f.write('{}\n'.format({'l_prob': self.l_prob, 'r_prob': self.r_prob, 'l_poly': self.l_poly, 'r_poly': self.r_poly, 'p_poly': self.p_poly}))
+    # with open('/data/lane_planner_data', 'a') as f:
+    #   f.write('{}\n'.format({'l_prob': self.l_prob, 'r_prob': self.r_prob, 'l_poly': self.l_poly, 'r_poly': self.r_poly, 'p_poly': self.p_poly}))
 
     if len(md.meta.desireState):
       self.l_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeLeft - 1]
