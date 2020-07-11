@@ -1,6 +1,7 @@
 import numpy as np
 from common.numpy_fast import clip, interp
 from common.op_params import opParams
+from selfdrive.config import Conversions as CV
 
 
 def apply_deadzone(error, deadzone):
@@ -100,7 +101,7 @@ class PIDController:
     self._k_d = k_d  # derivative gain
     self.k_f = k_f  # feedforward gain
 
-    self.max_accel_d = 0.268224  # 0.6 mph/s
+    self.max_accel_d = 0.4 * CV.MPH_TO_MS
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
