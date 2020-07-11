@@ -110,6 +110,7 @@ class PIDController:
     self.rate = 1.0 / rate
     self.sat_limit = sat_limit
     self.convert = convert
+    self.id = 0
 
     self.reset()
 

@@ -102,8 +102,9 @@ class LongControl():
                                                        brake_pressed, cruise_standstill)
 
     v_ego_pid = max(v_ego, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
-
+    resetting = False
     if self.long_control_state == LongCtrlState.off or extras['CS'].gasPressed:
+      resetting = True
       self.v_pid = v_ego_pid
       self.pid.reset()
       output_gb = 0.
@@ -141,6 +142,8 @@ class LongControl():
       self.v_pid = v_ego
       self.pid.reset()
 
+    with open('/data/longcontrol_gas_press', 'a') as f:
+      f.write('{}\n'.format({'resetting': resetting, 'gas_pressed': extras['CS'].gasPressed, 'id': self.pid.id}))
     self.last_output_gb = output_gb
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
