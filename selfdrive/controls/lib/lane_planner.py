@@ -67,18 +67,18 @@ class DynamicCameraOffset:
   def _setup_static(self):  # these variables are static
     self._min_enable_speed = 15 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
-    self._hug_left_ratio = 0.25
-    self._hug_right_ratio = 0.75
+    self._hug_left_ratio = 0.375
+    self._hug_right_ratio = 0.625
     self._center_ratio = 0.5
 
-    self._keep_offset_for = 2  # seconds after losing oncoming lane
+    self._keep_offset_for = 3  # seconds after losing oncoming lane
     self._ramp_angles = [0, 12.5, 25]
     self._ramp_angle_mods = [1, 0.8, 0.1]  # multiply offset by this based on angle
 
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
     self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
 
-    self._k_i = 1.5
+    self._k_i = 0.5
     self._i_rate = 1 / 20
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
@@ -178,15 +178,15 @@ class DynamicCameraOffset:
     else:
       raise Exception('Error, no lane is oncoming but we\'re here!')
 
+    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
+      times = [self._keep_offset_for / 2, self._keep_offset_for]
+      mods = [hug_ratio, self._center_ratio]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
+      hug_ratio = np.interp(time_since_oncoming, times, mods)  # ramp down offset
+
     _k_i = self.op_params.get('dyn_camera_offset_p')  # integral gain, needs to be tuned
     error = estimated_lane_position - hug_ratio
     self.i += error * _k_i * self._i_rate
-    offset = self.i + error * k_p
-
-    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 2 seconds after last oncoming, ramp down from 1 second
-      times = [self._keep_offset_for / 2, self._keep_offset_for]
-      mods = [1, 0]  # keep full offset from 0-1 second, then ramp down from 1-2
-      offset *= np.interp(time_since_oncoming, times, mods)  # ramp down offset
+    offset = self.i
 
     return offset
 
