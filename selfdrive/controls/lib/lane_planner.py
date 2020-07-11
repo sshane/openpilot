@@ -60,6 +60,7 @@ class DynamicCameraOffset:
     self.last_left_lane_oncoming = False
     self.last_right_lane_oncoming = False
     self.last_oncoming_time = 0
+    self.i = 0.0
 
     self._setup_static()
 
@@ -68,6 +69,7 @@ class DynamicCameraOffset:
     self._min_lane_width_certainty = 0.4
     self._hug_left_ratio = 0.25
     self._hug_right_ratio = 0.75
+    self._center_ratio = 0.5
 
     self._keep_offset_for = 2  # seconds after losing oncoming lane
     self._ramp_angles = [0, 12.5, 25]
@@ -75,6 +77,9 @@ class DynamicCameraOffset:
 
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
     self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
+
+    self._k_i = 1.5
+    self._i_rate = 1 / 20
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
     self.sm.update(0)
@@ -90,6 +95,7 @@ class DynamicCameraOffset:
     if dynamic_offset is not None:
       return self.camera_offset + dynamic_offset
 
+    self.i = 0  # reset when not active
     return self.camera_offset  # don't offset if no lane line in direction we're going to hug
 
   def _send_state(self):
@@ -162,17 +168,20 @@ class DynamicCameraOffset:
     k_p = 1.5  # proportional gain, 1.5 was good on my test drive
     # k_p = self.op_params.get('dyn_camera_offset_p', 1.0)  # proportional gain, needs to be tuned
 
+    hug_modifier = np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)  # don't offset as much when angle is high
     if left_lane_oncoming:
       self.keeping_right = True
-      error = estimated_lane_position - self._hug_right_ratio
+      hug_ratio = (self._hug_right_ratio * hug_modifier) + (self._center_ratio * (1 - hug_modifier))  # weighted average
     elif right_lane_oncoming:
       self.keeping_left = True
-      error = estimated_lane_position - self._hug_left_ratio
+      hug_ratio = (self._hug_left_ratio * hug_modifier) + (self._center_ratio * (1 - hug_modifier))
     else:
       raise Exception('Error, no lane is oncoming but we\'re here!')
 
-    offset = error * k_p
-    offset *= np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)
+    _k_i = self.op_params.get('dyn_camera_offset_p')  # integral gain, needs to be tuned
+    error = estimated_lane_position - hug_ratio
+    self.i += error * _k_i * self._i_rate
+    offset = self.i + error * k_p
 
     if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 2 seconds after last oncoming, ramp down from 1 second
       times = [self._keep_offset_for / 2, self._keep_offset_for]
