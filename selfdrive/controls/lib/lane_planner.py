@@ -90,13 +90,6 @@ class DynamicCameraOffset:
     if dynamic_offset is not None:
       return self.camera_offset + dynamic_offset
 
-    #offset_to_center = self._dynamic_lane_centering()
-    #self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    #if offset_to_center is not None:
-    #  return self.camera_offset + offset_to_center
-
-    self.last_left_lane_oncoming = self.left_lane_oncoming
-    self.last_right_lane_oncoming = self.right_lane_oncoming
     return self.camera_offset  # don't offset if no lane line in direction we're going to hug
 
   def _send_state(self):
@@ -109,7 +102,7 @@ class DynamicCameraOffset:
   def have_oncoming(self):
     return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
 
-  def _dynamic_lane_centering(self):
+  def _dynamic_lane_centering(self):  # not good
     self.keeping_right = False
     if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
       self.keeping_left = False
@@ -147,26 +140,36 @@ class DynamicCameraOffset:
     if v_ego < self._min_enable_speed:
       return
 
+    left_lane_oncoming = self.left_lane_oncoming
+    right_lane_oncoming = self.right_lane_oncoming
+
     if self.have_oncoming:
       _min_poly_prob = np.interp(v_ego, self._poly_prob_speeds, self._poly_probs)
-      if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate lane width
+      if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate current lane width
         return
-      if self.lane_width_certainty < self._min_lane_width_certainty:  # we need to know the current lane width with confidence
+      if self.lane_width_certainty < self._min_lane_width_certainty:
         return
       self.last_oncoming_time = sec_since_boot()
-    elif time_since_oncoming > self._keep_offset_for:  # only return if we're 2+ seconds after last oncoming so we can ramp down slowly
-        return
+      self.last_left_lane_oncoming = self.left_lane_oncoming  # only update last oncoming vars when currently have oncoming. one should always be True for the 2 second ramp down
+      self.last_right_lane_oncoming = self.right_lane_oncoming
+    elif time_since_oncoming > self._keep_offset_for:  # return if it's 2+ seconds after last oncoming, no need to offset
+      return
+    else:  # no oncoming and not yet 2 seconds after we lost an oncoming lane. use last oncoming lane for 2 seconds to ramp down offset
+      left_lane_oncoming = self.last_left_lane_oncoming
+      right_lane_oncoming = self.last_right_lane_oncoming
 
     estimated_lane_position = self._get_camera_position()
     k_p = 1.5  # proportional gain, 1.5 was good on my test drive
     # k_p = self.op_params.get('dyn_camera_offset_p', 1.0)  # proportional gain, needs to be tuned
 
-    if self.left_lane_oncoming:
+    if left_lane_oncoming:
       self.keeping_right = True
       error = estimated_lane_position - self._hug_right_ratio
-    else:  # right lane oncoming
+    elif right_lane_oncoming:
       self.keeping_left = True
       error = estimated_lane_position - self._hug_left_ratio
+    else:
+      raise Exception('Error, no lane is oncoming but we\'re here!')
 
     offset = error * k_p
     offset *= np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)
