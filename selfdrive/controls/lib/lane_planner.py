@@ -183,7 +183,7 @@ class DynamicCameraOffset:
       mods = [hug_ratio, self._center_ratio]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
       hug_ratio = np.interp(time_since_oncoming, times, mods)  # ramp down offset
 
-    _k_i = self.op_params.get('dyn_camera_offset_p')  # integral gain, needs to be tuned
+    _k_i = self.op_params.get('dyn_camera_offset_i')  # integral gain, needs to be tuned
     error = estimated_lane_position - hug_ratio
     self.i += error * _k_i * self._i_rate
     offset = self.i
