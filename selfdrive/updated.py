@@ -320,14 +320,15 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
   if new_version:
     need_reboot = True
 
-  if sec_since_boot() - time_offroad > min_reboot_time and need_reboot:  # allow reboot x minutes after stopping openpilot or starting EON
-    print('hi')
-    cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
-    with open('/data/reboot_events.txt', 'a') as f:
-      f.write('{}: Auto update triggered reboot\n'.format(datetime.datetime.now()))
-    run(["am", "start", "-a", "android.intent.action.REBOOT"])
-  elif need_reboot:
-    cloudlog.info(COLORS.BLUE_GREEN + "UPDATE FOUND, waiting {} sec. until reboot".format(min_reboot_time - (sec_since_boot() - time_offroad)) + COLORS.ENDC)
+  if need_reboot:
+    if sec_since_boot() - time_offroad > min_reboot_time:
+      cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
+      with open('/data/reboot_events.txt', 'a') as f:
+        f.write('{}: Auto update triggered reboot\n'.format(datetime.datetime.now()))
+      run(["am", "start", "-a", "android.intent.action.REBOOT"])
+    else:
+      cloudlog.info(COLORS.BLUE_GREEN + "UPDATE FOUND, waiting {} sec. until reboot".format(min_reboot_time - (sec_since_boot() - time_offroad)) + COLORS.ENDC)
+
   return need_reboot
 
 
