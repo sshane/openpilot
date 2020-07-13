@@ -35,6 +35,7 @@ import threading
 from cffi import FFI
 
 from common.basedir import BASEDIR
+from common.colors import COLORS
 from common.params import Params
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
@@ -320,10 +321,10 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
     need_reboot = True
 
   if sec_since_boot() - time_offroad > min_reboot_time and need_reboot:  # allow reboot x minutes after stopping openpilot or starting EON
-    cloudlog.info("AUTO UPDATE: REBOOTING")
+    cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
     run(["am", "start", "-a", "android.intent.action.REBOOT"])
   elif need_reboot:
-    cloudlog.info("update found, waiting {} sec. until reboot".format(min_reboot_time - (sec_since_boot() - time_offroad)))
+    cloudlog.info(COLORS.BLUE_GREEN + "UPDATE FOUND, waiting {} sec. until reboot".format(min_reboot_time - (sec_since_boot() - time_offroad)) + COLORS.ENDC)
   return need_reboot
 
 
