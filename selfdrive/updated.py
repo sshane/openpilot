@@ -321,6 +321,7 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
     need_reboot = True
 
   if sec_since_boot() - time_offroad > min_reboot_time and need_reboot:  # allow reboot x minutes after stopping openpilot or starting EON
+    print('hi')
     cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
     with open('/data/reboot_events.txt', 'a') as f:
       f.write('{}: Auto update triggered reboot\n'.format(datetime.datetime.now()))
