@@ -73,7 +73,7 @@ class opParams:
     self.last_read_time = sec_since_boot()
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['reset_integral']  # a list of params you want to delete (unused)
+    self.to_delete = ['reset_integral', 'dyn_camera_offset_p']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
 
   def run_init(self):  # does first time initializing of default params
