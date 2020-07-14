@@ -186,7 +186,7 @@ class DynamicCameraOffset:
     _k_i = self.op_params.get('dyn_camera_offset_i')  # integral gain, needs to be tuned
     error = estimated_lane_position - hug_ratio
     self.i += error * _k_i * self._i_rate
-    offset = self.i
+    offset = self.i + error * self.op_params.get('dyn_camera_offset_p')
 
     return offset
 
