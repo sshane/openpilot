@@ -115,7 +115,7 @@ class LaneSpeed:
     self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
-    if len(self.d_poly) and not np.isnan(self.d_poly[0]) and abs(self.steer_angle) < self._max_steer_angle and self.v_ego > self._min_enable_speed:
+    if len(self.d_poly) and not np.isnan(self.d_poly[0]):
       # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
       self.group_tracks()
       self.find_oncoming_lanes()
@@ -230,11 +230,14 @@ class LaneSpeed:
 
   def send_status(self):
     new_fastest = self.fastest_lane in ['left', 'right'] and self.last_fastest_lane not in ['left', 'right']
+    fastest_lane = self.fastest_lane
     if self.ls_state == LaneSpeedState.silent:
       new_fastest = False  # be silent
+    if self.v_ego < self._min_enable_speed or abs(self.steer_angle) > self._max_steer_angle:  # keep sending updates, but not fastestLane
+      fastest_lane = 'none'
 
     ls_send = messaging.new_message('laneSpeed')
-    ls_send.laneSpeed.fastestLane = self.fastest_lane
+    ls_send.laneSpeed.fastestLane = fastest_lane
     ls_send.laneSpeed.new = new_fastest  # only send audible alert once when a lane becomes fastest, then continue to show silent alert
 
     ls_send.laneSpeed.leftLaneSpeeds = [trk.vRel + self.v_ego for trk in self.lanes['left'].tracks]

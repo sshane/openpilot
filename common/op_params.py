@@ -64,8 +64,6 @@ class opParams:
                            'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
                            'hide_auto_df_alerts': {'default': False, 'allowed_types': [bool], 'description': 'Hides the alert that shows what profile the model has chosen'},
                            'log_auto_df': {'default': False, 'allowed_types': [bool], 'description': 'Logs dynamic follow data for auto-df'},
-                           'dyn_camera_offset_i': {'default': 1.0, 'allowed_types': [int, float], 'live': True},
-                           'dyn_camera_offset_p': {'default': 1.0, 'allowed_types': [int, float], 'live': True},
 
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
@@ -75,7 +73,7 @@ class opParams:
     self.last_read_time = sec_since_boot()
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['reset_integral']  # a list of params you want to delete (unused)
+    self.to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p']  # a list of params you want to delete (unused)
     self.run_init()  # restores, reads, and updates params
 
   def run_init(self):  # does first time initializing of default params
