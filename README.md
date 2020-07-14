@@ -63,15 +63,15 @@ This feature alerts you of faster-travelling adjacent lanes and can be configure
 
 The idea behind this feature is since we often become very relaxed behind the wheel when being driven by openpilot, we don't always notice when we've become stuck behind a slower-moving vehicle. When either the left or right adjacent lane is moving faster than your current lane, LaneSpeed alerts the user that a faster lane is available so that they can make a lane change, overtaking the slower current lane. Thus saving time in the long run on long roadtrips or in general highway driving!
 
-The original idea is thanks to [Greengree#5537](https://github.com/greengree) on Discord.
+The original idea is thanks to [Greengree#5537](https://github.com/greengree) on Discord. This feature is available at 35 mph and up.
 
 Dynamic camera offset (based on oncoming traffic)
 -----
 This feature automatically adjusts your position in the lane if an adjacent lane has oncoming traffic. For example, if you're on a two-lane highway and the left adjacent lane has oncoming cars, LaneSpeed recognizes those cars and applies an offset to your `CAMERA_OFFSET` to move you over in the lane, keeping you farther from oncoming cars.
 
-This feature is only enabled at 35 mph and up.
+This feature is only enabled at 35 mph and up. To enable or disable this feature, use `opEdit` and change this parameter: `dynamic_camera_offset`.
 
-**Note that this feature only works reliably under 60 to 65 mph or so. Due to a radar limitation with Toyota, oncoming cars are not picked up at ~70 mph.**
+**Note that this feature only works reliably up to 60 mph or so. Due to a radar limitation with Toyota, oncoming cars are not picked up at ~60+ mph.**
 
 Dynamic gas
 -----
@@ -130,6 +130,7 @@ Here are the main parameters you can change with this fork:
   - `global_df_mod` **`(live!)`**: The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2. Smaller values will get you closer, larger will get you farther. This is applied to ALL profiles!
   - `min_TR` **`(live!)`**: The minimum allowed following distance in seconds. Default is 0.9 seconds, the range of this mod is limited from 0.85 to 1.3 seconds. This is applied to ALL profiles!
   - `hide_auto_df_alerts`: Hides the alert that shows what profile the model has chosen
+  - [`dynamic_camera_offset`](#Dynamic-camera-offset-based-on-oncoming-traffic): Whether to automatically keep away from oncoming traffic. Works from 35 to ~60 mph
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L40).

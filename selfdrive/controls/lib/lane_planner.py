@@ -65,7 +65,8 @@ class DynamicCameraOffset:
     self._setup_static()
 
   def _setup_static(self):  # these variables are static
-    self._min_enable_speed = 25 * CV.MPH_TO_MS
+    self._enabled = self.op_params.get('dynamic_camera_offset', True)
+    self._min_enable_speed = 35 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
     self._hug_left_ratio = 0.375
     self._hug_right_ratio = 0.625
@@ -83,59 +84,22 @@ class DynamicCameraOffset:
     self._i_rate = 1 / 20
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
-    self.sm.update(0)
-    self.camera_offset = self.op_params.get('camera_offset', 0.06)  # update base offset from user
-    self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
-    self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
-    self.lane_width_estimate, self.lane_width_certainty = lane_width_estimate, lane_width_certainty
-    self.l_poly, self.r_poly = polys
-    self.l_prob, self.r_prob = probs
+    if self._enabled:
+      self.sm.update(0)
+      self.camera_offset = self.op_params.get('camera_offset', 0.06)  # update base offset from user
+      self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
+      self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
+      self.lane_width_estimate, self.lane_width_certainty = lane_width_estimate, lane_width_certainty
+      self.l_poly, self.r_poly = polys
+      self.l_prob, self.r_prob = probs
 
-    dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
-    self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-    if dynamic_offset is not None:
-      return self.camera_offset + dynamic_offset
+      dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
+      self._send_state()  # for alerts, before speed check so alerts don't get stuck on
+      if dynamic_offset is not None:
+        return self.camera_offset + dynamic_offset
 
-    self.i = 0  # reset when not active
+      self.i = 0  # reset when not active
     return self.camera_offset  # don't offset if no lane line in direction we're going to hug
-
-  def _send_state(self):
-    dco_send = messaging.new_message('dynamicCameraOffset')
-    dco_send.dynamicCameraOffset.keepingLeft = self.keeping_left
-    dco_send.dynamicCameraOffset.keepingRight = self.keeping_right
-    self.pm.send('dynamicCameraOffset', dco_send)
-
-  @property
-  def have_oncoming(self):
-    return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
-
-  # def _dynamic_lane_centering(self):  # not good
-  #   self.keeping_right = False
-  #   if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
-  #     self.keeping_left = False
-  #     return
-  #   self.keeping_left = True
-  #   error = self._get_camera_position() - 0.5
-  #   k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
-  #   offset = error * k_p
-  #   return offset
-
-  def _get_camera_position(self):
-    """
-    Returns the position of the camera in the lane as a percentage. left to right: [0, 1]; 0.5 is centered
-    You MUST verify that either left or right polys and lane width are accurate before calling this function.
-    """
-    left_line_pos = self.l_poly[3] + self.camera_offset  # polys have not been offset yet
-    right_line_pos = self.r_poly[3] + self.camera_offset
-    cam_pos_left = left_line_pos / self.lane_width_estimate  # estimated position of car in lane based on left line
-    cam_pos_right = 1 - abs(right_line_pos) / self.lane_width_estimate  # estimated position of car in lane based on right line
-
-    # find car's camera position using weighted average of lane poly certainty
-    # if certainty of both lines are high, then just average ~equally
-    l_prob = self.l_prob / (self.l_prob + self.r_prob)  # this and next line sums to 1
-    r_prob = self.r_prob / (self.l_prob + self.r_prob)
-    # be biased towards position found from most probable lane line
-    return cam_pos_left * l_prob + cam_pos_right * r_prob
 
   def _get_camera_offset(self, v_ego, active, angle_steers):
     self.keeping_left, self.keeping_right = False, False  # reset keeping
@@ -187,6 +151,44 @@ class DynamicCameraOffset:
     offset = self.i + error * self._k_p
 
     return offset
+
+  def _send_state(self):
+    dco_send = messaging.new_message('dynamicCameraOffset')
+    dco_send.dynamicCameraOffset.keepingLeft = self.keeping_left
+    dco_send.dynamicCameraOffset.keepingRight = self.keeping_right
+    self.pm.send('dynamicCameraOffset', dco_send)
+
+  @property
+  def have_oncoming(self):
+    return self.left_lane_oncoming != self.right_lane_oncoming  # only one lane oncoming
+
+  def _get_camera_position(self):
+    """
+    Returns the position of the camera in the lane as a percentage. left to right: [0, 1]; 0.5 is centered
+    You MUST verify that either left or right polys and lane width are accurate before calling this function.
+    """
+    left_line_pos = self.l_poly[3] + self.camera_offset  # polys have not been offset yet
+    right_line_pos = self.r_poly[3] + self.camera_offset
+    cam_pos_left = left_line_pos / self.lane_width_estimate  # estimated position of car in lane based on left line
+    cam_pos_right = 1 - abs(right_line_pos) / self.lane_width_estimate  # estimated position of car in lane based on right line
+
+    # find car's camera position using weighted average of lane poly certainty
+    # if certainty of both lines are high, then just average ~equally
+    l_prob = self.l_prob / (self.l_prob + self.r_prob)  # this and next line sums to 1
+    r_prob = self.r_prob / (self.l_prob + self.r_prob)
+    # be biased towards position found from most probable lane line
+    return cam_pos_left * l_prob + cam_pos_right * r_prob
+
+  # def _dynamic_lane_centering(self):  # not good
+  #   self.keeping_right = False
+  #   if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
+  #     self.keeping_left = False
+  #     return
+  #   self.keeping_left = True
+  #   error = self._get_camera_position() - 0.5
+  #   k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
+  #   offset = error * k_p
+  #   return offset
 
 
 class LanePlanner():
