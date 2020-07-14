@@ -251,9 +251,6 @@ class DynamicFollow:
         else:
           rel_vel_mod = math.copysign(delta_v_rel, v_lead_change - v_ego_change) * lead_factor
 
-        # with open('/data/rel_accel_mod', 'a') as f:
-        #   f.write('{}\n'.format({'rel_accel_mod': rel_vel_mod, 'delta_v_rel': delta_v_rel, 'a_lead': self.lead_data.a_lead, 'a_ego': self.car_data.a_ego, 'v_lead': self.lead_data.v_lead, 'v_ego': self.car_data.v_ego}))
-
         calc_mod = np.interp(rel_vel_mod, rel_x, mod_y)
         if v_lead_end > v_ego_end and calc_mod >= 0:
           # if we're accelerating quicker than lead but lead is still faster, reduce mod
@@ -347,7 +344,7 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    rel_accel_mod = self._calculate_relative_accel_new()  # TODO: plot this vs lead.accel - ego.accel, might not need to be this complex
+    rel_accel_mod = self._calculate_relative_accel_new()
     if rel_accel_mod is not None:  # if available
       deadzone = 2 * CV.MPH_TO_MS
       if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
