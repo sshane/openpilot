@@ -79,9 +79,9 @@ class DynamicCameraOffset:
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
     self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
 
-    self._k_i = 1.2
     self._k_p = 1.5
-    self._i_rate = 1 / 20
+    _i_rate = 1 / 20
+    self._k_i = 1.2 * _i_rate
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
     if self._enabled:
@@ -147,7 +147,7 @@ class DynamicCameraOffset:
       hug_ratio = np.interp(time_since_oncoming, times, mods)  # ramp down offset
 
     error = estimated_lane_position - hug_ratio
-    self.i += error * self._k_i * self._i_rate  # PI controller
+    self.i += error * self._k_i  # PI controller
     offset = self.i + error * self._k_p
 
     return offset
@@ -178,17 +178,6 @@ class DynamicCameraOffset:
     r_prob = self.r_prob / (self.l_prob + self.r_prob)
     # be biased towards position found from most probable lane line
     return cam_pos_left * l_prob + cam_pos_right * r_prob
-
-  # def _dynamic_lane_centering(self):  # not good
-  #   self.keeping_right = False
-  #   if self.l_prob < 0.35 or self.r_prob < 0.35 or self.lane_width_certainty < 0.35:
-  #     self.keeping_left = False
-  #     return
-  #   self.keeping_left = True
-  #   error = self._get_camera_position() - 0.5
-  #   k_p = self.op_params.get('dyn_camera_offset_p', 1.0)
-  #   offset = error * k_p
-  #   return offset
 
 
 class LanePlanner():
