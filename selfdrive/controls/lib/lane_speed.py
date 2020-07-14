@@ -79,7 +79,7 @@ class LaneSpeed:
     self.offset = self.ls_state
 
     self.lane_width = 3.7  # in meters, just a starting point
-    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan', 'laneSpeedButton'])
+    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan', 'laneSpeedButton', 'controlsState'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
     lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
@@ -152,9 +152,9 @@ class LaneSpeed:
       for lane_name in self.lanes:
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
-          if track.vRel + self.v_ego >= 1:
+          if track.vRel + self.v_ego >= 2:
             self.lanes[lane_name].tracks.append(track)
-          elif track.vRel + self.v_ego <= -1:  # make sure we don't add stopped tracks at high speeds
+          elif track.vRel + self.v_ego <= -2:  # make sure we don't add stopped tracks at high speeds
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
 
@@ -174,10 +174,11 @@ class LaneSpeed:
     if self.ls_state == LaneSpeedState.off:
       return
 
+    v_cruise_setpoint = self.sm['controlsState'].vCruise * CV.KPH_TO_MS
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
-      track_speeds = [speed for speed in track_speeds if speed > self.v_ego * self._track_speed_margin]
+      track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
 
