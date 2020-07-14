@@ -152,9 +152,9 @@ class LaneSpeed:
       for lane_name in self.lanes:
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
-          if track.vRel + self.v_ego >= 2:
+          if track.vRel + self.v_ego >= 2.24:
             self.lanes[lane_name].tracks.append(track)
-          elif track.vRel + self.v_ego <= -2:  # make sure we don't add stopped tracks at high speeds
+          elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
 
