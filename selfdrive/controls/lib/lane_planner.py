@@ -67,8 +67,8 @@ class DynamicCameraOffset:
   def _setup_static(self):  # these variables are static
     self._min_enable_speed = 25 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
-    self._hug_left_ratio = 0.375
-    self._hug_right_ratio = 0.625
+    self._hug_left_ratio = 0.3125
+    self._hug_right_ratio = 0.6875
     self._center_ratio = 0.5
 
     self._keep_offset_for = 3  # seconds after losing oncoming lane
