@@ -141,14 +141,14 @@ class DynamicCameraOffset:
     else:
       raise Exception('Error, no lane is oncoming but we\'re here!')
 
-    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
-      times = [self._keep_offset_for / 2, self._keep_offset_for]
-      mods = [hug_ratio, self._center_ratio]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
-      hug_ratio = np.interp(time_since_oncoming, times, mods)  # ramp down offset
-
     error = estimated_lane_position - hug_ratio
     self.i += error * self._k_i  # PI controller
     offset = self.i + error * self._k_p
+
+    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
+      times = [self._keep_offset_for / 2, self._keep_offset_for]
+      offsets = [1, 0]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
+      offset *= np.interp(time_since_oncoming, times, offsets)  # ramp down offset
 
     return offset
 
