@@ -147,8 +147,8 @@ class DynamicCameraOffset:
 
     if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
       times = [self._keep_offset_for / 2, self._keep_offset_for]
-      offsets = [1, 0]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
-      offset *= np.interp(time_since_oncoming, times, offsets)  # ramp down offset
+      multipliers = [1, 0]  # keep full offset from 0-1.5 seconds, then ramp down from 1.5-3
+      offset *= np.interp(time_since_oncoming, times, multipliers)  # ramp down offset
 
     return offset
 
