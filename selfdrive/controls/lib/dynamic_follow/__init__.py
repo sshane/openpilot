@@ -37,7 +37,6 @@ class DynamicFollow:
     # Dynamic follow variables
     self.default_TR = 1.8
     self.TR = 1.8
-    # self.v_lead_retention = 2.0  # keep only last x seconds
     self.v_ego_retention = 2.5
     self.v_rel_retention = 1.75
 
@@ -291,8 +290,8 @@ class DynamicFollow:
     if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
       TR_mods.append(self._relative_accel_mod())
 
-    x = [self.sng_speed / 5.0, self.sng_speed]  # as we approach 0, apply x% more distance
-    y = [1.05, 1.0]
+    x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
+    y = [1.0, 1.05]
     profile_mod_pos *= interp(self.car_data.v_ego, x, y)  # but only for currently positive mods
 
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mods])  # alter TR modification according to profile
