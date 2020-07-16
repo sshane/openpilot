@@ -297,7 +297,7 @@ class DynamicFollow:
     TR_mod = sum([mod * profile_mod_neg if mod < 0 else mod * profile_mod_pos for mod in TR_mods])  # alter TR modification according to profile
     TR += TR_mod
 
-    if self.car_data.left_blinker or self.car_data.right_blinker and df_profile != self.df_profiles.traffic:
+    if (self.car_data.left_blinker or self.car_data.right_blinker) and df_profile != self.df_profiles.traffic:
       x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
       y = [1.0, .75, .65]
       TR *= interp(self.car_data.v_ego, x, y)  # reduce TR when changing lanes
