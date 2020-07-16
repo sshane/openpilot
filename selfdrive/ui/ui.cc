@@ -1041,11 +1041,11 @@ int main(int argc, char* argv[]) {
     }
 
     //awake on any touch
-    int touch_x = -1, touch_y = -1;
-    int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
-    if (touched == 1) {
-      set_awake(s, true);
-    }
+    //int touch_x = -1, touch_y = -1;
+    //int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
+    //if (touched == 1) {
+    //  set_awake(s, true);
+    //}
 
     // manage wakefulness
     if (s->awake_timeout > 0) {
