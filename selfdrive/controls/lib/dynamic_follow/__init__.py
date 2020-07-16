@@ -189,8 +189,6 @@ class DynamicFollow:
     """
     a_ego = self.car_data.a_ego
     a_lead = self.lead_data.a_lead
-    rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-    mod_y = [0.3245 * 1.5, 0.277 * 1.45, 0.11075 * 1.35, 0.08106 * 1.25, 0.06325 * 1.15, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
     min_consider_time = 0.75  # minimum amount of time required to consider calculation
     if len(self.df_data.v_rels) > 0:  # if not empty
       elapsed_time = self.df_data.v_rels[-1]['time'] - self.df_data.v_rels[0]['time']
@@ -199,10 +197,12 @@ class DynamicFollow:
         a_lead = (self.df_data.v_rels[-1]['v_lead'] - self.df_data.v_rels[0]['v_lead']) / elapsed_time
 
     mods_x = [0, -.75, -1.5]
-    mods_y = [3, 1.5, 1]
+    mods_y = [1.5, 1.25, 1]
     if a_lead < 0:  # more weight to slight lead decel
       a_lead *= np.interp(a_lead, mods_x, mods_y)
 
+    rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
+    mod_y = [0.3245 * 1.25, 0.277 * 1.2, 0.11075 * 1.15, 0.08106 * 1.075, 0.06325 * 1.05, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
     return np.interp(a_lead - a_ego, rel_x, mod_y)
 
   def global_profile_mod(self, profile_mod_x, profile_mod_pos, profile_mod_neg, x_vel, y_dist):
