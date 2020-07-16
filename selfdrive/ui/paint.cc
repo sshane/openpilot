@@ -902,12 +902,6 @@ static const mat4 full_to_wide_frame_transform = {{
   0.0,  0.0, 0.0, 1.0,
 }};
 
-struct tm get_time_struct() {
-  time_t t = time(NULL);
-  struct tm tm = *localtime(&t);
-  return tm;
-}
-
 void ui_nvg_init(UIState *s) {
   // init drawing
   s->vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
