@@ -289,8 +289,8 @@ class DynamicFollow:
 
     rel_accel_mod = self._relative_accel_mod()
     deadzone = 5 * CV.MPH_TO_MS
-    if self.lead_data.v_lead - deadzone > self.car_data.v_ego:  # todo: do we need this?
-      TR_mods.append(rel_accel_mod)
+    #if self.lead_data.v_lead - deadzone > self.car_data.v_ego:  # todo: do we need this?
+    TR_mods.append(rel_accel_mod)
 
     x = [self.sng_speed / 5.0, self.sng_speed]  # as we approach 0, apply x% more distance
     y = [1.05, 1.0]
