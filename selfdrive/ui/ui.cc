@@ -148,7 +148,9 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
   //dfButton manager  // code below thanks to kumar: https://github.com/arne182/openpilot/commit/71d5aac9f8a3f5942e89634b20cbabf3e19e3e78
   if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
     int padding = 40;
-    if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
+    int btn_x_1 = 1660 - 400;
+    int btn_x_2 = 1660 - 100;
+    if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
       s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping df button
       s->scene.dfButtonStatus++;
       if (s->scene.dfButtonStatus > 3) {
