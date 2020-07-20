@@ -315,8 +315,8 @@ class Track:
     self.yRel = yRel
     self.dRel = dRel
 
-TEMP_LIVE_TRACKS = [Track(np.random.uniform(-40, 40), np.random.uniform(-12, 12), np.random.uniform(0, 180)) for _ in range(16)]
-TEMP_D_POLY = np.array([1.3839008e-06, 0.00017540116, -0.0059070284, 0.25009361])
+TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 45), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 180)) for _ in range(16)]
+TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
 def main():
   lane_speed = LaneSpeed()
