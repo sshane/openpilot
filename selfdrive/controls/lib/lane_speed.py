@@ -312,10 +312,11 @@ class Track:
     self.dRel = dRel
 
 TEMP_LIVE_TRACKS = [Track(np.random.uniform(-40, 40), np.random.uniform(-12, 12), np.random.uniform(0, 180)) for _ in range(16)]
+TEMP_D_POLY = np.array([1.3839008e-06, 0.00017540116, -0.0059070284, 0.25009361])
 
 def main():
   lane_speed = LaneSpeed()
-  lane_speed.start(TEMP_LIVE_TRACKS)
+  lane_speed.start(temp_v_ego=np.random.uniform(0, 40), temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
 
 
 if __name__ == '__main__':
