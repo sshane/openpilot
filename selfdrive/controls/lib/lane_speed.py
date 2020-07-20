@@ -173,9 +173,9 @@ class LaneSpeed:
       for lane_name in self.lanes:
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
-          print('track in lane!')
-          print(self.v_ego)
-          print(track.vRel + self.v_ego)
+          # print('track in lane!')
+          # print(self.v_ego)
+          # print(track.vRel + self.v_ego)
           if track.vRel + self.v_ego >= 2.24:
             self.lanes[lane_name].tracks.append(track)
           elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
@@ -205,9 +205,10 @@ class LaneSpeed:
     v_cruise_setpoint = self.sm['controlsState'].vCruise * CV.KPH_TO_MS
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
+      print(len(lane.tracks))
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
-      print(len(track_speeds))
+      # print(len(track_speeds))
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
     print('get_fastest_lane avg_speeds: {}'.format(sec_since_boot() - t_start))
