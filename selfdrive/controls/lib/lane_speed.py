@@ -52,7 +52,7 @@ class Lane:
     self.fastest_count += 1
 
 
-LANE_SPEED_RATE = 1 / 5.
+LANE_SPEED_RATE = 1 / 20.
 
 class LaneSpeed:
   def __init__(self):
@@ -124,6 +124,7 @@ class LaneSpeed:
         time.sleep(t_sleep)
       else:  # don't sleep if lagging
         print('lane_speed lagging by: {} ms'.format(round(-t_sleep * 1000, 3)))
+      print('==============')
 
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
