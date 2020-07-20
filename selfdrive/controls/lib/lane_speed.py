@@ -212,8 +212,9 @@ class LaneSpeed:
       if len(track_speeds):  # filters out very slow tracks
         # lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
-    print('get_fastest_lane avg_speeds: {} s'.format(sec_since_boot() - t_start))
-    print('get_fastest_lane avg_speeds: {} Hz'.format(1/(sec_since_boot() - t_start)))
+    t_elapsed = sec_since_boot() - t_start
+    print('get_fastest_lane avg_speeds: {} s'.format(t_elapsed))
+    print('get_fastest_lane avg_speeds: {} Hz'.format(1/t_elapsed))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
     if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
