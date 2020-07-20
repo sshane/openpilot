@@ -57,7 +57,7 @@ LANE_SPEED_RATE = 1 / 5.
 class LaneSpeed:
   def __init__(self):
     set_core_affinity(1)
-    set_realtime_priority(1)
+    # set_realtime_priority(1)
     self.op_params = opParams()
 
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
