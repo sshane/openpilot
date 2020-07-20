@@ -1,5 +1,5 @@
 from common.op_params import opParams
-
+from common.realtime import set_realtime_priority, set_core_affinity
 from selfdrive.config import Conversions as CV
 # from common.numpy_fast import clip, interp
 import numpy as np
@@ -56,6 +56,8 @@ LANE_SPEED_RATE = 1 / 20.
 
 class LaneSpeed:
   def __init__(self):
+    set_core_affinity(1)
+    set_realtime_priority(0)
     self.op_params = opParams()
 
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
