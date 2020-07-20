@@ -131,6 +131,7 @@ class LaneSpeed:
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
     self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
+    print('ls_state: {}'.format(self.ls_state))
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]):
