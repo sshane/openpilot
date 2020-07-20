@@ -206,7 +206,6 @@ class LaneSpeed:
     v_cruise_setpoint = 99
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
-      print(len(lane.tracks))
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
       print(len(track_speeds))
