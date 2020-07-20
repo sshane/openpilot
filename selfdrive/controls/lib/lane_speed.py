@@ -206,12 +206,19 @@ class LaneSpeed:
     v_cruise_setpoint = 99
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
+      t = sec_since_boot()
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
+      print(sec_since_boot() - t)
+      t = sec_since_boot()
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
-      print(len(track_speeds))
+      print(sec_since_boot() - t)
+      t = sec_since_boot()
+      # print(len(track_speeds))
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
-    print('get_fastest_lane avg_speeds: {}'.format(sec_since_boot() - t_start))
+        print(sec_since_boot() - t)
+    print('get_fastest_lane avg_speeds: {} s'.format(sec_since_boot() - t_start))
+    print('get_fastest_lane avg_speeds: {} Hz'.format(1/(sec_since_boot() - t_start)))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
     if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
