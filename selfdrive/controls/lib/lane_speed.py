@@ -181,7 +181,9 @@ class LaneSpeed:
           elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
-    print('group_tracks: {}'.format(sec_since_boot() - t_start))
+    t_elapsed = sec_since_boot() - t_start
+    print('group_tracks: {} s'.format(t_elapsed))
+    print('group_tracks: {} Hz'.format(1/t_elapsed))
 
   def find_oncoming_lanes(self):
     t_start = sec_since_boot()
@@ -190,7 +192,9 @@ class LaneSpeed:
       self.oncoming_lanes[lane] = False
       if len(self.lanes[lane].oncoming_tracks) > len(self.lanes[lane].tracks):  # 0 can't be > 0 so 0 oncoming tracks will be handled correctly
         self.oncoming_lanes[lane] = True
-    print('find_oncoming_lanes: {}'.format(sec_since_boot() - t_start))
+    t_elapsed = sec_since_boot() - t_start
+    print('find_oncoming_lanes: {} s'.format(t_elapsed))
+    print('find_oncoming_lanes: {} Hz'.format(1/t_elapsed))
 
   def lanes_with_avg_speeds(self):
     """Returns a dict of lane objects where avg_speed not None"""
