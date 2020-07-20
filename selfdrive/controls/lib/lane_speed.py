@@ -318,7 +318,7 @@ class Track:
     self.yRel = yRel
     self.dRel = dRel
 
-TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 45), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 60)) for _ in range(16)]
+TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 10), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 60)) for _ in range(16)]
 TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
 def main():
