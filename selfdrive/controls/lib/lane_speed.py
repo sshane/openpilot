@@ -182,8 +182,7 @@ class LaneSpeed:
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
-    print('group_tracks: {} s'.format(t_elapsed))
-    print('group_tracks: {} Hz'.format(1/t_elapsed))
+    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   def find_oncoming_lanes(self):
     t_start = sec_since_boot()
@@ -193,8 +192,7 @@ class LaneSpeed:
       if len(self.lanes[lane].oncoming_tracks) > len(self.lanes[lane].tracks):  # 0 can't be > 0 so 0 oncoming tracks will be handled correctly
         self.oncoming_lanes[lane] = True
     t_elapsed = sec_since_boot() - t_start
-    print('find_oncoming_lanes: {} s'.format(t_elapsed))
-    print('find_oncoming_lanes: {} Hz'.format(1/t_elapsed))
+    print('find_oncoming_lanes: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   def lanes_with_avg_speeds(self):
     """Returns a dict of lane objects where avg_speed not None"""
@@ -216,8 +214,7 @@ class LaneSpeed:
         # np.mean was much slower than sum() / len()
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
     t_elapsed = sec_since_boot() - t_start
-    print('get_fastest_lane avg_speeds: {} s'.format(t_elapsed))
-    print('get_fastest_lane avg_speeds: {} Hz'.format(1/t_elapsed))
+    print('get_fastest_lane avg_speeds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
     if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
