@@ -9,6 +9,7 @@ try:
   import cereal.messaging as messaging
 except:
   pass
+
 # try:
 #   from common.realtime import sec_since_boot
 # except ImportError:
@@ -69,6 +70,7 @@ class LaneSpeed:
     self._setup()
 
   def _setup(self):
+    t_start = sec_since_boot()
     self.ls_state = self.op_params.get('lane_speed_alerts', 'audible').strip().lower()
     if not isinstance(self.ls_state, str) or self.ls_state not in LaneSpeedState.to_idx:
       self.ls_state = LaneSpeedState.audible
@@ -89,16 +91,29 @@ class LaneSpeed:
     self.oncoming_lanes = {'left': False, 'right': False}
 
     self.last_alert_end_time = 0
+    print('Setup time: {}'.format(sec_since_boot() - t_start))
 
-  def start(self):
+  def start(self, temp_v_ego=None, temp_steer_angle=None, temp_d_poly=None, temp_tracks=None):
     while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
 
-      self.v_ego = self.sm['carState'].vEgo
-      self.steer_angle = self.sm['carState'].steeringAngle
-      self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
-      self.live_tracks = self.sm['liveTracks']
+      if temp_v_ego is not None:
+        self.v_ego = temp_v_ego
+      else:
+        self.v_ego = self.sm['carState'].vEgo
+      if temp_steer_angle is not None:
+        self.steer_angle = temp_steer_angle
+      else:
+        self.steer_angle = self.sm['carState'].steeringAngle
+      if temp_d_poly is not None:
+        self.d_poly = temp_d_poly
+      else:
+        self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
+      if temp_tracks is not None:
+        self.live_tracks = temp_tracks
+      else:
+        self.live_tracks = self.sm['liveTracks']
 
       self.update_lane_bounds()
       self.update()
@@ -124,6 +139,7 @@ class LaneSpeed:
       self.reset(reset_fastest=True)
 
   def update_lane_bounds(self):
+    t_start = sec_since_boot()
     lane_width = self.sm['pathPlan'].laneWidth
     if isinstance(lane_width, float) and lane_width > 1:
       self.lane_width = min(lane_width, 4)  # LanePlanner uses 4 as max width for dPoly calculation
@@ -135,6 +151,7 @@ class LaneSpeed:
     self.lanes['left'].bounds = np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2])
     self.lanes['middle'].bounds = np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2])
     self.lanes['right'].bounds = np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])
+    print('update_lane_bounds: {}'.format(sec_since_boot() - t_start))
 
   # def filter_tracks(self):  # todo: make cluster() return indexes of live_tracks instead
   #   print(type(self.live_tracks))
@@ -146,6 +163,7 @@ class LaneSpeed:
   #   # print(c)
 
   def group_tracks(self):
+    t_start = sec_since_boot()
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
     for track, y_offset in zip(self.live_tracks, y_offsets):
@@ -157,19 +175,23 @@ class LaneSpeed:
           elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
+    print('group_tracks: {}'.format(sec_since_boot() - t_start))
 
   def find_oncoming_lanes(self):
+    t_start = sec_since_boot()
     """If number of oncoming tracks is greater than tracks going our direction, set lane to oncoming"""
     for lane in self.oncoming_lanes:
       self.oncoming_lanes[lane] = False
       if len(self.lanes[lane].oncoming_tracks) > len(self.lanes[lane].tracks):  # 0 can't be > 0 so 0 oncoming tracks will be handled correctly
         self.oncoming_lanes[lane] = True
+    print('find_oncoming_lanes: {}'.format(sec_since_boot() - t_start))
 
   def lanes_with_avg_speeds(self):
     """Returns a dict of lane objects where avg_speed not None"""
     return {lane: self.lanes[lane] for lane in self.lanes if self.lanes[lane].avg_speed is not None}
 
   def get_fastest_lane(self):
+    t_start = sec_since_boot()
     self.fastest_lane = 'none'
     if self.ls_state == LaneSpeedState.off:
       return
@@ -181,6 +203,7 @@ class LaneSpeed:
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
+    print('get_fastest_lane avg_speeds: {}'.format(sec_since_boot() - t_start))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
     if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
@@ -282,17 +305,17 @@ class LaneSpeed:
         self.lanes[lane].fastest_count = 0
 
 
-# class Track:
-#   def __init__(self, vRel, yRel, dRel):
-#     self.vRel = vRel
-#     self.yRel = yRel
-#     self.dRel = dRel
-#
-# TEMP_LIVE_TRACKS = [Track(10, 4, 20), Track(10, 4, 20), Track(20, 0, 20), Track(25, 0, 20)]
+class Track:
+  def __init__(self, vRel, yRel, dRel):
+    self.vRel = vRel
+    self.yRel = yRel
+    self.dRel = dRel
+
+TEMP_LIVE_TRACKS = [Track(np.random.uniform(-40, 40), np.random.uniform(-12, 12), np.random.uniform(0, 180)) for _ in range(16)]
 
 def main():
   lane_speed = LaneSpeed()
-  lane_speed.start()
+  lane_speed.start(TEMP_LIVE_TRACKS)
 
 
 if __name__ == '__main__':
