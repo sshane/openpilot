@@ -173,6 +173,7 @@ class LaneSpeed:
       for lane_name in self.lanes:
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
+          print('track in lane!')
           if track.vRel + self.v_ego >= 2.24:
             self.lanes[lane_name].tracks.append(track)
           elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
@@ -315,7 +316,7 @@ class Track:
     self.yRel = yRel
     self.dRel = dRel
 
-TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 45), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 180)) for _ in range(16)]
+TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 45), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 60)) for _ in range(16)]
 TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
 def main():
