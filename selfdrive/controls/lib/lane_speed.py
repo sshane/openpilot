@@ -217,6 +217,7 @@ class LaneSpeed:
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
         print(sec_since_boot() - t)
+      print()
     print('get_fastest_lane avg_speeds: {} s'.format(sec_since_boot() - t_start))
     print('get_fastest_lane avg_speeds: {} Hz'.format(1/(sec_since_boot() - t_start)))
 
