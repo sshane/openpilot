@@ -203,12 +203,13 @@ class LaneSpeed:
       return
 
     v_cruise_setpoint = self.sm['controlsState'].vCruise * CV.KPH_TO_MS
+    v_cruise_setpoint = 99
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
       print(len(lane.tracks))
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
-      # print(len(track_speeds))
+      print(len(track_speeds))
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
     print('get_fastest_lane avg_speeds: {}'.format(sec_since_boot() - t_start))
