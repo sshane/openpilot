@@ -154,7 +154,8 @@ class LaneSpeed:
     self.lanes['left'].bounds = np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2])
     self.lanes['middle'].bounds = np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2])
     self.lanes['right'].bounds = np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])
-    print('update_lane_bounds: {}'.format(sec_since_boot() - t_start))
+    t_elapsed = sec_since_boot() - t_start
+    print('update_lane_bounds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   # def filter_tracks(self):  # todo: make cluster() return indexes of live_tracks instead
   #   print(type(self.live_tracks))
