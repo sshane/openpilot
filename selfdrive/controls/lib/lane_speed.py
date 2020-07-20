@@ -52,7 +52,7 @@ class Lane:
     self.fastest_count += 1
 
 
-LANE_SPEED_RATE = 1 / 20.
+LANE_SPEED_RATE = 1 / 5.
 
 class LaneSpeed:
   def __init__(self):
