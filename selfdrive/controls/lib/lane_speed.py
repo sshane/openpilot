@@ -131,7 +131,6 @@ class LaneSpeed:
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
     self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
-    print('ls_state: {}'.format(self.ls_state))
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]):
@@ -205,6 +204,7 @@ class LaneSpeed:
       lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
+      print(len(track_speeds))
       if len(track_speeds):  # filters out very slow tracks
         lane.avg_speed = np.mean(track_speeds)  # todo: something with std?
     print('get_fastest_lane avg_speeds: {}'.format(sec_since_boot() - t_start))
