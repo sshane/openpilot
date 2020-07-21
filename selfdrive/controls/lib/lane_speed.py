@@ -334,14 +334,14 @@ TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 def eval_poly(poly, x):
   return poly[3] + poly[2]*x + poly[1]*x**2 + poly[0]*x**3
 
-x = np.linspace(0, 180, 180)
+x = np.random.uniform(0, 180, 10).tolist()
 t_start = sec_since_boot()
-for _ in range(10000):
+for _ in range(100000):
   np.polyval(TEMP_D_POLY, x)
 print('np.polyval: {}'.format(sec_since_boot() - t_start))
 
 t_start = sec_since_boot()
-for _ in range(10000):
+for _ in range(100000):
   eval_poly(TEMP_D_POLY, x)
 print('eval_poly: {}'.format(sec_since_boot() - t_start))
 raise Exception()
