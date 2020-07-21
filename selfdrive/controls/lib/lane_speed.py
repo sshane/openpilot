@@ -174,14 +174,12 @@ class LaneSpeed:
     for lane_name in self.lanes:
       for track, y_offset in zip(self.live_tracks, y_offsets):
         t_iter += 1
+        lane_bounds = self.lanes[lane_name].bounds + y_offset
+        if lane_bounds[0] >= track.yRel >= lane_bounds[1]:
+          break
     print('total iterations: {}'.format(t_iter))
-    t_iter = 0
-    for track, y_offset in zip(self.live_tracks, y_offsets):
-      for lane_name in self.lanes:
-        t_iter += 1
-    print('total iterations: {}'.format(t_iter))
-    t_iter = 0
 
+    t_iter = 0
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
         t_iter += 1
