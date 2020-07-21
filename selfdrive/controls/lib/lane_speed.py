@@ -154,9 +154,9 @@ class LaneSpeed:
     self.lanes['right'].pos = -self.lane_width
 
     # and now update bounds
-    self.lanes['left'].bounds = np.array([self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2])
-    self.lanes['middle'].bounds = np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2])
-    self.lanes['right'].bounds = np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])
+    self.lanes['left'].bounds = [self.lanes['left'].pos * 1.5, self.lanes['left'].pos / 2]
+    self.lanes['middle'].bounds = [self.lanes['left'].pos / 2, self.lanes['right'].pos / 2]
+    self.lanes['right'].bounds = [self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5]
     t_elapsed = sec_since_boot() - t_start
     # print('update_lane_bounds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
@@ -179,7 +179,7 @@ class LaneSpeed:
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
         t_iter += 1
-        lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
+        lane_bounds = [b + y_offset for b in self.lanes[lane_name].bounds]  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
           travk_vel = track.vRel + self.v_ego
           if travk_vel >= 2.24:
