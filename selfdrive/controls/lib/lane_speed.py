@@ -71,6 +71,7 @@ class LaneSpeed:
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
     self._setup()
+    self.group_tracks_rates = []
 
   def _setup(self):
     t_start = sec_since_boot()
@@ -189,6 +190,8 @@ class LaneSpeed:
     t_elapsed = sec_since_boot() - t_start
     print('total iterations: {}'.format(t_iter))
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
+    self.group_tracks_rates.append(1/t_elapsed)
+    print('average group_tracks rate: {}'.format(sum(self.group_tracks_rates) / len(self.group_tracks_rates)))
 
   def find_oncoming_lanes(self):
     # t_start = sec_since_boot()
