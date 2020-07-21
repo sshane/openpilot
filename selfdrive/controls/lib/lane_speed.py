@@ -67,7 +67,7 @@ class LaneSpeed:
     self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
     self._max_steer_angle = 100  # max supported steering angle
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
-    self._static_track_speed = 2.24  # tracks must be traveling faster than this speed to be added to a lane (- or +)
+    self._min_track_speed = 2.24  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
@@ -173,62 +173,37 @@ class LaneSpeed:
   def group_tracks(self):
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     t_start = sec_since_boot()
-    # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
-    offset_y_rels = [trk.yRel - eval_poly(self.d_poly, trk.dRel) for trk in self.live_tracks]  # it's faster to calculate all at once
+    offset_y_rels = [trk.yRel - eval_poly(self.d_poly, trk.dRel) for trk in self.live_tracks]  # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
 
     for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
+      # it's not pretty, but this code is the fastest. even when looping through tracks and then lanes for each track
+      # (and breaking when a lane has been found for the track)
+      # this is also faster than having the speed if check first
       track_vel = track.vRel + self.v_ego
       if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-        if track_vel >= 2.24:
+        if track_vel >= self._min_track_speed:  # ongoing track
           self.lanes['left'].tracks.append(track)
-        elif track_vel <= -2.24:
+        elif track_vel <= -self._min_track_speed:  # oncoming track
           self.lanes['left'].oncoming_tracks.append(track)
+
       elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-        if track_vel >= 2.24:
+        if track_vel >= self._min_track_speed:
           self.lanes['middle'].tracks.append(track)
-        elif track_vel <= -2.24:
+        elif track_vel <= -self._min_track_speed:
           self.lanes['middle'].oncoming_tracks.append(track)
+
       elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-        if track_vel >= 2.24:
+        if track_vel >= self._min_track_speed:
           self.lanes['right'].tracks.append(track)
-        elif track_vel <= -2.24:
+        elif track_vel <= -self._min_track_speed:
           self.lanes['right'].oncoming_tracks.append(track)
-
-      # if track_vel >= 2.24:
-      #   if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-      #     self.lanes['left'].tracks.append(track)
-      #   elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-      #     self.lanes['middle'].tracks.append(track)
-      #   elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-      #     self.lanes['right'].tracks.append(track)
-      # elif track_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
-      #   if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-      #     self.lanes['left'].oncoming_tracks.append(track)
-      #   elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-      #     self.lanes['middle'].oncoming_tracks.append(track)
-      #   elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-      #     self.lanes['right'].oncoming_tracks.append(track)
-
-    # t_iter = 0
-    # for track, y_offset in zip(self.live_tracks, y_offsets):  # 1299.8735 hz
-    #   for lane_name in self.lanes:
-    #     t_iter += 1
-    #     lane_bounds = [b + y_offset for b in self.lanes[lane_name].bounds]  # offset lane bounds based on our future lateral position (dPoly) and track's distance
-    #     if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
-    #       travk_vel = track.vRel + self.v_ego
-    #       if travk_vel >= 2.24:
-    #         self.lanes[lane_name].tracks.append(track)
-    #       elif travk_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
-    #         self.lanes[lane_name].oncoming_tracks.append(track)
-    #       break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
 
-    # print('total iterations: {}'.format(t_iter))
-    # print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
-    # print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
-    # print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
+    print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
+    print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
+    print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
 
-    # print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
+    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
     print('average group_tracks rate: {} Hz'.format(round(np.mean(self.group_tracks_rates), 4)))
     if sec_since_boot() - self.t_start > 60:
