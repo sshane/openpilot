@@ -157,7 +157,7 @@ class LaneSpeed:
     self.lanes['middle'].bounds = np.array([self.lanes['left'].pos / 2, self.lanes['right'].pos / 2])
     self.lanes['right'].bounds = np.array([self.lanes['right'].pos / 2, self.lanes['right'].pos * 1.5])
     t_elapsed = sec_since_boot() - t_start
-    print('update_lane_bounds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
+    # print('update_lane_bounds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   # def filter_tracks(self):  # todo: make cluster() return indexes of live_tracks instead
   #   print(type(self.live_tracks))
@@ -189,9 +189,9 @@ class LaneSpeed:
           break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
     print('total iterations: {}'.format(t_iter))
-    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
+    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
-    print('average group_tracks rate: {}'.format(sum(self.group_tracks_rates) / len(self.group_tracks_rates)))
+    print('average group_tracks rate: {}'.format(round(np.mean(self.group_tracks_rates), 4)))
 
   def find_oncoming_lanes(self):
     # t_start = sec_since_boot()
@@ -223,7 +223,7 @@ class LaneSpeed:
         # np.mean was much slower than sum() / len()
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
     t_elapsed = sec_since_boot() - t_start
-    print('get_fastest_lane avg_speeds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
+    # print('get_fastest_lane avg_speeds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
     if 'middle' not in lanes_with_avg_speeds or len(lanes_with_avg_speeds) < 2:
