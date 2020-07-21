@@ -94,27 +94,15 @@ class LaneSpeed:
 
     self.last_alert_end_time = 0
 
-  def start(self, temp_v_ego=None, temp_steer_angle=None, temp_d_poly=None, temp_tracks=None):
+  def start(self):
     while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
 
-      if temp_v_ego is not None:
-        self.v_ego = temp_v_ego
-      else:
-        self.v_ego = self.sm['carState'].vEgo
-      if temp_steer_angle is not None:
-        self.steer_angle = temp_steer_angle
-      else:
-        self.steer_angle = self.sm['carState'].steeringAngle
-      if temp_d_poly is not None:
-        self.d_poly = temp_d_poly
-      else:
-        self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
-      if temp_tracks is not None:
-        self.live_tracks = temp_tracks
-      else:
-        self.live_tracks = self.sm['liveTracks']
+      self.v_ego = self.sm['carState'].vEgo
+      self.steer_angle = self.sm['carState'].steeringAngle
+      self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
+      self.live_tracks = self.sm['liveTracks']
 
       self.update_lane_bounds()
       self.update()
@@ -314,20 +302,20 @@ class LaneSpeed:
         self.lanes[lane].fastest_count = 0
 
 
-class Track:
-  def __init__(self, vRel, yRel, dRel):
-    self.vRel = vRel
-    self.yRel = yRel
-    self.dRel = dRel
-v_rels = [7.027988825101453, -35, -2.0073281329557595, -38, -42, -0.4124279188166433, -4.864017389464086, -31.5, -9.684282305020197, -9.979187599100587, -8.036672540886896, -3.025854705185946, -6.347005348508485, -2.502134724290814, 3.8857648270182743, 5.3016772854121115]
-y_rels = [-3.7392238915910396, -4.947102125963248, -3.099776764519531, -5.399104990417248, 5.278053706824695, 3.8991116187949793, -0.9252016611001208, 0.4527911313949229, 4.606432638329704, -1.9683618473307751, -3.6920577990810357, -0.9243886066458202, 4.765879225624099, 5.310588490331199, -2.073362080174996, -0.787692913730746]
-d_rels = [47.816299530243484, 1.0937590342875225, 45.83286354330341, 44.79009263149329, 15.721120725763347, 48.974408204844835, 10.538985749858739, 50.379159253222355, 27.746917826360942, 24.410420872880284, 1.605961587171345, 23.89657990345233, 30.219941981980615, 50.31621564718719, 35.654178681545176, 34.980565736019585]
-TEMP_LIVE_TRACKS = [Track(v, y, d) for v, y, d in zip(v_rels, y_rels, d_rels)]
-TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
+# class Track:
+#   def __init__(self, vRel, yRel, dRel):
+#     self.vRel = vRel
+#     self.yRel = yRel
+#     self.dRel = dRel
+# v_rels = [7.027988825101453, -35, -2.0073281329557595, -38, -42, -0.4124279188166433, -4.864017389464086, -31.5, -9.684282305020197, -9.979187599100587, -8.036672540886896, -3.025854705185946, -6.347005348508485, -2.502134724290814, 3.8857648270182743, 5.3016772854121115]
+# y_rels = [-3.7392238915910396, -4.947102125963248, -3.099776764519531, -5.399104990417248, 5.278053706824695, 3.8991116187949793, -0.9252016611001208, 0.4527911313949229, 4.606432638329704, -1.9683618473307751, -3.6920577990810357, -0.9243886066458202, 4.765879225624099, 5.310588490331199, -2.073362080174996, -0.787692913730746]
+# d_rels = [47.816299530243484, 1.0937590342875225, 45.83286354330341, 44.79009263149329, 15.721120725763347, 48.974408204844835, 10.538985749858739, 50.379159253222355, 27.746917826360942, 24.410420872880284, 1.605961587171345, 23.89657990345233, 30.219941981980615, 50.31621564718719, 35.654178681545176, 34.980565736019585]
+# TEMP_LIVE_TRACKS = [Track(v, y, d) for v, y, d in zip(v_rels, y_rels, d_rels)]
+# TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
 def main():
   lane_speed = LaneSpeed()
-  lane_speed.start(temp_v_ego=28.36862661604355, temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
+  lane_speed.start()
 
 
 if __name__ == '__main__':
