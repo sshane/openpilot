@@ -170,8 +170,10 @@ class LaneSpeed:
     t_start = sec_since_boot()
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
+    t_iter = 0
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
+        t_iter += 1
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
           # print('track in lane!')
@@ -183,6 +185,7 @@ class LaneSpeed:
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
+    print('total iterations: {}'.format(t_iter))
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   def find_oncoming_lanes(self):
