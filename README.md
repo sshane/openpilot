@@ -50,7 +50,7 @@ I've trained a custom model with Keras that takes in the past 35 seconds of your
 
 It's only been trained on about an hour of data, so it's not perfect yet, but it's great for users who just want to set it and forget it. **To enable the `auto` profile, simply tap the profile changing button for dynamic follow until it reaches the `auto` profile!**
 
-If you're annoyed by the silent alerts that show when the model has changed the profile automatically, just use [opEdit](#Customize-this-fork-opEdit) and set `hide_auto_df_alerts` to `False`. Auto profile and model will remain functional but will not show alerts.
+If you're annoyed by the silent alerts that show when the model has changed the profile automatically, just use [opEdit](#Customize-this-fork-opEdit) and set `hide_auto_df_alerts` to `True`. Auto profile and model will remain functional but will not show alerts.
 
 Resources:
 - [The auto-df repo.](https://github.com/ShaneSmiskol/auto-df)
@@ -130,6 +130,8 @@ Here are the main parameters you can change with this fork:
   - `hide_auto_df_alerts`: Hides the alert that shows what profile the model has chosen
   - [`dynamic_camera_offset`](#Dynamic-camera-offset-based-on-oncoming-traffic): Whether to automatically keep away from oncoming traffic. Works from 35 to ~60 mph
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
+- **Experimental params**:
+  - `support_white_panda`: This allows users with the original white panda to use openpilot above 0.7.7. The high precision localizer's performance may be reduced due to a lack of GPS
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L40).
 
