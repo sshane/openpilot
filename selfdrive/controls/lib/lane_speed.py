@@ -180,6 +180,7 @@ class LaneSpeed:
       for lane_name in self.lanes:
         t_iter += 1
     print('total iterations: {}'.format(t_iter))
+    t_iter = 0
 
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
