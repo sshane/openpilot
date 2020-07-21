@@ -342,7 +342,8 @@ print('np.polyval: {}'.format(sec_since_boot() - t_start))
 
 t_start = sec_since_boot()
 for _ in range(100000):
-  [eval_poly(TEMP_D_POLY, _x) for _x in x]
+  # [eval_poly(TEMP_D_POLY, _x) for _x in x]
+  eval_poly(TEMP_D_POLY, np.array(x))
 print('eval_poly: {}'.format(sec_since_boot() - t_start))
 raise Exception()
 def main():
