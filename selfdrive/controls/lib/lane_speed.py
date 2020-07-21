@@ -177,11 +177,11 @@ class LaneSpeed:
     t_iter = 0
     t_start = sec_since_boot()
     for track, y_offset in zip(self.live_tracks, y_offsets):
-      travk_vel = track.vRel + self.v_ego
       for lane_name in self.lanes:
         t_iter += 1
         lane_bounds = self.lanes[lane_name].bounds + y_offset  # offset lane bounds based on our future lateral position (dPoly) and track's distance
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
+          travk_vel = track.vRel + self.v_ego
           # print('track in lane!')
           # print(self.v_ego)
           # print(track.vRel + self.v_ego)
