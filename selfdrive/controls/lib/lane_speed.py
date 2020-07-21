@@ -176,8 +176,8 @@ class LaneSpeed:
     # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
     offset_y_rels = [trk.yRel - eval_poly(self.d_poly, trk.dRel) for trk in self.live_tracks]  # it's faster to calculate all at once
 
-    for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
-      track_vel = track.vRel + self.v_ego
+    # for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
+    #   track_vel = track.vRel + self.v_ego
       # if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
       #   if track_vel >= 2.24:
       #     self.lanes['left'].tracks.append(track)
@@ -193,33 +193,33 @@ class LaneSpeed:
       #     self.lanes['right'].tracks.append(track)
       #   elif track_vel <= -2.24:
       #     self.lanes['right'].oncoming_tracks.append(track)
-      if track_vel >= 2.24:
-        if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-          self.lanes['left'].tracks.append(track)
-        elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-          self.lanes['middle'].tracks.append(track)
-        elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-          self.lanes['right'].tracks.append(track)
-      elif track_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
-        if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-          self.lanes['left'].oncoming_tracks.append(track)
-        elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-          self.lanes['middle'].oncoming_tracks.append(track)
-        elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-          self.lanes['right'].oncoming_tracks.append(track)
+
+      # if track_vel >= 2.24:
+      #   if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
+      #     self.lanes['left'].tracks.append(track)
+      #   elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
+      #     self.lanes['middle'].tracks.append(track)
+      #   elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
+      #     self.lanes['right'].tracks.append(track)
+      # elif track_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
+      #   if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
+      #     self.lanes['left'].oncoming_tracks.append(track)
+      #   elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
+      #     self.lanes['middle'].oncoming_tracks.append(track)
+      #   elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
+      #     self.lanes['right'].oncoming_tracks.append(track)
 
     # t_iter = 0
-    # for track, y_offset in zip(self.live_tracks, y_offsets):  # 1299.8735 hz
-    #   for lane_name in self.lanes:
-    #     t_iter += 1
-    #     lane_bounds = [b + y_offset for b in self.lanes[lane_name].bounds]  # offset lane bounds based on our future lateral position (dPoly) and track's distance
-    #     if lane_bounds[0] >= track.yRel >= lane_bounds[1]:  # track is in a lane
-    #       travk_vel = track.vRel + self.v_ego
-    #       if travk_vel >= 2.24:
-    #         self.lanes[lane_name].tracks.append(track)
-    #       elif travk_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
-    #         self.lanes[lane_name].oncoming_tracks.append(track)
-    #       break  # skip to next track
+    for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):  # 1299.8735 hz
+      for lane_name in self.lanes:
+        # lane_bounds = [b + y_offset for b in self.lanes[lane_name].bounds]  # offset lane bounds based on our future lateral position (dPoly) and track's distance
+        if self.lanes[lane_name].bounds[0] >= offset_y_rel >= self.lanes[lane_name].bounds[1]:  # track is in a lane
+          travk_vel = track.vRel + self.v_ego
+          if travk_vel >= 2.24:
+            self.lanes[lane_name].tracks.append(track)
+          elif travk_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
+            self.lanes[lane_name].oncoming_tracks.append(track)
+          break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
 
     # print('total iterations: {}'.format(t_iter))
