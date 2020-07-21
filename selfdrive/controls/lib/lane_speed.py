@@ -171,6 +171,16 @@ class LaneSpeed:
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
     t_iter = 0
+    for lane_name in self.lanes:
+      for track, y_offset in zip(self.live_tracks, y_offsets):
+        t_iter += 1
+    print('total iterations: {}'.format(t_iter))
+    t_iter = 0
+    for track, y_offset in zip(self.live_tracks, y_offsets):
+      for lane_name in self.lanes:
+        t_iter += 1
+    print('total iterations: {}'.format(t_iter))
+
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
         t_iter += 1
