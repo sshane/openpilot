@@ -234,8 +234,8 @@ if ANDROID:
     'tombstoned',
     'deleter',
   ]
-# if not no_ota_updates:
-#   persistent_processes.append('updated')
+if not no_ota_updates:
+  persistent_processes.append('updated')
 
 car_started_processes = [
   'controlsd',
@@ -250,7 +250,7 @@ car_started_processes = [
   'proclogd',
   'ubloxd',
   'locationd',
-  # 'lanespeedd',
+  'lanespeedd',
 ]
 
 if WEBCAM:
@@ -480,7 +480,7 @@ def manager_thread():
 
     if msg.thermal.freeSpace < 0.05:
       logger_dead = True
-    run_all = True
+    run_all = False
     if (msg.thermal.started and "driverview" not in running) or run_all:
       for p in car_started_processes:
         if p == "loggerd" and logger_dead:
