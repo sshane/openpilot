@@ -188,6 +188,7 @@ class LaneSpeed:
             self.lanes[lane_name].oncoming_tracks.append(track)
           break  # skip to next track
     t_elapsed = sec_since_boot() - t_start
+
     # print('total iterations: {}'.format(t_iter))
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
