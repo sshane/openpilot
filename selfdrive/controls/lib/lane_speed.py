@@ -223,11 +223,11 @@ class LaneSpeed:
     t_elapsed = sec_since_boot() - t_start
 
     # print('total iterations: {}'.format(t_iter))
-    print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
-    print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
-    print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
+    # print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
+    # print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
+    # print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
 
-    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
+    # print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
     print('average group_tracks rate: {} Hz'.format(round(np.mean(self.group_tracks_rates), 4)))
     if sec_since_boot() - self.t_start > 60:
