@@ -2,7 +2,7 @@ from common.op_params import opParams
 from common.realtime import set_core_affinity
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.lane_planner import eval_poly
-# from common.numpy_fast import clip, interp
+from common.numpy_fast import interp
 import numpy as np
 import time
 try:
@@ -128,7 +128,7 @@ class LaneSpeed:
       self.reset(reset_fastest=True)
 
   def update_lane_bounds(self):  # todo: run this at half the rate of lane_speed
-    t_start = sec_since_boot()
+    # todo 2: add dPoly offsetting to lane bounds here as well, from group_tracks
     lane_width = self.sm['pathPlan'].laneWidth
     if isinstance(lane_width, float) and lane_width > 1:
       self.lane_width = min(lane_width, 4.5)  # LanePlanner uses 4 as max width for dPoly calculation
@@ -153,7 +153,6 @@ class LaneSpeed:
   def group_tracks(self):
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
     offset_y_rels = [trk.yRel - eval_poly(self.d_poly, trk.dRel) for trk in self.live_tracks]  # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
-
     for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
       # it's not pretty, but this code is the fastest. even when looping through tracks and then lanes for each track
       # (and breaking when a lane has been found for the track)
@@ -222,7 +221,7 @@ class LaneSpeed:
 
     _f_time_x = [1, 4, 12]  # change the minimum time for fastest based on how many tracks are in fastest lane
     _f_time_y = [1.5, 1, 0.5]  # this is multiplied by base fastest time todo: probably need to tune this
-    min_fastest_time = np.interp(len(fastest_lane.tracks), _f_time_x, _f_time_y)  # get multiplier
+    min_fastest_time = interp(len(fastest_lane.tracks), _f_time_x, _f_time_y)  # get multiplier
     min_fastest_time = int(min_fastest_time * self._min_fastest_time)  # now get final min_fastest_time
 
     if fastest_lane.fastest_count < min_fastest_time:
