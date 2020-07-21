@@ -227,7 +227,7 @@ static void ui_init(UIState *s) {
                                     , "liveMapData"
 #endif
   });
-  s->pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton"});
+  s->pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
 
   s->ipc_fd = -1;
   s->scene.satelliteCount = -1;
@@ -271,7 +271,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 
   s->scene.dfButtonStatus = 0;
   s->scene.lsButtonStatus = 0;
-
+  s->scene.mlButtonStatus = 0;
 
   s->rgb_width = back_bufs.width;
   s->rgb_height = back_bufs.height;

@@ -126,6 +126,7 @@ typedef struct UIScene {
 
   int dfButtonStatus;
   int lsButtonStatus;
+  int mlButtonStatus;
 
   cereal::HealthData::HwType hwType;
   int satelliteCount;
