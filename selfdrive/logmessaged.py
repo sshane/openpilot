@@ -1,25 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import zmq
-from logentries import LogentriesHandler
-from selfdrive.services import service_list
-import selfdrive.messaging as messaging
+import cereal.messaging as messaging
+from selfdrive.swaglog import get_le_handler
 
-def main(gctx=None):
-  # setup logentries. we forward log messages to it
-  le_token = "e8549616-0798-4d7e-a2ca-2513ae81fa17"
-  le_handler = LogentriesHandler(le_token, use_tls=False, verbose=False)
 
-  le_level = 20 #logging.INFO
+def main():
+  le_handler = get_le_handler()
+  le_level = 20  # logging.INFO
 
   ctx = zmq.Context().instance()
   sock = ctx.socket(zmq.PULL)
   sock.bind("ipc:///tmp/logmessage")
 
   # and we publish them
-  pub_sock = messaging.pub_sock(service_list['logMessage'].port)
+  pub_sock = messaging.pub_sock('logMessage')
 
   while True:
-    dat = ''.join(sock.recv_multipart())
+    dat = b''.join(sock.recv_multipart())
+    dat = dat.decode('utf8')
 
     # print "RECV", repr(dat)
 
@@ -35,6 +33,7 @@ def main(gctx=None):
     msg = messaging.new_message()
     msg.logMessage = dat
     pub_sock.send(msg.to_bytes())
+
 
 if __name__ == "__main__":
   main()

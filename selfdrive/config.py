@@ -17,13 +17,13 @@ class Conversions:
   LB_TO_KG = 0.453592
 
 
-RADAR_TO_CENTER = 2.7   # RADAR is ~ 2.7m ahead from center of car
+RADAR_TO_CENTER = 2.7   # (deprecated) RADAR is ~ 2.7m ahead from center of car
+RADAR_TO_CAMERA = 1.52   # RADAR is ~ 1.5m ahead from center of mesh frame
 
 class UIParams:
   lidar_x, lidar_y, lidar_zoom = 384, 960, 6
   lidar_car_x, lidar_car_y = lidar_x/2., lidar_y/1.1
   car_hwidth = 1.7272/2 * lidar_zoom
   car_front = 2.6924 * lidar_zoom
-  car_back  = 1.8796 * lidar_zoom
+  car_back = 1.8796 * lidar_zoom
   car_color = 110
-

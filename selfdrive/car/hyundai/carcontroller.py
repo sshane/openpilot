@@ -1,70 +1,88 @@
+from cereal import car
+from common.realtime import DT_CTRL
 from selfdrive.car import apply_std_steer_torque_limits
-from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
-                                             create_1191, create_1156, \
-                                             create_clu11
-from selfdrive.car.hyundai.values import Buttons
-from selfdrive.can.packer import CANPacker
+from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa
+from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR
+from opendbc.can.packer import CANPacker
+
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
-# Steer torque limits
+def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
+                      right_lane, left_lane_depart, right_lane_depart):
+  sys_warning = (visual_alert == VisualAlert.steerRequired)
 
-class SteerLimitParams:
-  STEER_MAX = 255   # 409 is the max, 255 is stock
-  STEER_DELTA_UP = 3
-  STEER_DELTA_DOWN = 7
-  STEER_DRIVER_ALLOWANCE = 50
-  STEER_DRIVER_MULTIPLIER = 2
-  STEER_DRIVER_FACTOR = 1
+  # initialize to no line visible
+  sys_state = 1
+  if left_lane and right_lane or sys_warning:  # HUD alert only display when LKAS status is active
+    if enabled or sys_warning:
+      sys_state = 3
+    else:
+      sys_state = 4
+  elif left_lane:
+    sys_state = 5
+  elif right_lane:
+    sys_state = 6
 
-class CarController(object):
-  def __init__(self, dbc_name, car_fingerprint):
+  # initialize to no warnings
+  left_lane_warning = 0
+  right_lane_warning = 0
+  if left_lane_depart:
+    left_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+  if right_lane_depart:
+    right_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+
+  return sys_warning, sys_state, left_lane_warning, right_lane_warning
+
+
+class CarController():
+  def __init__(self, dbc_name, CP, VM):
     self.apply_steer_last = 0
-    self.car_fingerprint = car_fingerprint
-    self.lkas11_cnt = 0
-    self.cnt = 0
-    self.last_resume_cnt = 0
-    # True when giraffe switch 2 is low and we need to replace all the camera messages
-    # otherwise we forward the camera msgs and we just replace the lkas cmd signals
-    self.camera_disconnected = False
-
+    self.car_fingerprint = CP.carFingerprint
     self.packer = CANPacker(dbc_name)
+    self.steer_rate_limited = False
+    self.last_resume_frame = 0
 
-  def update(self, enabled, CS, actuators, pcm_cancel_cmd, hud_alert):
+  def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
+             left_lane, right_lane, left_lane_depart, right_lane_depart):
+    # Steering Torque
+    new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+    apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, SteerLimitParams)
+    self.steer_rate_limited = new_steer != apply_steer
 
-    ### Steering Torque
-    apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
+    # disable if steer angle reach 90 deg, otherwise mdps fault in some models
+    lkas_active = enabled and abs(CS.out.steeringAngle) < 90.
 
-    apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
+    # fix for Genesis hard fault at low speed
+    if CS.out.vEgo < 16.7 and self.car_fingerprint == CAR.HYUNDAI_GENESIS:
+      lkas_active = False
 
-    if not enabled:
+    if not lkas_active:
       apply_steer = 0
-
-    steer_req = 1 if enabled else 0
 
     self.apply_steer_last = apply_steer
 
+    sys_warning, sys_state, left_lane_warning, right_lane_warning =\
+      process_hud_alert(enabled, self.car_fingerprint, visual_alert,
+                        left_lane, right_lane, left_lane_depart, right_lane_depart)
+
     can_sends = []
-
-    self.lkas11_cnt = self.cnt % 0x10
-    self.clu11_cnt = self.cnt % 0x10
-
-    if self.camera_disconnected:
-      if (self.cnt % 10) == 0:
-        can_sends.append(create_lkas12())
-      if (self.cnt % 50) == 0:
-        can_sends.append(create_1191())
-      if (self.cnt % 7) == 0:
-        can_sends.append(create_1156())
-
-    can_sends.append(create_lkas11(self.packer, self.car_fingerprint, apply_steer, steer_req, self.lkas11_cnt,
-                                   enabled, CS.lkas11, hud_alert, keep_stock=(not self.camera_disconnected)))
+    can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
+                                   CS.lkas11, sys_warning, sys_state, enabled,
+                                   left_lane, right_lane,
+                                   left_lane_warning, right_lane_warning))
 
     if pcm_cancel_cmd:
-      can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.CANCEL))
-    elif CS.stopped and (self.cnt - self.last_resume_cnt) > 5:
-      self.last_resume_cnt = self.cnt
-      can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.RES_ACCEL))
+      can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL))
+    elif CS.out.cruiseState.standstill:
+      # SCC won't resume anyway when the lead distace is less than 3.7m
+      # send resume at a max freq of 5Hz
+      if CS.lead_distance > 3.7 and (frame - self.last_resume_frame)*DT_CTRL > 0.2:
+        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL))
+        self.last_resume_frame = frame
 
-    self.cnt += 1
+    # 20 Hz LFA MFA message
+    if frame % 5 == 0 and self.car_fingerprint in [CAR.SONATA, CAR.PALISADE, CAR.IONIQ]:
+      can_sends.append(create_lfa_mfa(self.packer, frame, enabled))
 
     return can_sends

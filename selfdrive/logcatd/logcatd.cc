@@ -7,10 +7,8 @@
 #include <log/logger.h>
 #include <log/logprint.h>
 
-#include <zmq.h>
-#include <capnp/serialize.h>
 #include "common/timing.h"
-#include "cereal/gen/cpp/log.capnp.h"
+#include "messaging.hpp"
 
 int main() {
   int err;
@@ -25,13 +23,9 @@ int main() {
   assert(system_logger);
   struct logger *crash_logger = android_logger_open(logger_list, LOG_ID_CRASH);
   assert(crash_logger);
-//  struct logger *kernel_logger = android_logger_open(logger_list, LOG_ID_KERNEL);
-//  assert(kernel_logger);
-
-  void *context = zmq_ctx_new();
-  void *publisher = zmq_socket(context, ZMQ_PUB);
-  err = zmq_bind(publisher, "tcp://*:8020");
-  assert(err == 0);
+  struct logger *kernel_logger = android_logger_open(logger_list, (log_id_t)5); // LOG_ID_KERNEL
+  assert(kernel_logger);
+  PubMaster pm({"androidLog"});
 
   while (1) {
     log_msg log_msg;
@@ -49,7 +43,7 @@ int main() {
     capnp::MallocMessageBuilder msg;
     cereal::Event::Builder event = msg.initRoot<cereal::Event>();
     event.setLogMonoTime(nanos_since_boot());
-    auto androidEntry = event.initAndroidLogEntry();
+    auto androidEntry = event.initAndroidLog();
     androidEntry.setId(log_msg.id());
     androidEntry.setTs(entry.tv_sec * 1000000000ULL + entry.tv_nsec);
     androidEntry.setPriority(entry.priority);
@@ -58,12 +52,9 @@ int main() {
     androidEntry.setTag(entry.tag);
     androidEntry.setMessage(entry.message);
 
-    auto words = capnp::messageToFlatArray(msg);
-    auto bytes = words.asBytes();
-    zmq_send(publisher, bytes.begin(), bytes.size(), 0);
+    pm.send("androidLog", msg);
   }
 
   android_logger_list_close(logger_list);
-
   return 0;
 }

@@ -1,3 +1,156 @@
+Version 0.7.7 (2020-07-20)
+========================
+ * White panda is no longer supported, upgrade to comma two or black panda
+ * Improved vehicle model estimation using high precision localizer
+ * Improved thermal management on comma two
+ * Improved autofocus for road-facing camera
+ * Improved noise performance for driver-facing camera
+ * Block lane change start using blindspot monitor on select Toyota, Hyundai, and Subaru
+ * Fix GM ignition detection
+ * Code cleanup and smaller release sizes
+ * Hyundai Sonata 2020 promoted to officially supported car
+ * Hyundai Ioniq Electric Limited 2019 and Ioniq SE 2020 support thanks to baldwalker!
+ * Subaru Forester 2019 and Ascent 2019 support thanks to martinl!
+
+Version 0.7.6.1 (2020-06-16)
+========================
+* Hotfix: update kernel on some comma twos (orders #8570-#8680)
+
+Version 0.7.6 (2020-06-05)
+========================
+* White panda is deprecated, upgrade to comma two or black panda
+* 2017 Nissan X-Trail, 2018-19 Leaf and 2019 Rogue support thanks to avolmensky!
+* 2017 Mazda CX-5 support in dashcam mode thanks to Jafaral!
+* Huge CPU savings in modeld by using thneed!
+* Lots of code cleanup and refactors
+
+Version 0.7.5 (2020-05-13)
+========================
+* Right-Hand Drive support for both driving and driver monitoring!
+* New driving model: improved at sharp turns and lead speed estimation
+* New driver monitoring model: overall improvement on comma two
+* Driver camera preview in settings to improve mounting position
+* Added support for many Hyundai, Kia, Genesis models thanks to xx979xx!
+* Improved lateral tuning for 2020 Toyota Rav 4 (hybrid)
+
+Version 0.7.4 (2020-03-20)
+========================
+ * New driving model: improved lane changes and lead car detection
+ * Improved driver monitoring model: improve eye detection
+ * Improved calibration stability
+ * Improved lateral control on some 2019 and 2020 Toyota Prius
+ * Improved lateral control on VW Golf: 20% more steering torque
+ * Fixed bug where some 2017 and 2018 Toyota C-HR would use the wrong steering angle sensor
+ * Support for Honda Insight thanks to theantihero!
+ * Code cleanup in car abstraction layers and ui
+
+Version 0.7.3 (2020-02-21)
+========================
+ * Support for 2020 Highlander thanks to che220!
+ * Support for 2018 Lexus NX 300h thanks to kengggg!
+ * Speed up ECU firmware query
+ * Fix bug where manager would sometimes hang after shutting down the car
+
+Version 0.7.2 (2020-02-07)
+========================
+ * ECU firmware version based fingerprinting for Honda & Toyota
+ * New driving model: improved path prediction during turns and lane changes and better lead speed tracking
+ * Improve driver monitoring under extreme lighting and add low accuracy alert
+ * Support for 2019 Rav4 Hybrid thanks to illumiN8i!
+ * Support for 2016, 2017 and 2020 Lexus RX thanks to illumiN8i!
+ * Support for 2020 Chrysler Pacifica Hybrid thanks to adhintz!
+
+Version 0.7.1 (2020-01-20)
+========================
+ * comma two support!
+ * Lane Change Assist above 45 mph!
+ * Replace zmq with custom messaging library, msgq!
+ * Supercombo model: calibration and driving models are combined for better lead estimate
+ * More robust updater thanks to jyoung8607! Requires NEOS update
+ * Improve low speed ACC tuning
+
+Version 0.7 (2019-12-13)
+========================
+ * Move to SCons build system!
+ * Add Lane Departure Warning (LDW) for all supported vehicles!
+ * NEOS update: increase wifi speed thanks to jyoung8607!
+ * Adaptive driver monitoring based on scene
+ * New driving model trained end-to-end: improve lane lines and lead detection
+ * Smarter torque limit alerts for all cars
+ * Improve GM longitudinal control: proper computations for 15Hz radar
+ * Move GM port, Toyota with DSU removed, comma pedal in community features; toggle switch required
+ * Remove upload over cellular toggle: only upload qlog and qcamera files if not on wifi
+ * Refactor Panda code towards ISO26262 and SIL2 compliancy
+ * Forward stock FCW for Honda Nidec
+ * Volkswagen port now standard: comma Harness intercepts stock camera
+
+Version 0.6.6 (2019-11-05)
+========================
+ * Volkswagen support thanks to jyoung8607!
+ * Toyota Corolla Hybrid with TSS 2.0 support thanks to u8511049!
+ * Lexus ES with TSS 2.0 support thanks to energee!
+ * Fix GM ignition detection and lock safety mode not required anymore
+ * Log panda firmware and dongle ID thanks to martinl!
+ * New driving model: improve path prediction and lead detection
+ * New driver monitoring model, 4x smaller and running on DSP
+ * Display an alert and don't start openpilot if panda has wrong firmware
+ * Fix bug preventing EON from terminating processes after a drive
+ * Remove support for Toyota giraffe without the 120Ohm resistor
+
+Version 0.6.5 (2019-10-07)
+========================
+ * NEOS update: upgrade to Python3 and new installer!
+ * comma Harness support!
+ * New driving model: improve path prediction
+ * New driver monitoring model: more accurate face and eye detection
+ * Redesign offroad screen to display updates and alerts
+ * Increase maximum allowed acceleration
+ * Prevent car 12V battery drain by cutting off EON charge after 3 days of no drive
+ * Lexus CT Hybrid support thanks to thomaspich!
+ * Louder chime for critical alerts
+ * Add toggle to switch to dashcam mode
+ * Fix "invalid vehicle params" error on DSU-less Toyota
+
+Version 0.6.4 (2019-09-08)
+========================
+ * Forward stock AEB for Honda Nidec
+ * Improve lane centering on banked roads
+ * Always-on forward collision warning
+ * Always-on driver monitoring, except for right hand drive countries
+ * Driver monitoring learns the user's normal driving position
+ * Honda Fit support thanks to energee!
+ * Lexus IS support
+
+Version 0.6.3 (2019-08-12)
+========================
+ * Alert sounds from EON: requires NEOS update
+ * Improve driver monitoring: eye tracking and improved awareness logic
+ * Improve path prediction with new driving model
+ * Improve lane positioning with wide lanes and exits
+ * Improve lateral control on RAV4
+ * Slow down for turns using model
+ * Open sourced regression test to verify outputs against reference logs
+ * Open sourced regression test to sanity check all car models
+
+Version 0.6.2 (2019-07-29)
+========================
+ * New driving model!
+ * Improve lane tracking with double lines
+ * Strongly improve stationary vehicle detection
+ * Strongly reduce cases of braking due to false leads
+ * Better lead tracking around turns
+ * Improve cut-in prediction by using neural network
+ * Improve lateral control on Toyota Camry and C-HR thanks to zorrobyte!
+ * Fix unintended openpilot disengagements on Jeep thanks to adhintz!
+ * Fix delayed transition to offroad when car is turned off
+
+Version 0.6.1 (2019-07-21)
+========================
+ * Remote SSH with comma prime and [ssh.comma.ai](https://ssh.comma.ai)
+ * Panda code Misra-c2012 compliance, tested against cppcheck coverage
+ * Lockout openpilot after 3 terminal alerts for driver distracted or unresponsive
+ * Toyota Sienna support thanks to wocsor!
+
 Version 0.6 (2019-07-01)
 ========================
  * New model, with double the pixels and ten times the temporal context!
@@ -8,7 +161,7 @@ Version 0.6 (2019-07-01)
  * Panda safety code is MISRA compliant and ships with a signed version on release2
  * New NEOS is 500MB smaller and has a reproducible usr/pipenv
  * Lexus ES Hybrid support thanks to wocsor!
- * Improve tuning for supported Toyota with TSS2
+ * Improve tuning for supported Toyota with TSS 2.0
  * Various other stability improvements
 
 Version 0.5.13 (2019-05-31)

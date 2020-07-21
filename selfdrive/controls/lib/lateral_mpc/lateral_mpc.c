@@ -30,21 +30,9 @@ typedef struct {
   double cost;
 } log_t;
 
-void init(double pathCost, double laneCost, double headingCost, double steerRateCost){
-  acado_initializeSolver();
+void init_weights(double pathCost, double laneCost, double headingCost, double steerRateCost){
   int    i;
   const int STEP_MULTIPLIER = 3;
-
-  /* Initialize the states and controls. */
-  for (i = 0; i < NX * (N + 1); ++i)  acadoVariables.x[ i ] = 0.0;
-  for (i = 0; i < NU * N; ++i)  acadoVariables.u[ i ] = 0.1;
-
-  /* Initialize the measurements/reference. */
-  for (i = 0; i < NY * N; ++i)  acadoVariables.y[ i ] = 0.0;
-  for (i = 0; i < NYN; ++i)  acadoVariables.yN[ i ] = 0.0;
-
-  /* MPC: initialize the current state feedback. */
-  for (i = 0; i < NX; ++i) acadoVariables.x0[ i ] = 0.0;
 
   for (i = 0; i < N; i++) {
     int f = 1;
@@ -64,9 +52,27 @@ void init(double pathCost, double laneCost, double headingCost, double steerRate
   acadoVariables.WN[(NYN+1)*3] = headingCost * STEP_MULTIPLIER;
 }
 
+void init(double pathCost, double laneCost, double headingCost, double steerRateCost){
+  acado_initializeSolver();
+  int    i;
+
+  /* Initialize the states and controls. */
+  for (i = 0; i < NX * (N + 1); ++i)  acadoVariables.x[ i ] = 0.0;
+  for (i = 0; i < NU * N; ++i)  acadoVariables.u[ i ] = 0.1;
+
+  /* Initialize the measurements/reference. */
+  for (i = 0; i < NY * N; ++i)  acadoVariables.y[ i ] = 0.0;
+  for (i = 0; i < NYN; ++i)  acadoVariables.yN[ i ] = 0.0;
+
+  /* MPC: initialize the current state feedback. */
+  for (i = 0; i < NX; ++i) acadoVariables.x0[ i ] = 0.0;
+
+  init_weights(pathCost, laneCost, headingCost, steerRateCost);
+}
+
 int run_mpc(state_t * x0, log_t * solution,
-             double l_poly[4], double r_poly[4], double p_poly[4],
-             double l_prob, double r_prob, double p_prob, double curvature_factor, double v_ref, double lane_width){
+             double l_poly[4], double r_poly[4], double d_poly[4],
+             double l_prob, double r_prob, double curvature_factor, double v_ref, double lane_width){
 
   int    i;
 
@@ -84,16 +90,15 @@ int run_mpc(state_t * x0, log_t * solution,
     acadoVariables.od[i+8] = r_poly[2];
     acadoVariables.od[i+9] = r_poly[3];
 
-    acadoVariables.od[i+10] = p_poly[0];
-    acadoVariables.od[i+11] = p_poly[1];
-    acadoVariables.od[i+12] = p_poly[2];
-    acadoVariables.od[i+13] = p_poly[3];
+    acadoVariables.od[i+10] = d_poly[0];
+    acadoVariables.od[i+11] = d_poly[1];
+    acadoVariables.od[i+12] = d_poly[2];
+    acadoVariables.od[i+13] = d_poly[3];
 
 
     acadoVariables.od[i+14] = l_prob;
     acadoVariables.od[i+15] = r_prob;
-    acadoVariables.od[i+16] = p_prob;
-    acadoVariables.od[i+17] = lane_width;
+    acadoVariables.od[i+16] = lane_width;
 
   }
 

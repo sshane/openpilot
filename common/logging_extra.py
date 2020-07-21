@@ -1,9 +1,11 @@
+import io
 import os
 import sys
 import copy
 import json
 import socket
 import logging
+import traceback
 from threading import local
 from collections import OrderedDict
 from contextlib import contextmanager
@@ -66,8 +68,11 @@ class SwagErrorFilter(logging.Filter):
   def filter(self, record):
     return record.levelno < logging.ERROR
 
-_tmpfunc = lambda: 0
-_srcfile = os.path.normcase(_tmpfunc.__code__.co_filename)
+def _tmpfunc():
+  return 0
+
+def _srcfile():
+  return os.path.normcase(_tmpfunc.__code__.co_filename)
 
 class SwagLogger(logging.Logger):
   def __init__(self):
@@ -77,28 +82,6 @@ class SwagLogger(logging.Logger):
 
     self.log_local = local()
     self.log_local.ctx = {}
-
-  def findCaller(self, stack_info=None):
-    """
-      Find the stack frame of the caller so that we can note the source
-      file name, line number and function name.
-      """
-    # f = currentframe()
-    f = sys._getframe(3)
-    #On some versions of IronPython, currentframe() returns None if
-    #IronPython isn't run with -X:Frames.
-    if f is not None:
-      f = f.f_back
-    rv = "(unknown file)", 0, "(unknown function)"
-    while hasattr(f, "f_code"):
-      co = f.f_code
-      filename = os.path.normcase(co.co_filename)
-      if filename in (logging._srcfile, _srcfile):
-        f = f.f_back
-        continue
-      rv = (co.co_filename, f.f_lineno, co.co_name)
-      break
-    return rv
 
   def local_ctx(self):
     try:
@@ -132,13 +115,48 @@ class SwagLogger(logging.Logger):
     if args:
       evt['args'] = args
     evt.update(kwargs)
-    ctx = self.get_ctx()
-    if ctx:
-      evt['ctx'] = self.get_ctx()
     if 'error' in kwargs:
       self.error(evt)
     else:
       self.info(evt)
+
+  def findCaller(self, stack_info=False, stacklevel=1):
+    """
+    Find the stack frame of the caller so that we can note the source
+    file name, line number and function name.
+    """
+    f = sys._getframe(3)
+    #On some versions of IronPython, currentframe() returns None if
+    #IronPython isn't run with -X:Frames.
+    if f is not None:
+        f = f.f_back
+    orig_f = f
+    while f and stacklevel > 1:
+        f = f.f_back
+        stacklevel -= 1
+    if not f:
+        f = orig_f
+    rv = "(unknown file)", 0, "(unknown function)", None
+    while hasattr(f, "f_code"):
+        co = f.f_code
+        filename = os.path.normcase(co.co_filename)
+
+        # TODO: is this pylint exception correct?
+        if filename == _srcfile:  # pylint: disable=comparison-with-callable
+            f = f.f_back
+            continue
+        sinfo = None
+        if stack_info:
+            sio = io.StringIO()
+            sio.write('Stack (most recent call last):\n')
+            traceback.print_stack(f, file=sio)
+            sinfo = sio.getvalue()
+            if sinfo[-1] == '\n':
+                sinfo = sinfo[:-1]
+            sio.close()
+        rv = (co.co_filename, f.f_lineno, co.co_name, sinfo)
+        break
+    return rv
 
 if __name__ == "__main__":
   log = SwagLogger()

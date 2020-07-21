@@ -13,9 +13,10 @@ else
   DFU_UTIL = "tools/dfu-util-aarch64"
 endif
 
-CC = arm-none-eabi-gcc
-OBJCOPY = arm-none-eabi-objcopy
-OBJDUMP = arm-none-eabi-objdump
+#COMPILER_PATH = /home/batman/Downloads/gcc-arm-none-eabi-9-2020-q2-update/bin/
+CC = $(COMPILER_PATH)arm-none-eabi-gcc
+OBJCOPY = $(COMPILER_PATH)arm-none-eabi-objcopy
+OBJDUMP = $(COMPILER_PATH)arm-none-eabi-objdump
 
 ifeq ($(RELEASE),1)
   CERT = ../../pandaextra/certs/release
@@ -33,7 +34,7 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 # this no longer pushes the bootstub
 flash: obj/$(PROJ_NAME).bin
-	PYTHONPATH=../ python -c "from python import Panda; Panda().flash('obj/$(PROJ_NAME).bin')"
+	PYTHONPATH=../ python3 -c "from python import Panda; Panda().flash('obj/$(PROJ_NAME).bin')"
 
 ota: obj/$(PROJ_NAME).bin
 	curl http://192.168.0.10/stupdate --upload-file $<
@@ -42,7 +43,7 @@ bin: obj/$(PROJ_NAME).bin
 
 # this flashes everything
 recover: obj/bootstub.$(PROJ_NAME).bin obj/$(PROJ_NAME).bin
-	-PYTHONPATH=../ python -c "from python import Panda; Panda().reset(enter_bootloader=True)"
+	-PYTHONPATH=../ python3 -c "from python import Panda; Panda().reset(enter_bootstub=True); Panda().reset(enter_bootloader=True)"
 	sleep 1.0
 	$(DFU_UTIL) -d 0483:df11 -a 0 -s 0x08004000 -D obj/$(PROJ_NAME).bin
 	$(DFU_UTIL) -d 0483:df11 -a 0 -s 0x08000000:leave -D obj/bootstub.$(PROJ_NAME).bin
@@ -68,7 +69,7 @@ obj/$(PROJ_NAME).bin: obj/$(STARTUP_FILE).o obj/main.$(PROJ_NAME).o
 	$(OBJCOPY) -v -O binary obj/$(PROJ_NAME).elf obj/code.bin
 	SETLEN=1 ../crypto/sign.py obj/code.bin $@ $(CERT)
 	@BINSIZE=$$(du -b "obj/$(PROJ_NAME).bin" | cut -f 1) ; \
-	if [ $$BINSIZE -ge 32768 ]; then echo "ERROR obj/$(PROJ_NAME).bin is too big!"; exit 1; fi;
+	if [ $$BINSIZE -ge 49152 ]; then echo "ERROR obj/$(PROJ_NAME).bin is too big!"; exit 1; fi;
 
 obj/bootstub.$(PROJ_NAME).bin: obj/$(STARTUP_FILE).o obj/bootstub.$(PROJ_NAME).o obj/sha.$(PROJ_NAME).o obj/rsa.$(PROJ_NAME).o
 	$(CC) $(CFLAGS) -o obj/bootstub.$(PROJ_NAME).elf $^

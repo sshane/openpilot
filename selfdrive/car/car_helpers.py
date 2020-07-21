@@ -1,19 +1,30 @@
 import os
-from common.vin import is_vin_response_valid
+from common.params import Params
 from common.basedir import BASEDIR
-from common.fingerprints import eliminate_incompatible_cars, all_known_cars
-from selfdrive.boardd.boardd import can_list_to_can_capnp
+from selfdrive.version import comma_remote, tested_branch
+from selfdrive.car.fingerprints import eliminate_incompatible_cars, all_known_cars
+from selfdrive.car.vin import get_vin, VIN_UNKNOWN
+from selfdrive.car.fw_versions import get_fw_versions, match_fw_to_car
 from selfdrive.swaglog import cloudlog
-import selfdrive.messaging as messaging
+import cereal.messaging as messaging
+from selfdrive.car import gen_empty_fingerprint
+
+from cereal import car, log
+EventName = car.CarEvent.EventName
+HwType = log.HealthData.HwType
 
 
-def get_startup_alert(car_recognized, controller_available):
-  alert = 'startup'
+def get_startup_event(car_recognized, controller_available):
+  if comma_remote and tested_branch:
+    event = EventName.startup
+  else:
+    event = EventName.startupMaster
+
   if not car_recognized:
-    alert = 'startupNoCar'
+    event = EventName.startupNoCar
   elif car_recognized and not controller_available:
-    alert = 'startupNoControl'
-  return alert
+    event = EventName.startupNoControl
+  return event
 
 
 def load_interfaces(brand_names):
@@ -21,12 +32,19 @@ def load_interfaces(brand_names):
   for brand_name in brand_names:
     path = ('selfdrive.car.%s' % brand_name)
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
+
+    if os.path.exists(BASEDIR + '/' + path.replace('.', '/') + '/carstate.py'):
+      CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
+    else:
+      CarState = None
+
     if os.path.exists(BASEDIR + '/' + path.replace('.', '/') + '/carcontroller.py'):
       CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController
     else:
       CarController = None
+
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController)
+      ret[model_name] = (CarInterface, CarController, CarState)
   return ret
 
 
@@ -48,104 +66,113 @@ def _get_interface_names():
 
 
 # imports from directory selfdrive/car/<name>/
-interfaces = load_interfaces(_get_interface_names())
+interface_names = _get_interface_names()
+interfaces = load_interfaces(interface_names)
 
 
-# BOUNTY: every added fingerprint in selfdrive/car/*/values.py is a $100 coupon code on shop.comma.ai
+def only_toyota_left(candidate_cars):
+  return all(("TOYOTA" in c or "LEXUS" in c) for c in candidate_cars) and len(candidate_cars) > 0
+
+
 # **** for use live only ****
-def fingerprint(logcan, sendcan):
-  if os.getenv("SIMULATOR2") is not None:
-    return ("simulator2", None, "")
-  elif os.getenv("SIMULATOR") is not None:
-    return ("simulator", None, "")
+def fingerprint(logcan, sendcan, has_relay):
+  fixed_fingerprint = os.environ.get('FINGERPRINT', "")
+  skip_fw_query = os.environ.get('SKIP_FW_QUERY', False)
 
-  finger = {}
-  cloudlog.warning("waiting for fingerprint...")
-  candidate_cars = all_known_cars()
-  can_seen_frame = None
-  can_seen = False
+  if has_relay and not fixed_fingerprint and not skip_fw_query:
+    # Vin query only reliably works thorugh OBDII
+    bus = 1
 
-  # works on standard 11-bit addresses for diagnostic. Tested on Toyota and Subaru;
-  # Honda uses the extended 29-bit addresses, and unfortunately only works from OBDII
-  vin_query_msg = [[0x7df, 0, '\x02\x09\x02'.ljust(8, "\x00"), 0],
-                   [0x7e0, 0, '\x30'.ljust(8, "\x00"), 0]]
+    cached_params = Params().get("CarParamsCache")
+    if cached_params is not None:
+      cached_params = car.CarParams.from_bytes(cached_params)
+      if cached_params.carName == "mock":
+        cached_params = None
 
-  vin_cnts = [1, 2]  # number of messages to wait for at each iteration
-  vin_step = 0
-  vin_cnt = 0
-  vin_responded = False
-  vin_never_responded = True
-  vin_dat = []
-  vin = ""
+    if cached_params is not None and len(cached_params.carFw) > 0 and cached_params.carVin is not VIN_UNKNOWN:
+      cloudlog.warning("Using cached CarParams")
+      vin = cached_params.carVin
+      car_fw = list(cached_params.carFw)
+    else:
+      cloudlog.warning("Getting VIN & FW versions")
+      _, vin = get_vin(logcan, sendcan, bus)
+      car_fw = get_fw_versions(logcan, sendcan, bus)
 
+    fw_candidates = match_fw_to_car(car_fw)
+  else:
+    vin = VIN_UNKNOWN
+    fw_candidates, car_fw = set(), []
+
+  cloudlog.warning("VIN %s", vin)
+  Params().put("CarVin", vin)
+
+  finger = gen_empty_fingerprint()
+  candidate_cars = {i: all_known_cars() for i in [0, 1]}  # attempt fingerprint on both bus 0 and 1
   frame = 0
-  while True:
-    a = messaging.recv_one(logcan)
+  frame_fingerprint = 10  # 0.1s
+  car_fingerprint = None
+  done = False
+
+  while not done:
+    a = messaging.get_one_can(logcan)
 
     for can in a.can:
-      can_seen = True
+      # need to independently try to fingerprint both bus 0 and 1 to work
+      # for the combo black_panda and honda_bosch. Ignore extended messages
+      # and VIN query response.
+      # Include bus 2 for toyotas to disambiguate cars using camera messages
+      # (ideally should be done for all cars but we can't for Honda Bosch)
+      if can.src in range(0, 4):
+        finger[can.src][can.address] = len(can.dat)
+      for b in candidate_cars:
+        if (can.src == b or (only_toyota_left(candidate_cars[b]) and can.src == 2)) and \
+           can.address < 0x800 and can.address not in [0x7df, 0x7e0, 0x7e8]:
+          candidate_cars[b] = eliminate_incompatible_cars(can, candidate_cars[b])
 
-      # have we got a VIN query response?
-      if can.src == 0 and can.address == 0x7e8:
-        vin_never_responded = False
-        # basic sanity checks on ISO-TP response
-        if is_vin_response_valid(can.dat, vin_step, vin_cnt):
-          vin_dat += can.dat[2:] if vin_step == 0 else can.dat[1:]
-          vin_cnt += 1
-          if vin_cnt == vin_cnts[vin_step]:
-            vin_responded = True
-            vin_step += 1
+    # if we only have one car choice and the time since we got our first
+    # message has elapsed, exit
+    for b in candidate_cars:
+      # Toyota needs higher time to fingerprint, since DSU does not broadcast immediately
+      if only_toyota_left(candidate_cars[b]):
+        frame_fingerprint = 100  # 1s
+      if len(candidate_cars[b]) == 1:
+        if frame > frame_fingerprint:
+          # fingerprint done
+          car_fingerprint = candidate_cars[b][0]
 
-      # ignore everything not on bus 0 and with more than 11 bits,
-      # which are ussually sporadic and hard to include in fingerprints.
-      # also exclude VIN query response on 0x7e8
-      if can.src == 0 and can.address < 0x800 and can.address != 0x7e8:
-        finger[can.address] = len(can.dat)
-        candidate_cars = eliminate_incompatible_cars(can, candidate_cars)
-
-    if can_seen_frame is None and can_seen:
-      can_seen_frame = frame
-
-    # if we only have one car choice and the time_fingerprint since we got our first
-    # message has elapsed, exit. Toyota needs higher time_fingerprint, since DSU does not
-    # broadcast immediately
-    if len(candidate_cars) == 1 and can_seen_frame is not None:
-      time_fingerprint = 1.0 if ("TOYOTA" in candidate_cars[0] or "LEXUS" in candidate_cars[0]) else 0.1
-      if (frame - can_seen_frame) > (time_fingerprint * 100):
-        break
-
-    # bail if no cars left or we've been waiting for more than 2s since can_seen
-    elif len(candidate_cars) == 0 or (can_seen_frame is not None and (frame - can_seen_frame) > 200):
-      return None, finger, ""
-
-    # keep sending VIN qury if ECU isn't responsing.
-    # sendcan is probably not ready due to the zmq slow joiner syndrome
-    # TODO: VIN query temporarily disabled until we have the harness
-    if False and can_seen and (vin_never_responded or (vin_responded and vin_step < len(vin_cnts))):
-      sendcan.send(can_list_to_can_capnp([vin_query_msg[vin_step]], msgtype='sendcan'))
-      vin_responded = False
-      vin_cnt = 0
+    # bail if no cars left or we've been waiting for more than 2s
+    failed = all(len(cc) == 0 for cc in candidate_cars.values()) or frame > 200
+    succeeded = car_fingerprint is not None
+    done = failed or succeeded
 
     frame += 1
 
-  # only report vin if procedure is finished
-  if vin_step == len(vin_cnts) and vin_cnt == vin_cnts[-1]:
-    vin = "".join(vin_dat[3:])
+  source = car.CarParams.FingerprintSource.can
 
-  cloudlog.warning("fingerprinted %s", candidate_cars[0])
-  cloudlog.warning("VIN %s", vin)
-  return candidate_cars[0], finger, vin
+  # If FW query returns exactly 1 candidate, use it
+  if len(fw_candidates) == 1:
+    car_fingerprint = list(fw_candidates)[0]
+    source = car.CarParams.FingerprintSource.fw
+
+  if fixed_fingerprint:
+    car_fingerprint = fixed_fingerprint
+    source = car.CarParams.FingerprintSource.fixed
+
+  cloudlog.warning("fingerprinted %s", car_fingerprint)
+  return car_fingerprint, finger, vin, car_fw, source
 
 
-def get_car(logcan, sendcan):
-
-  candidate, fingerprints, vin = fingerprint(logcan, sendcan)
+def get_car(logcan, sendcan, has_relay=False):
+  candidate, fingerprints, vin, car_fw, source = fingerprint(logcan, sendcan, has_relay)
 
   if candidate is None:
     cloudlog.warning("car doesn't match any fingerprints: %r", fingerprints)
     candidate = "mock"
 
-  CarInterface, CarController = interfaces[candidate]
-  params = CarInterface.get_params(candidate, fingerprints, vin)
+  CarInterface, CarController, CarState = interfaces[candidate]
+  car_params = CarInterface.get_params(candidate, fingerprints, has_relay, car_fw)
+  car_params.carVin = vin
+  car_params.carFw = car_fw
+  car_params.fingerprintSource = source
 
-  return CarInterface(params, CarController), params
+  return CarInterface(car_params, CarController, CarState), car_params

@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import time
-from selfdrive.can.parser import CANParser
+from opendbc.can.parser import CANParser
 from cereal import car
-from common.realtime import sec_since_boot
 from selfdrive.car.toyota.values import NO_DSU_CAR, DBC, TSS2_CAR
+from selfdrive.car.interfaces import RadarInterfaceBase
 
 def _create_radar_can_parser(car_fingerprint):
   dbc_f = DBC[car_fingerprint]['radar']
@@ -19,22 +19,20 @@ def _create_radar_can_parser(car_fingerprint):
   msg_a_n = len(RADAR_A_MSGS)
   msg_b_n = len(RADAR_B_MSGS)
 
-  signals = zip(['LONG_DIST'] * msg_a_n + ['NEW_TRACK'] * msg_a_n + ['LAT_DIST'] * msg_a_n +
+  signals = list(zip(['LONG_DIST'] * msg_a_n + ['NEW_TRACK'] * msg_a_n + ['LAT_DIST'] * msg_a_n +
                 ['REL_SPEED'] * msg_a_n + ['VALID'] * msg_a_n + ['SCORE'] * msg_b_n,
                 RADAR_A_MSGS * 5 + RADAR_B_MSGS,
-                [255] * msg_a_n + [1] * msg_a_n + [0] * msg_a_n + [0] * msg_a_n + [0] * msg_a_n + [0] * msg_b_n)
+                [255] * msg_a_n + [1] * msg_a_n + [0] * msg_a_n + [0] * msg_a_n + [0] * msg_a_n + [0] * msg_b_n))
 
-  checks = zip(RADAR_A_MSGS + RADAR_B_MSGS, [20]*(msg_a_n + msg_b_n))
+  checks = list(zip(RADAR_A_MSGS + RADAR_B_MSGS, [20]*(msg_a_n + msg_b_n)))
 
   return CANParser(os.path.splitext(dbc_f)[0], signals, checks, 1)
 
-class RadarInterface(object):
+class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
-    # radar
-    self.pts = {}
+    super().__init__(CP)
     self.track_id = 0
-
-    self.delay = 0.0  # Delay of radar
+    self.radar_ts = CP.radarTimeStep
 
     if CP.carFingerprint in TSS2_CAR:
       self.RADAR_A_MSGS = list(range(0x180, 0x190))
@@ -46,43 +44,46 @@ class RadarInterface(object):
     self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
 
     self.rcp = _create_radar_can_parser(CP.carFingerprint)
+    self.trigger_msg = self.RADAR_B_MSGS[-1]
+    self.updated_messages = set()
+
     # No radar dbc for cars without DSU which are not TSS 2.0
     # TODO: make a adas dbc file for dsu-less models
     self.no_radar = CP.carFingerprint in NO_DSU_CAR and CP.carFingerprint not in TSS2_CAR
 
-  def update(self):
-
-    ret = car.RadarData.new_message()
-
+  def update(self, can_strings):
     if self.no_radar:
-      time.sleep(0.05)
-      return ret
+      time.sleep(self.radar_ts)
+      return car.RadarData.new_message()
 
-    canMonoTimes = []
-    updated_messages = set()
-    while 1:
-      tm = int(sec_since_boot() * 1e9)
-      _, vls = self.rcp.update(tm, True)
-      updated_messages.update(vls)
-      if self.RADAR_B_MSGS[-1] in updated_messages:
-        break
+    vls = self.rcp.update_strings(can_strings)
+    self.updated_messages.update(vls)
 
+    if self.trigger_msg not in self.updated_messages:
+      return None
+
+    rr = self._update(self.updated_messages)
+    self.updated_messages.clear()
+
+    return rr
+
+  def _update(self, updated_messages):
+    ret = car.RadarData.new_message()
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
     ret.errors = errors
-    ret.canMonoTimes = canMonoTimes
 
-    for ii in updated_messages:
+    for ii in sorted(updated_messages):
       if ii in self.RADAR_A_MSGS:
         cpt = self.rcp.vl[ii]
 
-        if cpt['LONG_DIST'] >=255 or cpt['NEW_TRACK']:
+        if cpt['LONG_DIST'] >= 255 or cpt['NEW_TRACK']:
           self.valid_cnt[ii] = 0    # reset counter
         if cpt['VALID'] and cpt['LONG_DIST'] < 255:
           self.valid_cnt[ii] += 1
         else:
-          self.valid_cnt[ii] = max(self.valid_cnt[ii] -1, 0)
+          self.valid_cnt[ii] = max(self.valid_cnt[ii] - 1, 0)
 
         score = self.rcp.vl[ii+16]['SCORE']
         # print ii, self.valid_cnt[ii], score, cpt['VALID'], cpt['LONG_DIST'], cpt['LAT_DIST']
@@ -103,12 +104,5 @@ class RadarInterface(object):
           if ii in self.pts:
             del self.pts[ii]
 
-    ret.points = self.pts.values()
+    ret.points = list(self.pts.values())
     return ret
-
-if __name__ == "__main__":
-  RI = RadarInterface(None)
-  while 1:
-    ret = RI.update()
-    print(chr(27) + "[2J")
-    print(ret)

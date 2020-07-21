@@ -1,4 +1,3 @@
-
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
@@ -13,8 +12,7 @@
 #include <GLES2/gl2.h>
 #include <EGL/eglext.h>
 
-#define BACKLIGHT_CONTROL "/sys/class/leds/lcd-backlight/brightness"
-#define BACKLIGHT_LEVEL "205"
+#define BACKLIGHT_LEVEL 205
 
 using namespace android;
 
@@ -33,13 +31,27 @@ struct FramebufferState {
     EGLContext context;
 };
 
+extern "C" void framebuffer_swap(FramebufferState *s) {
+  eglSwapBuffers(s->display, s->surface);
+  assert(glGetError() == GL_NO_ERROR);
+}
+
+extern "C" bool set_brightness(int brightness) {
+  FILE *f = fopen("/sys/class/leds/lcd-backlight/brightness", "wb");
+  if (f != NULL) {
+    fprintf(f, "%d", brightness);
+    fclose(f);
+    return true;
+  }
+  return false;
+}
+
 extern "C" void framebuffer_set_power(FramebufferState *s, int mode) {
   SurfaceComposerClient::setDisplayPowerMode(s->dtoken, mode);
 }
 
 extern "C" FramebufferState* framebuffer_init(
     const char* name, int32_t layer, int alpha,
-    EGLDisplay *out_display, EGLSurface *out_surface,
     int *out_w, int *out_h) {
   status_t status;
   int success;
@@ -90,6 +102,9 @@ extern "C" FramebufferState* framebuffer_init(
     EGL_DEPTH_SIZE,   0,
     EGL_STENCIL_SIZE, 8,
     EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+    // enable MSAA
+    EGL_SAMPLE_BUFFERS, 1,
+    EGL_SAMPLES, 4,
     EGL_NONE,
   };
 
@@ -100,7 +115,7 @@ extern "C" FramebufferState* framebuffer_init(
   assert(success);
 
   printf("egl version %d.%d\n", s->egl_major, s->egl_minor);
-  
+
   EGLint num_configs;
   success = eglChooseConfig(s->display, attribs, &s->config, 1, &num_configs);
   assert(success);
@@ -125,15 +140,8 @@ extern "C" FramebufferState* framebuffer_init(
 
   printf("gl version %s\n", glGetString(GL_VERSION));
 
+  set_brightness(BACKLIGHT_LEVEL);
 
-  // set brightness
-  int brightness_fd = open(BACKLIGHT_CONTROL, O_RDWR);
-  const char brightness_level[] = BACKLIGHT_LEVEL;
-  write(brightness_fd, brightness_level, strlen(brightness_level));
-
-
-  if (out_display) *out_display = s->display;
-  if (out_surface) *out_surface = s->surface;
   if (out_w) *out_w = w;
   if (out_h) *out_h = h;
 

@@ -5,9 +5,6 @@
 
 #include <unistd.h>
 #include <dirent.h>
-
-#include <vector>
-#include <string>
 #include <memory>
 #include <utility>
 #include <sstream>
@@ -16,9 +13,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include <zmq.h>
-#include <capnp/serialize.h>
-#include "cereal/gen/cpp/log.capnp.h"
+#include "messaging.hpp"
 
 #include "common/timing.h"
 #include "common/utilpp.h"
@@ -34,12 +29,7 @@ struct ProcCache {
 }
 
 int main() {
-  int err;
-
-  void *context = zmq_ctx_new();
-  void *publisher = zmq_socket(context, ZMQ_PUB);
-  err = zmq_bind(publisher, "tcp://*:8031");
-  assert(err == 0);
+  PubMaster publisher({"procLog"});
 
   double jiffy = sysconf(_SC_CLK_TCK);
   size_t page_size = sysconf(_SC_PAGE_SIZE);
@@ -70,8 +60,8 @@ int main() {
           unsigned long utime, ntime, stime, itime;
           unsigned long iowtime, irqtime, sirqtime;
 
-          int count = sscanf(stat_line.data(), "cpu%d %lu %lu %lu %lu %lu %lu %lu",
-            &id, &utime, &ntime, &stime, &itime, &iowtime, &irqtime, &sirqtime);
+          sscanf(stat_line.data(), "cpu%d %lu %lu %lu %lu %lu %lu %lu",
+                 &id, &utime, &ntime, &stime, &itime, &iowtime, &irqtime, &sirqtime);
 
           auto ltimeo = orphanage.newOrphan<cereal::ProcLog::CPUTimes>();
           auto ltime = ltimeo.get();
@@ -103,19 +93,19 @@ int main() {
 
       std::ifstream smem("/proc/meminfo");
       std::string mem_line;
-      
+
       uint64_t mem_total = 0, mem_free = 0, mem_available = 0, mem_buffers = 0;
       uint64_t mem_cached = 0, mem_active = 0, mem_inactive = 0, mem_shared = 0;
 
       while (std::getline(smem, mem_line)) {
-        if (util::starts_with(mem_line, "MemTotal:")) sscanf(mem_line.data(), "MemTotal: %lu kB", &mem_total);
-        else if (util::starts_with(mem_line, "MemFree:")) sscanf(mem_line.data(), "MemFree: %lu kB", &mem_free);
-        else if (util::starts_with(mem_line, "MemAvailable:")) sscanf(mem_line.data(), "MemAvailable: %lu kB", &mem_available);
-        else if (util::starts_with(mem_line, "Buffers:")) sscanf(mem_line.data(), "Buffers: %lu kB", &mem_buffers);
-        else if (util::starts_with(mem_line, "Cached:")) sscanf(mem_line.data(), "Cached: %lu kB", &mem_cached);
-        else if (util::starts_with(mem_line, "Active:")) sscanf(mem_line.data(), "Active: %lu kB", &mem_active);
-        else if (util::starts_with(mem_line, "Inactive:")) sscanf(mem_line.data(), "Inactive: %lu kB", &mem_inactive);
-        else if (util::starts_with(mem_line, "Shmem:")) sscanf(mem_line.data(), "Shmem: %lu kB", &mem_shared);
+        if (util::starts_with(mem_line, "MemTotal:")) sscanf(mem_line.data(), "MemTotal: %" SCNu64 " kB", &mem_total);
+        else if (util::starts_with(mem_line, "MemFree:")) sscanf(mem_line.data(), "MemFree: %" SCNu64 " kB", &mem_free);
+        else if (util::starts_with(mem_line, "MemAvailable:")) sscanf(mem_line.data(), "MemAvailable: %" SCNu64 " kB", &mem_available);
+        else if (util::starts_with(mem_line, "Buffers:")) sscanf(mem_line.data(), "Buffers: %" SCNu64 " kB", &mem_buffers);
+        else if (util::starts_with(mem_line, "Cached:")) sscanf(mem_line.data(), "Cached: %" SCNu64 " kB", &mem_cached);
+        else if (util::starts_with(mem_line, "Active:")) sscanf(mem_line.data(), "Active: %" SCNu64 " kB", &mem_active);
+        else if (util::starts_with(mem_line, "Inactive:")) sscanf(mem_line.data(), "Inactive: %" SCNu64 " kB", &mem_inactive);
+        else if (util::starts_with(mem_line, "Shmem:")) sscanf(mem_line.data(), "Shmem: %" SCNu64 " kB", &mem_shared);
       }
 
       mem.setTotal(mem_total * 1024);
@@ -203,7 +193,7 @@ int main() {
           std::string cmdline_s = util::read_file(util::string_format("/proc/%d/cmdline", pid));
           const char* cmdline_p = cmdline_s.c_str();
           const char* cmdline_ep = cmdline_p + cmdline_s.size();
-          
+
           // strip trailing null bytes
           while ((cmdline_ep-1) > cmdline_p && *(cmdline_ep-1) == 0) {
             cmdline_ep--;
@@ -234,9 +224,7 @@ int main() {
       }
     }
 
-    auto words = capnp::messageToFlatArray(msg);
-    auto bytes = words.asBytes();
-    zmq_send(publisher, bytes.begin(), bytes.size(), 0);
+    publisher.send("procLog", msg);
 
     usleep(2000000); // 2 secs
   }

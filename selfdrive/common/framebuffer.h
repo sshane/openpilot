@@ -1,7 +1,4 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
-
-#include <EGL/eglext.h>
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,10 +8,11 @@ typedef struct FramebufferState FramebufferState;
 
 FramebufferState* framebuffer_init(
     const char* name, int32_t layer, int alpha,
-    EGLDisplay *out_display, EGLSurface *out_surface,
     int *out_w, int *out_h);
 
 void framebuffer_set_power(FramebufferState *s, int mode);
+void framebuffer_swap(FramebufferState *s);
+bool set_brightness(int brightness);
 
 /* Display power modes */
 enum {
@@ -42,9 +40,6 @@ enum {
     HWC_POWER_MODE_DOZE_SUSPEND  = 3,
 };
 
-
 #ifdef __cplusplus
 }
-#endif
-
 #endif

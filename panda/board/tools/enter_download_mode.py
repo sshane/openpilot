@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-from __future__ import print_function
+#!/usr/bin/env python3
+
 
 import sys
 import time
@@ -11,7 +11,7 @@ def enter_download_mode(device):
 
   try:
     handle.controlWrite(usb1.TYPE_VENDOR | usb1.RECIPIENT_DEVICE, 0xd1, 0, 0, b'')
-  except (usb1.USBErrorIO, usb1.USBErrorPipe) as e:
+  except (usb1.USBErrorIO, usb1.USBErrorPipe):
     print("Device download mode enabled.")
     time.sleep(1)
   else:
@@ -21,12 +21,12 @@ def enter_download_mode(device):
 def find_first_panda(context=None):
   context = context or usb1.USBContext()
   for device in context.getDeviceList(skip_on_error=True):
-    if device.getVendorID() == 0xbbaa and device.getProductID()&0xFF00 == 0xdd00:
+    if device.getVendorID() == 0xbbaa and device.getProductID() & 0xFF00 == 0xdd00:
       return device
 
 if __name__ == "__main__":
   panda_dev = find_first_panda()
-  if panda_dev == None:
+  if panda_dev is None:
     print("no device found")
     sys.exit(0)
   print("found device")
