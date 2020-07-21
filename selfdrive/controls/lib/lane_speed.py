@@ -336,15 +336,15 @@ def eval_poly(poly, x):
 
 x = np.linspace(0, 180, 180)
 t_start = sec_since_boot()
-for _ in range(1000):
+for _ in range(10000):
   np.polyval(TEMP_D_POLY, x)
 print('np.polyval: {}'.format(sec_since_boot() - t_start))
 
 t_start = sec_since_boot()
-for _ in range(1000):
+for _ in range(10000):
   eval_poly(TEMP_D_POLY, x)
 print('eval_poly: {}'.format(sec_since_boot() - t_start))
-
+raise Exception()
 def main():
   lane_speed = LaneSpeed()
   lane_speed.start(temp_v_ego=28.36862661604355, temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
