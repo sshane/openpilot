@@ -176,7 +176,10 @@ class LaneSpeed:
         t_iter += 1
         lane_bounds = self.lanes[lane_name].bounds + y_offset
         if lane_bounds[0] >= track.yRel >= lane_bounds[1]:
-          break
+          if track.vRel + self.v_ego >= 2.24:
+            self.lanes[lane_name].tracks.append(track)
+          elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
+            self.lanes[lane_name].oncoming_tracks.append(track)
     print('total iterations: {}'.format(t_iter))
 
     t_iter = 0
