@@ -1,6 +1,7 @@
 from common.op_params import opParams
 from common.realtime import set_realtime_priority, set_core_affinity
 from selfdrive.config import Conversions as CV
+from selfdrive.controls.lib.lane_planner import eval_poly
 # from common.numpy_fast import clip, interp
 import numpy as np
 import time
@@ -169,7 +170,8 @@ class LaneSpeed:
   def group_tracks(self):
     t_start = sec_since_boot()
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
-    y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
+    # y_offsets = np.polyval(self.d_poly, [trk.dRel for trk in self.live_tracks])  # it's faster to calculate all at once
+    y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
     t_iter = 0
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
@@ -331,9 +333,6 @@ d_rels = [47.816299530243484, 1.0937590342875225, 45.83286354330341, 44.79009263
 TEMP_LIVE_TRACKS = [Track(v, y, d) for v, y, d in zip(v_rels, y_rels, d_rels)]
 TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
-def eval_poly(poly, x):
-  return poly[3] + poly[2]*x + poly[1]*x**2 + poly[0]*x**3
-
 x = np.random.uniform(0, 180, 10).tolist()
 t_start = sec_since_boot()
 for _ in range(100000):
@@ -345,7 +344,7 @@ for _ in range(100000):
   # [eval_poly(TEMP_D_POLY, _x) for _x in x]
   eval_poly(TEMP_D_POLY, np.array(x))
 print('eval_poly: {}'.format(sec_since_boot() - t_start))
-raise Exception()
+# raise Exception()
 def main():
   lane_speed = LaneSpeed()
   lane_speed.start(temp_v_ego=28.36862661604355, temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
