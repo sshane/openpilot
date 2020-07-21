@@ -67,6 +67,7 @@ class LaneSpeed:
     self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
     self._max_steer_angle = 100  # max supported steering angle
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
+    self._static_track_speed = 2.24  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
@@ -176,21 +177,21 @@ class LaneSpeed:
     y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
 
     for track, y_offset in zip(self.live_tracks, y_offsets):
-      travk_vel = track.vRel + self.v_ego
+      track_vel = track.vRel + self.v_ego
       if self.lanes['left'].bounds[0] + y_offset >= track.yRel >= self.lanes['left'].bounds[1] + y_offset:
-        if travk_vel >= 2.24:
+        if track_vel >= 2.24:
           self.lanes['left'].tracks.append(track)
-        elif travk_vel <= -2.24:
+        elif track_vel <= -2.24:
           self.lanes['left'].oncoming_tracks.append(track)
       elif self.lanes['middle'].bounds[0] + y_offset >= track.yRel >= self.lanes['middle'].bounds[1] + y_offset:
-        if travk_vel >= 2.24:
+        if track_vel >= 2.24:
           self.lanes['middle'].tracks.append(track)
-        elif travk_vel <= -2.24:
+        elif track_vel <= -2.24:
           self.lanes['middle'].oncoming_tracks.append(track)
       elif self.lanes['right'].bounds[0] + y_offset >= track.yRel >= self.lanes['right'].bounds[1] + y_offset:
-        if travk_vel >= 2.24:
+        if track_vel >= 2.24:
           self.lanes['right'].tracks.append(track)
-        elif travk_vel <= -2.24:
+        elif track_vel <= -2.24:
           self.lanes['right'].oncoming_tracks.append(track)
       # if travk_vel >= 2.24:
       #   if self.lanes['left'].bounds[0] + y_offset >= track.yRel >= self.lanes['left'].bounds[1] + y_offset:
