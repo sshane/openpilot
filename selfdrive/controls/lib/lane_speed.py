@@ -171,11 +171,11 @@ class LaneSpeed:
 
   def group_tracks(self):
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
+    t_start = sec_since_boot()
     # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
     y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
 
     t_iter = 0
-    t_start = sec_since_boot()
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
         t_iter += 1
