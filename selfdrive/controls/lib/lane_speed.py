@@ -180,8 +180,11 @@ class LaneSpeed:
             self.lanes[lane_name].tracks.append(track)
           elif track.vRel + self.v_ego <= -2.24:  # make sure we don't add stopped tracks at high speeds
             self.lanes[lane_name].oncoming_tracks.append(track)
+    t_elapsed = sec_since_boot() - t_start
     print('total iterations: {}'.format(t_iter))
+    print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
+    t_start = sec_since_boot()
     t_iter = 0
     for track, y_offset in zip(self.live_tracks, y_offsets):
       for lane_name in self.lanes:
