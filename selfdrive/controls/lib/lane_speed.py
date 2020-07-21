@@ -48,6 +48,15 @@ class Lane:
     self.avg_speed = None
     self.fastest_count = 0
 
+  def add_track(self, track, track_speed):
+    """
+    Takes a track object and track speed and adds it to tracks or oncoming_tracks or neither if static
+    """
+    if track_speed >= 2.24:
+      self.tracks.append(track)
+    elif track_speed <= -2.24:
+      self.oncoming_tracks.append(track)
+
   def set_fastest(self):
     """Increments this lane's fast count"""
     self.fastest_count += 1
@@ -176,21 +185,13 @@ class LaneSpeed:
     y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
 
     for track, y_offset in zip(self.live_tracks, y_offsets):
-      travk_vel = track.vRel + self.v_ego
-      if travk_vel >= 2.24:
-        if self.lanes['left'].bounds[0] + y_offset >= track.yRel >= self.lanes['left'].bounds[1] + y_offset:
-          self.lanes['left'].tracks.append(track)
-        elif self.lanes['middle'].bounds[0] + y_offset >= track.yRel >= self.lanes['middle'].bounds[1] + y_offset:
-          self.lanes['middle'].tracks.append(track)
-        elif self.lanes['right'].bounds[0] + y_offset >= track.yRel >= self.lanes['right'].bounds[1] + y_offset:
-          self.lanes['right'].tracks.append(track)
-      elif travk_vel <= -2.24:  # make sure we don't add stopped tracks at high speeds
-        if self.lanes['left'].bounds[0] + y_offset >= track.yRel >= self.lanes['left'].bounds[1] + y_offset:
-          self.lanes['left'].oncoming_tracks.append(track)
-        elif self.lanes['middle'].bounds[0] + y_offset >= track.yRel >= self.lanes['middle'].bounds[1] + y_offset:
-          self.lanes['middle'].oncoming_tracks.append(track)
-        elif self.lanes['right'].bounds[0] + y_offset >= track.yRel >= self.lanes['right'].bounds[1] + y_offset:
-          self.lanes['right'].oncoming_tracks.append(track)
+      track_vel = track.vRel + self.v_ego
+      if self.lanes['left'].bounds[0] + y_offset >= track.yRel >= self.lanes['left'].bounds[1] + y_offset:
+        self.lanes['left'].add_track(track, track_vel)
+      elif self.lanes['middle'].bounds[0] + y_offset >= track.yRel >= self.lanes['middle'].bounds[1] + y_offset:
+        self.lanes['middle'].add_track(track, track_vel)
+      elif self.lanes['right'].bounds[0] + y_offset >= track.yRel >= self.lanes['right'].bounds[1] + y_offset:
+        self.lanes['right'].add_track(track, track_vel)
 
     # t_iter = 0
     # for track, y_offset in zip(self.live_tracks, y_offsets):  # 1299.8735 hz
