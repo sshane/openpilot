@@ -333,17 +333,17 @@ d_rels = [47.816299530243484, 1.0937590342875225, 45.83286354330341, 44.79009263
 TEMP_LIVE_TRACKS = [Track(v, y, d) for v, y, d in zip(v_rels, y_rels, d_rels)]
 TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
-x = np.random.uniform(0, 180, 10).tolist()
-t_start = sec_since_boot()
-for _ in range(100000):
-  np.polyval(TEMP_D_POLY, x)
-print('np.polyval: {}'.format(sec_since_boot() - t_start))
-
-t_start = sec_since_boot()
-for _ in range(100000):
-  # [eval_poly(TEMP_D_POLY, _x) for _x in x]
-  eval_poly(TEMP_D_POLY, np.array(x))
-print('eval_poly: {}'.format(sec_since_boot() - t_start))
+# x = np.random.uniform(0, 180, 10).tolist()
+# t_start = sec_since_boot()
+# for _ in range(100000):
+#   np.polyval(TEMP_D_POLY, x)
+# print('np.polyval: {}'.format(sec_since_boot() - t_start))
+#
+# t_start = sec_since_boot()
+# for _ in range(100000):
+#   # [eval_poly(TEMP_D_POLY, _x) for _x in x]
+#   eval_poly(TEMP_D_POLY, np.array(x))
+# print('eval_poly: {}'.format(sec_since_boot() - t_start))
 # raise Exception()
 def main():
   lane_speed = LaneSpeed()
