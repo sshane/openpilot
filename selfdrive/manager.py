@@ -234,8 +234,8 @@ if ANDROID:
     'tombstoned',
     'deleter',
   ]
-if not no_ota_updates:
-  persistent_processes.append('updated')
+# if not no_ota_updates:
+#   persistent_processes.append('updated')
 
 car_started_processes = [
   'controlsd',
