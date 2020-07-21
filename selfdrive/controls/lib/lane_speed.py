@@ -175,7 +175,7 @@ class LaneSpeed:
     t_start = sec_since_boot()
     # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
     y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
-
+    # track_y_rels_corrected = [trk.yRel + y_offset for trk, y_offset in zip(self.live_tracks, y_offsets)]
 
     for track, y_offset in zip(self.live_tracks, y_offsets):
       track_vel = track.vRel + self.v_ego
@@ -224,9 +224,9 @@ class LaneSpeed:
     t_elapsed = sec_since_boot() - t_start
 
     # print('total iterations: {}'.format(t_iter))
-    print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
-    print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
-    print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
+    # print('left lane: {} {}'.format(len(self.lanes['left'].tracks), len(self.lanes['left'].oncoming_tracks)))
+    # print('middle lane: {} {}'.format(len(self.lanes['middle'].tracks), len(self.lanes['middle'].oncoming_tracks)))
+    # print('right lane: {} {}'.format(len(self.lanes['right'].tracks), len(self.lanes['right'].oncoming_tracks)))
 
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
@@ -263,7 +263,7 @@ class LaneSpeed:
       if len(track_speeds):  # filters out very slow tracks
         # np.mean was much slower than sum() / len()
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
-    t_elapsed = sec_since_boot() - t_start
+    # t_elapsed = sec_since_boot() - t_start
     # print('get_fastest_lane avg_speeds: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
     lanes_with_avg_speeds = self.lanes_with_avg_speeds()
