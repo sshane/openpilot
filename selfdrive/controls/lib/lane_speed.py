@@ -141,11 +141,11 @@ class LaneSpeed:
     else:
       self.reset(reset_fastest=True)
 
-  def update_lane_bounds(self):
+  def update_lane_bounds(self):  # todo: run this at half the rate of lane_speed
     t_start = sec_since_boot()
     lane_width = self.sm['pathPlan'].laneWidth
     if isinstance(lane_width, float) and lane_width > 1:
-      self.lane_width = min(lane_width, 4)  # LanePlanner uses 4 as max width for dPoly calculation
+      self.lane_width = min(lane_width, 4.5)  # LanePlanner uses 4 as max width for dPoly calculation
 
     self.lanes['left'].pos = self.lane_width  # update with new lane center positions
     self.lanes['right'].pos = -self.lane_width
@@ -186,14 +186,14 @@ class LaneSpeed:
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   def find_oncoming_lanes(self):
-    t_start = sec_since_boot()
+    # t_start = sec_since_boot()
     """If number of oncoming tracks is greater than tracks going our direction, set lane to oncoming"""
     for lane in self.oncoming_lanes:
       self.oncoming_lanes[lane] = False
       if len(self.lanes[lane].oncoming_tracks) > len(self.lanes[lane].tracks):  # 0 can't be > 0 so 0 oncoming tracks will be handled correctly
         self.oncoming_lanes[lane] = True
-    t_elapsed = sec_since_boot() - t_start
-    print('find_oncoming_lanes: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
+    # t_elapsed = sec_since_boot() - t_start
+    # print('find_oncoming_lanes: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 3)))
 
   def lanes_with_avg_speeds(self):
     """Returns a dict of lane objects where avg_speed not None"""
@@ -211,6 +211,7 @@ class LaneSpeed:
       lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
       track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
+      print(len(track_speeds))
       if len(track_speeds):  # filters out very slow tracks
         # np.mean was much slower than sum() / len()
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
@@ -322,13 +323,15 @@ class Track:
     self.vRel = vRel
     self.yRel = yRel
     self.dRel = dRel
-
-TEMP_LIVE_TRACKS = [Track(np.random.uniform(-10, 10), np.random.uniform(-3.7*1.5, 3.7*1.5), np.random.uniform(0, 60)) for _ in range(16)]
+v_rels = [7.027988825101453, -1.6939890741248327, -2.0073281329557595, 7.732686354895254, 8.448640704461642, -0.4124279188166433, -4.864017389464086, -4.1186454970802515, -9.684282305020197, -9.979187599100587, -8.036672540886896, -3.025854705185946, -6.347005348508485, -2.502134724290814, 3.8857648270182743, 5.3016772854121115]
+y_rels = [-3.7392238915910396, -4.947102125963248, -3.099776764519531, -5.399104990417248, 5.278053706824695, 3.8991116187949793, -0.9252016611001208, 0.4527911313949229, 4.606432638329704, -1.9683618473307751, -3.6920577990810357, -0.9243886066458202, 4.765879225624099, 5.310588490331199, -2.073362080174996, -0.787692913730746]
+d_rels = [47.816299530243484, 1.0937590342875225, 45.83286354330341, 44.79009263149329, 15.721120725763347, 48.974408204844835, 10.538985749858739, 50.379159253222355, 27.746917826360942, 24.410420872880284, 1.605961587171345, 23.89657990345233, 30.219941981980615, 50.31621564718719, 35.654178681545176, 34.980565736019585]
+TEMP_LIVE_TRACKS = [Track(v, y, d) for v, y, d in zip(v_rels, y_rels, d_rels)]
 TEMP_D_POLY = np.array([1.3839008e-06/10, 0, 0, 0.05])
 
 def main():
   lane_speed = LaneSpeed()
-  lane_speed.start(temp_v_ego=np.random.uniform(0, 40), temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
+  lane_speed.start(temp_v_ego=28.36862661604355, temp_steer_angle=0, temp_d_poly=TEMP_D_POLY, temp_tracks=TEMP_LIVE_TRACKS)
 
 
 if __name__ == '__main__':
