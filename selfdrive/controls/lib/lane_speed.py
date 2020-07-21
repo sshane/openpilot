@@ -18,7 +18,6 @@ except:
 #   import time
 #   sec_since_boot = time.time
 
-
 def cluster(data, maxgap):
   data.sort(key=lambda _trk: _trk.dRel)
   groups = [[data[0]]]
@@ -57,7 +56,7 @@ LANE_SPEED_RATE = 1 / 5.
 
 class LaneSpeed:
   def __init__(self):
-    set_core_affinity(1)
+    set_core_affinity(1)  # use up to 1 core?
     self.op_params = opParams()
 
     self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
@@ -66,7 +65,7 @@ class LaneSpeed:
     self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
     self._max_steer_angle = 100  # max supported steering angle
     self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
-    self._min_track_speed = 2.24  # tracks must be traveling faster than this speed to be added to a lane (- or +)
+    self._min_track_speed = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
