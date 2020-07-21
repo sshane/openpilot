@@ -119,7 +119,7 @@ class DynamicFollow:
 
   def _norm(self, x, name):
     self.x = x
-    return np.interp(x, self.model_scales[name], [0, 1])
+    return interp(x, self.model_scales[name], [0, 1])
 
   def _send_cur_state(self):
     if self.mpc_id == 1 and self.pm is not None:
@@ -141,7 +141,7 @@ class DynamicFollow:
       cost_mod = interp(change_time, change_time_x, change_mod_y)
       cost_mod_speeds = [0, 20 * CV.MPH_TO_MS]  # don't change cost too much under 20 mph
       cost_mods = [cost_mod * 0.01, cost_mod]
-      cost *= np.interp(cost_mod, cost_mod_speeds, cost_mods)
+      cost *= interp(cost_mod, cost_mod_speeds, cost_mods)
 
     if self.last_cost != cost:
       libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
@@ -198,11 +198,11 @@ class DynamicFollow:
     mods_x = [0, -.75, -1.5]
     mods_y = [1.5, 1.25, 1]
     if a_lead < 0:  # more weight to slight lead decel
-      a_lead *= np.interp(a_lead, mods_x, mods_y)
+      a_lead *= interp(a_lead, mods_x, mods_y)
 
     rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
     mod_y = [0.3245 * 1.25, 0.277 * 1.2, 0.11075 * 1.15, 0.08106 * 1.075, 0.06325 * 1.05, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
-    return np.interp(a_lead - a_ego, rel_x, mod_y)
+    return interp(a_lead - a_ego, rel_x, mod_y)
 
   def global_profile_mod(self, profile_mod_x, profile_mod_pos, profile_mod_neg, x_vel, y_dist):
     """
@@ -216,11 +216,11 @@ class DynamicFollow:
     # Calculate new TRs
     speeds = [0, self.sng_speed, 18, x_vel[-1]]  # [0, 18 mph, ~40 mph, highest profile mod speed (~78 mph)]
     mods = [0, 0.1, 0.7, 1]  # how much to limit global_df_mod at each speed, 1 is full effect
-    y_dist_new = [y - (y * global_df_mod * np.interp(x, speeds, mods)) for x, y in zip(x_vel, y_dist)]
+    y_dist_new = [y - (y * global_df_mod * interp(x, speeds, mods)) for x, y in zip(x_vel, y_dist)]
 
     # Calculate how to change profile mods based on change in TR
     # eg. if df mod is 0.7, then increase positive mod and decrease negative mod
-    calc_profile_mods = [(np.interp(mod_x, x_vel, y_dist) - np.interp(mod_x, x_vel, y_dist_new) + 1) for mod_x in profile_mod_x]
+    calc_profile_mods = [(interp(mod_x, x_vel, y_dist) - interp(mod_x, x_vel, y_dist_new) + 1) for mod_x in profile_mod_x]
     profile_mod_pos = [mod_pos * mod for mod_pos, mod in zip(profile_mod_pos, calc_profile_mods)]
     profile_mod_neg = [mod_neg * ((1 - mod) + 1) for mod_neg, mod in zip(profile_mod_neg, calc_profile_mods)]
 

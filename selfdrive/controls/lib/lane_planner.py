@@ -118,7 +118,7 @@ class DynamicCameraOffset:
     right_lane_oncoming = self.right_lane_oncoming
 
     if self.have_oncoming:
-      _min_poly_prob = np.interp(v_ego, self._poly_prob_speeds, self._poly_probs)
+      _min_poly_prob = interp(v_ego, self._poly_prob_speeds, self._poly_probs)
       if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate current lane width
         return
       if self.lane_width_certainty < self._min_lane_width_certainty:
@@ -134,7 +134,7 @@ class DynamicCameraOffset:
 
     estimated_lane_position = self._get_camera_position()
 
-    hug_modifier = np.interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)  # don't offset as much when angle is high
+    hug_modifier = interp(abs(angle_steers), self._ramp_angles, self._ramp_angle_mods)  # don't offset as much when angle is high
     if left_lane_oncoming:
       self.keeping_right = True
       hug_ratio = (self._hug_right_ratio * hug_modifier) + (self._center_ratio * (1 - hug_modifier))  # weighted average
@@ -149,7 +149,7 @@ class DynamicCameraOffset:
     offset = self.i + error * self._k_p
 
     if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
-      offset *= np.interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # ramp down offset
+      offset *= interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # ramp down offset
 
     return offset
 
