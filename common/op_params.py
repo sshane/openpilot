@@ -60,7 +60,10 @@ class opParams:
                            'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
                            'hide_auto_df_alerts': {'default': False, 'allowed_types': [bool], 'description': 'Hides the alert that shows what profile the model has chosen'},
                            'log_auto_df': {'default': False, 'allowed_types': [bool], 'description': 'Logs dynamic follow data for auto-df'},
-                           'dynamic_camera_offset': {'default': True, 'allowed_types': [bool], 'description': 'Whether to automatically keep away from oncoming traffic. Works from 35 to ~60 mph'},
+                           'dynamic_camera_offset': {'default': True, 'allowed_types': [bool], 'description': 'Whether to automatically keep away from oncoming traffic.\n'
+                                                                                                              'Works from 35 to ~60 mph (requires radar)'},
+                           'support_white_panda': {'default': False, 'allowed_types': [bool], 'description': 'Enable this to allow engagement with the deprecated white panda.\n'
+                                                                                                             'localizer might not work correctly'},
 
 
                            'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
