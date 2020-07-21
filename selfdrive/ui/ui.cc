@@ -890,7 +890,7 @@ int main(int argc, char* argv[]) {
     }
 
     s->sound.setVolume(fmin(MAX_VOLUME, MIN_VOLUME + s->scene.controls_state.getVEgo() / 5)); // up one notch every 5 m/s
-    !s->controls_seen = true;
+    s->controls_seen = true;
 
     if (s->controls_timeout > 0) {
       s->controls_timeout--;
