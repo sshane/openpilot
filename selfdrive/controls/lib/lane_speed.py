@@ -175,21 +175,21 @@ class LaneSpeed:
     t_start = sec_since_boot()
     # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
     y_offsets = eval_poly(self.d_poly, np.array([trk.dRel for trk in self.live_tracks]))  # it's faster to calculate all at once
-    # track_y_rels_corrected = [trk.yRel + y_offset for trk, y_offset in zip(self.live_tracks, y_offsets)]
+    y_rels_corrected = [trk.yRel - y_offset for trk, y_offset in zip(self.live_tracks, y_offsets)]
 
-    for track, y_offset in zip(self.live_tracks, y_offsets):
+    for track, offset_y_rel in zip(self.live_tracks, y_rels_corrected):
       track_vel = track.vRel + self.v_ego
-      if self.lanes['left'].bounds[0] >= track.yRel - y_offset >= self.lanes['left'].bounds[1]:
+      if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
         if track_vel >= 2.24:
           self.lanes['left'].tracks.append(track)
         elif track_vel <= -2.24:
           self.lanes['left'].oncoming_tracks.append(track)
-      elif self.lanes['middle'].bounds[0] >= track.yRel - y_offset >= self.lanes['middle'].bounds[1]:
+      elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
         if track_vel >= 2.24:
           self.lanes['middle'].tracks.append(track)
         elif track_vel <= -2.24:
           self.lanes['middle'].oncoming_tracks.append(track)
-      elif self.lanes['right'].bounds[0] >= track.yRel - y_offset >= self.lanes['right'].bounds[1]:
+      elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
         if track_vel >= 2.24:
           self.lanes['right'].tracks.append(track)
         elif track_vel <= -2.24:
