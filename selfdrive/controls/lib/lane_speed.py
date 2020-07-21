@@ -194,7 +194,7 @@ class LaneSpeed:
     print('group_tracks: {} s - {} Hz'.format(t_elapsed, round(1/t_elapsed, 4)))
     self.group_tracks_rates.append(1/t_elapsed)
     print('average group_tracks rate: {}'.format(round(np.mean(self.group_tracks_rates), 4)))
-    if sec_since_boot() - self.t_start > 20:
+    if sec_since_boot() - self.t_start > 40:
       raise Exception('Finished!')
 
   def find_oncoming_lanes(self):
