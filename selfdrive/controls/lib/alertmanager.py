@@ -22,8 +22,8 @@ class AlertManager():
     for a in alerts:
       self.add(frame, a, enabled=enabled)
 
-  def add_custom(self, frame, alert_name, enabled=True, extra_text_1='', extra_text_2=''):
-    alert = EVENTS[alert_name]
+  def add_custom(self, frame, alert_name, event_type, enabled=True, extra_text_1='', extra_text_2=''):
+    alert = EVENTS[alert_name][event_type]
     added_alert = copy.copy(alert)
     added_alert.start_time = frame * DT_CTRL
     added_alert.alert_text_1 += extra_text_1

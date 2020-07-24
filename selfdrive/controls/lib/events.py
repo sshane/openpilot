@@ -533,41 +533,53 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
   },
 
-  # "dfButtonAlert": Alert(
-  #   "Using profile: ",
-  #   "",
-  #   AlertStatus.normal, AlertSize.mid,
-  #   Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
-  #
-  # "lsButtonAlert": Alert(
-  #   "Lane Speed set to: ",
-  #   "",
-  #   AlertStatus.normal, AlertSize.small,
-  #   Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
-  #
-  # "dfButtonAlertSilent": Alert(
-  #   "Dynamic follow: ",
-  #   "",
-  #   AlertStatus.normal, AlertSize.small,
-  #   Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
-  #
-  # "laneSpeedAlert": Alert(
-  #   "",
-  #   "",
-  #   AlertStatus.normal, AlertSize.mid,
-  #   Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 0.1),
-  #
-  # "laneSpeedAlertSilent": Alert(
-  #   "",
-  #   "",
-  #   AlertStatus.normal, AlertSize.mid,
-  #   Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
-  #
-  # "laneSpeedKeeping": Alert(
-  #   "KEEPING ",
-  #   "",
-  #   AlertStatus.normal, AlertSize.mid,
-  #   Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+  "dfButtonAlert": {
+    ET.WARNING: Alert(
+      "Using profile: ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+  },
+
+  "lsButtonAlert": {
+    ET.WARNING: Alert(
+      "Lane Speed set to: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+  },
+
+  "dfButtonAlertSilent": {
+    ET.WARNING: Alert(
+      "Dynamic follow: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
+  },
+
+  "laneSpeedAlert": {
+    ET.WARNING: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 0.1),
+  },
+
+  "laneSpeedAlertSilent": {
+    ET.WARNING: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+  },
+
+  "laneSpeedKeeping": {
+    ET.WARNING: Alert(
+      "KEEPING ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+  },
 
   EventName.posenetInvalid: {
     ET.WARNING: Alert(
