@@ -686,6 +686,11 @@ static void ui_draw_ml_button(UIState *s) {
   nvgStrokeWidth(s->vg, 12);
   nvgStroke(s->vg);
 
+  nvgBeginPath(s->vg);
+  nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
+  nvgStrokeColor(s->vg, nvgRGBA(130, 12, 104, 128));
+  nvgStroke(s->vg);
+
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
   nvgFontSize(s->vg, 65);
   nvgText(s->vg, x, y + btn_h / 8, "Toggle Model Long", NULL);
