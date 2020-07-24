@@ -271,7 +271,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 
   s->scene.dfButtonStatus = 0;
   s->scene.lsButtonStatus = 0;
-
+  s->scene.mlButtonStatus = 0;
 
   s->rgb_width = back_bufs.width;
   s->rgb_height = back_bufs.height;
@@ -849,6 +849,7 @@ int main(int argc, char* argv[]) {
     int touch_x = -1, touch_y = -1;
     int touched = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (touched == 1) {
+      printf("touched x: %d, y: %d\n", touch_x, touch_y);
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
 
