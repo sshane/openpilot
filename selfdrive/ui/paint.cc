@@ -664,8 +664,8 @@ static void ui_draw_df_button(UIState *s) {
 static void ui_draw_ml_button(UIState *s) {
 //  int test_button = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
 
-  int btn_w = 450;
-  int btn_h = 100;
+  int btn_w = 500;
+  int btn_h = 125;
 //  int y_padding = 100;
 //  int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
 //  int btn_y = 980 - btn_h / 2 - y_padding;
