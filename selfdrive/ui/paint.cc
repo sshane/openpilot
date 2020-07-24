@@ -679,9 +679,9 @@ static void ui_draw_ml_button(UIState *s) {
   nvgStrokeWidth(s->vg, 14);
   nvgStroke(s->vg);
 
-//  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-//  nvgFontSize(s->vg, 80);
-//  nvgText(s->vg, btn_x - 38, btn_y + 30, "LS", NULL);
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
+  nvgFontSize(s->vg, 80);
+  nvgText(s->vg, btn_x - 38, btn_y + 30, "Model Long", NULL);
 //
 //  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
 //  nvgFontSize(s->vg, 45);
