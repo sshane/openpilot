@@ -844,8 +844,6 @@ int main(int argc, char* argv[]) {
       if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
       }
-    } else {
-      printf("not touched\n");
     }
 
     if (!s->started) {
@@ -859,7 +857,10 @@ int main(int argc, char* argv[]) {
       set_awake(s, true);
       // Car started, fetch a new rgb image from ipc
       if (s->vision_connected){
+        printf("vision connected\n");
         ui_update(s);
+      } else {
+        printf("vision not connected\n");
       }
 
       check_messages(s);
