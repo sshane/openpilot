@@ -21,11 +21,21 @@ def send_controls_packet(pm):
     pm.send('controlsState', dat)
     time.sleep(0.01)
 
+def send_thermal_packet(pm):
+  while True:
+    dat = messaging.new_message('thermal')
+    dat.controlsState = {
+      'started': True,
+    }
+    pm.send('thermal', dat)
+    time.sleep(0.01)
 
 def main():
   pm = messaging.PubMaster(['controlsState'])
   controls_sender = multiprocessing.Process(target=send_controls_packet, args=[pm])
+  thermal_sender = multiprocessing.Process(target=send_thermal_packet, args=[pm])
   controls_sender.start()
+  thermal_sender.start()
 
   # TODO: refactor with manager start/kill
   proc_cam = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/camerad/camerad"), cwd=os.path.join(BASEDIR, "selfdrive/camerad"))
