@@ -659,7 +659,7 @@ static void ui_draw_df_button(UIState *s) {
 }
 
 static void ui_draw_ml_button(UIState *s) {
-  int test_button = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
+//  int test_button = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
 
   int btn_w = 400;
   int btn_h = 150;
