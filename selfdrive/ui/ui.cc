@@ -150,19 +150,20 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
 }
 
 static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
-    //mlButton manager
+  //mlButton manager
+  if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
+  int padding = 40;
     int btn_w = 500;
     int btn_h = 138;
-    if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
-        int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w / 2};
-        int y_top = 915 - btn_h / 2;
-        if (xs[0] <= touch_x && touch_x <= xs[1] && y_top <= touch_y) {
-            printf("ml button touched!\n");
-            s->scene.mlButtonEnabled = !s->scene.mlButtonEnabled;
-            send_ml(s, s->scene.mlButtonEnabled);
-            return true;
-        }
+    int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w / 2};
+    int y_top = 915 - btn_h / 2;
+    if (xs[0] <= touch_x + padding && touch_x - padding <= xs[1] && y_top - padding <= touch_y) {
+      printf("ml button touched!\n");
+      s->scene.mlButtonEnabled = !s->scene.mlButtonEnabled;
+      send_ml(s, s->scene.mlButtonEnabled);
+      return true;
     }
+  }
     return false;
 }
 
@@ -883,7 +884,6 @@ int main(int argc, char* argv[]) {
       if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y) && !handle_ml_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
       } else {
-        printf("SA button touched!\n");
         s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping any SA button
       }
     }
