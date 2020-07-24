@@ -99,7 +99,7 @@ static void send_ls(UIState *s, int status) {
 
 static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
   //lsButton manager
-  if ()s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
+  if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
     int padding = 40;
     int btn_x_1 = 1660 - 200;
     int btn_x_2 = 1660 - 50;
