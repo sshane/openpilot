@@ -619,8 +619,10 @@ static void ui_draw_driver_view(UIState *s) {
 static void ui_draw_ls_button(UIState *s) {
   int btn_w = 150;
   int btn_h = 150;
-  int btn_x = 1920 - btn_w - 200;  // 150 + 50 padding
-  int btn_y = 1080 - btn_h - 50;
+  int x_padding = 200;
+  int y_padding = 50;
+  int btn_x = 1920 - btn_w - x_padding;
+  int btn_y = 1080 - btn_h - y_padding;
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
@@ -640,8 +642,9 @@ static void ui_draw_ls_button(UIState *s) {
 static void ui_draw_df_button(UIState *s) {
   int btn_w = 150;
   int btn_h = 150;
+  int y_padding = 50;
   int btn_x = 1920 - btn_w;
-  int btn_y = 1080 - btn_h - 50;
+  int btn_y = 1080 - btn_h - y_padding;
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
@@ -663,8 +666,9 @@ static void ui_draw_ml_button(UIState *s) {
 
   int btn_w = 400;
   int btn_h = 150;
+  int y_padding = 50;
   int btn_x = 1051 - btn_w / 2;  // 150 + 50 padding
-  int btn_y = 934 - btn_h / 2;
+  int btn_y = 934 - btn_h / 2 - y_padding;
 
 //  ui_draw_image(s->vg, btn_x, btn_y, btn_w, btn_h, test_button, 1.0f);
 
