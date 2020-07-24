@@ -149,7 +149,7 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
 //    if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
     if (true) {
         int padding = 40;
-        int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w};
+        int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w / 2};
         int y_top = 915;
         if (xs[0] <= touch_x && xs[1] >= touch_x && y_top <= touch_y) {
             printf("ml button touched!\n");
