@@ -672,8 +672,8 @@ static void ui_draw_ml_button(UIState *s) {
   int btn_x = 960;
   int btn_y = 540;
 
-  int btn_x_center = 960 - btn_h / 2;
-  int btn_y_center = 540 - btn_w / 2;
+  int btn_x_center = 960 - btn_w / 2;
+  int btn_y_center = 540 - btn_h / 2;
 
 //  ui_draw_image(s->vg, btn_x, btn_y, btn_w, btn_h, test_button, 1.0f);
 
