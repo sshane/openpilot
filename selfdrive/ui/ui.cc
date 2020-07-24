@@ -859,8 +859,6 @@ int main(int argc, char* argv[]) {
       if (s->vision_connected){
         printf("vision connected\n");
         ui_update(s);
-      } else {
-        printf("vision not connected\n");
       }
 
       check_messages(s);
@@ -890,9 +888,12 @@ int main(int argc, char* argv[]) {
 
     // Don't waste resources on drawing in case screen is off
     if (s->awake) {
+      printf("drawing with paint.cc!\n")
       ui_draw(s);
       glFinish();
       should_swap = true;
+    } else {
+      printf("not drawing with paint.cc\n");
     }
 
     s->sound.setVolume(fmin(MAX_VOLUME, MIN_VOLUME + s->scene.controls_state.getVEgo() / 5)); // up one notch every 5 m/s
