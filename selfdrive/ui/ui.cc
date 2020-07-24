@@ -149,7 +149,9 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
     if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
         int padding = 40;
         int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w};
-        if ((xs[0] - padding <= touch_x) && (touch_x <= xs[1] + padding) && (855 - padding <= touch_y)) {
+        int y_top = 915;
+        printf("here!\n")
+        if ((xs[0] - padding <= touch_x) && (touch_x <= xs[1] + padding) && (y_top <= touch_y)) {
             printf("ml button touched!\n")
             s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping ls button
             s->scene.lsButtonStatus++;
