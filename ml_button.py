@@ -3,4 +3,4 @@ sm = SubMaster(['modelLongButton'])
 while 1:
   input()
   sm.update(0)
-  print(sm['modelLongButton'].status)
+  print(sm['modelLongButton'].enabled)
