@@ -686,7 +686,7 @@ static void ui_draw_ml_button(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x_center, btn_y_center, btn_w, btn_h, 25);
-  nvgStrokeColor(s->vg, nvgRGBA(130, 12, 128, 255));
+  nvgStrokeColor(s->vg, nvgRGBA(0, 255, 0, 255));
   nvgStrokeWidth(s->vg, 14);
   nvgStroke(s->vg);
 
