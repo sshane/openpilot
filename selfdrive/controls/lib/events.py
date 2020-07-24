@@ -530,7 +530,7 @@ EVENTS = {
       "Model longitudinal ",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
   "dfButtonAlert": {
@@ -538,7 +538,7 @@ EVENTS = {
       "Using profile: ",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
   "lsButtonAlert": {
@@ -546,7 +546,7 @@ EVENTS = {
       "Lane Speed set to: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
   "dfButtonAlertSilent": {
@@ -554,7 +554,7 @@ EVENTS = {
       "Dynamic follow: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0.2, 0., 2.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
   },
 
   "laneSpeedAlert": {
@@ -562,7 +562,7 @@ EVENTS = {
       "",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 0.1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
   },
 
   "laneSpeedAlertSilent": {
@@ -570,7 +570,7 @@ EVENTS = {
       "",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
   },
 
   "laneSpeedKeeping": {
