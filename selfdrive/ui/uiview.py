@@ -17,6 +17,7 @@ def send_controls_packet(pm):
   while True:
     dat = messaging.new_message('controlsState')
     dat.controlsState = {
+      "rearViewCam": True,
     }
     pm.send('controlsState', dat)
     time.sleep(0.01)
@@ -24,7 +25,7 @@ def send_controls_packet(pm):
 def send_thermal_packet(pm):
   while True:
     dat = messaging.new_message('thermal')
-    dat.controlsState = {
+    dat.thermal = {
       'started': True,
     }
     pm.send('thermal', dat)
