@@ -147,7 +147,8 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
     int btn_w = 500;
 //    int btn_h = 138;
     printf("hi\n");
-    if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
+//    if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
+    if (true) {
         int padding = 40;
         int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w};
         int y_top = 915;
