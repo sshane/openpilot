@@ -29,7 +29,7 @@ def main():
 
   # TODO: refactor with manager start/kill
   proc_cam = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/camerad/camerad"), cwd=os.path.join(BASEDIR, "selfdrive/camerad"))
-  proc_ui = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/ui"), cwd=os.path.join(BASEDIR, "selfdrive/ui"))
+  proc_ui = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/ui/ui"), cwd=os.path.join(BASEDIR, "selfdrive/ui"))
 
   params = Params()
   is_rhd_checked = False
