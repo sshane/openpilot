@@ -808,6 +808,7 @@ int main(int argc, char* argv[]) {
   int draws = 0;
   printf("num args: %d\n", argc);
   printf("1st arg: %s\n", argv[0]);
+  printf("2nd arg: %s\n", argv[1]);
 
   while (!do_exit) {
     bool should_swap = false;
