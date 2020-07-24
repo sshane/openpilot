@@ -227,7 +227,7 @@ static void ui_init(UIState *s) {
                                     , "liveMapData"
 #endif
   });
-  s->pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton"});
+  s->pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
 
   s->ipc_fd = -1;
   s->scene.satelliteCount = -1;

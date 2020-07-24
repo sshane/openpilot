@@ -2014,6 +2014,10 @@ struct DynamicCameraOffset {
   keepingRight @1 :Bool;
 }
 
+struct ModelLongButton {
+  enabled @0 :Bool;
+}
+
 struct Event {
   # in nanoseconds?
   logMonoTime @0 :UInt64;
@@ -2098,5 +2102,6 @@ struct Event {
     laneSpeed @76 :LaneSpeed;
     laneSpeedButton @77 :LaneSpeedButton;
     dynamicCameraOffset @78 :DynamicCameraOffset;
+    modelLongButton @79 :ModelLongButton;
   }
 }

@@ -83,6 +83,7 @@ dynamicFollowButton: [8076, false, 0.]
 laneSpeed: [8077, false, 0.]
 laneSpeedButton: [8078, false, 0.]
 dynamicCameraOffset: [8079, false, 0.]
+modelLongButton: [8080, false, 0.]
 
 testModel: [8040, false, 0.]
 testLiveLocation: [8045, false, 0.]
