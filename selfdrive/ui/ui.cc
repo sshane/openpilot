@@ -815,8 +815,6 @@ int main(int argc, char* argv[]) {
   }
 
   while (!do_exit) {
-    printf("s->started: %d\n", s->started);
-    printf("s->controls_seen: %d\n", s->controls_seen);
     bool should_swap = false;
     if (debug_ui) {
       s->started = true;
