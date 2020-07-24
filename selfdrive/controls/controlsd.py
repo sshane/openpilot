@@ -279,13 +279,9 @@ class Controls:
     frame = self.sm.frame
     # alert priority is defined by code location, keeping is highest, then lane speed alert, then auto-df alert
     if self.sm_smiskol['modelLongButton'].enabled != self.last_model_long:
-      if self.last_model_long:
-        extra_text_1 = 'disabled!'
-        extra_text_2 = ''
-      else:
-        extra_text_1 = 'enabled!'
-        extra_text_2 = 'Remain alert'
-      self.AM.add_custom(frame, 'modelLongAlert', ET.WARNING, self.enabled, extra_text_1=extra_text_1, extra_text_2=extra_text_2)
+      extra_text_1 = 'disabled!' if self.last_model_long else 'enabled!'
+      self.AM.add_custom(frame, 'modelLongAlert', ET.WARNING, self.enabled, extra_text_1=extra_text_1)
+      return
 
     if self.sm_smiskol['dynamicCameraOffset'].keepingLeft:
       self.AM.add_custom(frame, 'laneSpeedKeeping', ET.WARNING, self.enabled, extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')

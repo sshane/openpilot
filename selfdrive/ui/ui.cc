@@ -122,7 +122,6 @@ static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
     int btn_x_1 = 1660 - 200;
     int btn_x_2 = 1660 - 50;
     if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
-      printf("ls button touched!\n");
       s->scene.lsButtonStatus++;
       if (s->scene.lsButtonStatus > 2) {
         s->scene.lsButtonStatus = 0;
@@ -139,7 +138,6 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
   if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
     int padding = 40;
     if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
-      printf("df button touched!\n");
       s->scene.dfButtonStatus++;
       if (s->scene.dfButtonStatus > 3) {
         s->scene.dfButtonStatus = 0;
@@ -160,7 +158,6 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
     int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w / 2};
     int y_top = 915 - btn_h / 2;
     if (xs[0] <= touch_x + padding && touch_x - padding <= xs[1] && y_top - padding <= touch_y) {
-      printf("ml button touched!\n");
       s->scene.mlButtonEnabled = !s->scene.mlButtonEnabled;
       send_ml(s, s->scene.mlButtonEnabled);
       return true;
@@ -260,7 +257,7 @@ static void ui_init(UIState *s) {
   s->scene.satelliteCount = -1;
   s->started = false;
   s->vision_seen = false;
-  s->ui_debug = true;  // change to true while debugging
+  s->ui_debug = false;  // change to true while debugging
 
   // init display
   s->fb = framebuffer_init("ui", 0, true, &s->fb_w, &s->fb_h);
@@ -835,23 +832,8 @@ int main(int argc, char* argv[]) {
 
   int draws = 0;
 
-  bool debug_ui = false;
-  if (argc == 2) {
-    if (strcmp(argv[1], "debug") == 0) {
-      debug_ui = true;
-    }
-  }
-
   while (!do_exit) {
     bool should_swap = false;
-    if (debug_ui) {
-      s->started = true;
-      s->status = STATUS_DISENGAGED;
-      s->controls_seen = true;
-      s->vision_seen = true;
-      s->active_app = cereal::UiLayoutState::App::NONE;
-      s->controls_timeout = UI_FREQ;
-    }
     if (!s->started) {
       // Delay a while to avoid 9% cpu usage while car is not started and user is keeping touching on the screen.
       // Don't hold the lock while sleeping, so that vision_connect_thread have chances to get the lock.

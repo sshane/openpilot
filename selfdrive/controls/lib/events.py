@@ -528,7 +528,7 @@ EVENTS = {
   "modelLongAlert": {
     ET.WARNING: Alert(
       "Model longitudinal ",
-      "",
+      "Remain alert",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
