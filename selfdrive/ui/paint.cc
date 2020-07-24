@@ -669,14 +669,14 @@ static void ui_draw_ml_button(UIState *s) {
   int y_padding = 50;
   int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
   int btn_y = 980 - btn_h / 2 - y_padding;
-  btn_y = 540 - btn_w / 2;
-  btn_x = 960 - btn_h / 2;
+  btn_y = 540;
+  btn_x = 960;
 
 //  ui_draw_image(s->vg, btn_x, btn_y, btn_w, btn_h, test_button, 1.0f);
 
 
   nvgBeginPath(s->vg);
-  nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
+  nvgRoundedRect(s->vg, btn_x - btn_h / 2, btn_y - btn_w / 2, btn_w, btn_h, 25);
   nvgStrokeColor(s->vg, nvgRGBA(130, 12, 128, 255));
   nvgStrokeWidth(s->vg, 14);
   nvgStroke(s->vg);
