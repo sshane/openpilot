@@ -809,6 +809,12 @@ int main(int argc, char* argv[]) {
 
   while (!do_exit) {
     bool should_swap = false;
+    s->started = true;
+    s->status = STATUS_DISENGAGED;
+    s->controls_seen = true;
+    s->vision_seen = true;
+    s->active_app = cereal::UiLayoutState::App::NONE;
+    s->controls_timeout = 20;
     if (!s->started) {
       // Delay a while to avoid 9% cpu usage while car is not started and user is keeping touching on the screen.
       // Don't hold the lock while sleeping, so that vision_connect_thread have chances to get the lock.
