@@ -31,7 +31,7 @@ def send_thermal_packet(pm):
     time.sleep(0.01)
 
 def main():
-  pm = messaging.PubMaster(['controlsState'])
+  pm = messaging.PubMaster(['controlsState', 'thermal'])
   controls_sender = multiprocessing.Process(target=send_controls_packet, args=[pm])
   thermal_sender = multiprocessing.Process(target=send_thermal_packet, args=[pm])
   controls_sender.start()
