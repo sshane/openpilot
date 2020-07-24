@@ -810,6 +810,9 @@ int main(int argc, char* argv[]) {
   int draws = 0;
 
   bool debug_ui = false;
+  printf("%d\n", argc);
+  printf("%s\n", argv[0]);
+  printf("%s\n", argv[1]);
   if (argc == 2) {
     if (strcmp(argv[1], "debug") == 0) {
       debug_ui = true;
