@@ -525,6 +525,12 @@ EVENTS = {
                               duration_hud_alert=0.),
   },
 
+  "modelLongAlert": Alert(
+    "Model longitudinal ",
+    "",
+    AlertStatus.normal, AlertSize.mid,
+    Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, 0.2, 0., 2.),
+
   "dfButtonAlert": Alert(
     "Using profile: ",
     "",

@@ -55,11 +55,13 @@ class Controls:
     if self.sm is None:
       self.sm = messaging.SubMaster(['thermal', 'health', 'frame', 'model', 'liveCalibration',
                                      'dMonitoringState', 'plan', 'pathPlan', 'liveLocationKalman'])
-    self.sm_smiskol = messaging.SubMaster(['radarState', 'dynamicFollowData', 'liveTracks', 'dynamicFollowButton', 'laneSpeed', 'dynamicCameraOffset'])
+    self.sm_smiskol = messaging.SubMaster(['radarState', 'dynamicFollowData', 'liveTracks', 'dynamicFollowButton',
+                                           'laneSpeed', 'dynamicCameraOffset', 'modelLongButton'])
 
     self.op_params = opParams()
     self.df_manager = dfManager(self.op_params)
-    self.hide_auto_df_alerts = self.op_params.get('hide_auto_df_alerts', False) 
+    self.hide_auto_df_alerts = self.op_params.get('hide_auto_df_alerts', False)
+    self.last_model_long = False
 
     self.can_sock = can_sock
     if can_sock is None:
@@ -276,6 +278,15 @@ class Controls:
   def add_stock_additions_alerts(self, CS):
     frame = self.sm.frame
     # alert priority is defined by code location, keeping is highest, then lane speed alert, then auto-df alert
+    if self.sm_smiskol['modelLongButton'].enabled != self.last_model_long:
+      if self.last_model_long:
+        extra_text_1 = 'disabled!'
+        extra_text_2 = ''
+      else:
+        extra_text_1 = 'enabled!'
+        extra_text_2 = 'Remain alert'
+      self.AM.add_custom(frame, 'modelLongAlert', self.enabled, extra_text_1=extra_text_1, extra_text_2=extra_text_2)
+
     if self.sm_smiskol['dynamicCameraOffset'].keepingLeft:
       self.AM.add_custom(frame, 'laneSpeedKeeping', self.enabled, extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')
       return
@@ -486,6 +497,7 @@ class Controls:
     alerts = self.events.create_alerts(self.current_alert_types, [self.CP, self.sm, self.is_metric])
     self.AM.add_many(self.sm.frame, alerts, self.enabled)
     self.add_stock_additions_alerts(CS)
+    self.last_model_long = self.sm_smiskol['modelLongButton'].enabled
     self.AM.process_alerts(self.sm.frame)
     CC.hudControl.visualAlert = self.AM.visual_alert
 
