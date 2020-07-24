@@ -814,8 +814,8 @@ void ui_draw(UIState *s) {
   glViewport(0, 0, s->fb_w, s->fb_h);
   nvgBeginFrame(s->vg, s->fb_w, s->fb_h, 1.0f);
   ui_draw_sidebar(s);
+  s->status = STATUS_DISENGAGED;
   if (s->started && s->active_app == cereal::UiLayoutState::App::NONE && s->status != STATUS_STOPPED && s->vision_seen) {
-    printf("drawing\n");
     ui_draw_vision(s);
   } else{
     printf("NOT drawing\n");
