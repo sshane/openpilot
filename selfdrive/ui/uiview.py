@@ -17,7 +17,7 @@ def send_controls_packet(pm):
   while True:
     dat = messaging.new_message('controlsState')
     dat.controlsState = {
-      "rearViewCam": True,
+      "rearViewCam": False,
     }
     pm.send('controlsState', dat)
     time.sleep(0.01)
