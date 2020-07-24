@@ -669,8 +669,10 @@ static void ui_draw_ml_button(UIState *s) {
 //  int y_padding = 100;
 //  int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
 //  int btn_y = 980 - btn_h / 2 - y_padding;
-  int btn_x = 1920 / 2 - btn_w / 2;
-  int btn_y = 905 - btn_h / 2;
+  int x = 1920 / 2;
+  int y = 905;
+  int btn_x = x - btn_w / 2;
+  int btn_y = y - btn_h / 2;
 
 //  ui_draw_image(s->vg, btn_x, btn_y, btn_w, btn_h, test_button, 1.0f);
 
@@ -680,9 +682,9 @@ static void ui_draw_ml_button(UIState *s) {
   nvgStrokeWidth(s->vg, 14);
   nvgStroke(s->vg);
 
-//  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-//  nvgFontSize(s->vg, 80);
-//  nvgText(s->vg, btn_x, btn_y, "Model Long", NULL);
+  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
+  nvgFontSize(s->vg, 80);
+  nvgText(s->vg, x, y, "Model Long", NULL);
 //
 //  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
 //  nvgFontSize(s->vg, 45);
