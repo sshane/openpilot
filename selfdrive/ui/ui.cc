@@ -874,7 +874,9 @@ int main(int argc, char* argv[]) {
     int touch_x = -1, touch_y = -1;
     int touched = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (touched == 1) {
-      printf("touched x: %d, y: %d\n", touch_x, touch_y);
+      if (s->ui_debug) {
+        printf("touched x: %d, y: %d\n", touch_x, touch_y);
+      }
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
 
