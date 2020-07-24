@@ -877,6 +877,8 @@ int main(int argc, char* argv[]) {
 
       if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y) && !handle_ml_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
+      } else {
+        printf("a SA button has been touched\n");
       }
     }
 
