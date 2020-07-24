@@ -806,6 +806,8 @@ int main(int argc, char* argv[]) {
   assert(s->sound.init(MIN_VOLUME));
 
   int draws = 0;
+  printf("num args: %d\n", argc);
+  printf("1st arg: %s\n", argv[0]);
 
   while (!do_exit) {
     bool should_swap = false;
