@@ -666,7 +666,7 @@ static void ui_draw_ml_button(UIState *s) {
 
   int btn_w = 400;
   int btn_h = 150;
-  int y_padding = 50;
+//  int y_padding = 50;
 //  int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
 //  int btn_y = 980 - btn_h / 2 - y_padding;
   int btn_x = 960;
