@@ -837,12 +837,15 @@ int main(int argc, char* argv[]) {
     int touch_x = -1, touch_y = -1;
     int touched = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (touched == 1) {
+      printf("touched\n");
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
 
       if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
       }
+    } else {
+      printf("not touched\n");
     }
 
     if (!s->started) {
