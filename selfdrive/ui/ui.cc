@@ -142,6 +142,26 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
   return false;
 }
 
+static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
+    //lsButton manager
+    if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
+        int padding = 40;
+//        int btn_x_1 = 1660 - 200;
+        int btn_x_2 = 1660 - 50;
+        int xs[2] = {1660 - 200, 1660 - 50};
+        if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
+            s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping ls button
+            s->scene.lsButtonStatus++;
+            if (s->scene.lsButtonStatus > 2) {
+                s->scene.lsButtonStatus = 0;
+            }
+            send_ls(s, s->scene.lsButtonStatus);
+            return true;
+        }
+    }
+    return false;
+}
+
 static void handle_sidebar_touch(UIState *s, int touch_x, int touch_y) {
   if (!s->scene.uilayout_sidebarcollapsed && touch_x <= sbr_w) {
     if (touch_x >= settings_btn_x && touch_x < (settings_btn_x + settings_btn_w)
@@ -853,7 +873,7 @@ int main(int argc, char* argv[]) {
       set_awake(s, true);
       handle_sidebar_touch(s, touch_x, touch_y);
 
-      if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
+      if (!handle_df_touch(s, touch_x, touch_y) && !handle_ls_touch(s, touch_x, touch_y) && !handle_ml_touch(s, touch_x, touch_y)) {  // disables sidebar from popping out when tapping df or ls button
         handle_vision_touch(s, touch_x, touch_y);
       }
     }
