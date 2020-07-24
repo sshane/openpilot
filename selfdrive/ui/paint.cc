@@ -688,7 +688,7 @@ static void ui_draw_ml_button(UIState *s) {
 
   nvgBeginPath(s->vg);  // dark background for readability
   nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
-  nvgFillColor(s->vg, nvgRGBA(75, 75, 75, 128));
+  nvgFillColor(s->vg, nvgRGBA(75, 75, 75, 75));
   nvgFill(s->vg);
 
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
