@@ -144,8 +144,8 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
 
 static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
     //mlButton manager
-    int btn_w = 500;
-    int btn_h = 138;
+//    int btn_w = 500;
+//    int btn_h = 138;
     printf("hi\n");
     if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
         int padding = 40;
