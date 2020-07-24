@@ -662,19 +662,12 @@ static void ui_draw_df_button(UIState *s) {
 }
 
 static void ui_draw_ml_button(UIState *s) {
-//  int test_button = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
-
   int btn_w = 500;
   int btn_h = 138;
-//  int y_padding = 100;
-//  int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
-//  int btn_y = 980 - btn_h / 2 - y_padding;
   int x = 1920 / 2;
   int y = 915;
   int btn_x = x - btn_w / 2;
   int btn_y = y - btn_h / 2;
-
-//  ui_draw_image(s->vg, btn_x, btn_y, btn_w, btn_h, test_button, 1.0f);
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
@@ -694,10 +687,6 @@ static void ui_draw_ml_button(UIState *s) {
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
   nvgFontSize(s->vg, 65);
   nvgText(s->vg, x, y + btn_h / 8, "Toggle Model Long", NULL);
-//
-//  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-//  nvgFontSize(s->vg, 45);
-//  nvgText(s->vg, btn_x - 34, btn_y + 50 + 15, "mode", NULL);
 }
 
 static void ui_draw_vision_header(UIState *s) {
