@@ -143,13 +143,13 @@ static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
 }
 
 static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
-    //lsButton manager
+    //mlButton manager
+    int btn_w = 500;
+    int btn_h = 138;
     if (s->awake && s->vision_connected && s->status != STATUS_STOPPED) {
         int padding = 40;
-//        int btn_x_1 = 1660 - 200;
-        int btn_x_2 = 1660 - 50;
-        int xs[2] = {1660 - 200, 1660 - 50};
-        if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
+        int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w};
+        if ((xs[0] - padding <= touch_x) && (touch_x <= xs[1] + padding) && (855 - padding <= touch_y)) {
             s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping ls button
             s->scene.lsButtonStatus++;
             if (s->scene.lsButtonStatus > 2) {
