@@ -8,8 +8,6 @@
 #include <sstream>
 #include <sys/resource.h>
 #include <czmq.h>
-#include <string.h>
-#include <stdio.h>
 #include "common/util.h"
 #include "common/timing.h"
 #include "common/swaglog.h"
