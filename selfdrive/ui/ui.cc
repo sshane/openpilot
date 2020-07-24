@@ -88,6 +88,33 @@ static void update_offroad_layout_state(UIState *s) {
 #endif
 }
 
+static void send_ls(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto lsStatus = event.initLaneSpeedButton();
+  lsStatus.setStatus(status);
+  s->pm->send("laneSpeedButton", msg);
+}
+
+static void send_df(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto dfStatus = event.initDynamicFollowButton();
+  dfStatus.setStatus(status);
+  s->pm->send("dynamicFollowButton", msg);
+}
+
+static void send_ml(UIState *s, bool enabled) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto mlStatus = event.initModelLongButton();
+  mlStatus.setEnabled(enabled);
+  s->pm->send("modelLongButton", msg);
+}
+
 static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
   //lsButton manager
   if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {
@@ -137,33 +164,6 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
         }
     }
     return false;
-}
-
-static void send_ls(UIState *s, int status) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto lsStatus = event.initLaneSpeedButton();
-  lsStatus.setStatus(status);
-  s->pm->send("laneSpeedButton", msg);
-}
-
-static void send_df(UIState *s, int status) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto dfStatus = event.initDynamicFollowButton();
-  dfStatus.setStatus(status);
-  s->pm->send("dynamicFollowButton", msg);
-}
-
-static void send_ml(UIState *s, bool enabled) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto mlStatus = event.initModelLongButton();
-  mlStatus.setEnabled(enabled);
-  s->pm->send("modelLongButton", msg);
 }
 
 static void handle_sidebar_touch(UIState *s, int touch_x, int touch_y) {
