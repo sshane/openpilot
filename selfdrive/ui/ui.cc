@@ -811,6 +811,7 @@ int main(int argc, char* argv[]) {
   while (!do_exit) {
     bool should_swap = false;
     s->started = true;
+    s->status = STATUS_DISENGAGED;
     if (!s->started) {
       printf("delay\n");
       // Delay a while to avoid 9% cpu usage while car is not started and user is keeping touching on the screen.
