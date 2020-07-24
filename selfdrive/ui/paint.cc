@@ -664,8 +664,8 @@ static void ui_draw_df_button(UIState *s) {
 static void ui_draw_ml_button(UIState *s) {
 //  int test_button = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
 
-  int btn_w = 400;
-  int btn_h = 150;
+  int btn_w = 450;
+  int btn_h = 100;
 //  int y_padding = 100;
 //  int btn_x = 1027 - btn_w / 2;  // 150 + 50 padding
 //  int btn_y = 980 - btn_h / 2 - y_padding;
@@ -683,8 +683,8 @@ static void ui_draw_ml_button(UIState *s) {
   nvgStroke(s->vg);
 
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
-  nvgFontSize(s->vg, 80);
-  nvgText(s->vg, x, y + 80/2, "Model Long", NULL);
+  nvgFontSize(s->vg, 65);
+  nvgText(s->vg, x, y, "Toggle Model Long", NULL);
 //
 //  nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
 //  nvgFontSize(s->vg, 45);
