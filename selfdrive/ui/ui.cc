@@ -131,8 +131,8 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
         int y_top = 915 - btn_h / 2;
         if (xs[0] <= touch_x && touch_x <= xs[1] && y_top <= touch_y) {
             printf("ml button touched!\n");
-            s->scene.mlButtonStatus = !s->scene.mlButtonStatus;
-            send_ml(s, s->scene.mlButtonStatus);
+            s->scene.mlButtonEnabled = !s->scene.mlButtonEnabled;
+            send_ml(s, s->scene.mlButtonEnabled);
             return true;
         }
     }
@@ -157,12 +157,12 @@ static void send_df(UIState *s, int status) {
   s->pm->send("dynamicFollowButton", msg);
 }
 
-static void send_ml(UIState *s, bool status) {
+static void send_ml(UIState *s, bool enabled) {
   capnp::MallocMessageBuilder msg;
   auto event = msg.initRoot<cereal::Event>();
   event.setLogMonoTime(nanos_since_boot());
   auto mlStatus = event.initModelLongButton();
-  mlStatus.setStatus(status);
+  mlStatus.setEnabled(enabled);
   s->pm->send("modelLongButton", msg);
 }
 
@@ -296,7 +296,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 
   s->scene.dfButtonStatus = 0;
   s->scene.lsButtonStatus = 0;
-  s->scene.mlButtonStatus = false;
+  s->scene.mlButtonEnabled = false;
 
   s->rgb_width = back_bufs.width;
   s->rgb_height = back_bufs.height;

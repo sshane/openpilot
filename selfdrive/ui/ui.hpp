@@ -126,7 +126,7 @@ typedef struct UIScene {
 
   int dfButtonStatus;
   int lsButtonStatus;
-  bool mlButtonStatus;
+  bool mlButtonEnabled;
 
   cereal::HealthData::HwType hwType;
   int satelliteCount;
