@@ -888,7 +888,7 @@ int main(int argc, char* argv[]) {
 
     // Don't waste resources on drawing in case screen is off
     if (s->awake) {
-      printf("drawing with paint.cc!\n")
+      printf("drawing with paint.cc!\n");
       ui_draw(s);
       glFinish();
       should_swap = true;
