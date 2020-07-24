@@ -678,7 +678,7 @@ static void ui_draw_ml_button(UIState *s) {
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
-  if (s->scene.mlButtonEnabled) {
+  if (s->scene.mlButtonEnabled) {  // change outline color based on status of button
     nvgStrokeColor(s->vg, nvgRGBA(55, 184, 104, 255));
   } else {
     nvgStrokeColor(s->vg, nvgRGBA(184, 55, 55, 255));
@@ -686,9 +686,9 @@ static void ui_draw_ml_button(UIState *s) {
   nvgStrokeWidth(s->vg, 12);
   nvgStroke(s->vg);
 
-  nvgBeginPath(s->vg);
+  nvgBeginPath(s->vg);  // dark background for readability
   nvgRoundedRect(s->vg, btn_x, btn_y, btn_w, btn_h, 25);
-  nvgStrokeColor(s->vg, nvgRGBA(130, 12, 104, 128));
+  nvgFillColor(s->vg, nvgRGBA(130, 12, 104, 128));
   nvgStroke(s->vg);
 
   nvgFillColor(s->vg, nvgRGBA(255, 255, 255, 255));
