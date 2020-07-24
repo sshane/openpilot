@@ -10,14 +10,6 @@ import cereal.messaging as messaging
 from selfdrive.controls.lib.events import EVENTS, Alert
 
 def now_millis(): return time.time() * 1000
-for _, et in EVENTS.items():
-  print(et)
-  try:
-    et.items()
-  except:
-    continue
-  for _, a in et.items():
-    print(a)
 ALERTS = [a for _, et in EVENTS.items() for _, a in et.items() if isinstance(a, Alert)]
 
 #from cereal import car
