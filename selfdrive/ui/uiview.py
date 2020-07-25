@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 import os
-import sys
 import time
 import signal
 import subprocess
 import multiprocessing
 import cereal.messaging as messaging
 
-from common.params import Params
 from common.basedir import BASEDIR
 
 KILL_TIMEOUT = 15
@@ -31,7 +29,6 @@ def send_thermal_packet(pm):
 
 def main():
   pm = messaging.PubMaster(['controlsState', 'thermal'])
-
   controls_sender = multiprocessing.Process(target=send_controls_packet, args=[pm])
   controls_sender.start()
   thermal_sender = multiprocessing.Process(target=send_thermal_packet, args=[pm])
@@ -44,15 +41,6 @@ def main():
   def terminate(signalNumber, frame):
     print('got SIGTERM, exiting..')
     proc_cam.send_signal(signal.SIGINT)
-    kill_start = time.time()
-    while proc_cam.poll() is None:
-      if time.time() - kill_start > KILL_TIMEOUT:
-        from selfdrive.swaglog import cloudlog
-        cloudlog.critical("FORCE REBOOTING PHONE!")
-        os.system("date >> /sdcard/unkillable_reboot")
-        os.system("reboot")
-        raise RuntimeError
-      continue
     proc_ui.send_signal(signal.SIGINT)
     thermal_sender.terminate()
     controls_sender.terminate()
