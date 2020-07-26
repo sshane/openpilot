@@ -640,6 +640,7 @@ static void ui_draw_ls_button(UIState *s) {
 }
 
 static void ui_draw_df_button(UIState *s) {
+  printf("df button state: %d", s->scene.dfbuttonstatus);
   int btn_w = 150;
   int btn_h = 150;
   int y_padding = 50;
