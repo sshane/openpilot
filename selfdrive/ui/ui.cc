@@ -311,13 +311,10 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::string err;
 //  std::string test_json = "{\"test\": \"hello\"}";
   auto json = json11::Json::parse(op_params_content, err);
-  double camera_offset = json["camera_offset"].number_value();
-  std::cout << "camera_offset: " << camera_offset << std::endl;
-  if (json.is_null() || !err.empty()) {
-    std::string log = "Error parsing json: " + err;
-    LOGW(log.c_str());
-    printf("JSON ERROR\n");
-  }
+  std::string dynamic_follow = json["dynamic_follow"].string_value();
+  std::string lane_speed_alerts = json["lane_speed_alerts"].string_value();
+  std::cout << "dynamic_follow: " << dynamic_follow << std::endl;
+  std::cout << "lane_speed_alerts: " << lane_speed_alerts << std::endl;
 
 
   s->scene.dfButtonStatus = 0;
