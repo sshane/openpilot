@@ -22,22 +22,6 @@ class AlertManager():
     for a in alerts:
       self.add(frame, a, enabled=enabled)
 
-  def add_custom(self, frame, alert_name, event_type, enabled=True, extra_text_1='', extra_text_2=''):
-    alert = EVENTS[alert_name][event_type]
-    added_alert = copy.copy(alert)
-    added_alert.start_time = frame * DT_CTRL
-    added_alert.alert_text_1 += extra_text_1
-    added_alert.alert_text_2 += extra_text_2
-
-    # if new alert is higher priority, log it
-    if not self.alert_present() or added_alert.alert_priority > self.activealerts[0].alert_priority:
-      cloudlog.event('alert_add', alert_type=added_alert.alert_type, enabled=enabled)
-
-    self.activealerts.append(added_alert)
-
-    # sort by priority first and then by start_time
-    self.activealerts.sort(key=lambda k: (k.alert_priority, k.start_time), reverse=True)
-
   def add(self, frame, alert, enabled=True):
     added_alert = copy.copy(alert)
     added_alert.start_time = frame * DT_CTRL

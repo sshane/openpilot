@@ -244,6 +244,48 @@ class Controls:
        and not self.CP.radarOffCan and CS.vEgo < 0.3:
       self.events.add(EventName.noTarget)
 
+    self.add_stock_additions_events(CS)
+
+  def add_stock_additions_events(self, CS):
+    # alert priority is defined by code location, keeping is highest, then lane speed alert, then auto-df alert
+    if self.sm_smiskol['modelLongButton'].enabled != self.last_model_long:
+      extra_text_1 = 'disabled!' if self.last_model_long else 'enabled!'
+      self.events.add('modelLongAlert', extra_text_1=extra_text_1)
+      return
+
+    if self.sm_smiskol['dynamicCameraOffset'].keepingLeft:
+      self.events.add('laneSpeedKeeping', extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')
+      return
+    elif self.sm_smiskol['dynamicCameraOffset'].keepingRight:
+      self.events.add('laneSpeedKeeping', extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
+      return
+
+    ls_state = self.sm_smiskol['laneSpeed'].state
+    if ls_state != '':
+      self.events.add('lsButtonAlert', extra_text_1=ls_state)
+      return
+
+    faster_lane = self.sm_smiskol['laneSpeed'].fastestLane
+    if faster_lane in ['left', 'right']:
+      ls_alert = 'laneSpeedAlert'
+      if not self.sm_smiskol['laneSpeed'].new:
+        ls_alert += 'Silent'
+      self.events.add(ls_alert, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+      return
+
+    df_out = self.df_manager.update()
+    if df_out.changed:
+      df_alert = 'dfButtonAlert'
+      if df_out.is_auto and df_out.last_is_auto:
+        # only show auto alert if engaged, not hiding auto, and time since lane speed alert not showing
+        if CS.cruiseState.enabled and not self.hide_auto_df_alerts:
+          df_alert += 'Silent'
+          self.events.add(df_alert, extra_text_1=df_out.model_profile_text + ' (auto)')
+          return
+      else:
+        self.events.add(df_alert, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
+        return
+
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
@@ -274,47 +316,6 @@ class Controls:
     self.distance_traveled += CS.vEgo * DT_CTRL
 
     return CS
-
-  def add_stock_additions_alerts(self, CS):
-    frame = self.sm.frame
-    # alert priority is defined by code location, keeping is highest, then lane speed alert, then auto-df alert
-    if self.sm_smiskol['modelLongButton'].enabled != self.last_model_long:
-      extra_text_1 = 'disabled!' if self.last_model_long else 'enabled!'
-      self.AM.add_custom(frame, 'modelLongAlert', ET.WARNING, self.enabled, extra_text_1=extra_text_1)
-      return
-
-    if self.sm_smiskol['dynamicCameraOffset'].keepingLeft:
-      self.AM.add_custom(frame, 'laneSpeedKeeping', ET.WARNING, self.enabled, extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')
-      return
-    elif self.sm_smiskol['dynamicCameraOffset'].keepingRight:
-      self.AM.add_custom(frame, 'laneSpeedKeeping', ET.WARNING, self.enabled, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
-      return
-
-    ls_state = self.sm_smiskol['laneSpeed'].state
-    if ls_state != '':
-      self.AM.add_custom(frame, 'lsButtonAlert', ET.WARNING, self.enabled, extra_text_1=ls_state)
-      return
-
-    faster_lane = self.sm_smiskol['laneSpeed'].fastestLane
-    if faster_lane in ['left', 'right']:
-      ls_alert = 'laneSpeedAlert'
-      if not self.sm_smiskol['laneSpeed'].new:
-        ls_alert += 'Silent'
-      self.AM.add_custom(frame, ls_alert, ET.WARNING, self.enabled, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
-      return
-
-    df_out = self.df_manager.update()
-    if df_out.changed:
-      df_alert = 'dfButtonAlert'
-      if df_out.is_auto and df_out.last_is_auto:
-        # only show auto alert if engaged, not hiding auto, and time since lane speed alert not showing
-        if CS.cruiseState.enabled and not self.hide_auto_df_alerts:
-          df_alert += 'Silent'
-          self.AM.add_custom(frame, df_alert, ET.WARNING, self.enabled, extra_text_1=df_out.model_profile_text + ' (auto)')
-          return
-      else:
-        self.AM.add_custom(frame, df_alert, ET.WARNING, self.enabled, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
-        return
 
   def state_transition(self, CS):
     """Compute conditional state transitions and execute actions on state transitions"""
@@ -492,7 +493,6 @@ class Controls:
 
     alerts = self.events.create_alerts(self.current_alert_types, [self.CP, self.sm, self.is_metric])
     self.AM.add_many(self.sm.frame, alerts, self.enabled)
-    self.add_stock_additions_alerts(CS)
     self.last_model_long = self.sm_smiskol['modelLongButton'].enabled
     self.AM.process_alerts(self.sm.frame)
     CC.hudControl.visualAlert = self.AM.visual_alert
