@@ -302,7 +302,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->scene.gps_planner_active = false;
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
-  std::ifstream op_params_file("/data/op_params.json");
+  std::ifstream op_params_file("/data/op_params.json");  // todo: figure out how to read op_params.json
   std::cout << op_params_file << std::endl;
 
 //  std::string err;
