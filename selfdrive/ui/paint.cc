@@ -617,17 +617,19 @@ static void ui_draw_driver_view(UIState *s) {
 }
 
 static void ui_draw_ls_button(UIState *s) {
-  printf("ls button state: %d\n", s->scene.lsButtonStatus);
+  int btn_status = s->scene.lsButtonStatus;
+  printf("ls button state: %d\n", btn_status);
   int btn_w = 150;
   int btn_h = 150;
   int x_padding = 200;
   int y_padding = 50;
   int btn_x = 1920 - btn_w - x_padding;
   int btn_y = 1080 - btn_h - y_padding;
+  int btn_colors[3][3] = {{60, 160, 255}, {125, 131, 255}, {161, 61, 128}};
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
-  nvgStrokeColor(s->vg, nvgRGBA(12, 79, 130, 255));
+  nvgStrokeColor(s->vg, nvgRGBA(btn_colors[btn_status][0], btn_colors[btn_status][1], btn_colors[btn_status][2], 255));
   nvgStrokeWidth(s->vg, 11);
   nvgStroke(s->vg);
 
