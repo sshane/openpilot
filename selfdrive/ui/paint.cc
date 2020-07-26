@@ -625,7 +625,7 @@ static void ui_draw_ls_button(UIState *s) {
   int y_padding = 50;
   int btn_x = 1920 - btn_w - x_padding;
   int btn_y = 1080 - btn_h - y_padding;
-  int btn_colors[3][3] = {{55, 184, 104}, {255, 55, 55}, {65, 60, 88}};
+  int btn_colors[3][3] = {{255, 55, 55}, {55, 184, 104}, {65, 60, 88}};
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
