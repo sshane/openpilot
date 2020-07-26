@@ -651,7 +651,7 @@ static void ui_draw_df_button(UIState *s) {
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
 //  nvgStrokeColor(s->vg, nvgRGBA(12, 79, 130, 255));
-  nvgStrokeColor(s->vg, nvgRGBA(*btn_colors[0], 255));
+  nvgStrokeColor(s->vg, nvgRGBA(btn_colors[0][0], btn_colors[0][1], btn_colors[0][2], 255));
   nvgStrokeWidth(s->vg, 11);
   nvgStroke(s->vg);
 
