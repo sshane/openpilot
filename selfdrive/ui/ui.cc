@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -305,11 +306,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::string test_json = "{\"test\": \"hello\"}";
   auto json = json11::Json::parse(test_json, err);
   std::string new_fingerprint = json["test"].string_value();
-  printf("value: %s\n", new_fingerprint);
-  printf("value: %s\n", new_fingerprint);
-  printf("value: %s\n", new_fingerprint);
-  printf("value: %s\n", new_fingerprint);
-//  std::cout << "test" << endl;
+  cout << "test" << endl;
 
 
   s->scene.dfButtonStatus = 0;
