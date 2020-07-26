@@ -313,6 +313,10 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   auto json = json11::Json::parse(op_params_content, err);
   std::string camera_offset = json["camera_offset"].string_value();
   std::cout << "camera_offset: " << camera_offset << std::endl;
+  if (json.is_null() || !err.empty()) {
+    std::string log = "Error parsing json: " + err;
+    LOGW(log.c_str());
+  }
 
 
   s->scene.dfButtonStatus = 0;
