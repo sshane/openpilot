@@ -617,6 +617,7 @@ static void ui_draw_driver_view(UIState *s) {
 }
 
 static void ui_draw_ls_button(UIState *s) {
+  printf("ls button state: %d\n", s->scene.lsButtonStatus);
   int btn_w = 150;
   int btn_h = 150;
   int x_padding = 200;
@@ -640,19 +641,16 @@ static void ui_draw_ls_button(UIState *s) {
 }
 
 static void ui_draw_df_button(UIState *s) {
-  printf("df button state: %d\n", s->scene.dfButtonStatus);
   int btn_status = s->scene.dfButtonStatus;
   int btn_w = 150;
   int btn_h = 150;
   int y_padding = 50;
   int btn_x = 1920 - btn_w;
   int btn_y = 1080 - btn_h - y_padding;
-//  int btn_colors[4][3] = {{250, 166, 255}, {115, 83, 186}, {47, 25, 95}, {15, 16, 32}};
   int btn_colors[4][3] = {{4, 67, 137}, {36, 168, 188}, {252, 255, 75}, {251, 54, 64}};
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
-//  nvgStrokeColor(s->vg, nvgRGBA(12, 79, 130, 255));
   nvgStrokeColor(s->vg, nvgRGBA(btn_colors[btn_status][0], btn_colors[btn_status][1], btn_colors[btn_status][2], 255));
   nvgStrokeWidth(s->vg, 11);
   nvgStroke(s->vg);
