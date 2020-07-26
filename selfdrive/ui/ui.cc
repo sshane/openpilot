@@ -305,7 +305,10 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::string test_json = "{\"test\": \"hello\"}";
   auto json = json11::Json::parse(test_json, err);
   std::string new_fingerprint = json["test"].string_value();
-//  printf("value: %s\n", new_fingerprint);
+  printf("value: %s\n", new_fingerprint);
+  printf("value: %s\n", new_fingerprint);
+  printf("value: %s\n", new_fingerprint);
+  printf("value: %s\n", new_fingerprint);
 //  std::cout << "test" << endl;
 
 
