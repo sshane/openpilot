@@ -316,6 +316,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   if (json.is_null() || !err.empty()) {
     std::string log = "Error parsing json: " + err;
     LOGW(log.c_str());
+    printf("JSON ERROR\n");
   }
 
 
