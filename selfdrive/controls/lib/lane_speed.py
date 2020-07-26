@@ -33,7 +33,7 @@ class LaneSpeedState:
   off = 0
   audible = 1
   silent = 2
-  to_state = {off: 'off', silent: 'silent', audible: 'audible'}
+  to_state = {off: 'off', audible: 'audible', silent: 'silent'}
   to_idx = {v: k for k, v in to_state.items()}
 
 class Lane:
