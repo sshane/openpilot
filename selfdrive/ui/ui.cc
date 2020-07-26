@@ -308,11 +308,11 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 
   std::cout << op_params_content << std::endl;
 
-//  std::string err;
+  std::string err;
 //  std::string test_json = "{\"test\": \"hello\"}";
-//  auto json = json11::Json::parse(test_json, err);
-//  std::string new_fingerprint = json["test"].string_value();
-//  std::cout << "test" << std::endl;
+  auto json = json11::Json::parse(op_params_content, err);
+  std::string camera_offset = json["camera_offset"].string_value();
+  std::cout << "camera_offset: " << camera_offset << std::endl;
 
 
   s->scene.dfButtonStatus = 0;
