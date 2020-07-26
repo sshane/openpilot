@@ -302,11 +302,14 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->scene.gps_planner_active = false;
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
-  std::string err;
-  std::string test_json = "{\"test\": \"hello\"}";
-  auto json = json11::Json::parse(test_json, err);
-  std::string new_fingerprint = json["test"].string_value();
-  std::cout << "test" << std::endl;
+  std::ifstream op_params_file("/data/op_params.json");
+  std::cout << op_params_file << std::endl;
+
+//  std::string err;
+//  std::string test_json = "{\"test\": \"hello\"}";
+//  auto json = json11::Json::parse(test_json, err);
+//  std::string new_fingerprint = json["test"].string_value();
+//  std::cout << "test" << std::endl;
 
 
   s->scene.dfButtonStatus = 0;
