@@ -308,14 +308,15 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::ifstream op_params_file("/data/op_params.json");
   std::string op_params_content((std::istreambuf_iterator<char>(op_params_file)),
                                 (std::istreambuf_iterator<char>()));
+
   std::string err;
   auto json = json11::Json::parse(op_params_content, err);
-  if (json.is_null() || !err.empty()) { // error parsing json
-    s->scene.dfButtonStatus = 0;
-    s->scene.lsButtonStatus = 0;
-  } else {
+  if (!json.is_null() && err.empty()) {
     s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
     s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
+  } else {  // error parsing json
+    s->scene.dfButtonStatus = 0;
+    s->scene.lsButtonStatus = 0;
   }
   s->scene.mlButtonEnabled = false;  // state isn't saved yet
 
