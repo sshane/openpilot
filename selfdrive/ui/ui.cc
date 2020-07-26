@@ -8,7 +8,7 @@
 #include <sstream>
 #include <sys/resource.h>
 #include <czmq.h>
-#include <json/value.h>
+#include "json11.hpp"
 #include <fstream>
 #include "common/util.h"
 #include "common/timing.h"
@@ -301,7 +301,12 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->scene.gps_planner_active = false;
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
-  std::ifstream people_file("/data/op_params.json", std::ifstream::binary);
+  std::string err;
+  std::string "{\"test\": \"hello\"}";
+  auto json = json11::Json::parse(str, err);
+  std::string new_fingerprint = json["test"].string_value();
+  printf("value: %s\n", new_fingerprint)
+
   Json::Reader reader;
   Json::Value op_params;
   std::ifstream op_params_file("/data/op_params.json");
