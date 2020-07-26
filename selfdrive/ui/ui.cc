@@ -20,6 +20,9 @@
 #include "common/utilpp.h"
 #include "ui.hpp"
 
+std::map<std::string, int> LS_TO_IDX = {{"off", 0}, {"audible", 1}, {"silent", 2}};
+std::map<std::string, int> DF_TO_IDX = {{"traffic", 0}, {"relaxed", 1}, {"roadtrip", 2}, {"auto", 3}};
+
 static void ui_set_brightness(UIState *s, int brightness) {
   static int last_brightness = -1;
   if (last_brightness != brightness && (s->awake || brightness == 0)) {
@@ -313,8 +316,10 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   auto json = json11::Json::parse(op_params_content, err);
   std::string dynamic_follow = json["dynamic_follow"].string_value();
   std::string lane_speed_alerts = json["lane_speed_alerts"].string_value();
-  std::cout << "dynamic_follow: " << dynamic_follow << std::endl;
-  std::cout << "lane_speed_alerts: " << lane_speed_alerts << std::endl;
+  int ls_state = LS_TO_IDX[lane_speed_alerts];
+  int df_state = DF_TO_IDX[dynamic_follow];
+  std::cout << "dynamic_follow: " << dynamic_follow << df_state << std::endl;
+  std::cout << "lane_speed_alerts: " << lane_speed_alerts << ls_state << std::endl;
 
 
   s->scene.dfButtonStatus = 0;
