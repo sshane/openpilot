@@ -315,7 +315,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::string lane_speed_alerts = json["lane_speed_alerts"].string_value();
   int ls_state = LS_TO_IDX[lane_speed_alerts];
   int df_state = DF_TO_IDX[json["dynamic_follow"].string_value()];
-  std::cout << "dynamic_follow: " << dynamic_follow << df_state << std::endl;
+  std::cout << "dynamic_follow: " << df_state << std::endl;
   std::cout << "lane_speed_alerts: " << lane_speed_alerts << ls_state << std::endl;
 
 
