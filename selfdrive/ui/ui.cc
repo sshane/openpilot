@@ -308,20 +308,16 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::ifstream op_params_file("/data/op_params.json");
   std::string op_params_content((std::istreambuf_iterator<char>(op_params_file)),
                                 (std::istreambuf_iterator<char>()));
-
   std::string err;
   auto json = json11::Json::parse(op_params_content, err);
-//  std::string dynamic_follow = json["dynamic_follow"].string_value();
-  std::string lane_speed_alerts = json["lane_speed_alerts"].string_value();
-  int ls_state = LS_TO_IDX[lane_speed_alerts];
-  int df_state = DF_TO_IDX[json["dynamic_follow"].string_value()];
-  std::cout << "dynamic_follow: " << df_state << std::endl;
-  std::cout << "lane_speed_alerts: " << lane_speed_alerts << ls_state << std::endl;
-
-
-  s->scene.dfButtonStatus = 0;
-  s->scene.lsButtonStatus = 0;
-  s->scene.mlButtonEnabled = false;
+  if (json.is_null() || !err.empty()) { // error parsing json
+    s->scene.dfButtonStatus = 0;
+    s->scene.lsButtonStatus = 0;
+  } else {
+    s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
+    s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
+  }
+  s->scene.mlButtonEnabled = false;  // state isn't saved yet
 
   s->rgb_width = back_bufs.width;
   s->rgb_height = back_bufs.height;
