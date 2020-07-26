@@ -854,8 +854,6 @@ int main(int argc, char* argv[]) {
 
   int draws = 0;
 
-
-
   while (!do_exit) {
     bool should_swap = false;
     if (!s->started) {
