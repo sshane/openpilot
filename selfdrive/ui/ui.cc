@@ -311,7 +311,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   std::string err;
 //  std::string test_json = "{\"test\": \"hello\"}";
   auto json = json11::Json::parse(op_params_content, err);
-  std::string camera_offset = json["camera_offset"].number_value();
+  double camera_offset = json["camera_offset"].number_value();
   std::cout << "camera_offset: " << camera_offset << std::endl;
   if (json.is_null() || !err.empty()) {
     std::string log = "Error parsing json: " + err;
