@@ -306,7 +306,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 //  auto json = json11::Json::parse(str, err);
 //  std::string new_fingerprint = json["test"].string_value();
 //  printf("value: %s\n", new_fingerprint);
-  std::cout << "test" << endl;
+//  std::cout << "test" << endl;
 
   Json::Reader reader;
   Json::Value op_params;
