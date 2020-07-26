@@ -302,7 +302,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
   std::string err;
-  std::string "{\"test\": \"hello\"}";
+  std::string test_json = "{\"test\": \"hello\"}";
 //  auto json = json11::Json::parse(str, err);
 //  std::string new_fingerprint = json["test"].string_value();
 //  printf("value: %s\n", new_fingerprint);
