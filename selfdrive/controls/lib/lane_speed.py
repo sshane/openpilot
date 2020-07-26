@@ -79,7 +79,7 @@ class LaneSpeed:
     else:
       self.ls_state = LaneSpeedState.to_idx[self.ls_state]
     self.last_ls_state = self.ls_state
-    self.offset = self.ls_state
+    # self.offset = self.ls_state
 
     self.lane_width = 3.7  # in meters, just a starting point
     self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan', 'laneSpeedButton', 'controlsState'])
@@ -115,7 +115,8 @@ class LaneSpeed:
 
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
-    self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
+    # self.ls_state = (self.sm['laneSpeedButton'].status + self.offset) % len(LaneSpeedState.to_state)
+    self.ls_state = self.sm['laneSpeedButton'].status
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]):
