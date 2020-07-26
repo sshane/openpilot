@@ -618,7 +618,6 @@ static void ui_draw_driver_view(UIState *s) {
 
 static void ui_draw_ls_button(UIState *s) {
   int btn_status = s->scene.lsButtonStatus;
-  printf("ls button state: %d\n", btn_status);
   int btn_w = 150;
   int btn_h = 150;
   int x_padding = 200;
