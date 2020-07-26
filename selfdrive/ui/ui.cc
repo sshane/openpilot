@@ -8,6 +8,8 @@
 #include <sstream>
 #include <sys/resource.h>
 #include <czmq.h>
+#include <json/value.h>
+#include <fstream>
 #include "common/util.h"
 #include "common/timing.h"
 #include "common/swaglog.h"
@@ -297,6 +299,14 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->scene.front_box_height = ui_info.front_box_height;
   s->scene.world_objects_visible = false;  // Invisible until we receive a calibration message.
   s->scene.gps_planner_active = false;
+
+  // stock additions todo: run opparams first (in main()?) to ensure json values exist
+  std::ifstream people_file("/data/op_params.json", std::ifstream::binary);
+  Json::Reader reader;
+  Json::Value op_params;
+  std::ifstream op_params_file("/data/op_params.json");
+  op_params_file >> op_params;
+  std::cout << op_params << std::endl;
 
   s->scene.dfButtonStatus = 0;
   s->scene.lsButtonStatus = 0;
@@ -835,6 +845,8 @@ int main(int argc, char* argv[]) {
   assert(s->sound.init(MIN_VOLUME));
 
   int draws = 0;
+
+
 
   while (!do_exit) {
     bool should_swap = false;
