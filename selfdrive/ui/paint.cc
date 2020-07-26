@@ -648,7 +648,7 @@ static void ui_draw_df_button(UIState *s) {
   int btn_x = 1920 - btn_w;
   int btn_y = 1080 - btn_h - y_padding;
 //  int btn_colors[4][3] = {{250, 166, 255}, {115, 83, 186}, {47, 25, 95}, {15, 16, 32}};
-  int btn_colors[4][3] = {{185, 19, 114}, {255, 0, 34}, {237, 222, 164}, {27, 231, 255}};
+  int btn_colors[4][3] = {{185, 19, 114}, {255, 0, 34}, {247, 231, 51}, {43, 45, 66}};
 
   nvgBeginPath(s->vg);
   nvgRoundedRect(s->vg, btn_x-110, btn_y-45, btn_w, btn_h, 100);
