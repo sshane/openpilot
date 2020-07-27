@@ -98,8 +98,8 @@ class Events:
   def to_msg(self):
     ret = []
     for event_name in self.events:
-      if isinstance(event_name, str):
-        continue  # custom alert, skip
+      # if isinstance(event_name, str):
+      #   continue  # custom alert, skip
       event = car.CarEvent.new_message()
       event.name = event_name
       for event_type in EVENTS.get(event_name, {}).keys():
@@ -546,7 +546,7 @@ EVENTS = {
                               duration_hud_alert=0.),
   },
 
-  "modelLongAlert": {
+  EventName.modelLongAlert: {
     ET.WARNING: Alert(
       "Model longitudinal ",
       "Remain alert",
@@ -554,7 +554,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  "dfButtonAlert": {
+  EventName.dfButtonAlert: {
     ET.WARNING: Alert(
       "Using profile: ",
       "",
@@ -562,7 +562,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  "lsButtonAlert": {
+  EventName.lsButtonAlert: {
     ET.WARNING: Alert(
       "Lane Speed set to: ",
       "",
@@ -570,7 +570,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  "dfButtonAlertSilent": {
+  EventName.dfButtonAlertSilent: {
     ET.WARNING: Alert(
       "Dynamic follow: ",
       "",
@@ -578,7 +578,7 @@ EVENTS = {
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
   },
 
-  "laneSpeedAlert": {
+  EventName.laneSpeedAlert: {
     ET.WARNING: Alert(
       "",
       "",
@@ -586,7 +586,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
   },
 
-  "laneSpeedAlertSilent": {
+  EventName.laneSpeedAlertSilent: {
     ET.WARNING: Alert(
       "",
       "",
@@ -594,7 +594,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
   },
 
-  "laneSpeedKeeping": {
+  EventName.laneSpeedKeeping: {
     ET.WARNING: Alert(
       "KEEPING ",
       "",

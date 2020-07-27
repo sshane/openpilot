@@ -112,6 +112,14 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     wrongCruiseMode @87;
     neosUpdateRequired @88;
     modeldLagging @89;
+
+    modelLongAlert @90;
+    dfButtonAlert @91;
+    lsButtonAlert @92;
+    dfButtonAlertSilent @93;
+    laneSpeedAlert @94;
+    laneSpeedAlertSilent @95;
+    laneSpeedKeeping @96;
   }
 }
 
