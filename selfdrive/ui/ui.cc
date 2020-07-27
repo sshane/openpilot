@@ -166,9 +166,7 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
 }
 
 static bool handle_SA_touched(UIState *s, int touch_x, int touch_y) {
-  printf("active_app: %hu\n", s->active_app);
-  printf("settings: %hu\n", cereal::UiLayoutState::App::SETTINGS);
-  if (s->active_app != cereal::UiLayoutState::App::SETTINGS) {  // if not settings
+  if (s->active_app == cereal::UiLayoutState::App::NONE) {  // if onroad (not settings or home)
     if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {  // if car started or debug mode
       if (handle_df_touch(s, touch_x, touch_y)) { return true; }  // only allow one button to be pressed at a time
       if (handle_ls_touch(s, touch_x, touch_y)) { return true; }
