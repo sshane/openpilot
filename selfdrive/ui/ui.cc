@@ -267,7 +267,7 @@ static void ui_init(UIState *s) {
   s->scene.satelliteCount = -1;
   s->started = false;
   s->vision_seen = false;
-  s->ui_debug = true;  // change to true while debugging
+  s->ui_debug = false;  // change to true while debugging
 
   // init display
   s->fb = framebuffer_init("ui", 0, true, &s->fb_w, &s->fb_h);
