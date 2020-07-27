@@ -98,6 +98,8 @@ class Events:
   def to_msg(self):
     ret = []
     for event_name in self.events:
+      if isinstance(event_name, str):
+        continue  # custom alert, skip
       event = car.CarEvent.new_message()
       event.name = event_name
       for event_type in EVENTS.get(event_name, {}).keys():
