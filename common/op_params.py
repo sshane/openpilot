@@ -51,7 +51,7 @@ class opParams:
                            'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)'},
                            'steer_ratio': {'default': None, 'allowed_types': [type(None), float, int], 'description': '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
                                                                                                                       'If you use a float/int, openpilot will use that steer ratio instead', 'live': True},
-                           'lane_speed_alerts': {'default': True, 'allowed_types': [str], 'description': 'Can be: (\'off\', \'silent\', \'audible\'): Whether you want openpilot to alert you of faster-traveling adjacent lanes'},
+                           'lane_speed_alerts': {'default': 'silent', 'allowed_types': [str], 'description': 'Can be: (\'off\', \'silent\', \'audible\'): Whether you want openpilot to alert you of faster-traveling adjacent lanes'},
                            'upload_on_hotspot': {'default': False, 'allowed_types': [bool], 'description': 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'},
                            'enable_long_derivative': {'default': False, 'allowed_types': [bool], 'description': 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
                                                                                                                 'integral wind-down to help reduce overshooting within the long PID loop'},
