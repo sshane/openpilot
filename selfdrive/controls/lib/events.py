@@ -215,6 +215,62 @@ EVENTS = {
 
   # ********** events only containing alerts displayed in all states **********
 
+  EventName.modelLongAlert: {
+    ET.PERMANENT: Alert(
+      "Model longitudinal ",
+      "Remain alert",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+  },
+
+  EventName.dfButtonAlert: {
+    ET.PERMANENT: Alert(
+      "Using profile: ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+  },
+
+  EventName.lsButtonAlert: {
+    ET.PERMANENT: Alert(
+      "Lane Speed set to: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+  },
+
+  EventName.dfButtonAlertSilent: {
+    ET.PERMANENT: Alert(
+      "Dynamic follow: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
+  },
+
+  EventName.laneSpeedAlert: {
+    ET.PERMANENT: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
+  },
+
+  EventName.laneSpeedAlertSilent: {
+    ET.PERMANENT: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
+  },
+
+  EventName.laneSpeedKeeping: {
+    ET.PERMANENT: Alert(
+      "KEEPING ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+  },
+
   EventName.debugAlert: {
     ET.PERMANENT: Alert(
       "DEBUG ALERT",
@@ -532,62 +588,6 @@ EVENTS = {
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning1, .4, 2., 3.),
     ET.NO_ENTRY: NoEntryAlert("Steering Temporarily Unavailable",
                               duration_hud_alert=0.),
-  },
-
-  EventName.modelLongAlert: {
-    ET.WARNING: Alert(
-      "Model longitudinal ",
-      "Remain alert",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
-  },
-
-  EventName.dfButtonAlert: {
-    ET.WARNING: Alert(
-      "Using profile: ",
-      "",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
-  },
-
-  EventName.lsButtonAlert: {
-    ET.WARNING: Alert(
-      "Lane Speed set to: ",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
-  },
-
-  EventName.dfButtonAlertSilent: {
-    ET.WARNING: Alert(
-      "Dynamic follow: ",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
-  },
-
-  EventName.laneSpeedAlert: {
-    ET.WARNING: Alert(
-      "",
-      "",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
-  },
-
-  EventName.laneSpeedAlertSilent: {
-    ET.WARNING: Alert(
-      "",
-      "",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
-  },
-
-  EventName.laneSpeedKeeping: {
-    ET.WARNING: Alert(
-      "KEEPING ",
-      "",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
   },
 
   EventName.posenetInvalid: {
