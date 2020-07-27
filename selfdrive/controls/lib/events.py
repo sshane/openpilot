@@ -39,6 +39,8 @@ class Events:
     self.static_events = []
     self.events_prev = dict.fromkeys(EVENTS.keys(), 0)
 
+    self.extra_texts = {}
+
   @property
   def names(self):
     return self.events
@@ -46,14 +48,20 @@ class Events:
   def __len__(self):
     return len(self.events)
 
-  def add(self, event_name, static=False):
+  def add(self, event_name, static=False, extra_text_1='', extra_text_2=''):
     if static:
       self.static_events.append(event_name)
     self.events.append(event_name)
 
+    if extra_text_1:
+      self.extra_texts[event_name] = AlertInfo(extra_text_1=extra_text_1)
+    elif extra_text_2:
+      self.extra_texts[event_name] = AlertInfo(extra_text_2=extra_text_2)
+
   def clear(self):
     self.events_prev = {k: (v+1 if k in self.events else 0) for k, v in self.events_prev.items()}
     self.events = self.static_events.copy()
+    self.extra_texts = {}
 
   def any(self, event_type):
     for e in self.events:
@@ -73,6 +81,10 @@ class Events:
           alert = EVENTS[e][et]
           if not isinstance(alert, Alert):
             alert = alert(*callback_args)
+
+          if e in self.extra_texts:  # add dynamic alert text
+            alert.alert_text_1 += self.extra_texts[e].extra_text_1
+            alert.alert_text_2 += self.extra_texts[e].extra_text_2
 
           if DT_CTRL * (self.events_prev[e] + 1) >= alert.creation_delay:
             alert.alert_type = f"{EVENT_NAME[e]}/{et}"

@@ -251,22 +251,22 @@ class Controls:
     if self.sm_smiskol['modelLongButton'].enabled != self.last_model_long:
       extra_text_1 = 'disabled!' if self.last_model_long else 'enabled!'
       # self.events.add('modelLongAlert', extra_text_1=extra_text_1)
-      self.events.add(EventName.modelLongAlert)
+      self.events.add(EventName.modelLongAlert, extra_text_1=extra_text_1)
       return
 
     if self.sm_smiskol['dynamicCameraOffset'].keepingLeft:
       # self.events.add('laneSpeedKeeping', extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')
-      self.events.add(EventName.laneSpeedKeeping)
+      self.events.add(EventName.laneSpeedKeeping, extra_text_1='LEFT', extra_text_2='Oncoming traffic in right lane')
       return
     elif self.sm_smiskol['dynamicCameraOffset'].keepingRight:
       # self.events.add('laneSpeedKeeping', extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
-      self.events.add(EventName.laneSpeedKeeping)
+      self.events.add(EventName.laneSpeedKeeping, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
       return
 
     ls_state = self.sm_smiskol['laneSpeed'].state
     if ls_state != '':
       # self.events.add('lsButtonAlert', extra_text_1=ls_state)
-      self.events.add(EventName.lsButtonAlert)
+      self.events.add(EventName.lsButtonAlert, extra_text_1=ls_state)
       return
 
     faster_lane = self.sm_smiskol['laneSpeed'].fastestLane
@@ -275,22 +275,22 @@ class Controls:
       if not self.sm_smiskol['laneSpeed'].new:
         ls_alert += 'Silent'
       # self.events.add(ls_alert, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
-      self.events.add(EventName.laneSpeedAlert)
+      self.events.add(EventName.laneSpeedAlert, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
       return
 
     df_out = self.df_manager.update()
     if df_out.changed:
-      df_alert = 'dfButtonAlert'
+      df_alert = EventName.dfButtonAlert
       if df_out.is_auto and df_out.last_is_auto:
         # only show auto alert if engaged, not hiding auto, and time since lane speed alert not showing
         if CS.cruiseState.enabled and not self.hide_auto_df_alerts:
-          df_alert += 'Silent'
+          df_alert = EventName.dfButtonAlertSilent
           # self.events.add(df_alert, extra_text_1=df_out.model_profile_text + ' (auto)')
-          self.events.add(EventName.dfButtonAlert)
+          self.events.add(df_alert, extra_text_1=df_out.model_profile_text + ' (auto)')
           return
       else:
         # self.events.add(df_alert, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
-        self.events.add(EventName.dfButtonAlert)
+        self.events.add(df_alert, extra_text_1=df_out.user_profile_text, extra_text_2='Dynamic follow: {} profile active'.format(df_out.user_profile_text))
         return
 
   def data_sample(self):
