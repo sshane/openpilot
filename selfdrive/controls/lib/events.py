@@ -3,6 +3,7 @@ from cereal import log, car
 from common.realtime import DT_CTRL
 from selfdrive.config import Conversions as CV
 from selfdrive.locationd.calibration_helpers import Filter
+import copy
 
 AlertSize = log.ControlsState.AlertSize
 AlertStatus = log.ControlsState.AlertStatus
@@ -83,6 +84,7 @@ class Events:
             alert = alert(*callback_args)
 
           if e in self.extra_texts:  # add dynamic alert text
+            alert = copy.copy(alert)
             alert.alert_text_1 += self.extra_texts[e].extra_text_1
             alert.alert_text_2 += self.extra_texts[e].extra_text_2
 
