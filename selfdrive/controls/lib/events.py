@@ -208,7 +208,7 @@ EVENTS = {
 
   # ********** events only containing alerts displayed in all states **********
 
-  EventName.modelLongAlert: {
+  'modelLongAlert': {
     ET.PERMANENT: Alert(
       "Model longitudinal ",
       "Remain alert",
