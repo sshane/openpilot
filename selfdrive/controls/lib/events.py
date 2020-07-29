@@ -235,7 +235,7 @@ EVENTS = {
       "Dynamic follow: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 1.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 1.5),
   },
 
   'laneSpeedAlert': {
