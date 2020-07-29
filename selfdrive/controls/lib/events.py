@@ -3,7 +3,6 @@ from cereal import log, car
 from common.realtime import DT_CTRL
 from selfdrive.config import Conversions as CV
 from selfdrive.locationd.calibration_helpers import Filter
-import copy
 
 AlertSize = log.ControlsState.AlertSize
 AlertStatus = log.ControlsState.AlertStatus
@@ -40,8 +39,6 @@ class Events:
     self.static_events = []
     self.events_prev = dict.fromkeys(EVENTS.keys(), 0)
 
-    self.extra_texts = {}
-
   @property
   def names(self):
     return self.events
@@ -49,20 +46,14 @@ class Events:
   def __len__(self):
     return len(self.events)
 
-  def add(self, event_name, static=False, extra_text_1='', extra_text_2=''):
+  def add(self, event_name, static=False):
     if static:
       self.static_events.append(event_name)
     self.events.append(event_name)
 
-    if extra_text_1:
-      self.extra_texts[event_name] = AlertInfo(extra_text_1=extra_text_1)
-    elif extra_text_2:
-      self.extra_texts[event_name] = AlertInfo(extra_text_2=extra_text_2)
-
   def clear(self):
     self.events_prev = {k: (v+1 if k in self.events else 0) for k, v in self.events_prev.items()}
     self.events = self.static_events.copy()
-    self.extra_texts = {}
 
   def any(self, event_type):
     for e in self.events:
@@ -83,10 +74,6 @@ class Events:
           if not isinstance(alert, Alert):
             alert = alert(*callback_args)
 
-          if e in self.extra_texts:  # add dynamic alert text
-            alert = copy.copy(alert)
-            alert.alert_text_1 += self.extra_texts[e].extra_text_1
-            alert.alert_text_2 += self.extra_texts[e].extra_text_2
 
           if DT_CTRL * (self.events_prev[e] + 1) >= alert.creation_delay:
             alert.alert_type = f"{EVENT_NAME[e]}/{et}"
@@ -100,20 +87,12 @@ class Events:
   def to_msg(self):
     ret = []
     for event_name in self.events:
-      # if isinstance(event_name, str):
-      #   continue  # custom alert, skip
       event = car.CarEvent.new_message()
       event.name = event_name
       for event_type in EVENTS.get(event_name, {}).keys():
         setattr(event, event_type , True)
       ret.append(event)
     return ret
-
-
-class AlertInfo:
-  def __init__(self, extra_text_1='', extra_text_2=''):
-    self.extra_text_1 = extra_text_1
-    self.extra_text_2 = extra_text_2
 
 
 class Alert:
