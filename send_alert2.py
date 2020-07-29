@@ -19,8 +19,7 @@ while True:
   print(AM.alert_text_1)
   print(AM.alert_text_2)
   print('alert type: {}'.format(AM.alert_type))
-  print('alert type type: {}'.format(type(AM.alert_type)))
-  print(AM.audible_alert)
+  print('audible: {}'.format(AM.audible_alert))
 
   # dat = messaging.new_message('controlsState')
   # dat.valid = True
