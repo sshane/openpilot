@@ -13,6 +13,7 @@ while True:
   print(AM.alert_text_1)
   print(AM.alert_text_2)
   print(AM.alert_type)
+  print(AM.audible_alert)
 
   # dat = messaging.new_message('controlsState')
   # dat.valid = True
