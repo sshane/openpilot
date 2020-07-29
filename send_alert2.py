@@ -10,10 +10,10 @@ frame = 0
 current_alert_types = [ET.PERMANENT]
 while True:
   input()
-  events.add(EventName.laneSpeedAlert)
-  alerts = events.create_alerts(current_alert_types)
-  AM.add_many(frame, alerts, True)
-  # AM.add_custom(frame, EventName.laneSpeedAlert, False, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
+  # events.add(EventName.laneSpeedAlert)
+  # alerts = events.create_alerts(current_alert_types)
+  # AM.add_many(frame, alerts, True)
+  AM.add_custom(frame, EventName.laneSpeedAlert, False, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
   AM.process_alerts(frame)
 
   print(AM.alert_text_1)
