@@ -244,9 +244,9 @@ class Controls:
        and not self.CP.radarOffCan and CS.vEgo < 0.3:
       self.events.add(EventName.noTarget)
 
-    self.add_stock_additions_events(CS)
+    self.add_stock_additions_alerts(CS)
 
-  def add_stock_additions_events(self, CS):
+  def add_stock_additions_alerts(self, CS):
     self.AM.SA_set_frame(self.sm.frame)
     self.AM.SA_set_enabled(self.enabled)
     # alert priority is defined by code location, keeping is highest, then lane speed alert, then auto-df alert
