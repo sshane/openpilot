@@ -3,6 +3,8 @@ Stock Additions 0.7.7
  * LaneSpeed process is much more efficient, CPU usage down from 6% (causing lag alerts) to ~1%
  * Use numpy_fast.interp instead of np.interp for slight boost in performance
  * Support white panda with experimental parameter. localizer performance may be reduced
+ * Fixed silent alerts due to the new alert manager in 0.7.7
+ * Make all the UI buttons show their state with unique colors!
 
 Version 0.7.7 (2020-07-20)
 ========================
