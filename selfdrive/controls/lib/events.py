@@ -211,7 +211,7 @@ EVENTS = {
       "Model longitudinal ",
       "Remain alert",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
   },
 
   'dfButtonAlert': {
@@ -219,7 +219,7 @@ EVENTS = {
       "Using profile: ",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
   },
 
   'lsButtonAlert': {
@@ -227,7 +227,7 @@ EVENTS = {
       "Lane Speed set to: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
   },
 
   'dfButtonAlertSilent': {
@@ -235,7 +235,7 @@ EVENTS = {
       "Dynamic follow: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 1.),
   },
 
   'laneSpeedAlert': {
@@ -259,7 +259,7 @@ EVENTS = {
       "KEEPING ",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0.2, 0., 0.1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
   },
 
   EventName.debugAlert: {
@@ -275,7 +275,7 @@ EVENTS = {
       "Be ready to take over at any time",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 7.5),
   },
 
   EventName.startupWhitePanda: {
@@ -291,7 +291,7 @@ EVENTS = {
       "WARNING: This branch is not tested",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 7.5),
   },
 
   EventName.startupNoControl: {
