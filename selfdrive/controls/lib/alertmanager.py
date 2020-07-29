@@ -22,17 +22,23 @@ class AlertManager():
     for a in alerts:
       self.add(frame, a, enabled=enabled)
 
-  def add_custom(self, frame, alert_name, enabled=True, extra_text_1='', extra_text_2=''):
+  def SA_set_frame(self, frame):
+    self.SA_frame = frame
+
+  def SA_set_enabled(self, enabled):
+    self.SA_enabled = enabled
+
+  def SA_add(self, alert_name, extra_text_1='', extra_text_2=''):
     alert = EVENTS[alert_name][ET.PERMANENT]  # assume permanent (to display in all states)
     added_alert = copy.copy(alert)
-    added_alert.start_time = frame * DT_CTRL
+    added_alert.start_time = self.SA_frame * DT_CTRL
     added_alert.alert_text_1 += extra_text_1
     added_alert.alert_text_2 += extra_text_2
     added_alert.alert_type = f"{alert_name}/{ET.PERMANENT}"  # fixes alerts being silent
 
     # if new alert is higher priority, log it
     if not self.alert_present() or added_alert.alert_priority > self.activealerts[0].alert_priority:
-      cloudlog.event('alert_add', alert_type=added_alert.alert_type, enabled=enabled)
+      cloudlog.event('alert_add', alert_type=added_alert.alert_type, enabled=self.SA_enabled)
 
     self.activealerts.append(added_alert)
 
