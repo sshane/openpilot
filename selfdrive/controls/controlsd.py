@@ -271,7 +271,7 @@ class Controls:
       ls_alert = 'laneSpeedAlert'
       if not self.sm_smiskol['laneSpeed'].new:
         ls_alert += 'Silent'
-      self.AM.add_custom(frame, 'laneSpeedAlert', self.enabled, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
+      self.AM.add_custom(frame, ls_alert, self.enabled, extra_text_1='{} lane faster'.format(faster_lane).upper(), extra_text_2='Change lanes to faster {} lane'.format(faster_lane))
       return
 
     df_out = self.df_manager.update()
