@@ -216,7 +216,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  EventName.dfButtonAlert: {
+  'dfButtonAlert': {
     ET.PERMANENT: Alert(
       "Using profile: ",
       "",
@@ -224,7 +224,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  EventName.lsButtonAlert: {
+  'lsButtonAlert': {
     ET.PERMANENT: Alert(
       "Lane Speed set to: ",
       "",
@@ -232,7 +232,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 2.),
   },
 
-  EventName.dfButtonAlertSilent: {
+  'dfButtonAlertSilent': {
     ET.PERMANENT: Alert(
       "Dynamic follow: ",
       "",
@@ -240,7 +240,7 @@ EVENTS = {
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 2.),
   },
 
-  EventName.laneSpeedAlert: {
+  'laneSpeedAlert': {
     ET.PERMANENT: Alert(
       "",
       "",
@@ -248,7 +248,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
   },
 
-  EventName.laneSpeedAlertSilent: {
+  'laneSpeedAlertSilent': {
     ET.PERMANENT: Alert(
       "",
       "",
@@ -256,7 +256,7 @@ EVENTS = {
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
   },
 
-  EventName.laneSpeedKeeping: {
+  'laneSpeedKeeping': {
     ET.PERMANENT: Alert(
       "KEEPING ",
       "",

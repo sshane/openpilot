@@ -1,8 +1,8 @@
 from selfdrive.controls.lib.alertmanager import AlertManager
-from cereal import car, log, messaging
+from cereal import log, messaging
 from selfdrive.controls.lib.events import Events, ET
 
-EventName = car.CarEvent.EventName
+
 
 AM = AlertManager()
 events = Events()
@@ -11,9 +11,9 @@ current_alert_types = [ET.PERMANENT]
 while True:
   input()
   # events.add(EventName.laneSpeedAlert)
-  # alerts = events.create_alerts(current_alert_types)
+  alerts = events.create_alerts(current_alert_types)
   # AM.add_many(frame, alerts, True)
-  AM.add_custom(frame, EventName.laneSpeedAlert, False, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
+  AM.add_custom(frame, 'laneSpeedAlert', False, extra_text_1='RIGHT', extra_text_2='Oncoming traffic in left lane')
   AM.process_alerts(frame)
 
   print(AM.alert_text_1)
