@@ -315,6 +315,8 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
     printf("successfully parsed opParams json\n");
     s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
     s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
+    printf("dfButtonStatus: %d\n", s->scene.dfButtonStatus);
+    printf("lsButtonStatus: %d\n", s->scene.lsButtonStatus);
   } else {  // error parsing json
     printf("ERROR PARSING OPPARAMS JSON!\n");
     s->scene.dfButtonStatus = 0;
