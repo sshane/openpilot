@@ -195,13 +195,13 @@ class DynamicFollow:
         a_ego = (self.df_data.v_rels[-1]['v_ego'] - self.df_data.v_rels[0]['v_ego']) / elapsed_time
         a_lead = (self.df_data.v_rels[-1]['v_lead'] - self.df_data.v_rels[0]['v_lead']) / elapsed_time
 
-    mods_x = [0, -.75, -1.5]
-    mods_y = [1.5, 1.25, 1]
+    mods_x = [-1.5, -.75, 0]
+    mods_y = [1, 1.5, 1.25]
     if a_lead < 0:  # more weight to slight lead decel
       a_lead *= interp(a_lead, mods_x, mods_y)
 
     rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
-    mod_y = [0.3245 * 1.25, 0.277 * 1.2, 0.11075 * 1.15, 0.08106 * 1.075, 0.06325 * 1.05, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
+    mod_y = [0.3245 * 1.1, 0.277 * 1.08, 0.11075 * 1.06, 0.08106 * 1.045, 0.06325 * 1.035, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
     return interp(a_lead - a_ego, rel_x, mod_y)
 
   def global_profile_mod(self, profile_mod_x, profile_mod_pos, profile_mod_neg, x_vel, y_dist):
@@ -284,9 +284,9 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    # deadzone = 7.5 * CV.MPH_TO_MS
-    # if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
-    #   TR_mods.append(self._relative_accel_mod())
+    deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph
+    if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
+      TR_mods.append(self._relative_accel_mod())
 
     x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
     y = [1.0, 1.05]
