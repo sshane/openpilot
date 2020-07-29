@@ -29,7 +29,6 @@ class dfManager:
     self.cur_model_profile = 0
     self.alert_duration = 2.0
 
-    # self.offset = self.cur_user_profile
     self.profile_pred = None
     self.change_time = sec_since_boot()
     self.first_run = True
@@ -51,7 +50,6 @@ class dfManager:
       self.first_run = False
 
     button_status = self.sm['dynamicFollowButton'].status
-    # df_out.user_profile = (button_status + self.offset) % len(self.df_profiles.to_profile)
     df_out.user_profile = button_status
     df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
 
