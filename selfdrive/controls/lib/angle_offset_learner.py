@@ -9,7 +9,7 @@ from selfdrive.config import Conversions as CV
 # modified by ShaneSmiskol to add speed and curve direction as learning factors
 # version 5 due to json incompatibilities
 
-class CurvatureOffsetLearner:
+class AngleOffsetLearner:
   def __init__(self):
     self.curvature_file = '/data/curvature_offset_v5.json'
     rate = 1 / 20.  # pathplanner is 20 hz
@@ -33,7 +33,7 @@ class CurvatureOffsetLearner:
 
     if sec_since_boot() - self._last_write_time >= self.write_frequency:
       self._write_curvature()
-    return clip(offset, -1, 1)
+    return clip(offset, -3, 3)
 
   def pick_speed_band(self, v_ego):
     if v_ego <= 30 * CV.MPH_TO_MS:
