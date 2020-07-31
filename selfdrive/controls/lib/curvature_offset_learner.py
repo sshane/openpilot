@@ -11,7 +11,7 @@ from selfdrive.config import Conversions as CV
 # version 5 due to json incompatibilities
 
 
-class CurvatureLearner:
+class CurvatureOffsetLearner:
   def __init__(self):
     self.curvature_file = '/data/curvaturev5.json'
     rate = 1 / 20.  # pathplanner is 20 hz
