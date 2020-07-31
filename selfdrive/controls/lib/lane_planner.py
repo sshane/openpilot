@@ -113,14 +113,14 @@ class DynamicCameraOffset:
       return
     if v_ego < self._min_enable_speed:
       return
-    _min_poly_prob = interp(v_ego, self._poly_prob_speeds, self._poly_probs)
-    if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate current lane width
-      return
 
     left_lane_oncoming = self.left_lane_oncoming
     right_lane_oncoming = self.right_lane_oncoming
 
     if self.have_oncoming:
+      _min_poly_prob = interp(v_ego, self._poly_prob_speeds, self._poly_probs)
+      if self.l_prob < _min_poly_prob and self.r_prob < _min_poly_prob:  # we only need one line and an accurate current lane width
+        return
       if self.lane_width_certainty < self._min_lane_width_certainty:
         return
       self.last_oncoming_time = sec_since_boot()
