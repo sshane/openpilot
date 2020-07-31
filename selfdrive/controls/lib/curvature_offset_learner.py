@@ -5,15 +5,13 @@ from common.realtime import sec_since_boot
 from selfdrive.config import Conversions as CV
 
 
-# by Zorrobyte
-# version 4
+# Original idea by Zorrobyte (version 4)
 # modified by ShaneSmiskol to add speed and curve direction as learning factors
 # version 5 due to json incompatibilities
 
-
 class CurvatureOffsetLearner:
   def __init__(self):
-    self.curvature_file = '/data/curvaturev5.json'
+    self.curvature_file = '/data/curvature_offset_v5.json'
     rate = 1 / 20.  # pathplanner is 20 hz
     self.learning_rate = 3.5e-3 * rate
     self.write_frequency = 5  # in seconds
@@ -35,7 +33,7 @@ class CurvatureOffsetLearner:
 
     if sec_since_boot() - self._last_write_time >= self.write_frequency:
       self._write_curvature()
-    return clip(offset, -0.3, 0.3)
+    return clip(offset, -1, 1)
 
   def pick_speed_band(self, v_ego):
     if v_ego <= 30 * CV.MPH_TO_MS:
