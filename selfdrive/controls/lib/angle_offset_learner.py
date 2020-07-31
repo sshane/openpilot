@@ -5,8 +5,8 @@ from common.realtime import sec_since_boot
 from selfdrive.config import Conversions as CV
 
 
-# Original idea by Zorrobyte (version 4)
-# modified by ShaneSmiskol to add speed and curve direction as learning factors
+# CurvatureLearner by Zorrobyte (version 4)
+# modified to add speed and curve direction as learning factors and change to angle offset learner for lane hugging
 # version 5 due to json incompatibilities
 
 class AngleOffsetLearner:
