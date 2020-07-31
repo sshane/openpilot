@@ -13,7 +13,7 @@ class AngleOffsetLearner:
   def __init__(self):
     self.offset_file = '/data/angle_offset_v5.json'
     rate = 1 / 20.  # pathplanner is 20 hz
-    self.learning_rate = 3.5e-3 * rate
+    self.learning_rate = 7.5e-3 * rate
     self.write_frequency = 5  # in seconds
 
     self.directions = ['left', 'right']
