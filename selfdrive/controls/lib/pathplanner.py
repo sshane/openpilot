@@ -65,10 +65,9 @@ class PathPlanner():
     self.prev_one_blinker = False
 
     self.op_params = opParams()
+    self.curvature_offset_learner = CurvatureOffsetLearner()
     self.alca_nudge_required = self.op_params.get('alca_nudge_required', default=True)
     self.alca_min_speed = self.op_params.get('alca_min_speed', default=30.0) * CV.MPH_TO_MS
-
-    self.curvature_offset_learner = CurvatureOffsetLearner()
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
