@@ -173,9 +173,6 @@ class PathPlanner():
       self.LP.r_prob *= self.lane_change_ll_prob
     self.LP.update_d_poly(v_ego, angle_steers, active)
 
-    if active:
-      angle_offset += self.angle_offset_learner.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
-
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
 
@@ -213,6 +210,10 @@ class PathPlanner():
       self.solution_invalid_cnt = 0
     plan_solution_valid = self.solution_invalid_cnt < 2
 
+    angle_offset_average = float(sm['liveParameters'].angleOffsetAverage)
+    if active:
+      angle_offset_average += self.angle_offset_learner.update(angle_steers - angle_offset, self.LP.d_poly, v_ego)
+
     plan_send = messaging.new_message('pathPlan')
     plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'liveParameters', 'model'])
     plan_send.pathPlan.laneWidth = float(self.LP.lane_width)
@@ -224,7 +225,7 @@ class PathPlanner():
 
     plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
     plan_send.pathPlan.rateSteers = float(rate_desired)
-    plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffsetAverage)
+    plan_send.pathPlan.angleOffset = angle_offset_average
     plan_send.pathPlan.mpcSolutionValid = bool(plan_solution_valid)
     plan_send.pathPlan.paramsValid = bool(sm['liveParameters'].valid)
 
