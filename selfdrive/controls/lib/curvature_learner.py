@@ -11,17 +11,16 @@ from selfdrive.config import Conversions as CV
 # version 5 due to json incompatibilities
 
 
-class CurvatureLearner:  # todo: disable when dynamic camera offset is working
+class CurvatureLearner:
   def __init__(self):
     self.curvature_file = '/data/curvaturev5.json'
     rate = 1 / 20.  # pathplanner is 20 hz
-    self.learning_rate = 3.5e-3 * rate  # equivalent to x/12000
+    self.learning_rate = 3.5e-3 * rate
     self.write_frequency = 5  # in seconds
 
     self.directions = ['left', 'right']
     self.speed_bands = ['slow', 'medium', 'fast']
     self.angle_bands = ['center', 'inner', 'outer']
-
     self._load_curvature()
 
   def update(self, angle_steers, d_poly, v_ego):
@@ -39,9 +38,9 @@ class CurvatureLearner:  # todo: disable when dynamic camera offset is working
     return clip(offset, -0.3, 0.3)
 
   def pick_speed_band(self, v_ego):
-    if v_ego <= 25 * CV.MPH_TO_MS:
+    if v_ego <= 30 * CV.MPH_TO_MS:
       return 'slow'
-    if v_ego <= 50 * CV.MPH_TO_MS:
+    if v_ego <= 55 * CV.MPH_TO_MS:
       return 'medium'
     return 'fast'
 
