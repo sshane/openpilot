@@ -1,6 +1,6 @@
 import os
 import json
-from numpy import clip
+from common.numpy_fast import clip
 from common.realtime import sec_since_boot
 from selfdrive.config import Conversions as CV
 
