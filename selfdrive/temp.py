@@ -6,8 +6,8 @@ sm = SubMaster(['logMessage'])
 
 last = ''
 while 1:
-  while sm['logMessage'] == last:
+  while sm['logMessage']['msg'] == last:
     sm.update(0)
-  last = sm['logMessage']
+  last = sm['logMessage']['msg']
   print(last)
 # print("PRINT")
