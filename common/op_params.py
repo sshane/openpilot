@@ -24,7 +24,7 @@ travis = False
 class ValueTypes:
   number = [float, int]
   none_or_number = [type(None), float, int]
-VT = ValueTypes()
+
 
 class Param:
   def __init__(self, default, allowed_types=None, description=None, live=False, hidden=False):
@@ -48,6 +48,7 @@ class opParams:
   def __init__(self):
     # self.default_params = {'camera_offset': Param(0.06, [int, float], 'Your camera offset to use in lane_planner.py')}
 
+    VT = ValueTypes()
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py'),
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
@@ -56,7 +57,7 @@ class opParams:
                                                                         'Smaller values will get you closer, larger will get you farther\n'
                                                                         'This is multiplied by any profile that\'s active. Set to None to disable'),
                         'min_TR': Param(None, VT.none_or_number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
-                                                                        'The range is limited from 0.85 to 1.3. Set to None to disable'),
+                                                                 'The range is limited from 0.85 to 1.3. Set to None to disable'),
                         'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(25.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
@@ -75,12 +76,12 @@ class opParams:
                         'dynamic_camera_offset': Param(True, bool, 'Whether to automatically keep away from oncoming traffic.\n'
                                                                    'Works from 35 to ~60 mph (requires radar)'),
                         'dynamic_camera_offset_time': Param(2.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
-                        'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
+                        'support_white_panda': Param(1, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
 
 
-                        'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key')}
+                        'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', hidden=True)}
 
     # todo: add live param list here!
 
