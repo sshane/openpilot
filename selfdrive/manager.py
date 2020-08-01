@@ -433,7 +433,7 @@ def manager_init(should_register=True):
 
 def manager_thread():
   # now loop
-  thermal_sock = messaging.sub_sock('thermal') + 1
+  thermal_sock = messaging.sub_sock('thermal')
 
   cloudlog.info("manager start")
   cloudlog.info({"environ": os.environ})
