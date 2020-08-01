@@ -165,7 +165,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      if param_info.is_valid([]):
+      if param_info.has_allowed_types and param_info.is_valid([]):
+        param_info.allowed_types.remove(list)
         self.change_param_list(old_value, param_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 
@@ -179,7 +180,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           return
 
         new_value = self.str_eval(new_value)
-        if param_info.has_allowed_types and type(new_value) not in param_info.allowed_types:
+        if not param_info.is_valid(new_value):
           self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
@@ -220,7 +221,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           break
 
         new_value = self.str_eval(new_value)
-        if param_info.has_allowed_types and type(new_value) not in param_info.allowed_types:
+        if not param_info.is_valid(new_value):
           self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
