@@ -10,11 +10,11 @@ last = ''
 msg = ''
 while 1:
   while msg == last:
+    sm.update(0)
     try:
       msg = json.loads(sm['logMessage'])['msg']
     except:
       continue
-    sm.update(0)
   last = str(msg)
   print(last)
 # print("PRINT")
