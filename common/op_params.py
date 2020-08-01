@@ -190,17 +190,6 @@ class opParams:
   def _get_all(self):  # returns all non-hidden params
     return {k: v for k, v in self.params.items() if k in self.fork_params and not self.param_info(k).hidden}
 
-  def _value_from_types(self, allowed_types):
-    if list in allowed_types:
-      return []
-    elif float in allowed_types or int in allowed_types:
-      return 0
-    elif type(None) in allowed_types:
-      return None
-    elif str in allowed_types:
-      return ''
-    return None  # unknown type
-
   def _update_params(self, param_info, force_live):
     if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and sec_since_boot() - self._last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
