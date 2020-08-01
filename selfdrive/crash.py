@@ -33,7 +33,7 @@ else:
   if username is not None and isinstance(username, str):
     error_tags['username'] = username
 
-  if 'github.com/ShaneSmiskol' in origin:  # only send errors if my fork
+  if 'github.com/shanesmiskol' in origin:  # only send errors if my fork
     sentry_uri = 'https://7f66878806a948f9a8b52b0fe7781201@o237581.ingest.sentry.io/5252098'
     print('FORK!!!!!')
   else:  # else use stock
