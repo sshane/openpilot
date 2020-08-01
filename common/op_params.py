@@ -27,15 +27,18 @@ class ValueTypes:
 
 
 class Param:
-  def __init__(self, default, allowed_types=None, description=None, live=False, hidden=False):
+  def __init__(self, default, allowed_types=None, description=None, hidden=False):
     self.default = default
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types
     self.description = description
-    self.live = live
+    self.live = False
     self.hidden = hidden
     self._create_attrs()
+
+  def set_live(self):
+    self.live = True
 
   def _create_attrs(self):
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
@@ -83,7 +86,8 @@ class opParams:
 
                         'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', hidden=True)}
 
-    # todo: add live param list here!
+    live_params = ['camera_offset', 'global_df_mod', 'min_TR', 'steer_ratio']
+    [self.fork_params[p].set_live() for p in live_params]
 
     self.params = {}
     self.params_file = "/data/op_params.json"
