@@ -28,6 +28,9 @@ class COLORS:
   def BASE(self, col):  # seems to support more colors
     return '\33[38;5;{}m'.format(col)
 
+  def BASEBG(self, col):  # seems to support more colors
+    return '\33[48;5;{}m'.format(col)
+
 
 COLORS = COLORS()
 
