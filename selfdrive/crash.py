@@ -42,6 +42,11 @@ else:
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
 
   def capture_exception(*args, **kwargs):
+    print('CAUGHT EXCEPTION!')
+    print(args)
+    print(kwargs)
+    print(kwargs[0])
+    print(kwargs.get('exc_info', 1))
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
