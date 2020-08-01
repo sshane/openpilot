@@ -22,3 +22,9 @@ class COLORS:
   PROMPT = YELLOW
   CYAN = '\033[36m'
   WARNING = '\033[33m'
+
+def opParams_warning(msg):
+  print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
+
+def opParams_error(msg):
+  print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLORS.ENDC))

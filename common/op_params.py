@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import os
 import json
+from common.colors import opParams_warning as warning
+from common.colors import opParams_error as error
 try:
   from common.realtime import sec_since_boot
 except ImportError:
   import time
   sec_since_boot = time.time
-  print("opParams WARNING: using python time.time() instead of faster sec_since_boot")
+  warning("Using python time.time() instead of faster sec_since_boot")
 
 travis = False
 
@@ -84,22 +86,20 @@ class opParams:
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
     self.to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p', 'lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
-    # self.run_init()  # restores, reads, and updates params
+    self._run_init()  # restores, reads, and updates params
 
-  def run_init(self):  # does first time initializing of default params
+  def _run_init(self):  # does first time initializing of default params
+    self.params = self._format_default_params()  # in case file is corrupted
     if travis:
-      self.params = self._format_default_params()
       return
-
-    self.params = self._format_default_params()  # in case any file is corrupted
 
     to_write = False
     if os.path.isfile(self.params_file):
       if self._read():
-        to_write = not self._add_default_params()  # if new default data has been added
-        to_write = self._delete_old or to_write  # or if old params have been deleted
+        to_write = self._add_default_params()  # if new default data has been added
+        to_write |= self._delete_old()  # or if old params have been deleted
       else:  # don't overwrite corrupted params, just print
-        print("opParams ERROR: Can't read op_params.json file")
+        error("Can't read op_params.json file")
     else:
       to_write = True  # user's first time running a fork with op_params, write default params
 
@@ -119,7 +119,7 @@ class opParams:
         if type(value) in key_info.allowed_types:
           return value  # all good, returning user's value
 
-        print('opParams WARNING: User\'s value is not valid!')
+        warning('User\'s value is not valid!')
         if key_info.has_default:  # invalid value type, try to use default value
           if type(key_info.default) in key_info.allowed_types:  # actually check if the default is valid
             # return default value because user's value of key is not in the allowed_types to avoid crashing openpilot
@@ -170,18 +170,20 @@ class opParams:
     return key_info
 
   def _add_default_params(self):
-    prev_params = dict(self.params)
-    for key in self.default_params:
-      if self.force_update:
-        self.params[key] = self.default_params[key]['default']
-      elif key not in self.params:
-        self.params[key] = self.default_params[key]['default']
-    return prev_params == self.params
+    added = False
+    for key, param in self.fork_params.items():
+      if self.force_update or key not in self.params:
+        self.params[key] = param.default
+        added = True
+      elif param.has_allowed_types and type(self.params[key]) not in param.allowed_types:
+        warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key))
+        self.params[key] = param.default
+        added = True
+    return added
 
   def _format_default_params(self):
-    return {key: self.default_params[key]['default'] for key in self.default_params}
+    return {key: value.default for key, value in self.fork_params.items()}
 
-  @property
   def _delete_old(self):
     deleted = False
     for param in self.to_delete:
@@ -216,8 +218,7 @@ class opParams:
         self.params = json.loads(f.read())
       return True
     except Exception as e:
-      print('opParams ERROR: {}'.format(e))
-      self.params = self._format_default_params()
+      error(e)
       return False
 
   def _write(self):
