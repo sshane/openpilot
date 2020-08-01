@@ -73,7 +73,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       live = [COLORS.BASE(157) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
-      blue_grad = [27, 33, 39, 45, 51, 80, 81, 87, 123]
+      # blue_grad = [27, 33, 39, 45, 51, 80, 81, 87, 123]
+      blue_grad = [33, 39, 45, 51, 80, 81, 87, 123]
       for idx, param in enumerate(self.params):
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
