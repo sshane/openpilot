@@ -38,7 +38,8 @@ class Param:
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
     if self.has_allowed_types:
-      assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
+      err = 'Default value type ({}) must be in {}'.format(type(self.default), self.allowed_types)
+      assert type(self.default) in self.allowed_types, err
 
 
 class opParams:
