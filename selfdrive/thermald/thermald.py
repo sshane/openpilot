@@ -248,6 +248,8 @@ def thermald_thread():
     msg.thermal.batteryCurrent = get_battery_current()
     msg.thermal.batteryVoltage = get_battery_voltage()
     msg.thermal.usbOnline = get_usb_present()
+    tmp = 54
+    tmp /= 0
 
     # Fake battery levels on uno for frame
     if is_uno:
