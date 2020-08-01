@@ -74,7 +74,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       to_print = []
       # blue_grad = [27, 33, 39, 45, 51, 80, 81, 87, 123]
-      blue_grad = [27, 33, 39, 45, 51, 87]
+      blue_grad = [33, 39, 45, 51, 87]
       for idx, param in enumerate(self.params):
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
