@@ -62,7 +62,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         if len(str(v)) < 20:
           if type(v) in self.type_colors:
             v_color = self.type_colors[type(v)]
-            if isinstance(type(v), bool):
+            if isinstance(v, bool):
               v_color = v_color[v]
             v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
         else:
