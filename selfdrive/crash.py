@@ -46,6 +46,9 @@ else:
     exc_info = sys.exc_info()
     print('------')
     print('sys: {}'.format(exc_info))
+    print(dir(exc_info[0]))
+    print(dir(exc_info[1]))
+    print(dir(exc_info[2]))
     print('kwargs: {}'.format(kwargs.get('exc_info', 1)))
     print('------')
     if not exc_info[0] is capnp.lib.capnp.KjException:
