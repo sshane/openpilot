@@ -5,6 +5,7 @@ import ast
 import difflib
 from common.colors import COLORS
 
+
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
