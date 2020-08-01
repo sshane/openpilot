@@ -47,6 +47,20 @@ class Param:
 
 class opParams:
   def __init__(self):
+    """
+      To add your own parameter to opParams in your fork, simply add a new entry in self.fork_params, instancing a new Param class with at minimum a default value.
+      The allowed_types and description args are not required but highly recommended to help users edit their parameters with opEdit safely.
+        - The description value will be shown to users when they use opEdit to change the value of the parameter.
+        - The allowed_types arg is used to restrict what kinds of values can be entered with opEdit so that users can't crash openpilot with unintended behavior.
+              (setting a param intended to be a number with a boolean, or viceversa for example)
+          Limiting the range of floats or integers is still recommended when `.get`ting the parameter.
+          When a None value is allowed, use `type(None)` instead of None, as opEdit checks the type against the values in the arg with `isinstance()`.
+        - Finally, the live arg tells both opParams and opEdit that it's a live parameter that will change. Therefore, you must place the `op_params.get()` call in the update function so that it can update.
+
+      Here's an example of a good fork_param entry:
+      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number)}  # VT.number allows both floats and ints
+    """
+
     VT = ValueTypes()
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py'),
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
