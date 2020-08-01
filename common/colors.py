@@ -4,6 +4,7 @@ class COLORS:
     self.OKBLUE = '\033[94m'
     self.CBLUE = '\33[44m'
     self.BOLD = '\033[1m'
+    self.CITALIC = '\33[3m'
     self.OKGREEN = '\033[92m'
     self.CWHITE = '\33[37m'
     self.ENDC = '\033[0m' + self.CWHITE
