@@ -7,7 +7,10 @@ sm = SubMaster(['logMessage'])
 
 last = ''
 while 1:
-  msg = ast.literal_eval(sm['logMessage'])['msg']
+  try:
+    msg = ast.literal_eval(sm['logMessage'])['msg']
+  except:
+    continue
   while msg == last:
     sm.update(0)
   last = str(msg)
