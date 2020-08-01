@@ -165,7 +165,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      if key_info.is_list:
+      if key_info.is_list:  # todo: this functionality is removed with opParams refactor, need to add back
         self.change_param_list(old_value, key_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 

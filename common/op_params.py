@@ -113,8 +113,7 @@ class opParams:
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
     if key is None:
       return self._get_all()
-    if key not in self.fork_params or key not in self.params:
-      raise Exception('opParams: Tried to get an unknown parameter! Key not in fork_params')
+    self._check_key_exists(key, 'get')
 
     param_info = self.fork_params[key]
     self._update_params(param_info, force_live)
@@ -126,42 +125,21 @@ class opParams:
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
-    self.params.update({key: value})
-    self._write()
+    self._check_key_exists(key, 'put')
+    if self.fork_params[key].is_valid(value):
+      self.params.update({key: value})
+      self._write()
+    else:
+      raise Exception('opParams: Tried to put a value of invalid type!')
 
-  def delete(self, key):
+  def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:
       del self.params[key]
       self._write()
 
-  def key_info(self, key):
-    key_info = KeyInfo()
-    if key is None or key not in self.default_params:
-      return key_info
-    if key in self.default_params:
-      if 'allowed_types' in self.default_params[key]:
-        allowed_types = self.default_params[key]['allowed_types']
-        if isinstance(allowed_types, list) and len(allowed_types) > 0:
-          key_info.has_allowed_types = True
-          key_info.allowed_types = list(allowed_types)
-          if list in [type(typ) for typ in allowed_types]:
-            key_info.is_list = True
-            key_info.allowed_types.remove(list)
-            key_info.allowed_types = key_info.allowed_types[0]
-
-      if 'live' in self.default_params[key]:
-        key_info.live = self.default_params[key]['live']
-
-      if 'default' in self.default_params[key]:
-        key_info.has_default = True
-        key_info.default = self.default_params[key]['default']
-
-      key_info.has_description = 'description' in self.default_params[key]
-
-      if 'hide' in self.default_params[key]:
-        key_info.hidden = self.default_params[key]['hide']
-
-    return key_info
+  def _check_key_exists(self, key, met):
+    if key not in self.fork_params or key not in self.params:
+      raise Exception('opParams: Tried to {} an unknown parameter! Key not in fork_params'.format(met))
 
   def _add_default_params(self):
     added = False
@@ -187,7 +165,7 @@ class opParams:
     return deleted
 
   def _get_all(self):  # returns all non-hidden params
-    return {k: v for k, v in self.params.items() if not self.key_info(k).hidden}
+    return {k: v for k, v in self.params.items() if k in self.fork_params and not self.fork_params[k].hidden}
 
   def _value_from_types(self, allowed_types):
     if list in allowed_types:
@@ -222,4 +200,4 @@ class opParams:
 
 
 op_params = opParams()
-print(op_params.get('camera_offset'))
+op_params.put('camera_offset', -0.04)
