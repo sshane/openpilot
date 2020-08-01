@@ -22,7 +22,7 @@ travis = False
 #   hidden = False
 
 class Param:
-  def __init__(self, default, allowed_types=None, description=None, live=None, hide=None):
+  def __init__(self, default, allowed_types=None, description=None, live=None, hidden=None):
     self.default = default
     if allowed_types == 'number':
       allowed_types = [float, int]
@@ -31,7 +31,7 @@ class Param:
     self.allowed_types = allowed_types
     self.description = description
     self.live = live
-    self.hide = hide
+    self.hidden = hidden
     self._create_attrs()
 
   def _create_attrs(self):
