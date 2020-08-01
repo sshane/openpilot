@@ -29,6 +29,11 @@ class Param:
     self.hidden = hidden
     self._create_attrs()
 
+  def is_valid(self, value):
+    if not self.has_allowed_types:
+      return True
+    return type(value) in self.allowed_types
+
   def _create_attrs(self):
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
@@ -105,29 +110,20 @@ class opParams:
       self._write()
       os.chmod(self.params_file, 0o764)
 
-  def get(self, key=None, default=None, force_update=False):  # can specify a default value if key doesn't exist
+  def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
     if key is None:
       return self._get_all()
+    if key not in self.fork_params or key not in self.params:
+      raise Exception('opParams: Tried to get an unknown parameter! Key not in fork_params')
 
-    key_info = self.key_info(key)
-    self._update_params(key_info, force_update)
-    if key in self.params:
-      if key_info.has_allowed_types:
-        value = self.params[key]
-        if type(value) in key_info.allowed_types:
-          return value  # all good, returning user's value
+    param_info = self.fork_params[key]
+    self._update_params(param_info, force_live)
+    value = self.params[key]
+    if param_info.is_valid(value):  # always valid if no allowed types, otherwise checks to make sure
+      return value  # all good, returning user's value
 
-        warning('User\'s value is not valid!')
-        if key_info.has_default:  # invalid value type, try to use default value
-          if type(key_info.default) in key_info.allowed_types:  # actually check if the default is valid
-            # return default value because user's value of key is not in the allowed_types to avoid crashing openpilot
-            return key_info.default
-
-        return self._value_from_types(key_info.allowed_types)  # else use a standard value based on type (last resort to keep openpilot running if user's value is of invalid type)
-      else:
-        return self.params[key]  # no defined allowed types, returning user's value
-
-    return default  # not in params
+    warning('User\'s value is not valid!')  # somehow... it should always be valid
+    return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
     self.params.update({key: value})
@@ -204,9 +200,9 @@ class opParams:
       return ''
     return None  # unknown type
 
-  def _update_params(self, key_info, force_update):
-    if force_update or key_info.live:  # if is a live param, we want to get updates while openpilot is running
-      if not travis and (sec_since_boot() - self.last_read_time >= self.read_frequency or force_update):  # make sure we aren't reading file too often
+  def _update_params(self, param_info, force_live):
+    if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
+      if not travis and sec_since_boot() - self.last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
         if self._read():
           self.last_read_time = sec_since_boot()
 
@@ -226,3 +222,4 @@ class opParams:
 
 
 op_params = opParams()
+print(op_params.get('camera_offset'))
