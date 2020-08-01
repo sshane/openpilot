@@ -13,8 +13,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.sleep_time = 0.75
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
-    self.type_colors = {int: COLORS.BASE(137), float: COLORS.BASE(137),  # or 180 or 215
-                        bool: COLORS.CITALIC + COLORS.BASE(177), type(None): COLORS.CITALIC + COLORS.BASE(177)}  # or 134, 171, 176, 177, (207, 207 looks prettier), 213, 219
+    self.type_colors = {int: COLORS.BASE(6), float: COLORS.BASE(6),  # or 180 or 215, 6, 173, 179, 180,
+                        bool: COLORS.CITALIC + COLORS.BASE(177), type(None): COLORS.CITALIC + COLORS.BASE(177)}
 
     self.last_choice = None
 
