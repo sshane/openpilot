@@ -4,8 +4,10 @@ from cereal.messaging import SubMaster
 
 sm = SubMaster(['logMessage'])
 
+last = ''
 while 1:
-  while not sm.updated['logMessage']:
+  while sm['logMessage'] == last:
     sm.update(0)
-  print(sm['logMessage'])
+  last = sm['logMessage']
+  print(last)
 # print("PRINT")
