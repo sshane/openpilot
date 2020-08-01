@@ -9,6 +9,16 @@ from selfdrive.version import version, dirty
 from selfdrive.swaglog import cloudlog
 from common.android import ANDROID
 
+def save_exception(exc_text):
+  i = 0
+  log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M%p.log'))
+  if os.path.exists(log_file):
+    while os.path.exists(log_file + str(i)):
+      i += 1
+    log_file += str(i)
+  with open(log_file, 'w') as f:
+    f.write(exc_text)
+
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or not ANDROID:
   def capture_exception(*args, **kwargs):
     pass
@@ -49,10 +59,7 @@ else:
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
 
   def capture_exception(*args, **kwargs):
-    log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M%p.log'))
-    with open(log_file, 'w') as f:
-      f.write(traceback.format_exc())
-
+    save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
