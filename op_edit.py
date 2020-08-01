@@ -60,11 +60,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       values_list = []
       for k, v in self.params.items():
         if len(str(v)) < 20:
+          v_color = ''
           if type(v) in self.type_colors:
             v_color = self.type_colors[type(v)]
             if isinstance(v, bool):
               v_color = v_color[v]
-            v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
+          v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
         else:
           v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
         values_list.append(v)
@@ -72,12 +73,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       live = [COLORS.BASE(157) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
+      blue_grad = [27, 33, 39, 45, 51, 80, 81, 87, 123]
       for idx, param in enumerate(self.params):
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
           line = COLORS.OKGREEN + line
         else:
-          line = COLORS.CYAN + line
+          _color = blue_grad[min(round(idx / len(self.params) * len(blue_grad)), len(blue_grad) - 1)]
+          # line = COLORS.CYAN + line
+          line = COLORS.BASE(_color) + line
         to_print.append(line)
 
       extras = {'a': 'Add new parameter',
