@@ -29,6 +29,12 @@ else:
   from raven import Client
   from raven.transport.http import HTTPTransport
   from selfdrive.version import origin, branch, commit
+  from datetime import datetime
+
+  if not os.path.exists('/data/community'):
+    os.mkdir('/data/community')
+  if not os.path.exists('/data/community/crashes'):
+    os.mkdir('/data/community/crashes')
 
   error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': commit}
   username = op_params.get('username', None)
@@ -44,11 +50,10 @@ else:
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
 
   def capture_exception(*args, **kwargs):
-    print('CAUGHT EXCEPTION!')
+    log_file = datetime.now().strftime('%d-%m-%Y--%I:%M%p.log')
     exc_info = sys.exc_info()
-    print('------')
-    print('TRACEBACK: {}'.format(traceback.format_exc()))
-    print('------')
+    with open(log_file, 'w') as f:
+      f.write(traceback.format_exc())
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
     cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
