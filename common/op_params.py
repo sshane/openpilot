@@ -45,8 +45,8 @@ class opParams:
   def __init__(self):
     # self.default_params = {'camera_offset': Param(0.06, [int, float], 'Your camera offset to use in lane_planner.py')}
 
-    self.fork_params = {'camera_offset': Param(True, [float, int], 'Your camera offset to use in lane_planner.py'),
-                        'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
+    self.fork_params = {'camera_offset': Param(0.06, [float, int], 'Your camera offset to use in lane_planner.py'),
+                        'dynamic_follow': Param(4.4, str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
                                                              'retaining the smoothness and safety of dynamic follow!'),
                         'global_df_mod': Param(None, [type(None), float, int], 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
