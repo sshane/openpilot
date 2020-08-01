@@ -77,6 +77,17 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         if idx == self.last_choice and self.last_choice is not None:
           line = COLORS.OKGREEN + line
         else:
+          v = self.params[param]
+          if len(str(v)) < 20:
+            if type(v) in self.type_colors:
+              v_color = self.type_colors[type(v)]
+              if isinstance(v, bool):
+                v_color = v_color[v]
+              v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
+          else:
+            v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
+
+
           line = COLORS.CYAN + line
         to_print.append(line)
 
