@@ -43,11 +43,9 @@ else:
 
   def capture_exception(*args, **kwargs):
     print('CAUGHT EXCEPTION!')
-    print(args)
-    print(kwargs)
-    print(kwargs[0])
-    print(kwargs.get('exc_info', 1))
     exc_info = sys.exc_info()
+    print('sys: {}'.format(exc_info))
+    print('kwargs: {}'.format(kwargs.get('exc_info', 1)))
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
     cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
