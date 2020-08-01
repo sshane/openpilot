@@ -31,8 +31,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.op_params = opParams()
     self.params = None
     self.sleep_time = 0.75
-    self.live_tuning = self.op_params.get('op_edit_live_mode', False)
-    self.username = self.op_params.get('username', None)
+    self.live_tuning = self.op_params.get('op_edit_live_mode')
+    self.username = self.op_params.get('username')
 
     self.last_choice = None
 
@@ -68,13 +68,13 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.info('Here are your parameters:', end='\n', sleep_time=0)
       else:
         self.info('Here are your live parameters:', sleep_time=0)
-        self.info('(changes take effect within {} seconds)'.format(self.op_params._read_frequency), end='\n', sleep_time=0)
-      self.params = self.op_params.get(force_update=True)
+        self.info('(changes take effect within {} seconds)'.format(self.op_params.read_frequency), end='\n', sleep_time=0)
+      self.params = self.op_params.get(force_live=True)
       if self.live_tuning:  # only display live tunable params
-        self.params = {k: v for k, v in self.params.items() if self.op_params.key_info(k).live}
+        self.params = {k: v for k, v in self.params.items() if self.op_params.param_info(k).live}
 
-      values_list = [self.params[i] if len(str(self.params[i])) < 20 else '{} ... {}'.format(str(self.params[i])[:30], str(self.params[i])[-15:]) for i in self.params]
-      live = ['(live!)' if self.op_params.key_info(i).live else '' for i in self.params]
+      values_list = [v if len(str(v)) < 20 else '{} ... {}'.format(str(v)[:30], str(v)[-15:]) for k, v in self.params.items()]
+      live = ['(live!)' if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
       for idx, param in enumerate(self.params):
@@ -146,27 +146,27 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def change_parameter(self, choice):
     while True:
       chosen_key = list(self.params)[choice]
-      key_info = self.op_params.key_info(chosen_key)
+      param_info = self.op_params.param_info(chosen_key)
 
       old_value = self.params[chosen_key]
       self.info('Chosen parameter: {}'.format(chosen_key), sleep_time=0)
 
       to_print = []
-      if key_info.has_description:
-        to_print.append(STYLES.OKGREEN + '>>  Description: {}'.format(self.op_params.default_params[chosen_key]['description'].replace('\n', '\n  > ')) + STYLES.ENDC)
-      if key_info.has_allowed_types:
-        to_print.append(STYLES.RED + '>>  Allowed types: {}'.format(', '.join([i.__name__ for i in key_info.allowed_types])) + STYLES.ENDC)
-      if key_info.live:
+      if param_info.has_description:
+        to_print.append(STYLES.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + STYLES.ENDC)
+      if param_info.has_allowed_types:
+        to_print.append(STYLES.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + STYLES.ENDC)
+      if param_info.live:
         live_msg = '>>  This parameter supports live tuning!'
         if not self.live_tuning:
-          live_msg += ' Updates should take effect within {} seconds'.format(self.op_params._read_frequency)
+          live_msg += ' Updates should take effect within {} seconds'.format(self.op_params.read_frequency)
         to_print.append(STYLES.YELLOW + live_msg + STYLES.ENDC)
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      if key_info.is_list:  # todo: this functionality is removed with opParams refactor, need to add back
-        self.change_param_list(old_value, key_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
+      if param_info.is_valid([]):
+        self.change_param_list(old_value, param_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
@@ -179,11 +179,11 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           return
 
         new_value = self.str_eval(new_value)
-        if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
+        if param_info.has_allowed_types and type(new_value) not in param_info.allowed_types:
           self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 
-        if key_info.live:  # stay in live tuning interface
+        if param_info.live:  # stay in live tuning interface
           self.op_params.put(chosen_key, new_value)
           self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
@@ -197,7 +197,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.info('Not saved!', sleep_time=0)
           return
 
-  def change_param_list(self, old_value, key_info, chosen_key):
+  def change_param_list(self, old_value, param_info, chosen_key):
     while True:
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
       self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
@@ -220,7 +220,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           break
 
         new_value = self.str_eval(new_value)
-        if key_info.has_allowed_types and type(new_value) not in key_info.allowed_types:
+        if param_info.has_allowed_types and type(new_value) not in param_info.allowed_types:
           self.error('The type of data you entered ({}) is not allowed with this parameter!'.format(type(new_value).__name__))
           continue
 

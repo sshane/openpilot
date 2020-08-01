@@ -19,7 +19,7 @@ class ValueTypes:
 
 
 class Param:
-  def __init__(self, default, allowed_types=None, description=None, hidden=False):
+  def __init__(self, default=None, allowed_types=None, description=None, hidden=False):
     self.default = default
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
@@ -74,6 +74,8 @@ class opParams:
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
+                        'username': Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\n'
+                                                                         'Helps the developer reach out to you if anything goes wrong'),
 
                         'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', hidden=True)}
 
@@ -84,7 +86,7 @@ class opParams:
 
     self._params_file = "/data/op_params.json"
     self._last_read_time = sec_since_boot()
-    self._read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p', 'lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
     self._run_init()  # restores, reads, and updates params
 
@@ -112,7 +114,7 @@ class opParams:
       return self._get_all()
     self._check_key_exists(key, 'get')
 
-    param_info = self.fork_params[key]
+    param_info = self.param_info(key)
     self._update_params(param_info, force_live)
     value = self.params[key]
     if param_info.is_valid(value):  # always valid if no allowed types, otherwise checks to make sure
@@ -123,7 +125,7 @@ class opParams:
 
   def put(self, key, value):
     self._check_key_exists(key, 'put')
-    if not self.fork_params[key].is_valid(value):
+    if not self.param_info(key).is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
     self._write()
@@ -132,6 +134,11 @@ class opParams:
     if key in self.params:
       del self.params[key]
       self._write()
+
+  def param_info(self, key):
+    if key in self.fork_params:
+      return self.fork_params[key]
+    return Param()
 
   def _check_key_exists(self, key, met):
     if key not in self.fork_params or key not in self.params:
@@ -161,7 +168,7 @@ class opParams:
     return deleted
 
   def _get_all(self):  # returns all non-hidden params
-    return {k: v for k, v in self.params.items() if k in self.fork_params and not self.fork_params[k].hidden}
+    return {k: v for k, v in self.params.items() if k in self.fork_params and not self.param_info(k).hidden}
 
   def _value_from_types(self, allowed_types):
     if list in allowed_types:
@@ -176,7 +183,7 @@ class opParams:
 
   def _update_params(self, param_info, force_live):
     if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
-      if not travis and sec_since_boot() - self._last_read_time >= self._read_frequency:  # make sure we aren't reading file too often
+      if not travis and sec_since_boot() - self._last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
         if self._read():
           self._last_read_time = sec_since_boot()
 
