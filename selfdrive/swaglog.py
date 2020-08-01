@@ -35,7 +35,7 @@ class LogMessageHandler(logging.Handler):
 
     msg = self.format(record).rstrip('\n')
     with open(self.log_file, 'a') as f:
-      f.write('{}\n'.format(record['msg']))
+      f.write('{}\n'.format(record.msg))
 
     print("SEND: {}".format(repr(msg)))
     try:
