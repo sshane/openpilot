@@ -27,6 +27,7 @@ class LogMessageHandler(logging.Handler):
     self.pid = os.getpid()
 
   def emit(self, record):
+    print('here')
     if os.getpid() != self.pid:
       self.connect()
 
