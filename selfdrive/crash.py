@@ -30,8 +30,9 @@ else:
 
   error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': commit}
   username = op_params.get('username', None)
-  if username is not None and isinstance(username, str):
-    error_tags['username'] = username
+  if username is None or not isinstance(username, str):
+    username = 'undefined'
+  error_tags['username'] = username
 
   if 'github.com/shanesmiskol' in origin.lower():  # only send errors if my fork
     sentry_uri = 'https://7f66878806a948f9a8b52b0fe7781201@o237581.ingest.sentry.io/5252098'
