@@ -197,7 +197,3 @@ class opParams:
     if not travis:
       with open(self.params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
-
-
-op_params = opParams()
-op_params.put('camera_offset', -0.04)
