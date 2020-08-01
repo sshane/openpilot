@@ -16,7 +16,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),  # or 180 or 215, 6, 173, 179, 180,
                         bool: {False: COLORS.RED, True: COLORS.OKGREEN},
                         type(None): COLORS.BASE(177),
-                        str: COLORS.BASE(113)}  # 107, 108, 77, 113, 149
+                        str: COLORS.BASE(77)}  # 107, 108, 77, 113, 149
 
     self.last_choice = None
 
