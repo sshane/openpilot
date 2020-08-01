@@ -88,6 +88,7 @@ from multiprocessing import Process
 # Run scons
 spinner = Spinner()
 spinner.update("0")
+print("DEBUG TEXT!")
 
 if not prebuilt:
   for retry in [True, False]:
