@@ -123,11 +123,10 @@ class opParams:
 
   def put(self, key, value):
     self._check_key_exists(key, 'put')
-    if self.fork_params[key].is_valid(value):
-      self.params.update({key: value})
-      self._write()
-    else:
+    if not self.fork_params[key].is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
+    self.params.update({key: value})
+    self._write()
 
   def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:
