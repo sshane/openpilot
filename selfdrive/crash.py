@@ -1,10 +1,9 @@
 """Install exception handler for process crash."""
 import os
 import sys
+import capnp
 import threading
 import traceback
-
-import capnp
 from selfdrive.version import version, dirty
 
 from selfdrive.swaglog import cloudlog
