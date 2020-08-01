@@ -3,27 +3,28 @@ import time
 from common.op_params import opParams
 import ast
 import difflib
+from common.colors import COLORS
 
 
-class STYLES:  # todo: use common.colors
-  # HEADER = '\033[95m'
-  # OKBLUE = '\033[94m'
-  # CBLUE = '\33[44m'
-  # BOLD = '\033[1m'
-  OKGREEN = '\033[92m'
-  CWHITE = '\33[37m'
-  ENDC = '\033[0m' + CWHITE
-  UNDERLINE = '\033[4m'
-
-  RED = '\033[91m'
-  PURPLE_BG = '\33[45m'
-  YELLOW = '\033[93m'
-
-  FAIL = RED
-  INFO = PURPLE_BG
-  SUCCESS = OKGREEN
-  PROMPT = YELLOW
-  CYAN = '\033[36m'
+# class STYLES:  # todo: use common.colors
+#   # HEADER = '\033[95m'
+#   # OKBLUE = '\033[94m'
+#   # CBLUE = '\33[44m'
+#   # BOLD = '\033[1m'
+#   OKGREEN = '\033[92m'
+#   CWHITE = '\33[37m'
+#   ENDC = '\033[0m' + CWHITE
+#   UNDERLINE = '\033[4m'
+#
+#   RED = '\033[91m'
+#   PURPLE_BG = '\33[45m'
+#   YELLOW = '\033[93m'
+#
+#   FAIL = RED
+#   INFO = PURPLE_BG
+#   SUCCESS = OKGREEN
+#   PROMPT = YELLOW
+#   CYAN = '\033[36m'
 
 
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
@@ -74,7 +75,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.params = {k: v for k, v in self.params.items() if self.op_params.param_info(k).live}
 
       values_list = [v if len(str(v)) < 20 else '{} ... {}'.format(str(v)[:30], str(v)[-15:]) for k, v in self.params.items()]
-      live = ['(live!)' if self.op_params.param_info(k).live else '' for k in self.params]
+      live = [COLORS.BASE.format(154) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
       for idx, param in enumerate(self.params):
