@@ -81,9 +81,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       for idx, param in enumerate(self.params):
         line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
         if idx == self.last_choice and self.last_choice is not None:
-          line = STYLES.OKGREEN + line
+          line = COLORS.OKGREEN + line
         else:
-          line = STYLES.CYAN + line
+          line = COLORS.CYAN + line
         to_print.append(line)
 
       extras = {'a': 'Add new parameter',
@@ -154,14 +154,14 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       to_print = []
       if param_info.has_description:
-        to_print.append(STYLES.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + STYLES.ENDC)
+        to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
       if param_info.has_allowed_types:
-        to_print.append(STYLES.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + STYLES.ENDC)
+        to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + COLORS.ENDC)
       if param_info.live:
         live_msg = '>>  This parameter supports live tuning!'
         if not self.live_tuning:
           live_msg += ' Updates should take effect within {} seconds'.format(self.op_params.read_frequency)
-        to_print.append(STYLES.YELLOW + live_msg + STYLES.ENDC)
+        to_print.append(COLORS.YELLOW + live_msg + COLORS.ENDC)
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
@@ -264,27 +264,22 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     print(msg, flush=True, end='\n' + end)
     time.sleep(sleep_time)
 
-  def str_color(self, msg, style, surround=False, underline=False):
+  def str_color(self, msg, style, surround=False):
     if style == 'success':
-      style = STYLES.SUCCESS
+      style = COLORS.SUCCESS
     elif style == 'fail':
-      style = STYLES.FAIL
+      style = COLORS.FAIL
     elif style == 'prompt':
-      style = STYLES.PROMPT
+      style = COLORS.PROMPT
     elif style == 'info':
-      style = STYLES.INFO
+      style = COLORS.INFO
     elif style == 'cyan':
-      style = STYLES.CYAN
-
-    if underline:
-      underline = STYLES.UNDERLINE
-    else:
-      underline = ''
+      style = COLORS.CYAN
 
     if surround:
-      msg = '{}--------\n{}{}\n{}--------{}'.format(style, underline, msg, STYLES.ENDC + style, STYLES.ENDC)
+      msg = '{}--------\n{}\n{}--------{}'.format(style, msg, COLORS.ENDC + style, COLORS.ENDC)
     else:
-      msg = '{}{}{}'.format(style + underline, msg, STYLES.ENDC)
+      msg = '{}{}{}'.format(style, msg, COLORS.ENDC)
 
     return msg
 
