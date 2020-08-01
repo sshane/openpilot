@@ -6,6 +6,7 @@ import difflib
 from common.colors import COLORS
 
 
+# noinspection PyCallByClass
 class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
@@ -54,7 +55,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.params = {k: v for k, v in self.params.items() if self.op_params.param_info(k).live}
 
       values_list = [COLORS.BASE(119) + v if len(str(v)) < 20 else '{} ... {}'.format(str(v)[:30], str(v)[-15:]) for k, v in self.params.items()]
-      live = [COLORS.BASE.format(213) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
+      live = [COLORS.BASE(213) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
       for idx, param in enumerate(self.params):

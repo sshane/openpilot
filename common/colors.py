@@ -1,5 +1,6 @@
 class COLORS:
-  BASE = '\33[38;5;{}m'  # seems to support more colors
+  def BASE(col):  # seems to support more colors
+    return '\33[38;5;{}m'.format(col)
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
   CBLUE = '\33[44m'
