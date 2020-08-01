@@ -29,9 +29,6 @@ class Param:
     self.hidden = hidden
     self._create_attrs()
 
-  def set_live(self):
-    self.live = True
-
   def _create_attrs(self):
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
@@ -78,7 +75,8 @@ class opParams:
 
     # A list of parameters you want to be live. You STILL need to use the .get function repeatedly in the calling file
     _live_params = ['camera_offset', 'global_df_mod', 'min_TR', 'steer_ratio']
-    [self.fork_params[p].set_live() for p in _live_params]
+    for p in _live_params:
+      self.fork_params[p].live = True
 
     self.params = {}
     self.params_file = "/data/op_params.json"
