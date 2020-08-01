@@ -32,7 +32,7 @@ class LogMessageHandler(logging.Handler):
       self.connect()
 
     msg = self.format(record).rstrip('\n')
-    # print("SEND".format(repr(msg)))
+    print("SEND: {}".format(repr(msg)))
     try:
       s = chr(record.levelno)+msg
       self.sock.send(s.encode('utf8'), zmq.NOBLOCK)
