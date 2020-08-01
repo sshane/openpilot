@@ -83,12 +83,14 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           line = COLORS.BASE(_color) + line
         to_print.append(line)
 
-      extras = {'a': '{}Add new parameter{}'.format(COLORS.OKGREEN, COLORS.ENDC),
-                'd': '{}Delete parameter{}'.format(COLORS.FAIL, ''),
+      extras = {'a': 'Add new parameter',
+                'd': 'Delete parameter',
                 'l': 'Toggle live tuning',
                 'e': 'Exit opEdit'}
 
-      to_print += ['---'] + ['{}. {}'.format(e, extras[e]) for e in extras]
+      extras_colors = [COLORS.OKGREEN, COLORS.FAIL, COLORS.WARNING, COLORS.PINK]
+
+      to_print += ['---'] + ['{}{}. {}'.format(ext_col, e, extras[e], COLORS.ENDC) for e, ext_col in zip(extras, extras_colors)]
       print('\n'.join(to_print))
       self.prompt('\nChoose a parameter to edit (by index or name):')
 
