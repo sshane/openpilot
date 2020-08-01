@@ -14,7 +14,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
     self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),  # or 180 or 215, 6, 173, 179, 180,
-                        bool: COLORS.CITALIC + COLORS.BASE(177), type(None): COLORS.CITALIC + COLORS.BASE(177),
+                        bool: {False: COLORS.RED, True: COLORS.OKGREEN},
+                        type(None): COLORS.BASE(177),
                         str: COLORS.BASE(149)}  # 107, 108, 77, 113, 149
 
     self.last_choice = None
@@ -58,15 +59,14 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       values_list = []
       for k, v in self.params.items():
-        v_type = type(v)
-        v = str(v)
-        if len(v) < 20:
-          if v_type in self.type_colors:
-            print(v_type)
-            print(self.type_colors[v_type])
-            v = '{}{}{}'.format(self.type_colors[v_type], v, COLORS.ENDC)
+        if len(str(v)) < 20:
+          if type(v) in self.type_colors:
+            v_color = self.type_colors[type(v)]
+            if isinstance(type(v), bool):
+              v_color = v_color[v]
+            v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
         else:
-          v = '{} ... {}'.format(v[:30], v[-15:])
+          v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
         values_list.append(v)
 
       live = [COLORS.BASE(157) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
