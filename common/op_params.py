@@ -82,12 +82,10 @@ class opParams:
     for p in _live_params:
       self.fork_params[p].live = True
 
-    self.params = {}
-    self.params_file = "/data/op_params.json"
-    self.last_read_time = sec_since_boot()
-    self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
-    self.force_update = False  # replaces values with default params if True, not just add add missing key/value pairs
-    self.to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p', 'lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
+    self._params_file = "/data/op_params.json"
+    self._last_read_time = sec_since_boot()
+    self._read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
+    self._to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p', 'lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
@@ -96,7 +94,7 @@ class opParams:
       return
 
     to_write = False
-    if os.path.isfile(self.params_file):
+    if os.path.isfile(self._params_file):
       if self._read():
         to_write = self._add_default_params()  # if new default data has been added
         to_write |= self._delete_old()  # or if old params have been deleted
@@ -107,7 +105,7 @@ class opParams:
 
     if to_write:
       self._write()
-      os.chmod(self.params_file, 0o764)
+      os.chmod(self._params_file, 0o764)
 
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
     if key is None:
@@ -143,10 +141,10 @@ class opParams:
   def _add_default_params(self):
     added = False
     for key, param in self.fork_params.items():
-      if self.force_update or key not in self.params:
+      if key not in self.params:
         self.params[key] = param.default
         added = True
-      elif param.has_allowed_types and type(self.params[key]) not in param.allowed_types:
+      elif not param.is_valid(self.params[key]):
         warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key))
         self.params[key] = param.default
         added = True
@@ -157,7 +155,7 @@ class opParams:
 
   def _delete_old(self):
     deleted = False
-    for param in self.to_delete:
+    for param in self._to_delete:
       if param in self.params:
         del self.params[param]
         deleted = True
@@ -179,13 +177,13 @@ class opParams:
 
   def _update_params(self, param_info, force_live):
     if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
-      if not travis and sec_since_boot() - self.last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
+      if not travis and sec_since_boot() - self._last_read_time >= self._read_frequency:  # make sure we aren't reading file too often
         if self._read():
-          self.last_read_time = sec_since_boot()
+          self._last_read_time = sec_since_boot()
 
   def _read(self):
     try:
-      with open(self.params_file, "r") as f:
+      with open(self._params_file, "r") as f:
         self.params = json.loads(f.read())
       return True
     except Exception as e:
@@ -194,5 +192,5 @@ class opParams:
 
   def _write(self):
     if not travis:
-      with open(self.params_file, "w") as f:
+      with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
