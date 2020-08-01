@@ -83,12 +83,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
               v_color = self.type_colors[type(v)]
               if isinstance(v, bool):
                 v_color = v_color[v]
-              v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
-          else:
-            v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
 
-
-          line = COLORS.CYAN + line
+          line = v_color + line
         to_print.append(line)
 
       extras = {'a': 'Add new parameter',
