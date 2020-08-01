@@ -11,64 +11,75 @@ except ImportError:
 travis = False
 
 
-class KeyInfo:
-  default = None
-  allowed_types = []
-  is_list = False
-  has_allowed_types = False
-  live = False
-  has_default = False
-  has_description = False
-  hidden = False
+# class KeyInfo:
+#   default = None
+#   allowed_types = []
+#   is_list = False
+#   has_allowed_types = False
+#   live = False
+#   has_default = False
+#   has_description = False
+#   hidden = False
+
+class Param:
+  def __init__(self, default, allowed_types=None, description=None, live=None, hide=None):
+    self.default = default
+    if allowed_types == 'number':
+      allowed_types = [float, int]
+    if not isinstance(allowed_types, list):
+      allowed_types = [allowed_types]
+    self.allowed_types = allowed_types
+    self.description = description
+    self.live = live
+    self.hide = hide
+    self._create_attrs()
+
+  def _create_attrs(self):
+    self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
+    self.has_description = self.description is not None
+    if self.has_allowed_types:
+      assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
 
 
 class opParams:
   def __init__(self):
-    """
-      To add your own parameter to opParams in your fork, simply add a new dictionary entry with the name of your parameter and its default value to save to new users' op_params.json file.
-      The description, allowed_types, and live keys are no longer required but recommended to help users edit their parameters with opEdit correctly.
-        - The description value will be shown to users when they use opEdit to change the value of the parameter.
-        - The allowed_types key is used to restrict what kinds of values can be entered with opEdit so that users can't reasonably break the fork with unintended behavior.
-          Limiting the range of floats or integers is still recommended when `.get`ting the parameter.
-          When a None value is allowed, use `type(None)` instead of None, as opEdit checks the type against the values in the key with `isinstance()`.
-        - Finally, the live key tells both opParams and opEdit that it's a live parameter that will change. Therefore, you must place the `op_params.get()` call in the update function so that it can update.
-      Here's an example of the minimum required dictionary:
+    # self.default_params = {'camera_offset': Param(0.06, [int, float], 'Your camera offset to use in lane_planner.py')}
 
-      self.default_params = {'camera_offset': {'default': 0.06}}
-    """
-
-    self.default_params = {'camera_offset': {'default': 0.06, 'allowed_types': [float, int], 'description': 'Your camera offset to use in lane_planner.py', 'live': True},
-                           'dynamic_follow': {'default': 'auto', 'allowed_types': [str], 'description': "Can be: ('traffic', 'relaxed', 'roadtrip'): Left to right increases in following distance.\n"
-                                                                                                        "All profiles support dynamic follow so you'll get your preferred distance while\n"
-                                                                                                        "retaining the smoothness and safety of dynamic follow!"},
-                           'global_df_mod': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
-                                                                                                                        'Smaller values will get you closer, larger will get you farther\n'
-                                                                                                                        'This is multiplied by any profile that\'s active. Set to None to disable', 'live': True},
-                           'min_TR': {'default': None, 'allowed_types': [type(None), float, int], 'description': 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
-                                                                                                                 'The range is limited from 0.85 to 1.3. Set to None to disable', 'live': True},
-                           'alca_nudge_required': {'default': True, 'allowed_types': [bool], 'description': ('Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
-                                                                                                             'If False, lane change will occur IMMEDIATELY after signaling')},
-                           'alca_min_speed': {'default': 25.0, 'allowed_types': [float, int], 'description': 'The minimum speed allowed for an automatic lane change (in MPH)'},
-                           'steer_ratio': {'default': None, 'allowed_types': [type(None), float, int], 'description': '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
-                                                                                                                      'If you use a float/int, openpilot will use that steer ratio instead', 'live': True},
-                           'lane_speed_alerts': {'default': 'silent', 'allowed_types': [str], 'description': 'Can be: (\'off\', \'silent\', \'audible\'): Whether you want openpilot to alert you of faster-traveling adjacent lanes'},
-                           'upload_on_hotspot': {'default': False, 'allowed_types': [bool], 'description': 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'},
-                           'enable_long_derivative': {'default': False, 'allowed_types': [bool], 'description': 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
-                                                                                                                'integral wind-down to help reduce overshooting within the long PID loop'},
-                           'disengage_on_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether you want openpilot to disengage on gas input or not'},
-                           'no_ota_updates': {'default': False, 'allowed_types': [bool], 'description': 'Set this to True to disable all automatic updates. Reboot to take effect'},
-                           'dynamic_gas': {'default': True, 'allowed_types': [bool], 'description': 'Whether to use dynamic gas if your car is supported'},
-                           'hide_auto_df_alerts': {'default': False, 'allowed_types': [bool], 'description': 'Hides the alert that shows what profile the model has chosen'},
-                           'log_auto_df': {'default': False, 'allowed_types': [bool], 'description': 'Logs dynamic follow data for auto-df'},
-                           'dynamic_camera_offset': {'default': True, 'allowed_types': [bool], 'description': 'Whether to automatically keep away from oncoming traffic.\n'
-                                                                                                              'Works from 35 to ~60 mph (requires radar)'},
-                           'dynamic_camera_offset_time': {'default': 2.5, 'allowed_types': [int, float], 'description': 'How long to keep away from oncoming traffic in seconds after losing lead'},
-                           'support_white_panda': {'default': False, 'allowed_types': [bool], 'description': 'Enable this to allow engagement with the deprecated white panda.\n'
-                                                                                                             'localizer might not work correctly'},
-                           'prius_use_lqr': {'default': False, 'allowed_types': [bool], 'description': 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'},
+    self.fork_params = {'camera_offset': Param(0.06, [float, int], 'Your camera offset to use in lane_planner.py'),
+                        'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
+                                                             'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
+                                                             'retaining the smoothness and safety of dynamic follow!'),
+                        'global_df_mod': Param(None, [type(None), float, int], 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
+                                                                               'Smaller values will get you closer, larger will get you farther\n'
+                                                                               'This is multiplied by any profile that\'s active. Set to None to disable'),
+                        'min_TR': Param(None, [type(None), float, int], 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
+                                                                        'The range is limited from 0.85 to 1.3. Set to None to disable'),
+                        'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
+                                                                 'If False, lane change will occur IMMEDIATELY after signaling'),
+                        'alca_min_speed': Param(25.0, [float, int], 'The minimum speed allowed for an automatic lane change (in MPH)'),
+                        'steer_ratio': Param(None, [type(None), float, int], '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
+                                                                             'If you use a float/int, openpilot will use that steer ratio instead'),
+                        'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
+                                                                  'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
+                        'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
+                        'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
+                                                                     'integral wind-down to help reduce overshooting within the long PID loop'),
+                        'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
+                        'no_ota_updates': Param(False, bool, 'Set this to True to disable all automatic updates. Reboot to take effect'),
+                        'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
+                        'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
+                        'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
+                        'dynamic_camera_offset': Param(True, bool, 'Whether to automatically keep away from oncoming traffic.\n'
+                                                                   'Works from 35 to ~60 mph (requires radar)'),
+                        'dynamic_camera_offset_time': Param(2.5, [int, float], 'How long to keep away from oncoming traffic in seconds after losing lead'),
+                        'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
+                                                                  'localizer might not work correctly'),
+                        'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
 
 
-                           'op_edit_live_mode': {'default': False, 'allowed_types': [bool], 'description': 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', 'hide': True}}
+                        'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key')}
+
+    # todo: add live param list here!
 
     self.params = {}
     self.params_file = "/data/op_params.json"
