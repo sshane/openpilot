@@ -13,6 +13,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.sleep_time = 0.75
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
+    self.type_colors = {str: COLORS.BASE(137)}  # or 180 or 215
 
     self.last_choice = None
 
@@ -53,7 +54,17 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if self.live_tuning:  # only display live tunable params
         self.params = {k: v for k, v in self.params.items() if self.op_params.param_info(k).live}
 
-      values_list = [COLORS.BASE(119) + str(v) if len(str(v)) < 20 else '{} ... {}'.format(str(v)[:30], str(v)[-15:]) for k, v in self.params.items()]
+      values_list = []
+      for k, v in self.params.items():
+        v_type = type(v)
+        v = str(v)
+        if len(v) < 20:
+          if v_type in self.type_colors:
+            v = '{}{}{}'.format(self.type_colors[v_type], v, COLORS.ENDC)
+        else:
+          v = '{} ... {}'.format(v[:30], v[-15:])
+        values_list.append(v)
+
       live = [COLORS.BASE(213) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
