@@ -25,8 +25,8 @@ class Param:
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types
     self.description = description
-    self.live = False
     self.hidden = hidden
+    self.live = False
     self._create_attrs()
 
   def is_valid(self, value):
@@ -74,7 +74,6 @@ class opParams:
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
-
 
                         'op_edit_live_mode': Param(False, bool, 'This parameter controls which mode opEdit starts in. It should be hidden from the user with the hide key', hidden=True)}
 
