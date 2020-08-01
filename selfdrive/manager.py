@@ -198,7 +198,7 @@ managed_processes = {
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.monitoring.driverview",
 
-  "lanespeedd": "selfdrive.controls.lib.lane_spee",
+  "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
 
 daemon_processes = {
@@ -433,7 +433,7 @@ def manager_init(should_register=True):
 
 def manager_thread():
   # now loop
-  thermal_sock = messaging.sub_sock('thermal')
+  thermal_sock = messaging.sub_sock('thermal') + 1
 
   cloudlog.info("manager start")
   cloudlog.info({"environ": os.environ})

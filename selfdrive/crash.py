@@ -18,6 +18,7 @@ def save_exception(exc_text):
     log_file += str(i)
   with open(log_file, 'w') as f:
     f.write(exc_text)
+  print('Logged current crash to {}!'.format(log_file))
 
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or not ANDROID:
   def capture_exception(*args, **kwargs):
