@@ -26,12 +26,17 @@ class LogMessageHandler(logging.Handler):
     self.sock.connect("ipc:///tmp/logmessage")
     self.pid = os.getpid()
 
+    self.log_file = '/data/community/logs/log.txt'
+
   def emit(self, record):
     print('here')
     if os.getpid() != self.pid:
       self.connect()
 
     msg = self.format(record).rstrip('\n')
+    with open(self.log_file, 'a') as f:
+      f.write('{}\n'.format(msg))
+
     print("SEND: {}".format(repr(msg)))
     try:
       s = chr(record.levelno)+msg
