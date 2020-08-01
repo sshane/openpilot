@@ -66,7 +66,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           v = '{} ... {}'.format(v[:30], v[-15:])
         values_list.append(v)
 
-      live = [COLORS.BASE(213) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
+      live = [COLORS.BASE(157) + '(live!)' + COLORS.ENDC if self.op_params.param_info(k).live else '' for k in self.params]
 
       to_print = []
       for idx, param in enumerate(self.params):
