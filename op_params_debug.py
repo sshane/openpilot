@@ -1,7 +1,7 @@
 from common.op_params import opParams
 op_params = opParams()
 
-cam = op_params.fork_params['global_df_mod']
+cam = op_params.fork_params['camera_offset']
 print('default: {}'.format(cam.default))
 print('allowed types: {}'.format(cam.allowed_types))
 print('description: {}'.format(cam.description))

@@ -27,7 +27,7 @@ class ValueTypes:
 VT = ValueTypes()
 
 class Param:
-  def __init__(self, default, allowed_types=None, description=None, live=None, hidden=None):
+  def __init__(self, default, allowed_types=None, description=None, live=False, hidden=False):
     self.default = default
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
