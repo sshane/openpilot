@@ -21,11 +21,14 @@ travis = False
 #   has_description = False
 #   hidden = False
 
+class ValueTypes:
+  number = [float, int]
+  none_or_number = [type(None), float, int]
+VT = ValueTypes()
+
 class Param:
   def __init__(self, default, allowed_types=None, description=None, live=None, hidden=None):
     self.default = default
-    if allowed_types == 'number':
-      allowed_types = [float, int]
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types
@@ -45,20 +48,20 @@ class opParams:
   def __init__(self):
     # self.default_params = {'camera_offset': Param(0.06, [int, float], 'Your camera offset to use in lane_planner.py')}
 
-    self.fork_params = {'camera_offset': Param(0.06, 'number', 'Your camera offset to use in lane_planner.py'),
+    self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py'),
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
                                                              'retaining the smoothness and safety of dynamic follow!'),
-                        'global_df_mod': Param(None, [type(None), float, int], 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
-                                                                               'Smaller values will get you closer, larger will get you farther\n'
-                                                                               'This is multiplied by any profile that\'s active. Set to None to disable'),
-                        'min_TR': Param(None, [type(None), float, int], 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
+                        'global_df_mod': Param(None, VT.none_or_number, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
+                                                                        'Smaller values will get you closer, larger will get you farther\n'
+                                                                        'This is multiplied by any profile that\'s active. Set to None to disable'),
+                        'min_TR': Param(None, VT.none_or_number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                                         'The range is limited from 0.85 to 1.3. Set to None to disable'),
                         'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
-                        'alca_min_speed': Param(25.0, [float, int], 'The minimum speed allowed for an automatic lane change (in MPH)'),
-                        'steer_ratio': Param(None, [type(None), float, int], '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
-                                                                             'If you use a float/int, openpilot will use that steer ratio instead'),
+                        'alca_min_speed': Param(25.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
+                        'steer_ratio': Param(None, VT.none_or_number, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
+                                                                      'If you use a float/int, openpilot will use that steer ratio instead'),
                         'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                                   'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
                         'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
@@ -71,7 +74,7 @@ class opParams:
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
                         'dynamic_camera_offset': Param(True, bool, 'Whether to automatically keep away from oncoming traffic.\n'
                                                                    'Works from 35 to ~60 mph (requires radar)'),
-                        'dynamic_camera_offset_time': Param(2.5, [int, float], 'How long to keep away from oncoming traffic in seconds after losing lead'),
+                        'dynamic_camera_offset_time': Param(2.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
