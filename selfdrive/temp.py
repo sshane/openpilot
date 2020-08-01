@@ -1,5 +1,6 @@
 import sys
 import ast
+import json
 import time
 from cereal.messaging import SubMaster
 
@@ -10,7 +11,7 @@ msg = ''
 while 1:
   while msg == last:
     try:
-      msg = ast.literal_eval(sm['logMessage'])['msg']
+      msg = json.loads(sm['logMessage'])['msg']
     except:
       continue
     sm.update(0)
