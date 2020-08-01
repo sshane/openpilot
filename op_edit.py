@@ -13,10 +13,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     self.sleep_time = 0.75
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
-    self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),  # or 180 or 215, 6, 173, 179, 180,
+    self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),
                         bool: {False: COLORS.RED, True: COLORS.OKGREEN},
                         type(None): COLORS.BASE(177),
-                        str: COLORS.BASE(77)}  # 107, 108, 77, 113, 149
+                        str: COLORS.BASE(77)}
 
     self.last_choice = None
 
@@ -87,7 +87,6 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
                 'd': 'Delete parameter',
                 'l': 'Toggle live tuning',
                 'e': 'Exit opEdit'}
-
       extras_colors = [COLORS.OKGREEN, COLORS.FAIL, COLORS.WARNING, COLORS.PINK]
 
       to_print += ['---'] + ['{}{}. {}'.format(ext_col, e, extras[e], COLORS.ENDC) for e, ext_col in zip(extras, extras_colors)]
