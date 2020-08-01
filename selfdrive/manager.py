@@ -101,7 +101,8 @@ class Logger(object):
     # you might want to specify some extra behavior here.
     pass
 
-sys.stdout = Logger()
+sys.stdout = open("test.txt", "w")
+sys.sterr = open("/data/community/logs/test1.log", "w")
 
 # Run scons
 spinner = Spinner()
