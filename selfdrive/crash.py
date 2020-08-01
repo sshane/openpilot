@@ -60,6 +60,8 @@ else:
 
   def capture_exception(*args, **kwargs):
     save_exception(traceback.format_exc())
+    save_exception(traceback.format_exc())
+    save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
