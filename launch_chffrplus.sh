@@ -14,6 +14,16 @@ if [ -z "$PASSIVE" ]; then
   export PASSIVE="1"
 fi
 
+[ ! -d "/data/community" ] && mkdir /data/community
+
+if [ ! -d "/data/community/logs" ]; then
+  mkdir /data/community/logs
+  echo "Created directory /data/community/logs"
+fi
+
+DATE=$(date +%d-%m-%y--%I:%M%p)
+LOG_DIR="/data/community/logs/$DATE"
+
 STAGING_ROOT="/data/safe_staging"
 
 function launch {
@@ -121,7 +131,7 @@ function launch {
 
   # start manager
   cd selfdrive
-  ./manager.py
+  ./manager.py |& tee "$LOG_DIR"
 
   # if broken, keep on screen error
   while true; do sleep 1; done
