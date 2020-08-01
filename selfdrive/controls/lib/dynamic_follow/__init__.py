@@ -48,7 +48,7 @@ class DynamicFollow:
 
   def _setup_collector(self):
     self.sm_collector = SubMaster(['liveTracks', 'laneSpeed'])
-    self.log_auto_df = self.op_params.get('log_auto_df', False)
+    self.log_auto_df = self.op_params.get('log_auto_df')
     if not isinstance(self.log_auto_df, bool):
       self.log_auto_df = False
     self.data_collector = DataCollector(file_path='/data/df_data', keys=['v_ego', 'a_ego', 'a_lead', 'v_lead', 'x_lead', 'left_lane_speeds', 'middle_lane_speeds', 'right_lane_speeds', 'left_lane_distances', 'middle_lane_distances', 'right_lane_distances', 'profile', 'time'], log_data=self.log_auto_df)
@@ -209,7 +209,7 @@ class DynamicFollow:
     This function modifies the y_dist list used by dynamic follow in accordance with global_df_mod
     It also intelligently adjusts the profile mods at each breakpoint based on the change in TR
     """
-    if self.global_df_mod is None:
+    if self.global_df_mod == 1.:
       return profile_mod_pos, profile_mod_neg, y_dist
     global_df_mod = 1 - self.global_df_mod
 
@@ -319,12 +319,10 @@ class DynamicFollow:
     self.car_data.cruise_enabled = CS.cruiseState.enabled
 
   def _get_live_params(self):
-    self.global_df_mod = self.op_params.get('global_df_mod', None)
-    if self.global_df_mod is not None:
+    self.global_df_mod = self.op_params.get('global_df_mod')
+    if self.global_df_mod != 1.:
       self.global_df_mod = clip(self.global_df_mod, 0.85, 1.2)
 
-    self.min_TR = self.op_params.get('min_TR', None)
-    if self.min_TR is not None:
-      self.min_TR = clip(self.min_TR, 0.85, 1.3)
-    else:
-      self.min_TR = 0.9  # default
+    self.min_TR = self.op_params.get('min_TR')
+    if self.min_TR != 1.:
+      self.min_TR = clip(self.min_TR, 0.85, 1.6)

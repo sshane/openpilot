@@ -72,7 +72,7 @@ class LaneSpeed:
     self._setup()
 
   def _setup(self):
-    self.ls_state = self.op_params.get('lane_speed_alerts', 'audible').strip().lower()
+    self.ls_state = self.op_params.get('lane_speed_alerts').strip().lower()
     if not isinstance(self.ls_state, str) or self.ls_state not in LaneSpeedState.to_idx:
       self.ls_state = LaneSpeedState.audible
       self.op_params.put('lane_speed_alerts', LaneSpeedState.to_state[self.ls_state])

@@ -24,7 +24,7 @@ TOTAL_SCONS_NODES = 1020
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
 op_params = opParams()
-no_ota_updates = op_params.get('no_ota_updates', False) or os.path.exists('/data/no_ota_updates')
+no_ota_updates = op_params.get('no_ota_updates') or os.path.exists('/data/no_ota_updates')
 
 # Create folders needed for msgq
 try:

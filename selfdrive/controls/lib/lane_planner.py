@@ -53,7 +53,7 @@ class DynamicCameraOffset:
     self.sm = SubMaster(['laneSpeed'])
     self.pm = PubMaster(['dynamicCameraOffset'])
     self.op_params = opParams()
-    self.camera_offset = self.op_params.get('camera_offset', 0.06)
+    self.camera_offset = self.op_params.get('camera_offset')
 
     self.left_lane_oncoming = False  # these variables change
     self.right_lane_oncoming = False
@@ -65,14 +65,14 @@ class DynamicCameraOffset:
     self._setup_static()
 
   def _setup_static(self):  # these variables are static
-    self._enabled = self.op_params.get('dynamic_camera_offset', True)
+    self._enabled = self.op_params.get('dynamic_camera_offset')
     self._min_enable_speed = 35 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
     self._hug_left_ratio = 0.375
     self._hug_right_ratio = 0.625
     self._center_ratio = 0.5
 
-    self._keep_offset_for = self.op_params.get('dynamic_camera_offset_time', 2.5)  # seconds after losing oncoming lane
+    self._keep_offset_for = self.op_params.get('dynamic_camera_offset_time')  # seconds after losing oncoming lane
     self._ramp_angles = [0, 12.5, 25]
     self._ramp_angle_mods = [1, 0.85, 0.1]  # multiply offset by this based on angle
 
@@ -89,7 +89,7 @@ class DynamicCameraOffset:
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
     if self._enabled:
       self.sm.update(0)
-      self.camera_offset = self.op_params.get('camera_offset', 0.06)  # update base offset from user
+      self.camera_offset = self.op_params.get('camera_offset')  # update base offset from user
       self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
       self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
       self.lane_width_estimate, self.lane_width_certainty = lane_width_estimate, lane_width_certainty

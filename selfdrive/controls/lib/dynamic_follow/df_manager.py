@@ -20,7 +20,7 @@ class dfManager:
     self.df_profiles = dfProfiles()
     self.sm = messaging.SubMaster(['dynamicFollowButton', 'dynamicFollowData'])
 
-    self.cur_user_profile = self.op_params.get('dynamic_follow', default='auto').strip().lower()
+    self.cur_user_profile = self.op_params.get('dynamic_follow').strip().lower()
     if not isinstance(self.cur_user_profile, str) or self.cur_user_profile not in self.df_profiles.to_idx:
       self.cur_user_profile = self.df_profiles.default  # relaxed
     else:

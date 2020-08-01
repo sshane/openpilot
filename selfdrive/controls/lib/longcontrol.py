@@ -77,7 +77,7 @@ class LongControl():
     self.last_output_gb = 0.0
 
     self.op_params = opParams()
-    self.enable_dg = self.op_params.get('dynamic_gas', True)
+    self.enable_dg = self.op_params.get('dynamic_gas')
     self.dynamic_gas = DynamicGas(CP, candidate)
 
   def reset(self, v_pid):

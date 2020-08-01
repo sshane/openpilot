@@ -37,14 +37,14 @@ class VehicleModel:
     self.cR_orig = CP.tireStiffnessRear
 
     self.op_params = opParams()
-    self.steer_ratio = self.op_params.get('steer_ratio', default=None)
+    self.steer_ratio = self.op_params.get('steer_ratio')
     self.sR = CP.steerRatio
 
     self.update_params(1.0, CP.steerRatio)
 
   def update_params(self, stiffness_factor: float, steer_ratio: float) -> None:
     """Update the vehicle model with a new stiffness factor and steer ratio"""
-    self.steer_ratio = self.op_params.get('steer_ratio', default=None)
+    self.steer_ratio = self.op_params.get('steer_ratio')
     self.cF = stiffness_factor * self.cF_orig
     self.cR = stiffness_factor * self.cR_orig
     if type(self.steer_ratio) in [int, float]:
