@@ -21,7 +21,7 @@ class COLORS:
   SUCCESS = OKGREEN
   PROMPT = YELLOW
   DBLUE = '\033[36m'
-  CYAN = BASE.format(45)
+  CYAN = BASE.format(39)
   WARNING = '\033[33m'
 
 def opParams_warning(msg):
