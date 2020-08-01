@@ -138,7 +138,7 @@ class opParams:
     if param_info.is_valid(value):  # always valid if no allowed types, otherwise checks to make sure
       return value  # all good, returning user's value
 
-    warning('User\'s value is not valid!')  # somehow... it should always be valid
+    warning('User\'s value type is not valid!')  # somehow... it should always be valid
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
