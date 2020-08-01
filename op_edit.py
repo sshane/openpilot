@@ -83,7 +83,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           line = COLORS.BASE(_color) + line
         to_print.append(line)
 
-      extras = {'a': 'Add new parameter',
+      extras = {'a': '{}Add new parameter{}'.format(COLORS.OKGREEN, COLORS.ENDC),
                 'd': 'Delete parameter',
                 'l': 'Toggle live tuning',
                 'e': 'Exit opEdit'}
