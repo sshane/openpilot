@@ -165,8 +165,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
 
-      if param_info.has_allowed_types and param_info.is_valid([]):
-        param_info.allowed_types.remove(list)
+      if param_info.is_list:
         self.change_param_list(old_value, param_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 

@@ -27,6 +27,7 @@ class Param:
     self.description = description
     self.hidden = hidden
     self.live = False
+    self.is_list = False
     self._create_attrs()
 
   def is_valid(self, value):
@@ -39,6 +40,9 @@ class Param:
     self.has_description = self.description is not None
     if self.has_allowed_types:
       assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
+    self.is_list = list in self.allowed_types
+    if self.is_list:
+      self.allowed_types.remove(list)
 
 
 class opParams:
