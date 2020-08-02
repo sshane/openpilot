@@ -105,7 +105,7 @@ class opParams:
     self._params_file = "/data/op_params.json"
     self._last_read_time = sec_since_boot()
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
-    self._to_delete = ['reset_integral', 'dyn_camera_offset_i', 'dyn_camera_offset_p', 'lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
+    self._to_delete = ['lane_hug_direction', 'lane_hug_angle_offset']  # a list of params you want to delete (unused)
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
