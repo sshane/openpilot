@@ -109,7 +109,7 @@ class opParams:
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
-    self.params = self._format_default_params()  # in case file is corrupted
+    self.params = {key: value.default for key, value in self.fork_params.items()}  # in case file is corrupted
     if travis:
       return
 
@@ -174,9 +174,6 @@ class opParams:
         self.params[key] = param.default
         added = True
     return added
-
-  def _format_default_params(self):
-    return {key: value.default for key, value in self.fork_params.items()}
 
   def _delete_old(self):
     deleted = False
