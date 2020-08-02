@@ -200,12 +200,12 @@ class DynamicFollow:
     if a_lead < 0:  # more weight to slight lead decel
       a_lead *= interp(a_lead, mods_x, mods_y)
 
+    if a_lead - a_ego > 0:  # return only if adding distance
+      return 0
+
     rel_x = [-2.6822, -1.7882, -0.8941, -0.447, -0.2235, 0.0, 0.2235, 0.447, 0.8941, 1.7882, 2.6822]
     mod_y = [0.3245 * 1.1, 0.277 * 1.08, 0.11075 * 1.06, 0.08106 * 1.045, 0.06325 * 1.035, 0.0, -0.09, -0.09375, -0.125, -0.3, -0.35]
-    mod = interp(a_lead - a_ego, rel_x, mod_y)
-    if mod > 0:  # temp: return only if adding distance
-      return mod
-    return None
+    return interp(a_lead - a_ego, rel_x, mod_y)
 
   def global_profile_mod(self, profile_mod_x, profile_mod_pos, profile_mod_neg, x_vel, y_dist):
     """
@@ -289,9 +289,7 @@ class DynamicFollow:
 
     deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph
     if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
-      rel_accel_mod = self._relative_accel_mod()
-      if rel_accel_mod is not None:
-        TR_mods.append(rel_accel_mod)
+      TR_mods.append(self._relative_accel_mod())
 
     x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
     y = [1.0, 1.05]
