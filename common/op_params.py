@@ -28,8 +28,14 @@ class Param:
     self.description = description
     self.hidden = hidden
     self.live, self.is_list = False, False
+    self._create_attrs()
 
-    # Create attributes and check Param is valid
+  def is_valid(self, value):
+    if not self.has_allowed_types:
+      return True
+    return type(value) in self.allowed_types
+
+  def _create_attrs(self):  # Create attributes and check Param is valid
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
     if self.has_allowed_types:
@@ -37,11 +43,6 @@ class Param:
     self.is_list = list in self.allowed_types
     if self.is_list:
       self.allowed_types.remove(list)
-
-  def is_valid(self, value):
-    if not self.has_allowed_types:
-      return True
-    return type(value) in self.allowed_types
 
 
 class opParams:
