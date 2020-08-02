@@ -109,7 +109,7 @@ class opParams:
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
-    self.params = {key: value.default for key, value in self.fork_params.items()}  # in case file is corrupted
+    self.params = self._get_all_params(default=True)  # in case file is corrupted
     if travis:
       return
 
@@ -129,7 +129,7 @@ class opParams:
 
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
     if key is None:
-      return self._get_all()
+      return self._get_all_params()
     self._check_key_exists(key, 'get')
 
     param_info = self.param_info(key)
@@ -183,8 +183,10 @@ class opParams:
         deleted = True
     return deleted
 
-  def _get_all(self):  # returns all non-hidden params
-    return {k: v for k, v in self.params.items() if k in self.fork_params and not self.param_info(k).hidden}
+  def _get_all_params(self, default=False):
+    if not default:
+      return {k: v for k, v in self.params.items() if k in self.fork_params}
+    return {k: p.default for k, p in self.fork_params.items()}
 
   def _update_params(self, param_info, force_live):
     if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
