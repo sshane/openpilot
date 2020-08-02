@@ -27,8 +27,7 @@ class Param:
     self.allowed_types = allowed_types
     self.description = description
     self.hidden = hidden
-    self.live = False
-    self.is_list = False
+    self.live, self.is_list = False, False
     self._create_attrs()
 
   def is_valid(self, value):
