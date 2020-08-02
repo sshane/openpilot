@@ -144,7 +144,7 @@ class DynamicFollow:
       cost *= interp(cost_mod, cost_mod_speeds, cost_mods)
 
     if self.last_cost != cost:
-      libmpc.change_tr(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
+      libmpc.change_costs(MPC_COST_LONG.TTC, cost, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.last_cost = cost
 
   def _store_df_data(self):

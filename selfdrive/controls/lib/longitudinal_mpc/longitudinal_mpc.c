@@ -68,7 +68,7 @@ void init(double ttcCost, double distanceCost, double accelerationCost, double j
 
 }
 
-void change_tr(double ttcCost, double distanceCost, double accelerationCost, double jerkCost){
+void change_costs(double ttcCost, double distanceCost, double accelerationCost, double jerkCost){
   int    i;
   const int STEP_MULTIPLIER = 3;
 
