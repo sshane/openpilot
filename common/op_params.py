@@ -128,12 +128,13 @@ class opParams:
       os.chmod(self._params_file, 0o764)
 
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
-    if key is None:
-      return self._get_all_params()
-    self._check_key_exists(key, 'get')
-
     param_info = self.param_info(key)
     self._update_params(param_info, force_live)
+
+    if key is None:
+      return self._get_all_params()
+
+    self._check_key_exists(key, 'get')
     value = self.params[key]
     if param_info.is_valid(value):  # always valid if no allowed types, otherwise checks to make sure
       return value  # all good, returning user's value
@@ -189,7 +190,7 @@ class opParams:
     return {k: p.default for k, p in self.fork_params.items()}
 
   def _update_params(self, param_info, force_live):
-    if param_info.live or force_live:  # if is a live param, we want to get updates while openpilot is running
+    if force_live or param_info.live:  # if is a live param, we want to get updates while openpilot is running
       if not travis and sec_since_boot() - self._last_read_time >= self.read_frequency:  # make sure we aren't reading file too often
         if self._read():
           self._last_read_time = sec_since_boot()
