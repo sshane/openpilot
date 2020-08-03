@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-from selfdrive.crash import client
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
 try:
@@ -140,7 +139,6 @@ class opParams:
       return value  # all good, returning user's value
 
     warning('User\'s value type is not valid! Returning default')  # somehow... it should always be valid
-    client.captureMessage("User's param: {} is not of valid type! (value: {} type: {})".format(key, value, type(value)), level='info')
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
