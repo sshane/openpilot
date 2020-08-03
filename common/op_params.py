@@ -182,10 +182,10 @@ class opParams:
         deleted = True
     return deleted
 
-  def _get_all_params(self, default=False):
-    if not default:
-      return {k: v for k, v in self.params.items() if k in self.fork_params}
-    return {k: p.default for k, p in self.fork_params.items()}
+  def _get_all_params(self, default=False, return_hidden=False):
+    if default:
+      return {k: p.default for k, p in self.fork_params.items()}
+    return {k: self.params[k] for k, p in self.fork_params.items() if not p.hidden or return_hidden}
 
   def _update_params(self, param_info, force_live):
     if force_live or param_info.live:  # if is a live param, we want to get updates while openpilot is running
