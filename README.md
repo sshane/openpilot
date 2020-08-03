@@ -126,6 +126,7 @@ Here are the main parameters you can change with this fork:
 - **Experimental params**:
   - `support_white_panda`: This allows users with the original white panda to use openpilot above 0.7.7. The high precision localizer's performance may be reduced due to a lack of GPS
   - `prius_use_lqr`: If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR
+  - `corolla_use_lqr`: Enable this to use LQR for lat with your Corolla (2017) *(can be enabled for all years by request)*
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L40).
 
