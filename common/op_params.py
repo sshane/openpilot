@@ -20,7 +20,7 @@ class ValueTypes:
 
 
 class Param:
-  def __init__(self, default=None, allowed_types=None, description=None, hidden=False):
+  def __init__(self, default=None, allowed_types=[], description=None, hidden=False):
     self.default = default
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
