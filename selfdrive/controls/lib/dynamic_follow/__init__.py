@@ -196,7 +196,7 @@ class DynamicFollow:
         a_lead = (self.df_data.v_rels[-1]['v_lead'] - self.df_data.v_rels[0]['v_lead']) / elapsed_time
 
     mods_x = [-1.5, -.75, 0]
-    mods_y = [1, 1.5, 1.25]
+    mods_y = [1, 1.25, 1.3]
     if a_lead < 0:  # more weight to slight lead decel
       a_lead *= interp(a_lead, mods_x, mods_y)
 
