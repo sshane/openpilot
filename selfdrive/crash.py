@@ -47,7 +47,7 @@ else:
     os.mkdir(CRASHES_DIR)
 
   error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': commit}
-  username = opParams().get('username', None)
+  username = opParams().get('username')
   if username is None or not isinstance(username, str):
     username = 'undefined'
   error_tags['username'] = username

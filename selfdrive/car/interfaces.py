@@ -32,7 +32,7 @@ class CarInterfaceBase():
     self.CC = None
     if CarController is not None:
       self.CC = CarController(self.cp.dbc_name, CP, self.VM)
-    self.disengage_on_gas = opParams().get('disengage_on_gas', default=True)
+    self.disengage_on_gas = opParams().get('disengage_on_gas')
 
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):

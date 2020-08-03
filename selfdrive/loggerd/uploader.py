@@ -24,7 +24,7 @@ UPLOAD_ATTR_NAME = 'user.upload'
 UPLOAD_ATTR_VALUE = b'1'
 
 fake_upload = os.getenv("FAKEUPLOAD") is not None
-upload_on_hotspot = opParams().get('upload_on_hotspot', default=False)
+upload_on_hotspot = opParams().get('upload_on_hotspot')
 
 def raise_on_thread(t, exctype):
   '''Raises an exception in the threads with id tid'''

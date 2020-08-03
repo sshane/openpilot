@@ -7,7 +7,7 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.car.interfaces import CarInterfaceBase
 from common.op_params import opParams
 
-prius_use_lqr = opParams().get('prius_use_lqr', False)
+prius_use_lqr = opParams().get('prius_use_lqr')
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
