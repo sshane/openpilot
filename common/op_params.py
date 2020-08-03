@@ -62,7 +62,7 @@ class opParams:
                            'log_auto_df': {'default': False, 'allowed_types': [bool], 'description': 'Logs dynamic follow data for auto-df'},
                            'dynamic_camera_offset': {'default': True, 'allowed_types': [bool], 'description': 'Whether to automatically keep away from oncoming traffic.\n'
                                                                                                               'Works from 35 to ~60 mph (requires radar)'},
-                           'dynamic_camera_offset_time': {'default': 3.5, 'allowed_types': [int, float], 'description': 'How long to keep away from oncoming traffic in seconds after losing lead'},
+                           'dynamic_camera_offset_time': {'default': 2.5, 'allowed_types': [int, float], 'description': 'How long to keep away from oncoming traffic in seconds after losing lead'},
                            'support_white_panda': {'default': False, 'allowed_types': [bool], 'description': 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                                                              'localizer might not work correctly'},
                            'prius_use_lqr': {'default': False, 'allowed_types': [bool], 'description': 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'},
