@@ -5,17 +5,13 @@ import capnp
 import threading
 import traceback
 from selfdrive.version import version, dirty
+from datetime import datetime
 
 from selfdrive.swaglog import cloudlog
 from common.android import ANDROID
 
 def save_exception(exc_text):
-  i = 0
-  log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M%p.log'))
-  if os.path.exists(log_file):
-    while os.path.exists(log_file + str(i)):
-      i += 1
-    log_file += str(i)
+  log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M.%S-%p.log'))
   with open(log_file, 'w') as f:
     f.write(exc_text)
   print('Logged current crash to {}'.format(log_file))
@@ -37,7 +33,6 @@ else:
   from raven.transport.http import HTTPTransport
   from selfdrive.version import origin, branch, commit
   from common.op_params import opParams
-  from datetime import datetime
 
   COMMUNITY_DIR = '/data/community'
   CRASHES_DIR = '{}/crashes'.format(COMMUNITY_DIR)
