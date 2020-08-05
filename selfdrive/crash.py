@@ -10,12 +10,6 @@ from datetime import datetime
 from selfdrive.swaglog import cloudlog
 from common.android import ANDROID
 
-def save_exception(exc_text):
-  log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M.%S-%p.log'))
-  with open(log_file, 'w') as f:
-    f.write(exc_text)
-  print('Logged current crash to {}'.format(log_file))
-
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or not ANDROID:
   def capture_exception(*args, **kwargs):
     pass
@@ -50,8 +44,13 @@ else:
   sentry_uri = 'https://1994756b5e6f41cf939a4c65de45f4f2:cefebaf3a8aa40d182609785f7189bd7@app.getsentry.com/77924'  # stock
   if 'github.com/shanesmiskol' in origin.lower():  # only send errors if my fork
     sentry_uri = 'https://7f66878806a948f9a8b52b0fe7781201@o237581.ingest.sentry.io/5252098'
-  client = Client(sentry_uri,
-                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
+  client = Client(sentry_uri, install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
+
+  def save_exception(exc_text):
+    log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M.%S-%p.log'))
+    with open(log_file, 'w') as f:
+      f.write(exc_text)
+    print('Logged current crash to {}'.format(log_file))
 
   def capture_exception(*args, **kwargs):
     save_exception(traceback.format_exc())
