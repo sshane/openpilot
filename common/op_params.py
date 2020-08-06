@@ -92,6 +92,7 @@ class opParams:
                                                                   'localizer might not work correctly'),
                         'prius_use_lqr': Param(False, bool, 'If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR'),
                         'corolla_use_lqr': Param(False, bool, 'Enable this to use LQR for lat with your Corolla (2017)'),
+                        'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your Corolla with TSS2'),
                         'username': Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\n'
                                                                          'Helps the developer reach out to you if anything goes wrong'),
 
