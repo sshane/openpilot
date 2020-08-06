@@ -249,14 +249,28 @@ class CarInterface(CarInterfaceBase):
           break
 
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
+      #stop_and_go = True
+      #ret.safetyParam = 73
+      #ret.wheelbase = 2.63906
+      #ret.steerRatio = 13.9
+      #tire_stiffness_factor = 0.444  # not optimized yet
+      #ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
+      #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+      #ret.lateralTuning.pid.kf = 0.00007818594
+      
+      # birdman6450#7399's Tune
       stop_and_go = True
       ret.safetyParam = 73
       ret.wheelbase = 2.63906
-      ret.steerRatio = 13.9
-      tire_stiffness_factor = 0.444  # not optimized yet
+      ret.steerRatio = 15.33
+      tire_stiffness_factor = 0.996
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-      ret.lateralTuning.pid.kf = 0.00007818594
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGain = 6.0
+      ret.lateralTuning.indi.outerLoopGain = 15.0
+      ret.lateralTuning.indi.timeConstant = 5.5
+      ret.lateralTuning.indi.actuatorEffectiveness = 6.0
+      ret.steerActuatorDelay = 0.57
 
     elif candidate in [CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2]:
       stop_and_go = True
