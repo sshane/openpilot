@@ -42,14 +42,13 @@ LaneChangeDirection = log.PathPlan.LaneChangeDirection
 EventName = car.CarEvent.EventName
 
 
-def log_fingerprint(candidate, timeout=5):
-  while True:
-    try:
-      requests.get('https://sentry.io', timeout=timeout)
-      client.captureMessage("fingerprinted {}".format(candidate), level='info')
-      return
-    except:
-      pass
+def log_fingerprint(candidate, timeout=30):
+  try:
+    requests.get('https://sentry.io', timeout=timeout)
+    client.captureMessage("fingerprinted {}".format(candidate), level='info')
+    return
+  except:
+    pass
 
 
 class Controls:
