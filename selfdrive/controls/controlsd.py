@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import os
 import gc
+import requests
+import threading
 from cereal import car, log
+from selfdrive.crash import client
 from common.android import ANDROID, get_sound_card_online
 from common.numpy_fast import clip
 from common.realtime import sec_since_boot, set_realtime_priority, set_core_affinity, Ratekeeper, DT_CTRL
@@ -37,6 +40,16 @@ Desire = log.PathPlan.Desire
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 EventName = car.CarEvent.EventName
+
+
+def log_fingerprint(candidate, timeout=5):
+  while True:
+    try:
+      requests.get('https://sentry.io', timeout=timeout)
+      client.captureMessage("fingerprinted {}".format(candidate), level='info')
+      return
+    except:
+      pass
 
 
 class Controls:
@@ -76,6 +89,7 @@ class Controls:
     messaging.get_one_can(self.can_sock)
 
     self.CI, self.CP, candidate = get_car(self.can_sock, self.pm.sock['sendcan'], has_relay)
+    threading.Thread(target=log_fingerprint, args=[candidate]).start()
 
     # read params
     params = Params()
