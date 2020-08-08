@@ -24,8 +24,10 @@ class dfManager:
     self.cur_user_profile = self.op_params.get('dynamic_follow').strip().lower()
     if not isinstance(self.cur_user_profile, str) or self.cur_user_profile not in self.df_profiles.to_idx:
       self.cur_user_profile = self.df_profiles.default  # relaxed
+      self.op_params.put('dynamic_follow', self.df_profiles.to_profile[self.cur_user_profile])
     else:
       self.cur_user_profile = self.df_profiles.to_idx[self.cur_user_profile]
+    self.last_user_profile = self.cur_user_profile
 
     self.cur_model_profile = 0
     self.alert_duration = 2.0
@@ -45,26 +47,25 @@ class dfManager:
 
   def update(self):
     self.sm.update(0)
+    df_out = dfReturn()
     if self.sm.updated['dynamicFollowButton']:
       self.button_updated = True
 
-    df_out = dfReturn()
     if self.first_run:
       df_out.changed = True  # to show alert on start
       self.first_run = False
 
-    if self.button_updated:
-      df_out.user_profile = self.sm['dynamicFollowButton'].status
-    else:
-      df_out.user_profile = self.cur_user_profile
+    if self.button_updated:  # only update when button is first pressed
+      self.cur_user_profile = self.sm['dynamicFollowButton'].status
+
+    df_out.user_profile = self.cur_user_profile
     df_out.user_profile_text = self.df_profiles.to_profile[df_out.user_profile]
 
-    if self.cur_user_profile != df_out.user_profile:
+    if self.cur_user_profile != self.last_user_profile:
+      self.op_params.put('dynamic_follow', self.df_profiles.to_profile[df_out.user_profile])  # save current profile for next drive
       self.change_time = sec_since_boot()
       self.last_is_auto = False
       df_out.changed = True
-      self.op_params.put('dynamic_follow', self.df_profiles.to_profile[df_out.user_profile])  # save current profile for next drive
-      self.cur_user_profile = df_out.user_profile
 
     if self.is_auto:
       df_out.model_profile = self.sm['dynamicFollowData'].profilePred
@@ -76,4 +77,5 @@ class dfManager:
         df_out.changed = True  # to hide pred alerts until user-selected auto alert has finished
       self.cur_model_profile = df_out.model_profile
 
+    self.last_user_profile = self.cur_user_profile
     return df_out
