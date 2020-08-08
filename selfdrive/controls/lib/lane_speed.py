@@ -72,6 +72,7 @@ class LaneSpeed:
     self._setup()
 
   def _setup(self):
+    self.button_updated = False
     self.ls_state = self.op_params.get('lane_speed_alerts').strip().lower()
     if not isinstance(self.ls_state, str) or self.ls_state not in LaneSpeedState.to_idx:
       self.ls_state = LaneSpeedState.audible
@@ -96,6 +97,8 @@ class LaneSpeed:
     while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
+      if self.sm.updated['dynamicFollowButton']:
+        self.button_updated = True
 
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
@@ -114,7 +117,8 @@ class LaneSpeed:
 
   def update(self):
     self.reset(reset_tracks=True, reset_avg_speed=True)
-    self.ls_state = self.sm['laneSpeedButton'].status
+    if self.button_updated:  # only update when button is first pressed
+      self.ls_state = self.sm['laneSpeedButton'].status
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
     if len(self.d_poly) and not np.isnan(self.d_poly[0]):
