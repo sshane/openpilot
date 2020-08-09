@@ -97,7 +97,7 @@ class LaneSpeed:
     while True:  # this loop can take up 0.049_ seconds without lagging
       t_start = sec_since_boot()
       self.sm.update(0)
-      if self.sm.updated['dynamicFollowButton']:
+      if self.sm.updated['laneSpeedButton']:
         self.button_updated = True
 
       self.v_ego = self.sm['carState'].vEgo
