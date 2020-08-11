@@ -287,9 +287,9 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph
-    if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
-      TR_mods.append(self._relative_accel_mod())
+    # deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph
+    # if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
+    #   TR_mods.append(self._relative_accel_mod())
 
     x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
     y = [1.0, 1.05]
