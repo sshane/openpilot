@@ -287,7 +287,7 @@ class DynamicFollow:
     y = [0.24, 0.16, 0.092, 0.0515, 0.0305, 0.022, 0.0, -0.0153, -0.042, -0.053, -0.059]  # modification values
     TR_mods.append(interp(self.lead_data.a_lead, x, y))
 
-    # deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph
+    # deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph  # todo: tune pedal to react similarly to without before adding/testing this
     # if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
     #   TR_mods.append(self._relative_accel_mod())
 
