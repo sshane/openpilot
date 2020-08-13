@@ -19,7 +19,7 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 3.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):  # pylint: disable=dangerous-default-value
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
 
     ret.carName = "toyota"
@@ -53,9 +53,9 @@ class CarInterface(CarInterfaceBase):
       stop_and_go = True
       ret.safetyParam = 66  # see conversion factor for STEER_TORQUE_EPS in dbc file
       ret.wheelbase = 2.70
-      ret.steerRatio = 14.22   # unknown end-to-end spec
+      ret.steerRatio = 14.88   # unknown end-to-end spec
       tire_stiffness_factor = 0.6371   # hand-tune
-      ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
       if prius_use_lqr:
         ret.lateralTuning.init('lqr')
