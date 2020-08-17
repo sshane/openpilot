@@ -18,8 +18,10 @@ plt.legend()
 plt.xlim(0, 35)
 plt.ylim(0, .1)
 
-kdBP_new = [0, 6.7, 30]
-kdV_new = [0.005, 0.016, 0.08]
+# kdBP_new = [0, 6.7, 30]
+kdBP_new = [0, 18, 27, 35]
+# kdV_new = [0.005, 0.016, 0.08]
+kdV_new = [0.02, 0.045, 0.0725, 0.085]
 plt.plot(kdBP_new, kdV_new, 'bo--', label='new')
 plt.legend()
 plt.show()
