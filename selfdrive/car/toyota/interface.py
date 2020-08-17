@@ -45,7 +45,7 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kpV = [3.6, 2.4, 1.5]
       ret.longitudinalTuning.kiV = [0.54, 0.36]
 
-    if candidate not in [CAR.PRIUS, CAR.RAV4, CAR.RAV4H]:  # These cars use LQR/INDI
+    if candidate not in [CAR.RAV4, CAR.RAV4H]:  # These cars use LQR/INDI
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kdBP = [0., 18., 27., 35.]
@@ -59,25 +59,9 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
-      if prius_use_lqr:
-        ret.lateralTuning.init('lqr')
-
-        ret.lateralTuning.lqr.scale = 1500.0
-        ret.lateralTuning.lqr.ki = 0.05
-
-        ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
-        ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
-        ret.lateralTuning.lqr.c = [1., 0.]
-        ret.lateralTuning.lqr.k = [-110.73572306, 451.22718255]
-        ret.lateralTuning.lqr.l = [0.3233671, 0.3185757]
-        ret.lateralTuning.lqr.dcGain = 0.002237852961363602
-      else:
-        ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 3.98
-        ret.lateralTuning.indi.outerLoopGain = 3.0
-        ret.lateralTuning.indi.timeConstant = 0.1
-        ret.lateralTuning.indi.actuatorEffectiveness = 0.99
-        ret.steerActuatorDelay = 0.488
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+      ret.lateralTuning.pid.kdV = [0.4, 0.9, 1.45, 1.7]
+      ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
@@ -267,7 +251,7 @@ class CarInterface(CarInterfaceBase):
         ret.steerActuatorDelay = 0.57
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-        ret.lateralTuning.pid.kf = 0.00007818594 
+        ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2]:
       stop_and_go = True
