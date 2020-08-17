@@ -60,7 +60,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-      ret.lateralTuning.pid.kdV = [0.4, 0.9, 1.45, 1.7]
+      ret.lateralTuning.pid.kdV = [0.6, 0.9, 1.45, 1.7]
       ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
