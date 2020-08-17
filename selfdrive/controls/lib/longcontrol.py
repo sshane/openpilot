@@ -1,9 +1,8 @@
 from cereal import log
 from common.numpy_fast import clip, interp
-from selfdrive.controls.lib.pid import PIDController
+from selfdrive.controls.lib.pid import LongPIDController
 from selfdrive.controls.lib.dynamic_gas import DynamicGas
 from common.op_params import opParams
-from selfdrive.config import Conversions as CV
 
 LongCtrlState = log.ControlsState.LongControlState
 
@@ -67,12 +66,12 @@ class LongControl():
     else:
       kdV = [0.08, 1.215, 2.51]
 
-    self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
-                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                             (kdBP, kdV),
-                             rate=RATE,
-                             sat_limit=0.8,
-                             convert=compute_gb)
+    self.pid = LongPIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
+                                 (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
+                                 (kdBP, kdV),
+                                 rate=RATE,
+                                 sat_limit=0.8,
+                                 convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 
