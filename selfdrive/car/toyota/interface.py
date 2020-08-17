@@ -123,7 +123,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.lqr.dcGain = 0.002237852961363602
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.05]]
-        ret.lateralTuning.pid.kdV = [0.02, 0.045, 0.0725, 0.085]
+        ret.lateralTuning.pid.kdV = [.4, .9, 1.45, 1.7]
         ret.lateralTuning.pid.kf = 0.00003   # full torque for 20 deg at 80mph means 0.00007818594
 
     elif candidate == CAR.LEXUS_RX:
