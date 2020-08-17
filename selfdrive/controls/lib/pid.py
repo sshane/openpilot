@@ -93,6 +93,7 @@ class LatPIDController():
       control = self.convert(control, speed=self.speed)
 
     self.saturated = self._check_saturation(control, check_saturation, error)
+    self.last_error = float(error)
 
     self.control = clip(control, self.neg_limit, self.pos_limit)
     return self.control
