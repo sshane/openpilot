@@ -7,5 +7,6 @@ ret.lateralTuning.init('pid')
 ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
 
 print('which: {}'.format(ret.lateralTuning.which()))
-ret.lateralTuning.init('lqr')
-print('which: {}'.format(ret.lateralTuning.which()))
+print(ret.lateralTuning.pid.kdV)
+print(ret.lateralTuning.pid.kdBP)
+
