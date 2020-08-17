@@ -19,6 +19,7 @@ class LatPIDController():
     self._k_i = k_i  # integral gain
     self._k_d = k_d  # derivative gain
     self.k_f = k_f  # feedforward gain
+    self.op_params = opParams()
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
@@ -69,7 +70,7 @@ class LatPIDController():
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
     self.p = error * self.k_p
-    d = self.k_d * (error - self.last_error)
+    d = self.k_d * (error - self.last_error) * self.op_params.get('derivative_multiplier')
     self.f = feedforward * self.k_f
 
     if override:
