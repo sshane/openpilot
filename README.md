@@ -93,7 +93,7 @@ PI -> PID Controller for Long and Lat
 -----
 (long: longitudinal, speed control. lat: latitudinal, steering control)
 
-**Changes for lat control:** (NEW❗)
+**Changes for lat control: (NEW❗)**
 - Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
 
   ***Currently Supported Cars:***
