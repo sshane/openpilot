@@ -67,12 +67,14 @@ The idea behind this feature is since we often become very relaxed behind the wh
 
 The original idea is thanks to [Greengree#5537](https://github.com/greengree) on Discord. This feature is available at 35 mph and up.
 
+---
 Dynamic camera offset (based on oncoming traffic)
 ---
 This feature automatically adjusts your position in the lane if an adjacent lane has oncoming traffic. For example, if you're on a two-lane highway and the left adjacent lane has oncoming cars, LaneSpeed recognizes those cars and applies an offset to your `CAMERA_OFFSET` to move you over in the lane, keeping you farther from oncoming cars.
 
 **This feature is available from 35 to ~60 mph due to a limitation with the Toyota radar**. It may not recognize oncoming traffic above 60 mph or so. To enable or disable this feature, use `opEdit` and change this parameter: `dynamic_camera_offset`.
 
+---
 Dynamic gas
 ---
 Dynamic gas aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by reducing the maximum gas that can be applied based on your current velocity, the relative velocity of the lead, the acceleration of the lead, and the distance of the lead. This usually results in quicker and smoother acceleration from a standstill without the jerking you get in stock openpilot with comma pedal (ex. taking off from a traffic light). It tries to coast if the lead is just inching up, it doesn’t use maximum gas as soon as the lead inches forward. When you are above 20 mph, relative velocity and the current following distance in seconds is taken into consideration.
@@ -90,6 +92,7 @@ non-pedal cars:
 
 If you have a car without a pedal, or you do have one but I haven't created a profile for you yet, please let me know and we can develop one for your car to test.
 
+---
 PI -> PID Controller for Long and Lat
 ---
 (long: longitudinal, speed control. lat: latitudinal, steering control)
@@ -106,6 +109,7 @@ PI -> PID Controller for Long and Lat
 
   Long derivative is disabled by default due to only one tune for all cars, but can be enabled by using [opEdit](#Customize-this-fork-opEdit) and setting the `enable_long_derivative` parameter to `True`. It works well on my '17 Corolla with pedal.
 
+---
 Customize this fork (opEdit)
 ---
 This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
@@ -150,6 +154,7 @@ Parameters are stored at `/data/op_params.json`
 ## opEdit Demo
 <img src=".media/op_edit.gif?raw=true" width="1000">
 
+---
 Automatic updates
 ---
 When a new update is available on GitHub for Stock Additions, your EON/C2 will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
@@ -157,12 +162,14 @@ When a new update is available on GitHub for Stock Additions, your EON/C2 will p
 
 Therefore, if your device sees an update while you're driving it will reboot approximately 5 to 10 minutes after you finish your drive, it resets the timer if you start driving again before the time is up.
 
+---
 Offline crash logging
 ---
 If you experience a crash or exception while driving with this fork and you're not on internet for the error to be uploaded to Sentry, you should be able to check out the directory `/data/community/crashes` to see any and all logs of exceptions caught in `manager.py`. Simply `cat` the log file you wish to view. This does not catch all errors, for example scons compilation errors or Python syntax errors will not be caught, `tmux a` is usually best to view these (if openpilot didn't start).
 
+---
 Documentation
-=====
+===
 
 Quick Installation
 ---
@@ -192,6 +199,7 @@ Most of the branches on this fork are development branches I use as various open
 * [Stock Additions 0.7.4](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-074)
 * [Stock Additions 0.7.5](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-075)
 
+---
 Videos
 ---
 Here's a short video showing how close the traffic profile was in `0.7.4`. In `0.7.5`, the traffic profile is an average of 7.371 feet closer from 18 mph to 90 mph. Video thanks to [@rolo01](https://github.com/rolo01)!
