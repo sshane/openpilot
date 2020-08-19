@@ -136,9 +136,9 @@ Here are the main parameters you can change with this fork:
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
 - **Experimental params**:
   - `support_white_panda`: This allows users with the original white panda to use openpilot above 0.7.7. The high precision localizer's performance may be reduced due to a lack of GPS
-  - `prius_use_lqr`: If you have a newer Prius with a good angle sensor, you can try enabling this to use LQR
-  - `corolla_use_lqr`: Enable this to use LQR for lat with your Corolla (2017) *(can be enabled for all years by request)*
-  - `corollaTSS2_use_indi`: Enable this to use INDI for lat with your Corolla equipped with TSS2 *(can be enabled for all years by request)*
+  - [`prius_use_pid`](#pi---pid-controller-for-long-and-lat): This enables the PID lateral controller with new a experimental derivative tune
+  - [`corolla_use_lqr`](#pi---pid-controller-for-long-and-lat): Enable this to use LQR for lateral control with your TSS1 Corolla *(can be enabled for all years by request)*
+  - `corollaTSS2_use_indi`: Enable this to use INDI for lat with your TSS2 Corolla *(can be enabled for all years by request)*
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L40).
 
