@@ -96,7 +96,7 @@ PI -> PID Controller for Long and Lat
 **Changes for lat control:**
 - Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
 
-  **Currently Supported Cars:**
+  ***Currently Supported Cars:***
   - 2017 Toyota Corolla (when param `corolla_use_lqr` is False)
   - All Prius years (when param `prius_use_pid` is True). *Note that it will use the 2020 Corolla's PID tune*
 
