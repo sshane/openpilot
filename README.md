@@ -18,10 +18,10 @@ Highlight Features
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - automatically moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
-* [**NEW❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for pedal overshoot
-* [**Customize this fork (opEdit with live tuning)**](#Customize-this-fork-opEdit)
+* [**NEW❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
+* [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
-* [**Offline crash logging**](#Offline-crash-logging)
+* [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
 Documentation
 ===
@@ -43,7 +43,7 @@ Just use the button on the button right of the screen while driving to change be
   * `roadtrip` - This profile is for road trips where you're mainly on two lane highways and don't want to be following particularly closely; at night for example.
   * [`auto`](#Automatic-DF-profile-switching) - The auto dynamic follow model was trained on about an hour of me manually cycling through the different profiles based on driving conditions, this profile tries to replicate those decisions entirely on its own.
 
-<img src=".media/df_profiles.jpg?raw=true" height="350">
+<img src=".media/df_profiles.jpg?raw=true">
 
 Automatic DF profile switching
 ---
