@@ -43,7 +43,9 @@ Just use the button on the button right of the screen while driving to change be
   * `roadtrip` - This profile is for road trips where you're mainly on two lane highways and don't want to be following particularly closely; at night for example.
   * [`auto`](#Automatic-DF-profile-switching) - The auto dynamic follow model was trained on about an hour of me manually cycling through the different profiles based on driving conditions, this profile tries to replicate those decisions entirely on its own.
 
-<img src=".media/df_profiles.jpg?raw=true">
+<p align="center">
+  <img src=".media/df_profiles.jpg?raw=true">
+</p>
 
 Automatic DF profile switching
 ---
