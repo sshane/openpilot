@@ -18,7 +18,8 @@ Highlight Features
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - automatically moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
-* [**PI > PID for longcontrol**](#Long-control-uses-a-PID-loop) - fix for pedal overshoot
+* [**Adding derivative to PI for better control**](#PID) - lat: smoother control in turns; long: fix for pedal overshoot
+* [**PI > PID for longcontrol**](#Long-control-uses-a-PID-loop)
 * [**Customize this fork (opEdit with live tuning)**](#Customize-this-fork-opEdit)
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging)
@@ -89,11 +90,17 @@ non-pedal cars:
 
 If you have a car without a pedal, or you do have one but I haven't created a profile for you yet, please let me know and we can develop one for your car to test.
 
-Long control uses a PID loop
+PI -> PID Controller for Long and Lat
 -----
-I've added a custom implementation of derivative to the PI loop controlling the gas and brake output sent to your car. Derivative (change in error) is calculated based on the current and last error and added to the class's integral variable. It's essentially winding down integral according to derivative. It helps fix overshoot on some cars with the comma pedal and increases responsiveness (like when going up and down hills) on all other cars! Still need to figure out the tuning, right now it's using the same derivative gain for all cars. Test it out and let me know what you think!
+(long: longitudinal, speed control. lat: latitudinal, steering control)
 
-Derivative is disabled by default due to only one tune for all cars, but can be enabled by using [opEdit](#Customize-this-fork-opEdit) and setting the `enable_long_derivative` parameter to `True`. It works well on my '17 Corolla with pedal.
+**Changes for lat control:**
+- Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
+
+**Changes for long control:**
+- I've added a custom implementation of derivative to the PI loop controlling the gas and brake output sent to your car. Derivative (change in error) is calculated based on the current and last error and added to the class's integral variable. It's essentially winding down integral according to derivative. It helps fix overshoot on some cars with the comma pedal and increases responsiveness (like when going up and down hills) on all other cars! Still need to figure out the tuning, right now it's using the same derivative gain for all cars. Test it out and let me know what you think!
+
+  Long derivative is disabled by default due to only one tune for all cars, but can be enabled by using [opEdit](#Customize-this-fork-opEdit) and setting the `enable_long_derivative` parameter to `True`. It works well on my '17 Corolla with pedal.
 
 Customize this fork (opEdit)
 -----
