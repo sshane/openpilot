@@ -45,8 +45,9 @@ Just use the button on the button right of the screen while driving to change be
 
 <img src=".media/df_profiles.jpg?raw=true" height="350">
 
+---
 Automatic DF profile switching
------
+---
 I've trained a custom model with Keras that takes in the past 35 seconds of your speed, the lead's speed and the lead's distance. With these inputs, it tries to correctly predict which profile is the best for your current situation.
 
 It's only been trained on about an hour of data, so it's not perfect yet, but it's great for users who just want to set it and forget it. **To enable the `auto` profile, simply tap the profile changing button for dynamic follow until it reaches the `auto` profile!**
