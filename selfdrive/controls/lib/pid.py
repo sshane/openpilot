@@ -19,7 +19,6 @@ class LatPIDController():
     self._k_i = k_i  # integral gain
     self._k_d = k_d  # derivative gain
     self.k_f = k_f  # feedforward gain
-    self.op_params = opParams()
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
