@@ -18,7 +18,7 @@ Highlight Features
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - automatically moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
-* [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for pedal overshoot
+* [**🆕❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for pedal overshoot
 * [**Customize this fork (opEdit with live tuning)**](#Customize-this-fork-opEdit)
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging)
