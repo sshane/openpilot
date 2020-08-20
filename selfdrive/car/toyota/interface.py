@@ -59,9 +59,9 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.4], [0.03]]
       ret.lateralTuning.pid.kdV = [0.6, 0.9, 1.45, 1.7]
-      ret.lateralTuning.pid.kf = 0.00007818594
+      ret.lateralTuning.pid.kf = 0.00007
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
