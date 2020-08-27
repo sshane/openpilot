@@ -118,7 +118,7 @@ assert(font >= 0);
 
   // Exit Button
   int exit_b_x = 1550;
-  int exit_b_y = 850;
+  int exit_b_y = 750;
   int exit_b_w = 300;
   int exit_b_h = 150;
 
