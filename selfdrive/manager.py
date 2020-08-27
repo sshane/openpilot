@@ -614,4 +614,5 @@ if __name__ == "__main__":
     raise
 
   # manual exit because we are forked
+  android.reboot()
   sys.exit(0)
