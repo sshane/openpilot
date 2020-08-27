@@ -58,23 +58,6 @@ void draw_git_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
   nvgStroke(vg);
 }
 
-void draw_exit_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
-  nvgBeginPath(vg);
-  nvgFillColor(vg, nvgRGBA(8, 8, 8, 255));
-  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
-  nvgFill(vg);
-
-  nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
-  nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-  nvgText(vg, b_x+b_w/2, b_y+b_h/2, "Exit", NULL);
-
-  nvgBeginPath(vg);
-  nvgStrokeColor(vg, nvgRGBA(255, 255, 255, 50));
-  nvgStrokeWidth(vg, 5);
-  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
-  nvgStroke(vg);
-}
-
 int main(int argc, char** argv) {
   int err;
 
