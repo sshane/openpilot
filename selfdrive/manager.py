@@ -611,9 +611,9 @@ if __name__ == "__main__":
       subprocess.check_output(["git", "pull"], cwd=BASEDIR)
       subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
 
+    time.sleep(2)
+    android.reboot()
     raise
 
   # manual exit because we are forked
-  time.sleep(5)
-  android.reboot()
   sys.exit(0)
