@@ -611,13 +611,12 @@ if __name__ == "__main__":
       try:
         subprocess.check_output(["git", "pull"], cwd=BASEDIR)
         subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
-        print('GIT SUCCESS')
       except subprocess.CalledProcessError as e:
-        print('GIT ERROR')
-        print(e.output)
+        # print(e.output)
+        pass
 
     time.sleep(1)
-    # subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
+    subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
     raise
 
   # manual exit because we are forked
