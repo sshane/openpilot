@@ -152,8 +152,11 @@ assert(font >= 0);
         if (touch_y > exit_b_y && touch_y < exit_b_y + exit_b_h){
           return 1;
         }
-      } else {
-        return 0;
+      }
+      if (touch_x > git_b_x && touch_x < git_b_x + git_b_w){
+        if (touch_y > git_b_y && touch_y < git_b_y + git_b_h){
+          return 0;  // touched reset button
+        }
       }
     }
 
