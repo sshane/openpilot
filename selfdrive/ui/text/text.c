@@ -24,7 +24,7 @@
 extern const unsigned char _binary_opensans_regular_ttf_start[];
 extern const unsigned char _binary_opensans_regular_ttf_end[];
 
-void draw_exit_button(NVGcontext vg, int exit_b_x, int exit_b_y, int exit_b_w, int exit_b_h) {
+void draw_exit_button(NVGcontext *vg, int exit_b_x, int exit_b_y, int exit_b_w, int exit_b_h) {
   nvgBeginPath(vg);
   nvgFillColor(vg, nvgRGBA(8, 8, 8, 255));
   nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
