@@ -608,7 +608,9 @@ if __name__ == "__main__":
     with TextWindow(error) as t:
       exit_status = t.wait_for_exit()
     if exit_status == 'reset':
-      print('doing git pull and rese code here!')
+      print('running a git now reset!')
+      subprocess.check_output(["git", "pull"], cwd=BASEDIR)
+      subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
 
     raise
 
