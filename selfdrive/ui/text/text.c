@@ -152,6 +152,8 @@ assert(font >= 0);
         if (touch_y > exit_b_y && touch_y < exit_b_y + exit_b_h){
           return 1;
         }
+      } else {
+        return 0;
       }
     }
 
