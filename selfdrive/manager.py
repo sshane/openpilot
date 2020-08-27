@@ -610,8 +610,10 @@ if __name__ == "__main__":
     if exit_status == 'reset':
       try:
         subprocess.check_output(["git", "pull"], cwd=BASEDIR)
-        subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+        # subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+        print('GIT SUCCESS')
       except subprocess.CalledProcessError as e:
+        print('GIT ERROR')
         print(e.output)
 
     time.sleep(1)
