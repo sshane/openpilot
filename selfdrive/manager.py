@@ -614,7 +614,8 @@ if __name__ == "__main__":
       except subprocess.CalledProcessError as e:
         print(e.output)
 
-    subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
+    time.sleep(1)
+    # subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
     raise
 
   # manual exit because we are forked
