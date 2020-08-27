@@ -612,10 +612,12 @@ if __name__ == "__main__":
         try:
           subprocess.check_output(["git", "pull"], cwd=BASEDIR)
           subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+          print('git reset successful!')
           break
         except subprocess.CalledProcessError as e:
           # print(e.output)
           if _ != 1:
+            print('git reset failed, trying again')
             time.sleep(5)  # wait 5 seconds and try again
 
     time.sleep(1)
