@@ -606,7 +606,9 @@ if __name__ == "__main__":
 
     error = "Manager failed to start. Press Reset to pull and reset to origin!\n \n" + error
     with TextWindow(error) as t:
-      t.wait_for_exit()
+      exit_status = t.wait_for_exit()
+    if exit_status == 'reset':
+      print('doing git pull and rese code here!')
 
     raise
 
