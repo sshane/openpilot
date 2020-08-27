@@ -608,12 +608,15 @@ if __name__ == "__main__":
     with TextWindow(error) as t:
       exit_status = t.wait_for_exit()
     if exit_status == 'reset':
-      try:
-        subprocess.check_output(["git", "pull"], cwd=BASEDIR)
-        subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
-      except subprocess.CalledProcessError as e:
-        # print(e.output)
-        pass
+      for _ in range(2):
+        try:
+          subprocess.check_output(["git", "pull"], cwd=BASEDIR)
+          subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+          break
+        except subprocess.CalledProcessError as e:
+          # print(e.output)
+          if _ != 1:
+            time.sleep(5)  # wait 5 seconds and try again
 
     time.sleep(1)
     subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
