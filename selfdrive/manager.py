@@ -22,7 +22,7 @@ os.environ['BASEDIR'] = BASEDIR
 
 TOTAL_SCONS_NODES = 1020
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
-prebuilt = True
+
 op_params = opParams()
 no_ota_updates = op_params.get('no_ota_updates') or os.path.exists('/data/no_ota_updates')
 
