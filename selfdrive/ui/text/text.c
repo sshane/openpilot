@@ -41,6 +41,40 @@ void draw_exit_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
   nvgStroke(vg);
 }
 
+void draw_git_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
+  nvgBeginPath(vg);
+  nvgFillColor(vg, nvgRGBA(8, 8, 8, 255));
+  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
+  nvgFill(vg);
+
+  nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
+  nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+  nvgText(vg, b_x+b_w/2, b_y+b_h/2, "git pull", NULL);
+
+  nvgBeginPath(vg);
+  nvgStrokeColor(vg, nvgRGBA(255, 255, 255, 50));
+  nvgStrokeWidth(vg, 5);
+  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
+  nvgStroke(vg);
+}
+
+void draw_exit_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
+  nvgBeginPath(vg);
+  nvgFillColor(vg, nvgRGBA(8, 8, 8, 255));
+  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
+  nvgFill(vg);
+
+  nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
+  nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+  nvgText(vg, b_x+b_w/2, b_y+b_h/2, "Exit", NULL);
+
+  nvgBeginPath(vg);
+  nvgStrokeColor(vg, nvgRGBA(255, 255, 255, 50));
+  nvgStrokeWidth(vg, 5);
+  nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
+  nvgStroke(vg);
+}
+
 int main(int argc, char** argv) {
   int err;
 
@@ -99,13 +133,21 @@ assert(font >= 0);
     }
   }
 
-  // Button
+  // Exit Button
   int exit_b_x = 1500;
   int exit_b_y = 800;
   int exit_b_w = 300;
   int exit_b_h = 150;
 
+  // Git Pull Button
+  int git_b_x = exit_b_x - exit_b_w - 50;  // 50 px padding
+  int git_b_y = exit_b_y;
+  int git_b_w = 300;
+  int git_b_h = 150;
+
   draw_exit_button(vg, exit_b_x, exit_b_y, exit_b_w, exit_b_h);
+  draw_git_button(vg, git_b_x, git_b_y, git_b_w, git_b_h);
+
 
   // Draw to screen
   nvgEndFrame(vg);
