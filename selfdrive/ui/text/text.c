@@ -117,7 +117,8 @@ assert(font >= 0);
     int touch_x = -1, touch_y = -1;
     int res = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (res){
-
+      std::cout << "touch_x: " << touch_x << std::endl;
+      std::cout << "touch_y: " << touch_y << std::endl;
       if (touch_x > b_x && touch_x < b_x + b_w){
         if (touch_y > b_y && touch_y < b_y + b_h){
           return 1;
