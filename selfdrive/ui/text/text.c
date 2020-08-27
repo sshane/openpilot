@@ -146,8 +146,6 @@ assert(font >= 0);
     int touch_x = -1, touch_y = -1;
     int res = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (res){
-      printf("touch_x: %d\n", touch_x);
-      printf("touch_y: %d\n", touch_y);
       if (touch_x > exit_b_x && touch_x < exit_b_x + exit_b_w){
         if (touch_y > exit_b_y && touch_y < exit_b_y + exit_b_h){
           return 1;
