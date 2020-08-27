@@ -226,6 +226,7 @@ class LanePlanner():
     CAMERA_OFFSET = self.dynamic_camera_offset.update(v_ego, active, angle_steers, self.lane_width, self.lane_width_certainty, [self.l_poly, self.r_poly], [self.l_prob, self.r_prob])
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
+    self.p_poly[3] += CAMERA_OFFSET
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
