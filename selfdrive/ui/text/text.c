@@ -26,7 +26,7 @@ extern const unsigned char _binary_opensans_regular_ttf_end[];
 
 void draw_exit_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
   nvgBeginPath(vg);
-  nvgFillColor(vg, nvgRGBA(8, 8, 8, 190));
+  nvgFillColor(vg, nvgRGBA(8, 8, 8, 178));
   nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
   nvgFill(vg);
 
@@ -43,7 +43,7 @@ void draw_exit_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
 
 void draw_git_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
   nvgBeginPath(vg);
-  nvgFillColor(vg, nvgRGBA(8, 8, 8, 190));
+  nvgFillColor(vg, nvgRGBA(8, 8, 8, 178));
   nvgRoundedRect(vg, b_x, b_y, b_w, b_h, 20);
   nvgFill(vg);
 
@@ -118,7 +118,7 @@ assert(font >= 0);
 
   // Exit Button
   int exit_b_x = 1550;
-  int exit_b_y = 750;
+  int exit_b_y = 850;
   int exit_b_w = 300;
   int exit_b_h = 150;
 
