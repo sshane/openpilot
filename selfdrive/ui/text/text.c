@@ -49,7 +49,7 @@ void draw_git_button(NVGcontext *vg, int b_x, int b_y, int b_w, int b_h) {
 
   nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
   nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-  nvgText(vg, b_x+b_w/2, b_y+b_h/2, "git pull", NULL);
+  nvgText(vg, b_x+b_w/2, b_y+b_h/2, "Reset", NULL);
 
   nvgBeginPath(vg);
   nvgStrokeColor(vg, nvgRGBA(255, 255, 255, 50));

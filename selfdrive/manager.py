@@ -604,7 +604,7 @@ if __name__ == "__main__":
     # Show last 3 lines of traceback
     error = traceback.format_exc(3)
 
-    error = "Manager failed to start. Press GIT PULL to reset to origin!\n \n" + error
+    error = "Manager failed to start. Press Reset to pull and reset to origin!\n \n" + error
     with TextWindow(error) as t:
       t.wait_for_exit()
 
