@@ -748,10 +748,10 @@ void ui_draw_vision_alert(UIState *s, cereal::ControlsState::AlertSize va_size, 
   int alr_h = alr_s+(va_size==cereal::ControlsState::AlertSize::NONE?0:bdr_s);
   int alr_y = vwp_h-alr_h;
 
-  alr_x += 30;
-  alr_y += 30;
-  alr_w -= 60;
-  alr_h -= 60;
+  alr_x += 50;
+  alr_y += 50;
+  alr_w -= 100;
+  alr_h -= 100;
 
   ui_draw_rect(s->vg, alr_x, alr_y, alr_w, alr_h, nvgRGBA(color[0],color[1],color[2],(color[3]*s->alert_blinking_alpha)));
 
