@@ -37,13 +37,12 @@ def main():
   # TODO: refactor with manager start/kill
   proc_cam = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/camerad/camerad"), cwd=os.path.join(BASEDIR, "selfdrive/camerad"))
   proc_ui = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/ui/ui"), cwd=os.path.join(BASEDIR, "selfdrive/ui"))
-  proc_cal = subprocess.Popen(os.path.join(BASEDIR, "selfdrive/locationd/calibrationd"), cwd=os.path.join(BASEDIR, "selfdrive/locationd"))
+  proc_cal = multiprocessing.Process(name='calibrationd', args=('selfdrive.locationd.calibrationd',))
 
   def terminate(signalNumber, frame):
     print('got SIGTERM, exiting..')
     proc_cam.send_signal(signal.SIGINT)
     proc_ui.send_signal(signal.SIGINT)
-    proc_cal.send_signal(signal.SIGINT)
     thermal_sender.terminate()
     controls_sender.terminate()
     proc_cal.terminate()
