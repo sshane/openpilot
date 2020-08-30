@@ -137,7 +137,6 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, N
   }
   nvgClosePath(s->vg);
   nvgFillColor(s->vg, color);
-
   nvgFill(s->vg);
 }
 
