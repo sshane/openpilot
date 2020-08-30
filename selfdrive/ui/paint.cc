@@ -327,7 +327,7 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
 //  color.a /= 25;
   prob /= 3;
   ui_draw_lane_line(s, pstart + 1, prob, path, true);  // so is this
-  ui_draw_lane_line(s, pstart + 2, prob, path, false); // this is how confident model is
+  ui_draw_lane_line(s, pstart + 2, prob, path, true); // this is how confident model is
 }
 
 static void ui_draw_vision_lanes(UIState *s) {
