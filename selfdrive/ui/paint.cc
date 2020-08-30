@@ -364,8 +364,6 @@ static void ui_draw_world(UIState *s) {
   if (!scene->world_objects_visible) {
     return;
   }
-  std::cout << "here\n";
-
 
   const int inner_height = viz_w*9/16;
   const int ui_viz_rx = scene->ui_viz_rx;
