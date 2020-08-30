@@ -135,7 +135,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
 
   float lane_pos = std::abs(path->poly[3]);
   float dists[2] = {0.7, 1.2 - .06};
-  float hues[2] = {133 / 360, 0};  // green to red
+  float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   std::cout << "lane pos: " << lane_pos << "\n";
   std::cout << "hue: " << hue << "\n";
@@ -149,7 +149,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
   nvgClosePath(s->vg);
   if (use_col){
 //    std::cout << "prob: " << prob << std::endl;
-    nvgFillColor(s->vg, nvgHSLA(hue., .73, .64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
+    nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
   } else {
     nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, prob));
   }
