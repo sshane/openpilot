@@ -130,14 +130,16 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
   draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
-static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color, const PathData *path) {
+static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color, const PathData *path, bool use_col) {
   if (pvd->cnt == 0) return;
   //path.points[0]  // could we use poly[3] if it's 4th degree?
 
-  float _x[2] = {0, 1.85};
-  float _y[2] = {0, 255};
-  float new_col = (abs(path->points[0]) - _x[0]) * (_y[1] - _y[0]) / (_x[1] - _x[0]) + _y[0];
-  int new_col_int = (int)new_col;
+  if (use_col) {
+    float _x[2] = {0, 1.85};
+    float _y[2] = {0, 255};
+    float new_col = (abs(path->points[0]) - _x[0]) * (_y[1] - _y[0]) / (_x[1] - _x[0]) + _y[0];
+    int new_col_int = (int)new_col;
+  }
 
   nvgBeginPath(s->vg);
   nvgMoveTo(s->vg, pvd->v[0].x, pvd->v[0].y);
@@ -145,8 +147,11 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, N
     nvgLineTo(s->vg, pvd->v[i].x, pvd->v[i].y);
   }
   nvgClosePath(s->vg);
-//  nvgFillColor(s->vg, color);
-  nvgFillColor(s->vg, nvgRGBA(new_col_int, 99, 0, 255));  // get redder when line is closer to car
+  if (!use_col){
+    nvgFillColor(s->vg, color);
+  } else {
+    nvgFillColor(s->vg, nvgRGBA(new_col_int, 40, 0, 255));  // get redder when line is closer to car
+  }
   nvgFill(s->vg);
 }
 
@@ -317,10 +322,10 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 }
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, NVGcolor color) {
-  ui_draw_lane_line(s, pstart, color, path);
+  ui_draw_lane_line(s, pstart, color, path, true);
   color.a /= 25;
-  ui_draw_lane_line(s, pstart + 1, color, path);
-  ui_draw_lane_line(s, pstart + 2, color, path);
+  ui_draw_lane_line(s, pstart + 1, color, path, false);
+  ui_draw_lane_line(s, pstart + 2, color, path, false);
 }
 
 static void ui_draw_vision_lanes(UIState *s) {
