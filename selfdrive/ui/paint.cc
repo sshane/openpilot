@@ -319,6 +319,7 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 }
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
+  std::cout << "prob: " << prob << std::endl;
   ui_draw_lane_line(s, pstart, prob, path, true);
 //  color.a /= 25;
   prob /= 25;
