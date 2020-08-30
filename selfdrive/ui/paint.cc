@@ -130,7 +130,7 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
   draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
-static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color, PathData *path) {
+static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color, const PathData *path) {
   if (pvd->cnt == 0) return;
   //path.points[0]  // could we use poly[3] if it's 4th degree?
 
