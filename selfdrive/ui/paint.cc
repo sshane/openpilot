@@ -127,7 +127,7 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
   draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
-static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, float prob, float hue) {
+static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color) {
   if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -136,7 +136,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
     nvgLineTo(s->vg, pvd->v[i].x, pvd->v[i].y);
   }
   nvgClosePath(s->vg);
-  nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car
+  nvgFillColor(s->vg, color);
 
   nvgFill(s->vg);
 }
@@ -308,16 +308,17 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 }
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
-  float lane_pos = std::abs(path->poly[3]);
+  float lane_pos = std::abs(path->poly[3]);  // get redder when line is closer to car
   float dists[2] = {1.1, 0.8};
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
+  NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255.)
 
   ui_draw_lane_line(s, pstart, prob, hue);
   prob /= 25;
-  ui_draw_lane_line(s, pstart + 1, prob, hue);  // so is this
-  ui_draw_lane_line(s, pstart + 2, prob, hue); // this is how confident model is
+  ui_draw_lane_line(s, pstart + 1, color);  // this is how confident model is
+  ui_draw_lane_line(s, pstart + 2, color);
 }
 
 static void ui_draw_vision_lanes(UIState *s) {
