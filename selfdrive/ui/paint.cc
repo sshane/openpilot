@@ -134,8 +134,8 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, N
   if (pvd->cnt == 0) return;
   //path.points[0]  // could we use poly[3] if it's 4th degree?
 
-  float _x[2] = [0, 1.85];
-  float _x[2] = [0, 255];
+  float _x[2] = {0, 1.85};
+  float _x[2] = {0, 255};
   float new_col = (abs(path.points[0]) - _x[0]) * (_y[1] - _y[0]) / (_x[1] - _x[0]) + _y[0]);
   int new_col_int = (int)new_col;
 
