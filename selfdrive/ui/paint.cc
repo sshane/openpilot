@@ -139,7 +139,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
     nvgLineTo(s->vg, pvd->v[i].x, pvd->v[i].y);
   }
   nvgClosePath(s->vg);
-  nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f todo: do the /360 in parent func
+  nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car
 
   nvgFill(s->vg);
 }
@@ -315,7 +315,7 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
   float dists[2] = {1.1, 0.8};
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
-  hue = fmin(133, fmax(0, hue));
+  hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
 
   ui_draw_lane_line(s, pstart, prob, hue);
   prob /= 25;
