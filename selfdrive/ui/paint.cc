@@ -312,7 +312,7 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
-  NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255.)
+  NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255.);
 
   ui_draw_lane_line(s, pstart, prob, hue);
   prob /= 25;
