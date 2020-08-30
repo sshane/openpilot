@@ -147,10 +147,9 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
   nvgClosePath(s->vg);
   if (use_col){
 //      nvgFillColor(s->vg, nvgHSLA(hue, 73, 64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
-      nvgFillColor(s->vg, nvgHSLA(hue, 73, 64, 255));  // get redder when line is closer to car. hsla divides a by 255f
+      nvgFillColor(s->vg, nvgHSLA(133, 73, 64, 255));  // get redder when line is closer to car. hsla divides a by 255f
   } else {
-//      nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, prob));
-      nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, 1.0));
+      nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, prob));
   }
   nvgFill(s->vg);
 }
