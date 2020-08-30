@@ -138,8 +138,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
   float hues[2] = {0, 133};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   std::cout << "lane pos: " << lane_pos << "\n";
-  hue = std::clamp(hue, 0, 133.);
-//  hue = std::min(192, std::max(5, data[MODEL_PATH_DISTANCE*2]));
+  hue = std::min(133, std::max(0, hue));
   std::cout << "hue: " << hue << "\n";
 
   nvgBeginPath(s->vg);
