@@ -130,16 +130,8 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
   draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
-static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, float prob, const PathData *path, bool use_col) {
+static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, float prob, float hue) {
   if (pvd->cnt == 0) return;
-
-  float lane_pos = std::abs(path->poly[3]);
-  float dists[2] = {1.2 - .06, 0.7};
-  float hues[2] = {133, 0};  // green to red
-  float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
-  std::cout << "lane pos: " << lane_pos << "\n";
-  hue = fmin(133, fmax(0, hue));
-  std::cout << "hue: " << hue << "\n";
 
   nvgBeginPath(s->vg);
   nvgMoveTo(s->vg, pvd->v[0].x, pvd->v[0].y);
@@ -147,12 +139,8 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
     nvgLineTo(s->vg, pvd->v[i].x, pvd->v[i].y);
   }
   nvgClosePath(s->vg);
-  if (use_col){
-//    std::cout << "prob: " << prob << std::endl;
-    nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
-  } else {
-    nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, prob));
-  }
+  nvgFillColor(s->vg, nvgHSLA(hue / 360.0, .73, .64, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f todo: do the /360 in parent func
+
   nvgFill(s->vg);
 }
 
@@ -323,11 +311,19 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 }
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
-  ui_draw_lane_line(s, pstart, prob, path, true);
+  float lane_pos = std::abs(path->poly[3]);
+  float dists[2] = {1.2 - .06, 0.7};
+  float hues[2] = {133, 0};  // green to red
+  float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
+  std::cout << "lane pos: " << lane_pos << "\n";
+  hue = fmin(133, fmax(0, hue));
+  std::cout << "hue: " << hue << "\n";
+
+  ui_draw_lane_line(s, pstart, prob, hue);
 //  color.a /= 25;
   prob /= 25;
-  ui_draw_lane_line(s, pstart + 1, prob, path, true);  // so is this
-  ui_draw_lane_line(s, pstart + 2, prob, path, true); // this is how confident model is
+  ui_draw_lane_line(s, pstart + 1, prob, hue);  // so is this
+  ui_draw_lane_line(s, pstart + 2, prob, hue); // this is how confident model is
 }
 
 static void ui_draw_vision_lanes(UIState *s) {
