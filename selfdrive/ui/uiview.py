@@ -44,12 +44,12 @@ def main():
     print('got SIGTERM, exiting..')
     proc_cam.send_signal(signal.SIGINT)
     proc_ui.send_signal(signal.SIGINT)
+    proc_mod.send_signal(signal.SIGINT)
     proc_cal.send_signal(signal.SIGINT)
+
     thermal_sender.terminate()
     controls_sender.terminate()
-    proc_mod.terminate()
-    proc_cal.terminate()
-  exit()
+    exit()
 
   signal.signal(signal.SIGTERM, terminate)
   signal.signal(signal.SIGINT, terminate)  # catch ctrl-c as well
