@@ -326,7 +326,7 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
 //  color.a /= 25;
   prob /= 25;
 //  ui_draw_lane_line(s, pstart + 1, prob, path, true);
-  ui_draw_lane_line(s, pstart + 2, prob, path, true);
+  ui_draw_lane_line(s, pstart + 2, prob, path, false);
 }
 
 static void ui_draw_vision_lanes(UIState *s) {
