@@ -320,7 +320,8 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
   ui_draw_lane_line(s, pstart, prob, path, true);
-  color.a /= 25;
+//  color.a /= 25;
+  prob /= 25;
   ui_draw_lane_line(s, pstart + 1, prob, path, false);
   ui_draw_lane_line(s, pstart + 2, prob, path, false);
 }
