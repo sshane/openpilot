@@ -314,7 +314,7 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
   hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
   NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255.);
 
-  ui_draw_lane_line(s, pstart, prob, color);
+  ui_draw_lane_line(s, pstart, color);
   prob /= 25;
   ui_draw_lane_line(s, pstart + 1, color);  // this is how confident model is
   ui_draw_lane_line(s, pstart + 2, color);
