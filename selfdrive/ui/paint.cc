@@ -312,7 +312,7 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
   float lane_pos = std::abs(path->poly[3]);
-  float dists[2] = {1.2 - .06, 0.7};
+  float dists[2] = {1.1, 0.75};
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   std::cout << "lane pos: " << lane_pos << "\n";
