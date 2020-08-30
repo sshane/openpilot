@@ -42,7 +42,6 @@ def main():
     print('got SIGTERM, exiting..')
     proc_cam.send_signal(signal.SIGINT)
     proc_ui.send_signal(signal.SIGINT)
-
     thermal_sender.terminate()
     controls_sender.terminate()
     exit()
