@@ -148,7 +148,7 @@ static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, f
   std::cout << "working\n";
   if (use_col){
     std::cout << "prob: " << prob << std::endl;
-      nvgFillColor(s->vg, nvgHSLA(hue / 255, 73 / 255, 64 / 255, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
+      nvgFillColor(s->vg, nvgHSLA(hue / 255.0, 73 / 255.0, 64 / 255.0, prob * 255.));  // get redder when line is closer to car. hsla divides a by 255f
   } else {
     nvgFillColor(s->vg, nvgRGBAf(1.0, 1.0, 1.0, prob));
   }
