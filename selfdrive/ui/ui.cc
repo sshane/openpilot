@@ -301,7 +301,7 @@ static void ui_init_vision(UIState *s, const VisionStreamBufs back_bufs,
   s->scene.front_box_y = ui_info.front_box_y;
   s->scene.front_box_width = ui_info.front_box_width;
   s->scene.front_box_height = ui_info.front_box_height;
-  s->scene.world_objects_visible = true;  // Invisible until we receive a calibration message.
+  s->scene.world_objects_visible = false;  // Invisible until we receive a calibration message.
   s->scene.gps_planner_active = false;
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
