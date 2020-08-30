@@ -308,7 +308,7 @@ static void update_all_lane_lines_data(UIState *s, const PathData &path, model_p
 
 static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_data *pstart, float prob) {
   float lane_pos = std::abs(path->poly[3]);  // get redder when line is closer to car
-  float dists[2] = {0.75, 0.5};  // try 1.075 next and decrease 0.9
+  float dists[2] = {1.4, 1.0};  // try 1.075 next and decrease 0.9
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
   hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
