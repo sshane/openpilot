@@ -1,4 +1,4 @@
-#pragma clang diagnostic ignored "-Wexceptions-unused"
+#pragma clang diagnostic ignored "-Wunused"
 #include <iostream>
 #include "ui.hpp"
 #include <assert.h>
