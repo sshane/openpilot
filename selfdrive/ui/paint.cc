@@ -1,11 +1,8 @@
-#pragma clang diagnostic ignored "-Wunused"
-#include <iostream>
 #include "ui.hpp"
 #include <assert.h>
 #include <map>
 #include <cmath>
 #include "common/util.h"
-#include <stdlib.h>
 
 #define NANOVG_GLES3_IMPLEMENTATION
 
