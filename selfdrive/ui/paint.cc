@@ -360,6 +360,8 @@ static void ui_draw_vision_lanes(UIState *s) {
 
 // Draw all world space objects.
 static void ui_draw_world(UIState *s) {
+  std::cout << "here\n";
+
   const UIScene *scene = &s->scene;
   if (!scene->world_objects_visible) {
     return;
