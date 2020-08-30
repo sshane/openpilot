@@ -315,12 +315,9 @@ static void ui_draw_lane(UIState *s, const PathData *path, model_path_vertices_d
   float dists[2] = {1.1, 0.8};
   float hues[2] = {133, 0};  // green to red
   float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
-  std::cout << "lane pos: " << lane_pos << "\n";
   hue = fmin(133, fmax(0, hue));
-  std::cout << "hue: " << hue << "\n";
 
   ui_draw_lane_line(s, pstart, prob, hue);
-//  color.a /= 25;
   prob /= 25;
   ui_draw_lane_line(s, pstart + 1, prob, hue);  // so is this
   ui_draw_lane_line(s, pstart + 2, prob, hue); // this is how confident model is
