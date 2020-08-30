@@ -1,4 +1,5 @@
 #pragma clang diagnostic ignored "-Wexceptions"
+#include <iostream>
 #include "ui.hpp"
 #include <assert.h>
 #include <map>
