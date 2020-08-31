@@ -4,7 +4,6 @@ import time
 import signal
 import subprocess
 import cereal.messaging as messaging
-
 from common.basedir import BASEDIR
 
 services = ['controlsState', 'thermal', 'radarState']  # the services needed to be spoofed to start ui offroad
