@@ -25,5 +25,3 @@ try:
     time.sleep(1 / 100)  # continually send, rate doesn't matter for thermal
 except KeyboardInterrupt:
   [p.send_signal(signal.SIGINT) for p in started_procs]
-  # time.sleep(3)
-  # [p.kill() for p in started_procs]
