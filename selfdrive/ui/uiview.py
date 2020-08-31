@@ -22,6 +22,6 @@ try:
     pm.send('controlsState', dat_cs)
     pm.send('thermal', dat_thermal)
     pm.send('radarState', dat_radar)
-    time.sleep(1 / 100)  # continually send, rate doesn't matter for thermal
+    time.sleep(1 / 100)  # continually send, rate doesn't matter
 except KeyboardInterrupt:
   [p.send_signal(signal.SIGINT) for p in started_procs]
