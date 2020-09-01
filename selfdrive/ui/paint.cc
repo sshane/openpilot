@@ -202,12 +202,12 @@ static void update_all_track_data(UIState *s) {
 //  if (scene->controls_state.getEnabled()) {
   if (true) {
     // Draw MPC path when engaged
-    update_track_data(s, true, &s->track_vertices[0]);
+    update_track_data(s, true, &s->track_vertices[1]);
   }
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
+static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, auto pPoly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -227,6 +227,14 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
       nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
+
+    float lane_pos = std::abs(path->poly[3]);  // get redder when line is closer to car
+    float dists[2] = {1.4, 1.0};
+    float hues[2] = {133, 0};  // green to red
+    float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
+    hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
+    NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255);
+
   }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
@@ -345,11 +353,11 @@ static void ui_draw_vision_lanes(UIState *s) {
     update_all_track_data(s);
   }
   // Draw vision path
-  ui_draw_track(s, false, &s->track_vertices[0]);
+  ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly);
 //  if (scene->controls_state.getEnabled()) {
   if (true) {
     // Draw MPC path when engaged
-    ui_draw_track(s, true, &s->track_vertices[0]);
+    ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly);
   }
 }
 
