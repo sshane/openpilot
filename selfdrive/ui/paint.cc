@@ -207,7 +207,7 @@ static void update_all_track_data(UIState *s) {
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *pPoly) {
+static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *p_poly, float angle_steers) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -353,11 +353,11 @@ static void ui_draw_vision_lanes(UIState *s) {
     update_all_track_data(s);
   }
   // Draw vision path
-  ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly);
+  ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly, scene->controls_state.getAngleSteers());
 //  if (scene->controls_state.getEnabled()) {
   if (true) {
     // Draw MPC path when engaged
-    ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly);
+    ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly, scene->controls_state.getAngleSteers());
   }
 }
 
