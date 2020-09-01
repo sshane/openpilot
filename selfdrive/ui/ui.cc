@@ -417,6 +417,7 @@ void handle_message(UIState *s, SubMaster &sm) {
     } else{
       update_status(s, scene.controls_state.getEnabled() ? STATUS_ENGAGED : STATUS_DISENGAGED);
     }
+    update_status(s, STATUS_ENGAGED);  // todo: change this
 
     float alert_blinkingrate = scene.controls_state.getAlertBlinkingRate();
     if (alert_blinkingrate > 0.) {
