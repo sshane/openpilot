@@ -229,7 +229,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
     angle_steers = std::abs(angle_steers) + 200;  // get redder when line is closer to car
 
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA(angle_steers, 61/255., 67/255., 255), nvgHSLA(angle_steers, 61/255., 67/255., 50));
+      nvgHSLA(angle_steers / 255., 61./255., 67./255., 255), nvgHSLA(angle_steers, 61/255., 67/255., 50));
   }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
