@@ -207,7 +207,7 @@ static void update_all_track_data(UIState *s) {
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, float *pPoly) {
+static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *pPoly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
