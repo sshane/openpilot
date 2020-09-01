@@ -14,17 +14,17 @@ If you'd like to support my development of Stock Additions with a [dollar for a 
   * [**`auto-df` model for automatic distance profile switching**](#Automatic-DF-profile-switching)
 * **Lane Speed**
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
-  * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - automatically moves you over if adjacent lane has oncoming traffic
+  * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
-* [**NEW❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
+* [**NEWISH❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
-### Visual Changes
-* [**Colored the lane lines based on distance from lane line**]()
+### Visual Changes NEW❗
+* [**Colored the lane lines based on distance from car**]()
 * [**Colored path based on curvature/steering angle**]()
 
 ## Documentation
