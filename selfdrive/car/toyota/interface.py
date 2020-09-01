@@ -72,11 +72,11 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kf = 0.000068  # full torque for 20 deg at 80mph means 0.00007818594
       else:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 4.0
+        ret.lateralTuning.indi.innerLoopGain = 4.08
         ret.lateralTuning.indi.outerLoopGain = 3.0
         ret.lateralTuning.indi.timeConstant = 1.0
-        ret.lateralTuning.indi.actuatorEffectiveness = 1.0
-        ret.steerActuatorDelay = 0.5
+        ret.lateralTuning.indi.actuatorEffectiveness = 0.986
+        ret.steerActuatorDelay = 0.462
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
