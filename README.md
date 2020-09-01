@@ -4,8 +4,6 @@ Stock Additions is a fork of openpilot designed to be minimal in design while bo
 
 Want to request a feature or create a bug report? [Open an issue here!](https://github.com/ShaneSmiskol/openpilot/issues/new/choose) Want to reach me to debug an issue? `Shane#6175` on Discord!
 
-If you'd like to support my development of Stock Additions with a [dollar for a RaceTrac ICEE](https://paypal.me/ssmiskol) (my PayPal link). Thanks! 🥰
-
 ---
 ## Highlight Features
 
@@ -200,3 +198,6 @@ Most of the branches on this fork are development branches I use as various open
 Here's a short video showing how close the traffic profile was in `0.7.4`. In `0.7.5`, the traffic profile is an average of 7.371 feet closer from 18 mph to 90 mph. Video thanks to [@rolo01](https://github.com/rolo01)!
 
 [![](https://img.youtube.com/vi/sGsODeP_G_c/0.jpg)](https://www.youtube.com/watch?v=sGsODeP_G_c)
+
+---
+If you'd like to support my development of Stock Additions with a [dollar for a RaceTrac ICEE](https://paypal.me/ssmiskol) (my PayPal link). Thanks! 🥰
