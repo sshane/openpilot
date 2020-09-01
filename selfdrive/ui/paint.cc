@@ -207,7 +207,7 @@ static void update_all_track_data(UIState *s) {
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, auto pPoly) {
+static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, cereal::ModelData::PathData::Reader pPoly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -228,12 +228,12 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, aut
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
       nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
 
-    float lane_pos = std::abs(path->poly[3]);  // get redder when line is closer to car
-    float dists[2] = {1.4, 1.0};
-    float hues[2] = {133, 0};  // green to red
-    float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
-    hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
-    NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255);
+//    float lane_pos = std::abs(path->poly[3]);  // get redder when line is closer to car
+//    float dists[2] = {1.4, 1.0};
+//    float hues[2] = {133, 0};  // green to red
+//    float hue = (lane_pos - dists[0]) * (hues[1] - hues[0]) / (dists[1] - dists[0]) + hues[0];
+//    hue = fmin(133, fmax(0, hue)) / 360;  // clip and normalize
+//    NVGcolor color = nvgHSLA(hue, 0.73, 0.64, prob * 255);
 
   }
   nvgFillPaint(s->vg, track_bg);
