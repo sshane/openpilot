@@ -221,6 +221,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
   if (is_mpc) {
     // Draw colored MPC track
     const uint8_t *clr = bg_colors[s->status];
+    std::cout << s->status << "\n";
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
       nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
   } else {
