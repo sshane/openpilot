@@ -198,7 +198,8 @@ static void update_all_track_data(UIState *s) {
   // Draw vision path
   update_track_data(s, false, &s->track_vertices[0]);
 
-  if (scene->controls_state.getEnabled()) {
+//  if (scene->controls_state.getEnabled()) {
+  if (true) {
     // Draw MPC path when engaged
     update_track_data(s, true, &s->track_vertices[1]);
   }
