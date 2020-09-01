@@ -22,6 +22,10 @@ Highlight Features
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
+## Visual Changes
+* [**Colored the lane lines based on distance from lane line**]()
+* [**Colored path based on curvature/steering angle**]()
+
 Documentation
 ===
 * [**Quick Installation**](#Quick-installation)
