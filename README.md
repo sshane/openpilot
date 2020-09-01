@@ -23,7 +23,7 @@ If you'd like to support my development of Stock Additions with a [dollar for a 
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
-### Visual Changes NEW❗
+### Visual Changes **NEW❗**
 * [**Colored the lane lines based on distance from car**]()
 * [**Colored path based on curvature/steering angle**]()
 
