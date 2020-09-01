@@ -227,7 +227,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+      nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
   }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
