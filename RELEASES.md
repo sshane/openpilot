@@ -10,6 +10,7 @@ Stock Additions 0.7.7
  * Add a Reset to origin button to TextWindow when an error occurs
  * Add color to the lane lines based on distance from car
  * Add color to path based on curvature/steering angle
+ * Correct CAMERA_OFFSET offsetting. Now offsets the path poly minus the standard camera offset of 0.06
 
 Version 0.7.7 (2020-07-20)
 ========================
