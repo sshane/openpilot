@@ -200,6 +200,7 @@ static void update_all_track_data(UIState *s) {
 
 //  if (scene->controls_state.getEnabled()) {
   if (true) {
+    std::cout << "here\n";
     // Draw MPC path when engaged
     update_track_data(s, true, &s->track_vertices[1]);
   }
