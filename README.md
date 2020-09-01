@@ -117,7 +117,7 @@ cd /data/openpilot
 python op_edit.py  # or ./op_edit.py
 ```
 
-[To see what features opEdit has, click me!](/OPEDIT_FEATURES.md)
+[**To see what features opEdit has, click me!**](/OPEDIT_FEATURES.md)
 
 Here are the main parameters you can change with this fork:
 - **Tuning params**:
