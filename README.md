@@ -123,12 +123,12 @@ Here are the main parameters you can change with this fork:
 - **Tuning params**:
   - `camera_offset` **`(live!)`**: Your camera offset to use in lane_planner.py. Helps fix lane hugging
   - `steer_ratio` **`(live!)`**: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead
-  - `enable_long_derivative`: This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals or cars with bad long tuning
+  - [`enable_long_derivative`](#pi---pid-controller-for-long-and-lat): This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals or cars with bad long tuning
 - **General fork params**:
   - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
   - `alca_min_speed`: The minimum speed allowed for an automatic lane change
   - `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
-  - `no_ota_updates`: Set this to True to disable all automatic updates. Reboot to take effect
+  - [`no_ota_updates`](#Automatic-updates): Set this to True to disable all automatic updates. Reboot to take effect
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
