@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ui.hpp"
 #include <assert.h>
 #include <map>
