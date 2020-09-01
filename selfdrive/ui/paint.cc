@@ -223,7 +223,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
     const uint8_t *clr = bg_colors[s->status];
     std::cout << s->status << "\n";
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
+      nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
