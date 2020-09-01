@@ -347,7 +347,8 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
   // Draw vision path
   ui_draw_track(s, false, &s->track_vertices[0]);
-  if (scene->controls_state.getEnabled()) {
+//  if (scene->controls_state.getEnabled()) {
+  if (true) {
     // Draw MPC path when engaged
     ui_draw_track(s, true, &s->track_vertices[1]);
   }
