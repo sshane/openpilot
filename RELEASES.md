@@ -8,6 +8,8 @@ Stock Additions 0.7.7
    * Also added more colors to opEdit!
  * Add derivative to lateral PI control for TSS1 Corolla and Prius!
  * Add a Reset to origin button to TextWindow when an error occurs
+ * Add color to the lane lines based on distance from car
+ * Add color to path based on curvature/steering angle
 
 Version 0.7.7 (2020-07-20)
 ========================
