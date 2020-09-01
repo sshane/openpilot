@@ -199,8 +199,8 @@ static void update_all_track_data(UIState *s) {
   // Draw vision path
   update_track_data(s, false, &s->track_vertices[0]);
 
-//  if (scene->controls_state.getEnabled()) {
-  if (true) {
+  if (scene->controls_state.getEnabled()) {
+//  if (true) {
     // Draw MPC path when engaged
     update_track_data(s, true, &s->track_vertices[1]);
   }
@@ -351,8 +351,8 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
   // Draw vision path
   ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly, scene->controls_state.getAngleSteers());
-//  if (scene->controls_state.getEnabled()) {
-  if (true) {
+  if (scene->controls_state.getEnabled()) {
+//  if (true) {
     // Draw MPC path when engaged
     ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly, scene->controls_state.getAngleSteers());
   }
