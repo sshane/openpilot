@@ -224,13 +224,13 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
 //    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
 //      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA(angle_steers / 255., 61./100., 67./100., 255), nvgHSLA(angle_steers / 255, 61./100., 67./100., 255/2));
+      nvgHSLA(angle_steers / 360., 61./100., 67./100., 255), nvgHSLA(angle_steers / 360, 61./100., 67./100., 255/2));
   } else {
     // Draw white vision track
 
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
 //      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
-      nvgHSLA(angle_steers / 255., 61./100., 67./100., 255), nvgHSLA(angle_steers / 255, 61./100., 67./100., 255/2));
+      nvgHSLA(angle_steers / 360., 61./100., 67./100., 255), nvgHSLA(angle_steers / 360, 61./100., 67./100., 255/2));
   }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
