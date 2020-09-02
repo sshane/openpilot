@@ -200,7 +200,6 @@ static void update_all_track_data(UIState *s) {
   update_track_data(s, false, &s->track_vertices[0]);
 
   if (scene->controls_state.getEnabled()) {
-//  if (true) {
     // Draw MPC path when engaged
     update_track_data(s, true, &s->track_vertices[1]);
   }
@@ -218,6 +217,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
+  angle_steers = std::abs(angle_steers) + 200;  // get redder when line is closer to car
   if (is_mpc) {
     // Draw colored MPC track
     const uint8_t *clr = bg_colors[s->status];
@@ -227,11 +227,9 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
       nvgHSLA(angle_steers / 255., 61./255., 67./255., 255), nvgHSLA(angle_steers / 255, 61./255., 67./255., 255/2));
   } else {
     // Draw white vision track
-    std::cout << "angle steers: " << angle_steers << std::endl;
-    angle_steers = std::abs(angle_steers) + 200;  // get redder when line is closer to car
 
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA(angle_steers / 255., 61./255., 67./255., 255), nvgHSLA(angle_steers / 255, 61./255., 67./255., 50));
+      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
   }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
@@ -352,7 +350,6 @@ static void ui_draw_vision_lanes(UIState *s) {
   // Draw vision path
   ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly, scene->controls_state.getAngleSteers());
   if (scene->controls_state.getEnabled()) {
-//  if (true) {
     // Draw MPC path when engaged
     ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly, scene->controls_state.getAngleSteers());
   }
