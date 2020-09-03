@@ -217,7 +217,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
-  angle_steers = std::abs(angle_steers) / 2.0;  // get redder when line is closer to car
+  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
   if (is_mpc) {
     // Draw colored MPC track
     const uint8_t *clr = bg_colors[s->status];
