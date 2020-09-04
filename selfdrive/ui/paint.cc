@@ -221,15 +221,14 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   if (is_mpc) {
     // Draw colored MPC track
     const uint8_t *clr = bg_colors[s->status];
-//    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-//      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
+    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
 //    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
 //      nvgHSLA((-angle_steers + 144) / 360., .71, .31, 255), nvgHSLA((angle_steers + 189) / 360., .71, .31, 255/2));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(13, 220, 248, 255), nvgHSLA(210, 50, 167, 0));
-//      nvgHSLA(187. / 360., .94, .51, 255), nvgHSLA(326. / 360., .64, .51, 255));
+      nvgHSLA(187. / 360., .94, .51, 255), nvgHSLA(326. / 360., .64, .51, 255));
 //      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
 //      nvgHSLA((angle_steers + 200) / 360., .78, .53, 255), nvgHSLA((angle_steers + 222) / 360., .78, .53, 255/2));
   }
