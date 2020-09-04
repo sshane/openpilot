@@ -229,7 +229,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA((angle_steers + 326) / 360., .94, .51, 255), nvgHSLA((angle_steers + 187) / 360., .94, .51, 255/2));
+      nvgHSLA((angle_steers + 326) / 360., .94, .51, 255), nvgHSLA((angle_steers + 187) / 360., .94, .51, 255));
 //      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
 //      nvgHSLA((angle_steers + 200) / 360., .78, .53, 255), nvgHSLA((angle_steers + 222) / 360., .78, .53, 255/2));
   }
