@@ -221,10 +221,10 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   if (is_mpc) {
     // Draw colored MPC track
     const uint8_t *clr = bg_colors[s->status];
-//    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-//      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA((-angle_steers + 144) / 360., .71, .31, 255), nvgHSLA((angle_steers + 189) / 360., .71, .31, 255/2));
+      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
+//    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+//      nvgHSLA((-angle_steers + 144) / 360., .71, .31, 255), nvgHSLA((angle_steers + 189) / 360., .71, .31, 255/2));
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
