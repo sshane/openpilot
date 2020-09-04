@@ -87,9 +87,9 @@ class DynamicCameraOffset:
     self._k_i = 1.2 * _i_rate
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
+    self.camera_offset = self.op_params.get('camera_offset')  # update base offset from user
     if self._enabled:
       self.sm.update(0)
-      self.camera_offset = self.op_params.get('camera_offset')  # update base offset from user
       self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
       self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
       self.lane_width_estimate, self.lane_width_certainty = lane_width_estimate, lane_width_certainty
