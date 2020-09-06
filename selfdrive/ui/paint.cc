@@ -217,7 +217,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
-  float TR = 1.8;
+  float TR = 1.8;  // eval car position at 1.8s from path
   float lat_pos = p_poly[3] + p_poly[2] * TR + p_poly[1] * pow(TR, 2) + p_poly[0] * pow(TR, 3);
   lat_pos = std::abs(lat_pos - p_poly[3]);
   std::cout << "lat_pos: " << lat_pos << std::endl;
