@@ -21,7 +21,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Automatic updates**](#Automatic-updates)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
-### Visual Changes **NEW❗**
+### Visual Changes ***NEW❗***
 * [**Colored the lane lines based on distance from car**]()
 * [**Colored path based on curvature/steering angle**]()
 
