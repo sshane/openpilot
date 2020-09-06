@@ -14,12 +14,12 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
-* [**NEWISH❗ Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
+* [***NEWISH❗* Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
-* [**ZSS (Zorrobyte Steering Sensor) Support**](#ZSS-support)
+* [***NEW❗* ZSS (Zorrobyte Steering Sensor) Support**](#ZSS-support)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
 ### Visual Changes ***NEW❗***
