@@ -222,6 +222,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   lat_pos = std::abs(lat_pos - p_poly[3]);
   float offset = lat_pos * 800.;
   std::cout << "offset: " << offset << std::endl;
+  offset = 0;
 
 
 //  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
@@ -235,7 +236,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgHSLA((187. + offset) / 360., .94, .51, 255), nvgHSLA((326. + offset) / 360., .94, .51, 255));
+      nvgHSLA((182. + offset) / 360., .94, .51, 255), nvgHSLA((148. + offset) / 360., .94, .51, 255));
 //      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
 //      nvgHSLA((angle_steers + 200) / 360., .78, .53, 255), nvgHSLA((angle_steers + 222) / 360., .78, .53, 255/2));
   }
