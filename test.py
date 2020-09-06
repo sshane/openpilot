@@ -1,9 +1,9 @@
 import numpy as np
 
-x = [0, .15]
+x = [0, .075]
 y = [0, -148]
 
-i = np.linspace(0, .15, 100)
+i = np.linspace(0, .075, 100)
 u = np.interp(i, x, y)
 
 # plt.plot(i, u)
