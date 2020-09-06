@@ -96,11 +96,12 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 (long: longitudinal, speed control. lat: latitudinal, steering control)
 
 **Changes for lat control: (NEW❗)**
-- Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
+- Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves and smooths out steering in all situations. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
 
   ***Currently Supported Cars:***
   - 2017 Toyota Corolla (when param `corolla_use_lqr` is False)
-  - All Prius years (when param `prius_use_pid` is True). *Note that it will use the 2020 Corolla's PID tune*
+  - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from birdman!
+  - All Prius years (when param `prius_use_pid` is True) - tune from [Trae](https://github.com/d412k5t412)!
 
 **Changes for long control:**
 - I've added a custom implementation of derivative to the PI loop controlling the gas and brake output sent to your car. Derivative (change in error) is calculated based on the current and last error and added to the class's integral variable. It's essentially winding down integral according to derivative. It helps fix overshoot on some cars with the comma pedal and increases responsiveness (like when going up and down hills) on all other cars! Still need to figure out the tuning, right now it's using the same derivative gain for all cars. Test it out and let me know what you think!
