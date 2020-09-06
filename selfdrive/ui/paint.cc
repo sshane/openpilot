@@ -222,7 +222,6 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   lat_pos = std::abs(lat_pos - p_poly[3]);
   float offset = lat_pos * 800.;
   std::cout << "offset: " << offset << std::endl;
-  offset = 0;
 
 
 //  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
