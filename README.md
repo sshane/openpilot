@@ -19,6 +19,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ### General Features
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
+* [**ZSS (Zorrobyte Steering Sensor) Support**](#ZSS-support)
 * [**Offline crash logging**](#Offline-crash-logging) - check out `/data/community/crashes`
 
 ### Visual Changes ***NEW❗***
@@ -92,7 +93,6 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 
 ---
 ### PI -> PID Controller for Long and Lat
-
 (long: longitudinal, speed control. lat: latitudinal, steering control)
 
 **Changes for lat control: (NEW❗)**
@@ -107,6 +107,12 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 - I've added a custom implementation of derivative to the PI loop controlling the gas and brake output sent to your car. Derivative (change in error) is calculated based on the current and last error and added to the class's integral variable. It's essentially winding down integral according to derivative. It helps fix overshoot on some cars with the comma pedal and increases responsiveness (like when going up and down hills) on all other cars! Still need to figure out the tuning, right now it's using the same derivative gain for all cars. Test it out and let me know what you think!
 
   Long derivative is disabled by default due to only one tune for all cars, but can be enabled by using [opEdit](#Customize-this-fork-opEdit) and setting the `enable_long_derivative` parameter to `True`. It works well on my '17 Corolla with pedal.
+
+---
+### ZSS Support
+If you have a Prius with a ZSS ([Zorrobyte](https://github.com/zorrobyte) Steer Sensor), you can use this fork to take full advantage of your high-precision angle sensor! Added support for ZSS with [PR #198](https://github.com/ShaneSmiskol/openpilot/pull/198), there's nothing you need to do. Special thanks to [Trae](https://github.com/d412k5t412) for helping testing the addition!
+
+If you have a ZSS but not a Prius, let me know and I can add support for your car.
 
 ---
 ### Customize this fork (opEdit)
