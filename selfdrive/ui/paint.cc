@@ -206,7 +206,7 @@ static void update_all_track_data(UIState *s) {
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *p_poly, float angle_steers) {
+static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *p_poly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -217,12 +217,11 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
-  float dist = 1.8 * fmax(s->scene.controls_state.getVEgo(), 4.4704*2);  // eval car position at 1.8s from path (min 10 mph)
+  float dist = 1.8 * fmax(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
   float lat_pos = std::abs((p_poly[0] * pow(dist, 3)) + (p_poly[1] * pow(dist, 2)) + (p_poly[2] * dist));  // don't include path offset
   std::cout << "lat_pos: " << lat_pos << std::endl;
   float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
 
-//  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
   if (is_mpc) {
     // Draw colored MPC track (unused)
     const uint8_t *clr = bg_colors[s->status];
@@ -351,11 +350,13 @@ static void ui_draw_vision_lanes(UIState *s) {
   if(s->sm->updated("radarState")) {
     update_all_track_data(s);
   }
+
+  float *p_poly = scene->model.path.poly
   // Draw vision path
-  ui_draw_track(s, false, &s->track_vertices[0], scene->model.path.poly, scene->controls_state.getAngleSteers());
+  ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   if (scene->controls_state.getEnabled()) {
     // Draw MPC path when engaged
-    ui_draw_track(s, true, &s->track_vertices[1], scene->model.path.poly, scene->controls_state.getAngleSteers());
+    ui_draw_track(s, true, &s->track_vertices[1], p_poly);
   }
 }
 
