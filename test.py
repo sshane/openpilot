@@ -1,6 +1,6 @@
 import numpy as np
 
-x = [0, .075]
+x = [0, 4]
 y = [0, -148]
 
 i = np.linspace(0, .075, 100)
