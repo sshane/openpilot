@@ -346,7 +346,7 @@ static void ui_draw_vision_lanes(UIState *s) {
     update_all_track_data(s);
   }
   // Draw vision path
-  float *p_poly = scene->model.path.poly
+  const float *p_poly = scene->model.path.poly;
   ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   if (scene->controls_state.getEnabled()) {
     // Draw MPC path when engaged
