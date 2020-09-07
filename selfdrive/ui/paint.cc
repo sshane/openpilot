@@ -217,27 +217,23 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   nvgClosePath(s->vg);
 
   NVGpaint track_bg;
-  // todo: use s->scene.controls_state.getVEgo()
-  float TR = 1.8 * 9.83488;  // eval car position at 1.8s from path (50 mph)
-  float lat_pos = p_poly[2] * TR + p_poly[1] * pow(TR, 2) + p_poly[0] * pow(TR, 3);
-  lat_pos = std::abs(lat_pos);
+  float TR = 1.8 * fmin(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
+  float lat_pos = std::abs((p_poly[0] * pow(TR, 3)) + (p_poly[1] * pow(TR, 2)) + (p_poly[2] * TR));  // don't include path offset
   std::cout << "lat_pos: " << lat_pos << std::endl;
-  float offset = lat_pos * -37;
-//  std::cout << "offset: " << offset << std::endl;
-
+  float hue = lat_pos * -32.9 + 148;  // interp from {0, 4.5} -> {148, 0}
 
 //  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
   if (is_mpc) {
-    // Draw colored MPC track
+    // Draw colored MPC track (unused)
     const uint8_t *clr = bg_colors[s->status];
 //    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
 //      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
 //    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
 //      nvgHSLA((-angle_steers + 144) / 360., .71, .31, 255), nvgHSLA((angle_steers + 189) / 360., .71, .31, 255/2));
   } else {
-    // Draw white vision track
+    // Draw colored vision track
     track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h*.9, vwp_w, vwp_h*.4,
-      nvgHSLA((148. + offset) / 360., .94, .51, 255), nvgHSLA((148. + offset) / 360., .73, .49, 127));
+      nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 127));
 //      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
 //      nvgHSLA((angle_steers + 200) / 360., .78, .53, 255), nvgHSLA((angle_steers + 222) / 360., .78, .53, 255/2));
   }
