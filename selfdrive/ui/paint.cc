@@ -221,8 +221,9 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   float TR = 1.8 * 22.352;  // eval car position at 1.8s from path (50 mph)
   float lat_pos = p_poly[2] * TR + p_poly[1] * pow(TR, 2) + p_poly[0] * pow(TR, 3);
   lat_pos = std::abs(lat_pos);
+  std::cout << "lat_pos: " << lat_pos << std::endl;
   float offset = lat_pos * -987;
-  std::cout << "offset: " << offset << std::endl;
+//  std::cout << "offset: " << offset << std::endl;
 
 
 //  angle_steers = std::abs(angle_steers) * 2.0;  // get redder when line is closer to car
