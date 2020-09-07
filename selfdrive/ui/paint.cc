@@ -218,6 +218,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
 
   NVGpaint track_bg;
   float TR = 1.8 * fmin(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
+  std::cout << "TR: " << TR << std::endl;
   float lat_pos = std::abs((p_poly[0] * pow(TR, 3)) + (p_poly[1] * pow(TR, 2)) + (p_poly[2] * TR));  // don't include path offset
   std::cout << "lat_pos: " << lat_pos << std::endl;
   float hue = lat_pos * -32.9 + 148;  // interp from {0, 4.5} -> {148, 0}
