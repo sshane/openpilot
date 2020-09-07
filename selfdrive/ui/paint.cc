@@ -1,4 +1,3 @@
-#include <iostream>
 #include "ui.hpp"
 #include <assert.h>
 #include <map>
@@ -220,7 +219,6 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
 
   float dist = 1.8 * fmax(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
   float lat_pos = std::abs((p_poly[0] * pow(dist, 3)) + (p_poly[1] * pow(dist, 2)) + (p_poly[2] * dist));  // don't include path offset
-  std::cout << "lat_pos: " << lat_pos << std::endl;
   float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
   if (is_mpc) {
     // Draw colored MPC track
