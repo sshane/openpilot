@@ -90,7 +90,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
 
   def update(self, v_ego, active, angle_steers, lane_width_estimate, lane_width_certainty, polys, probs):
     self.camera_offset = self.op_params.get('camera_offset')  # update base offset from user
-    if self._enabled:
+    if self._enabled:  # if feature enabled
       self.sm.update(0)
       self.left_lane_oncoming = self.sm['laneSpeed'].leftLaneOncoming
       self.right_lane_oncoming = self.sm['laneSpeed'].rightLaneOncoming
@@ -130,7 +130,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
       self.last_right_lane_oncoming = self.right_lane_oncoming
     elif time_since_oncoming > self._ramp_down_times[-1]:  # return if it's x+ seconds after last oncoming, no need to offset
       return
-    else:  # no oncoming and not yet 2 seconds after we lost an oncoming lane. use last oncoming lane for 2 seconds to ramp down offset
+    else:  # no oncoming and not yet x seconds after we lost an oncoming lane. use last oncoming lane until we complete full offset time
       left_lane_oncoming = self.last_left_lane_oncoming
       right_lane_oncoming = self.last_right_lane_oncoming
 
@@ -150,9 +150,8 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
     self.i += error * self._k_i  # PI controller
     offset = self.i + error * self._k_p
 
-    if time_since_oncoming <= self._ramp_down_times[-1] and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
-      offset *= interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # ramp down offset
-
+    if time_since_oncoming <= self._ramp_down_times[-1] and not self.have_oncoming:
+      offset *= interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # we have passed initial full offset time, start to ramp down
     return offset
 
   def _send_state(self):
