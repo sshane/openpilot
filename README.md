@@ -163,7 +163,7 @@ Parameters are stored at `/data/op_params.json`
 ---
 ### Automatic updates
 When a new update is available on GitHub for Stock Additions, your EON/C2 will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
-- your EON has been inactive or offroad for more than 5 minutes.
+- your EON has been inactive or offroad for more than 5 minutes
 
 Therefore, if your device sees an update while you're driving it will reboot approximately 5 to 10 minutes after you finish your drive, it resets the timer if you start driving again before the time is up.
 
