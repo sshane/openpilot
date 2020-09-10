@@ -316,7 +316,7 @@ def attempt_update(time_offroad, need_reboot):
   else:
     cloudlog.info("nothing new from git at this time")
 
-  set_update_available_params(new_version=new_version)
+  set_update_available_params(new_version=new_version) # test
   return auto_update_reboot(time_offroad, need_reboot, new_version)
 
 
