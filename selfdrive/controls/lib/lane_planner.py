@@ -100,7 +100,7 @@ class DynamicCameraOffset:
 
       dynamic_offset = self._get_camera_offset(v_ego, active, angle_steers)
       self._send_state()  # for alerts, before speed check so alerts don't get stuck on
-      if dynamic_offset is not None:
+      if dynamic_offset is not None:  # test
         return self.camera_offset + dynamic_offset
 
       self.i = 0  # reset when not active
