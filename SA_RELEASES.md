@@ -1,4 +1,4 @@
-Stock Additions v0.1.1 (2020-9-10, 0.7.7)
+Stock Additions v0.1.1 (2020-9-10) - 0.7.7
 ===
  * Disable automatic updates by default and show changelog to users in apk
 
