@@ -12,7 +12,6 @@ import textwrap
 from typing import Dict, List
 from selfdrive.swaglog import cloudlog, add_logentries_handler
 
-
 from common.basedir import BASEDIR, PARAMS
 from common.android import ANDROID
 WEBCAM = os.getenv("WEBCAM") is not None
@@ -21,7 +20,6 @@ os.environ['BASEDIR'] = BASEDIR
 
 TOTAL_SCONS_NODES = 1020
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
-
 
 # Create folders needed for msgq
 try:
@@ -229,8 +227,8 @@ if ANDROID:
   persistent_processes += [
     'logcatd',
     'tombstoned',
-    'deleter',
     'updated'
+    'deleter',
   ]
 
 car_started_processes = [
