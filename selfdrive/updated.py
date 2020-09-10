@@ -40,6 +40,7 @@ from common.colors import COLORS
 from common.params import Params
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
+from common.op_params import opParams
 
 STAGING_ROOT = "/data/safe_staging"
 
@@ -56,6 +57,8 @@ ffi = FFI()
 ffi.cdef("int link(const char *oldpath, const char *newpath);")
 libc = ffi.dlopen(None)
 
+op_params = opParams()
+auto_update = op_params.get('auto_update') and not os.path.exists('/data/no_ota_updates')
 
 class WaitTimeHelper:
   ready_event = threading.Event()
@@ -318,6 +321,8 @@ def attempt_update(time_offroad, need_reboot):
 
 
 def auto_update_reboot(time_offroad, need_reboot, new_version):
+  if not auto_update:
+    return False
   min_reboot_time = 5. * 60
   if new_version:
     need_reboot = True
