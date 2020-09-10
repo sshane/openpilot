@@ -11,7 +11,6 @@ import datetime
 import textwrap
 from typing import Dict, List
 from selfdrive.swaglog import cloudlog, add_logentries_handler
-from common.op_params import opParams
 
 
 from common.basedir import BASEDIR, PARAMS
@@ -23,8 +22,6 @@ os.environ['BASEDIR'] = BASEDIR
 TOTAL_SCONS_NODES = 1020
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
-op_params = opParams()
-no_ota_updates = op_params.get('no_ota_updates') or os.path.exists('/data/no_ota_updates')
 
 # Create folders needed for msgq
 try:
@@ -233,9 +230,8 @@ if ANDROID:
     'logcatd',
     'tombstoned',
     'deleter',
+    'updated'
   ]
-if not no_ota_updates:
-  persistent_processes.append('updated')
 
 car_started_processes = [
   'controlsd',

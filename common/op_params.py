@@ -81,7 +81,7 @@ class opParams:
                         'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
                                                                      'integral wind-down to help reduce overshooting within the long PID loop'),
                         'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
-                        'no_ota_updates': Param(False, bool, 'Set this to True to disable all automatic updates. Reboot to take effect'),
+                        'auto_update': Param(False, bool, 'Toggles whether your device will update and reboot automatically on this fork'),
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
