@@ -135,7 +135,7 @@ Here are the main parameters you can change with this fork:
   - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
   - `alca_min_speed`: The minimum speed allowed for an automatic lane change
   - `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
-  - [`no_ota_updates`](#Automatic-updates): Set this to True to disable all automatic updates. Reboot to take effect
+  - [`auto_update`](#Automatic-updates): Toggles whether your device will update and reboot automatically on this fork
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
