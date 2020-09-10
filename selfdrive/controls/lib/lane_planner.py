@@ -103,7 +103,7 @@ class DynamicCameraOffset:
       if dynamic_offset is not None:
         return self.camera_offset + dynamic_offset
 
-      self.i = 0  # reset when not  active
+      self.i = 0  # reset when not active
     return self.camera_offset  # don't offset if no lane line in direction we're going to hug
 
   def _get_camera_offset(self, v_ego, active, angle_steers):
