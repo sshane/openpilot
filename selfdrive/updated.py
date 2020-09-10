@@ -83,7 +83,6 @@ class WaitTimeHelper:
 
 def wait_between_updates(ready_event):
   ready_event.clear()
-  SHORT = True
   if SHORT:
     ready_event.wait(timeout=10)
   else:
@@ -324,11 +323,12 @@ def attempt_update(time_offroad, need_reboot):
 def auto_update_reboot(time_offroad, need_reboot, new_version):
   if not auto_update:
     return False
+
   min_reboot_time = 5. * 60
   if new_version:
     need_reboot = True
 
-  if need_reboot and op_params.get('auto_'):
+  if need_reboot:
     if sec_since_boot() - time_offroad > min_reboot_time:
       cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
       with open('/data/reboot_events.txt', 'a') as f:
