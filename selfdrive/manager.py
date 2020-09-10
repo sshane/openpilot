@@ -227,7 +227,7 @@ if ANDROID:
   persistent_processes += [
     'logcatd',
     'tombstoned',
-    'updated'
+    'updated',
     'deleter',
   ]
 
