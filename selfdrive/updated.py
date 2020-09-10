@@ -83,6 +83,7 @@ class WaitTimeHelper:
 
 def wait_between_updates(ready_event):
   ready_event.clear()
+  SHORT = True
   if SHORT:
     ready_event.wait(timeout=10)
   else:
