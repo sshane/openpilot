@@ -363,7 +363,7 @@ def main():
 
   # Wait a short time before our first update attempt
   # Avoids race with IsOffroad not being set, reduces manager startup load
-  time.sleep(30)
+  time.sleep(15)
   wait_helper = WaitTimeHelper()
 
   time_offroad = 0
