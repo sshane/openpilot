@@ -49,7 +49,7 @@ def calc_d_poly(l_poly, r_poly, p_poly, l_prob, r_prob, lane_width, v_ego):
   return lr_prob * d_poly_lane + (1.0 - lr_prob) * p_poly
 
 
-class DynamicCameraOffset:
+class DynamicCameraOffset:  # keeps away from oncoming traffic
   def __init__(self):
     self.sm = SubMaster(['laneSpeed'])
     self.pm = PubMaster(['dynamicCameraOffset'])
@@ -78,7 +78,7 @@ class DynamicCameraOffset:
     self._ramp_angles = [0, 12.5, 25]
     self._ramp_angle_mods = [1, 0.85, 0.1]  # multiply offset by this based on angle
 
-    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for + 2.]
+    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for * 1.5]
     self._ramp_down_multipliers = [1, 0]  # ramp down 1.5s after time has passed
 
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
@@ -128,7 +128,7 @@ class DynamicCameraOffset:
       self.last_oncoming_time = sec_since_boot()
       self.last_left_lane_oncoming = self.left_lane_oncoming  # only update last oncoming vars when currently have oncoming. one should always be True for the 2 second ramp down
       self.last_right_lane_oncoming = self.right_lane_oncoming
-    elif time_since_oncoming > self._keep_offset_for:  # return if it's 2+ seconds after last oncoming, no need to offset
+    elif time_since_oncoming > self._ramp_down_times[-1]:  # return if it's x+ seconds after last oncoming, no need to offset
       return
     else:  # no oncoming and not yet 2 seconds after we lost an oncoming lane. use last oncoming lane for 2 seconds to ramp down offset
       left_lane_oncoming = self.last_left_lane_oncoming
@@ -150,7 +150,7 @@ class DynamicCameraOffset:
     self.i += error * self._k_i  # PI controller
     offset = self.i + error * self._k_p
 
-    if time_since_oncoming <= self._keep_offset_for and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
+    if time_since_oncoming <= self._ramp_down_times[-1] and not self.have_oncoming:  # not yet 3 seconds after last oncoming, ramp down from 1.5 second
       offset *= interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # ramp down offset
 
     return offset
