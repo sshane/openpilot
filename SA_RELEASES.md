@@ -1,16 +1,6 @@
 Stock Additions v0.1.1 (0.7.7)
 ===
  * Disable automatic updates by default and show changelog to users in apk
- * LaneSpeed process is much more efficient, CPU usage down from 6% (causing lag alerts) to ~1%
-   * Use numpy_fast.interp instead of np.interp for slight boost in performance
- * Support white panda with experimental parameter. localizer performance may be reduced
- * Fixed silent alerts due to the new alert manager in 0.7.7
- * Make all the UI buttons show their state with unique colors!
-   * Also added more colors to opEdit!
- * Add derivative to lateral PI control for TSS1 & TSS2 Corolla and Prius!
- * Add a Reset to origin button to TextWindow when an error occurs
- * Color coded model lane lines and path
- * Add ZSS support
 
 Stock Additions v0.1 (0.7.7)
 ===
