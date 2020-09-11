@@ -183,7 +183,7 @@ managed_processes = {
   "pandad": "selfdrive.pandad",
   "ui": ("selfdrive/ui", ["./ui"]),
   "calibrationd": "selfdrive.locationd.calibrationd",
-  "paramsd": "selfdrive.locationd.paramsd",
+  "locationd": "selfdrive.locationd.locationd",
   "camerad": ("selfdrive/camerad", ["./camerad"]),
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
@@ -192,7 +192,7 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.monitoring.driverview",
-  "locationd": "selfdrive.locationd.locationd",
+  "paramsd": "selfdrive.locationd.paramsd",
 
   "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
@@ -324,7 +324,7 @@ def prepare_managed_process(p):
   t_start = time.time()
   if isinstance(proc, str):
     # import this python
-    cloudlog.info("preimporting %s" % proc)
+    print("preimporting %s" % proc, flush=True)
     importlib.import_module(proc)
   elif os.path.isfile(os.path.join(BASEDIR, proc[0], "Makefile")):
     # build this process adas
