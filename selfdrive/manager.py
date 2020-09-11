@@ -183,7 +183,6 @@ managed_processes = {
   "pandad": "selfdrive.pandad",
   "ui": ("selfdrive/ui", ["./ui"]),
   "calibrationd": "selfdrive.locationd.calibrationd",
-  "locationd": "selfdrive.locationd.locationd",
   "camerad": ("selfdrive/camerad", ["./camerad"]),
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
@@ -193,6 +192,7 @@ managed_processes = {
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.monitoring.driverview",
   "paramsd": "selfdrive.locationd.paramsd",
+  "locationd": "selfdrive.locationd.locationd",
 
   "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
