@@ -69,7 +69,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
     self._enabled = self.op_params.get('dynamic_camera_offset')
     self._min_enable_speed = 35 * CV.MPH_TO_MS
     self._min_lane_width_certainty = 0.4
-    hug = 0.1  # how much to hug
+    hug = 0.115  # how much to hug
     self._center_ratio = 0.5
     self._hug_left_ratio = self._center_ratio - hug
     self._hug_right_ratio = self._center_ratio + hug
@@ -78,8 +78,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
     self._ramp_angles = [0, 12.5, 25]
     self._ramp_angle_mods = [1, 0.85, 0.1]  # multiply offset by this based on angle
 
-    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for * 1.5]
-    self._ramp_down_multipliers = [1, 0]  # ramp down 1.5s after time has passed
+    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for * 1.25]
 
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
     self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
@@ -151,7 +150,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
     offset = self.i + error * self._k_p
 
     if time_since_oncoming <= self._ramp_down_times[-1] and not self.have_oncoming:
-      offset *= interp(time_since_oncoming, self._ramp_down_times, self._ramp_down_multipliers)  # we have passed initial full offset time, start to ramp down
+      offset = interp(time_since_oncoming, self._ramp_down_times, [offset, 0])  # we have passed initial full offset time, start to ramp down
     return offset
 
   def _send_state(self):
