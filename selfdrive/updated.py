@@ -86,7 +86,7 @@ def wait_between_updates(ready_event):
   if SHORT:
     ready_event.wait(timeout=10)
   else:
-    ready_event.wait(timeout=30)
+    ready_event.wait(timeout=30)  # trigger update
 
 
 def link(src, dest):
