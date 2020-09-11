@@ -126,7 +126,7 @@ def set_update_available_params(new_version=False):
       with open(os.path.join(FINALIZED, "SA_RELEASES.md"), "rb") as f:
         r = f.read()
       r = r[:r.find(b'\n\n')]  # Slice latest release notes
-      params.put("ReleaseNotes", r + b"\n")
+      params.put("ReleaseNotes", r + b"\n") # test
     except Exception:
       params.put("ReleaseNotes", "")
     params.put("UpdateAvailable", "1")
