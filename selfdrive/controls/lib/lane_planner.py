@@ -78,7 +78,7 @@ class DynamicCameraOffset:  # keeps away from oncoming traffic
     self._ramp_angles = [0, 12.5, 25]
     self._ramp_angle_mods = [1, 0.85, 0.1]  # multiply offset by this based on angle
 
-    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for * 1.25]
+    self._ramp_down_times = [self._keep_offset_for, self._keep_offset_for * 1.3]
 
     self._poly_prob_speeds = [0, 25 * CV.MPH_TO_MS, 35 * CV.MPH_TO_MS, 60 * CV.MPH_TO_MS]
     self._poly_probs = [0.2, 0.25, 0.45, 0.55]  # we're good if only one line is above this
