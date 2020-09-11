@@ -191,10 +191,11 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.monitoring.driverview",
-  "paramsd": "selfdrive.locationd.paramsd",
   "locationd": "selfdrive.locationd.locationd",
 
   "lanespeedd": "selfdrive.controls.lib.lane_speed",
+  "paramsd": "selfdrive.locationd.paramsd",
+
 }
 
 daemon_processes = {
