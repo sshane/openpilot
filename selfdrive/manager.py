@@ -176,6 +176,7 @@ managed_processes = {
   "ubloxd": ("selfdrive/locationd", ["./ubloxd"]),
   "loggerd": ("selfdrive/loggerd", ["./loggerd"]),
   "logmessaged": "selfdrive.logmessaged",
+  "locationd": "selfdrive.locationd.locationd",
   "tombstoned": "selfdrive.tombstoned",
   "logcatd": ("selfdrive/logcatd", ["./logcatd"]),
   "proclogd": ("selfdrive/proclogd", ["./proclogd"]),
@@ -183,6 +184,7 @@ managed_processes = {
   "pandad": "selfdrive.pandad",
   "ui": ("selfdrive/ui", ["./ui"]),
   "calibrationd": "selfdrive.locationd.calibrationd",
+  "paramsd": "selfdrive.locationd.paramsd",
   "camerad": ("selfdrive/camerad", ["./camerad"]),
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
@@ -191,11 +193,8 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.monitoring.driverview",
-  "locationd": "selfdrive.locationd.locationd",
 
   "lanespeedd": "selfdrive.controls.lib.lane_speed",
-  "paramsd": "selfdrive.locationd.paramsd",
-
 }
 
 daemon_processes = {
@@ -322,13 +321,12 @@ def start_daemon_process(name):
 
 def prepare_managed_process(p):
   proc = managed_processes[p]
-  t_start = time.time()
   if isinstance(proc, str):
     # import this python
-    print("preimporting %s" % proc, flush=True)
+    cloudlog.info("preimporting %s" % proc)
     importlib.import_module(proc)
   elif os.path.isfile(os.path.join(BASEDIR, proc[0], "Makefile")):
-    # build this process adas
+    # build this process
     cloudlog.info("building %s" % (proc,))
     try:
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
@@ -337,7 +335,6 @@ def prepare_managed_process(p):
       cloudlog.warning("building %s failed, make clean" % (proc, ))
       subprocess.check_call(["make", "clean"], cwd=os.path.join(BASEDIR, proc[0]))
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
-  print(f'{proc} took {time.time() - t_start} seconds')
 
 
 def join_process(process, timeout):
@@ -512,6 +509,7 @@ def manager_prepare(spinner=None):
 
   for i, p in enumerate(managed_processes):
     if spinner is not None:
+      print((100.0 - total) + total * (i + 1) / len(managed_processes))
       spinner.update("%d" % ((100.0 - total) + total * (i + 1) / len(managed_processes),))
     prepare_managed_process(p)
 
