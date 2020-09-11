@@ -327,7 +327,7 @@ def prepare_managed_process(p):
     cloudlog.info("preimporting %s" % proc)
     importlib.import_module(proc)
   elif os.path.isfile(os.path.join(BASEDIR, proc[0], "Makefile")):
-    # build this process
+    # build this process adas
     cloudlog.info("building %s" % (proc,))
     try:
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
