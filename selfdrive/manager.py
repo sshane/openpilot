@@ -321,6 +321,7 @@ def start_daemon_process(name):
 
 def prepare_managed_process(p):
   proc = managed_processes[p]
+  t_start = time.time()
   if isinstance(proc, str):
     # import this python
     cloudlog.info("preimporting %s" % proc)
@@ -335,6 +336,7 @@ def prepare_managed_process(p):
       cloudlog.warning("building %s failed, make clean" % (proc, ))
       subprocess.check_call(["make", "clean"], cwd=os.path.join(BASEDIR, proc[0]))
       subprocess.check_call(["make", "-j4"], cwd=os.path.join(BASEDIR, proc[0]))
+  print(f'{proc} took {time.time() - t_start} seconds')
 
 
 def join_process(process, timeout):
