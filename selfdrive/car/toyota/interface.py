@@ -355,6 +355,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.indi.actuatorEffectiveness = 1.0
 
     ret.steerRateCost = 0.5 if ret.hasZss else 1.0
+    # ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
 
     # TODO: get actual value, for now starting with reasonable value for
