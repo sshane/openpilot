@@ -351,7 +351,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.init('indi')
       ret.lateralTuning.indi.innerLoopGain = 4.0
       ret.lateralTuning.indi.outerLoopGain = 3.0
-      ret.lateralTuning.indi.timeConstant = 0.1 if ret.hasZss else 1.0
+      ret.lateralTuning.indi.timeConstant = 0.4 if ret.hasZss else 1.0
       ret.lateralTuning.indi.actuatorEffectiveness = 1.0
 
     ret.steerRateCost = 0.5 if ret.hasZss else 1.0
