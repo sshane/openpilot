@@ -335,10 +335,10 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
 
       ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGain = 4.0
-      ret.lateralTuning.indi.outerLoopGain = 3.0
-      ret.lateralTuning.indi.timeConstant = 1.0
-      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      ret.lateralTuning.indi.innerLoopGain = 6
+      ret.lateralTuning.indi.outerLoopGain = 15.0
+      ret.lateralTuning.indi.timeConstant = 5.5
+      ret.lateralTuning.indi.actuatorEffectiveness = 6.0
 
     elif candidate == CAR.PRIUS_2020:
       stop_and_go = True
