@@ -87,11 +87,17 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.6371  # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
 
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGain = 4.0
-      ret.lateralTuning.indi.outerLoopGain = 3.0
-      ret.lateralTuning.indi.timeConstant = 0.4 if ret.hasZss else 1.0
-      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      # ret.lateralTuning.init('indi')
+      # ret.lateralTuning.indi.innerLoopGain = 4.0
+      # ret.lateralTuning.indi.outerLoopGain = 3.0
+      # ret.lateralTuning.indi.timeConstant = 0.4 if ret.hasZss else 1.0
+      # ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+      ret.lateralTuning.pid.kdBP = [0.]
+      ret.lateralTuning.pid.kdV = [9.0]  # from birdman6450
+      ret.lateralTuning.pid.kf = 0.00007818594
+      ret.steerActuatorDelay = 0.4  # from birdman6450
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
@@ -340,7 +346,8 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kf = 0.00006
 
-    ret.steerRateCost = 0.5 if ret.hasZss else 1.0
+    # ret.steerRateCost = 0.5 if ret.hasZss else 1.0
+    ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
 
     # TODO: get actual value, for now starting with reasonable value for
