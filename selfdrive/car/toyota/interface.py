@@ -340,20 +340,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.indi.timeConstant = 5.5
       ret.lateralTuning.indi.actuatorEffectiveness = 6.0
 
-    elif candidate == CAR.PRIUS_2020:
-      stop_and_go = True
-      ret.safetyParam = 50
-      ret.wheelbase = 2.70
-      ret.steerRatio = 15.74  # unknown end-to-end spec
-      tire_stiffness_factor = 0.6371  # hand-tune
-      ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
-
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGain = 4.0
-      ret.lateralTuning.indi.outerLoopGain = 3.0
-      ret.lateralTuning.indi.timeConstant = 0.4 if ret.hasZss else 1.0
-      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
-
     ret.steerRateCost = 0.5 if ret.hasZss else 1.0
     # ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
