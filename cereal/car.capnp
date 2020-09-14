@@ -406,6 +406,7 @@ struct CarParams {
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
   hasZss @51: Bool;  # true if ZSS is detected
+  smartDsu @52: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
