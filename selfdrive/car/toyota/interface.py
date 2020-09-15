@@ -86,6 +86,9 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.74  # unknown end-to-end spec
       tire_stiffness_factor = 0.6371  # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
+      if not ret.enableGasInterceptor:
+        ret.longitudinalTuning.kpV = [3.0, 2.2, 1.5]
+        ret.longitudinalTuning.kiV = [0.54, 0.36]
 
       # ret.lateralTuning.init('indi')
       # ret.lateralTuning.indi.innerLoopGain = 4.0
@@ -96,7 +99,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [9.0]  # from birdman6450
       ret.lateralTuning.pid.kf = 0.00007818594
-      ret.steerActuatorDelay = 0.4  # from birdman6450
+      ret.steerActuatorDelay = 0.56  # from birdman6450
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
