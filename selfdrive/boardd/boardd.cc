@@ -126,7 +126,7 @@ void *safety_setter_thread(void *s) {
   capnp::FlatArrayMessageReader cmsg(amsg);
   cereal::CarParams::Reader car_params = cmsg.getRoot<cereal::CarParams>();
 
-  LOGW("setting unsafety mode");
+  LOGW("setting unsafe_mode for gas press");
   libusb_control_transfer(dev_handle, 0x40, 0xdf, 9, 0, NULL, 0, TIMEOUT);
 
   int safety_model = int(car_params.getSafetyModel());
