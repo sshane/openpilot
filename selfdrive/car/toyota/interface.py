@@ -90,11 +90,6 @@ class CarInterface(CarInterfaceBase):
         ret.longitudinalTuning.kpV = [2.9, 2.1, 1.5]
         ret.longitudinalTuning.kiV = [0.54, 0.36]
 
-      # ret.lateralTuning.init('indi')
-      # ret.lateralTuning.indi.innerLoopGain = 4.0
-      # ret.lateralTuning.indi.outerLoopGain = 3.0
-      # ret.lateralTuning.indi.timeConstant = 0.4 if ret.hasZss else 1.0
-      # ret.lateralTuning.indi.actuatorEffectiveness = 1.0
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
