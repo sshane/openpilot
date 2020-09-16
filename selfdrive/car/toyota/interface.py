@@ -343,8 +343,8 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kf = 0.00006
 
-    # ret.steerRateCost = 0.5 if ret.hasZss else 1.0
-    ret.steerRateCost = 1.0
+    ret.steerRateCost = 0.5 if ret.hasZss else 1.0
+    # ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
 
     # TODO: get actual value, for now starting with reasonable value for
