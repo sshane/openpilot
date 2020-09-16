@@ -81,7 +81,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.PRIUS_2020:
       stop_and_go = True
-      ret.safetyParam = 50
+      ret.safetyParam = 54
       ret.wheelbase = 2.70
       ret.steerRatio = 15.74  # unknown end-to-end spec
       tire_stiffness_factor = 0.6371  # hand-tune
