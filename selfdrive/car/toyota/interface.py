@@ -99,7 +99,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [9.0]  # from birdman6450
       ret.lateralTuning.pid.kf = 0.00007818594
-      ret.steerActuatorDelay = 0.4
+      ret.steerActuatorDelay = 0.55
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
