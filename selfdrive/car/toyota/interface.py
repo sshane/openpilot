@@ -68,7 +68,6 @@ class CarInterface(CarInterfaceBase):
 
       if prius_use_pid:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.02]]  # todo: parametertize by zss
-        ret.lateralTuning.pid.kdBP = [0.]
         ret.lateralTuning.pid.kdV = [0.85]
         ret.lateralTuning.pid.kf = 0.000068  # full torque for 20 deg at 80mph means 0.00007818594
       else:
@@ -91,7 +90,6 @@ class CarInterface(CarInterfaceBase):
         ret.longitudinalTuning.kiV = [0.54, 0.36]
 
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-      ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
       ret.lateralTuning.pid.kf = 0.00007818594
       ret.steerActuatorDelay = 0.55
@@ -140,7 +138,6 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.lqr.dcGain = 0.002237852961363602
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.22], [0.04125]]
-        ret.lateralTuning.pid.kdBP = [0.]
         ret.lateralTuning.pid.kdV = [0.78]
         ret.lateralTuning.pid.kf = 0.0000325   # full torque for 20 deg at 80mph means 0.00007818594
 
@@ -241,7 +238,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
-      ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [0.68]
 
       ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
@@ -288,7 +284,6 @@ class CarInterface(CarInterfaceBase):
         ret.steerActuatorDelay = 0.57
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-        ret.lateralTuning.pid.kdBP = [0.]
         ret.lateralTuning.pid.kdV = [2.01]
         ret.lateralTuning.pid.kf = 0.00007818594
 
