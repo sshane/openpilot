@@ -90,6 +90,8 @@ class CarController():
       pcm_cancel_cmd = 1
 
     # on entering standstill, send standstill request
+    with open('/data/smartDsu', 'a') as f:  # todo: remove me
+      f.write('{}\n'.format(CS.CP.smartDsu))
     if CS.out.standstill and not self.last_standstill and not CS.CP.smartDsu:
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
