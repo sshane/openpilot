@@ -97,7 +97,7 @@ class CarInterface(CarInterfaceBase):
       # ret.lateralTuning.indi.actuatorEffectiveness = 1.0
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [9.0]  # from birdman6450
+      ret.lateralTuning.pid.kdV = [1.2]  # from birdman6450
       ret.lateralTuning.pid.kf = 0.00007818594
       ret.steerActuatorDelay = 0.55
 
