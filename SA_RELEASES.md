@@ -1,7 +1,6 @@
 Stock Additions v0.5.3 - 2020-9-15 (0.7.7)
 ===
- * Properly set unsafe_mode in boardd. This might fix panda flashing issues for new users, since it is no longer be required
- * Tune 17 Corolla torque scale (safety param)
+ * Properly set unsafe_mode in boardd. This might fix panda flashing issues for new users, since it won't be required
 
 Stock Additions v0.5.2 - 2020-9-11 (0.7.7)
 ===
