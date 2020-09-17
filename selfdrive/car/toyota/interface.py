@@ -90,16 +90,16 @@ class CarInterface(CarInterfaceBase):
         ret.longitudinalTuning.kiV = [0.54, 0.36]
 
       ret.steerActuatorDelay = 0.55
-      if not ret.hasZss:
+      if ret.hasZss:
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.1]]
+        ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
+        ret.lateralTuning.pid.kf = 0.00007818594
+      else:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGain = 4.0
         ret.lateralTuning.indi.outerLoopGain = 3.0
         ret.lateralTuning.indi.timeConstant = 1.0
         ret.lateralTuning.indi.actuatorEffectiveness = 1.0
-      else:
-        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.1]]
-        ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
-        ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
@@ -344,8 +344,8 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kf = 0.00006
 
-    ret.steerRateCost = 0.5 if ret.hasZss else 1.0
-    # ret.steerRateCost = 1.0
+    # ret.steerRateCost = 0.5 if ret.hasZss else 1.0
+    ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
 
     # TODO: get actual value, for now starting with reasonable value for
