@@ -92,7 +92,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
       ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
       ret.lateralTuning.pid.kf = 0.00007818594
-      ret.steerActuatorDelay = 0.55
+      ret.steerActuatorDelay = 0.59
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
