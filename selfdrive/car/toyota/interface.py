@@ -108,7 +108,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 18.27
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      ret.steerActuatorDelay = 0.275
+      # ret.steerActuatorDelay = 0.275
 
       if corolla_use_lqr:
         ret.lateralTuning.init('lqr')
