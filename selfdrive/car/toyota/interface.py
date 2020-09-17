@@ -85,9 +85,9 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.74  # unknown end-to-end spec
       tire_stiffness_factor = 0.6371  # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
-      if not ret.enableGasInterceptor:
-        ret.longitudinalTuning.kpV = [2.9, 2.1, 1.5]
-        ret.longitudinalTuning.kiV = [0.54, 0.36]
+      # if not ret.enableGasInterceptor:
+      #   ret.longitudinalTuning.kpV = [2.9, 2.1, 1.5]
+      #   ret.longitudinalTuning.kiV = [0.54, 0.36]
 
       ret.steerActuatorDelay = 0.55
       if ret.hasZss:
