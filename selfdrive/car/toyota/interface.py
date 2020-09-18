@@ -50,6 +50,7 @@ class CarInterface(CarInterfaceBase):
     if corolla_use_lqr:
       CARS_NOT_PID.append(CAR.COROLLA)
     if not prius_use_pid:
+      CARS_NOT_PID.append(CAR.PRIUS_2020)
       CARS_NOT_PID.append(CAR.PRIUS)
 
     if candidate not in CARS_NOT_PID:  # These cars use LQR/INDI
@@ -90,7 +91,7 @@ class CarInterface(CarInterfaceBase):
       #   ret.longitudinalTuning.kiV = [0.54, 0.36]
 
       ret.steerActuatorDelay = 0.55
-      if ret.hasZss:
+      if prius_use_pid:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
         ret.lateralTuning.pid.kf = 0.00007818594
@@ -98,8 +99,9 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGain = 4.0
         ret.lateralTuning.indi.outerLoopGain = 3.0
-        ret.lateralTuning.indi.timeConstant = 1.0
+        ret.lateralTuning.indi.timeConstant = 0.1 if ret.hasZss else 1.0
         ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+        ret.steerActuatorDelay = 0.5
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
