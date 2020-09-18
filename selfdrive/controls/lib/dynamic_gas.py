@@ -90,9 +90,9 @@ class DynamicGas:
         self.supported_car = True
     else:
       y = [0.35, 0.47, 0.43, 0.35, 0.3, 0.3, 0.3229, 0.34784, 0.36765, 0.38, 0.396, 0.409, 0.425, 0.478, 0.55, 0.621, 0.7]
-      # y = [interp(i, [y[0], y[-1]], [1.15, 1.0]) * i for i in y]  # more gas at lower speeds
+      y = [interp(i, [y[0], y[-1]], [1.15, 1.0]) * i for i in y]  # more gas at lower speeds
       if self.candidate == CAR_TOYOTA.PRIUS_2020:
-        y = [i * (1-.14) for i in y]
+        y = [0.15, 0.1548, 0.1646, 0.179, 0.1976, 0.2143, 0.2481, 0.2689, 0.2873, 0.3011, 0.3162, 0.3349, 0.3508, 0.3991, 0.4647, 0.529, 0.5981]
       self.supported_car = True
 
     self.gasMaxBP, self.gasMaxV = x, y
