@@ -92,7 +92,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.steerActuatorDelay = 0.55
       if prius_use_pid:
-        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.5], [0.1]]
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.4], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]  # corolla D times gain in PI values
         ret.lateralTuning.pid.kf = 0.00007818594
       else:
