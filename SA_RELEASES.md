@@ -1,7 +1,7 @@
 Stock Additions v0.5.3 - 2020-9-15 (0.7.7)
 ===
  * Properly set unsafe_mode in boardd. This might fix panda flashing issues for new users, since it won't be required
- * Seperate 2020 Prius and add PID tune
+ * Separate 2020 Prius and add PID tune
  * Add param `standstill_hack` for stop and go hack
 
 Stock Additions v0.5.2 - 2020-9-11 (0.7.7)
