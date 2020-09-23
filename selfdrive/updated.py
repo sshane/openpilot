@@ -84,7 +84,7 @@ def wait_between_updates(ready_event):
   if SHORT:
     ready_event.wait(timeout=10)
   else:
-    ready_event.wait(timeout=5)
+    ready_event.wait(timeout=60 * 10)
 
 
 def link(src, dest):
@@ -322,7 +322,7 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
   if not REBOOT_ON_UPDATE:
     return False
 
-  min_reboot_time = 6
+  min_reboot_time = 5. * 60
   need_reboot |= new_version
 
   if need_reboot:
@@ -361,7 +361,7 @@ def main():
 
   # Wait a short time before our first update attempt
   # Avoids race with IsOffroad not being set, reduces manager startup load
-  time.sleep(10)
+  time.sleep(30)
   wait_helper = WaitTimeHelper()
 
   time_offroad = 0
