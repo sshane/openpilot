@@ -81,7 +81,9 @@ class opParams:
                         'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
                                                                      'integral wind-down to help reduce overshooting within the long PID loop'),
                         'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
-                        'auto_update': Param(False, bool, 'Toggles whether your device will update and reboot automatically on this fork'),
+                        'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\')\n'
+                                                              'off will never update, alert shows an alert on-screen.\n'
+                                                              'auto will reboot the device when an update is seen'),
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
@@ -99,7 +101,7 @@ class opParams:
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
-    self._to_delete = ['lane_hug_direction', 'lane_hug_angle_offset', 'prius_use_lqr', 'no_ota_updates']  # a list of params you want to delete (unused)
+    self._to_delete = ['no_ota_updates', 'auto_update']  # a list of unused params you want to delete
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
