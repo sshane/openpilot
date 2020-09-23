@@ -131,6 +131,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     else:  # find most similar param to user's input
       param_sims = [(idx, self.str_sim(choice, param.lower())) for idx, param in enumerate(self.params)]
       param_sims = [param for param in param_sims if param[1] > 0.2]
+      print(param_sims)
       if len(param_sims) > 0:
         chosen_param = sorted(param_sims, key=lambda param: param[1], reverse=True)[0]
         return 'change', chosen_param[0]  # return idx
