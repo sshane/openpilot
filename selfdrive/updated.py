@@ -57,7 +57,7 @@ ffi = FFI()
 ffi.cdef("int link(const char *oldpath, const char *newpath);")
 libc = ffi.dlopen(None)
 
-REBOOT_ON_UPDATE = opParams().get('update_behavior') == 'auto'  # if not auto, has to be alert
+REBOOT_ON_UPDATE = opParams().get('update_behavior').lower().strip() == 'auto'  # if not auto, has to be alert
 
 class WaitTimeHelper:
   ready_event = threading.Event()

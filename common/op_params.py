@@ -81,7 +81,7 @@ class opParams:
                         'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
                                                                      'integral wind-down to help reduce overshooting within the long PID loop'),
                         'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
-                        'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\')\n'
+                        'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
                                                               'off will never update, alert shows an alert on-screen.\n'
                                                               'auto will reboot the device when an update is seen'),
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
