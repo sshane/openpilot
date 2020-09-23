@@ -83,7 +83,7 @@ class opParams:
                         'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
                         'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
                                                               'off will never update, alert shows an alert on-screen\n'
-                                                              'auto will reboot the device when an update is seen'),
+                                                              'auto will reboot the device when an update is seen'), # test commit
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),

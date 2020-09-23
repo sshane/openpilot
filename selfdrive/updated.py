@@ -43,6 +43,7 @@ from common.realtime import sec_since_boot
 from common.op_params import opParams
 
 STAGING_ROOT = "/data/safe_staging"
+REBOOT_ON_UPDATE = opParams().get('update_behavior').lower().strip() == 'auto'  # if not auto, has to be alert
 
 OVERLAY_UPPER = os.path.join(STAGING_ROOT, "upper")
 OVERLAY_METADATA = os.path.join(STAGING_ROOT, "metadata")
@@ -56,8 +57,6 @@ SHORT = os.getenv("SHORT") is not None
 ffi = FFI()
 ffi.cdef("int link(const char *oldpath, const char *newpath);")
 libc = ffi.dlopen(None)
-
-REBOOT_ON_UPDATE = opParams().get('update_behavior').lower().strip() == 'auto'  # if not auto, has to be alert
 
 class WaitTimeHelper:
   ready_event = threading.Event()
@@ -85,7 +84,7 @@ def wait_between_updates(ready_event):
   if SHORT:
     ready_event.wait(timeout=10)
   else:
-    ready_event.wait(timeout=60 * 10)
+    ready_event.wait(timeout=5)
 
 
 def link(src, dest):
