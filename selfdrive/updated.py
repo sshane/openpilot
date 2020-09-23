@@ -322,7 +322,7 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
   if not REBOOT_ON_UPDATE:
     return False
 
-  min_reboot_time = 5
+  min_reboot_time = 6
   need_reboot |= new_version
 
   if need_reboot:
