@@ -3,6 +3,7 @@ Stock Additions v0.5.3 - 2020-9-15 (0.7.7)
  * Properly set unsafe_mode in boardd. This might fix panda flashing issues for new users, since it won't be required
  * Separate 2020 Prius and add PID tune
  * Add param `standstill_hack` for stop and go hack
+ * Add param `update_behavior` to change how SA updates. off never updates, auto reboots if there's an update, and alert shows a button offroad with changelog
 
 Stock Additions v0.5.2 - 2020-9-11 (0.7.7)
 ===
