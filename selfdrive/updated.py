@@ -322,7 +322,7 @@ def auto_update_reboot(time_offroad, need_reboot, new_version):
   if not REBOOT_ON_UPDATE:
     return False
 
-  min_reboot_time = 5. * 60
+  min_reboot_time = 5
   if new_version:
     need_reboot = True
 
@@ -362,7 +362,7 @@ def main():
 
   # Wait a short time before our first update attempt
   # Avoids race with IsOffroad not being set, reduces manager startup load
-  time.sleep(30)
+  time.sleep(10)
   wait_helper = WaitTimeHelper()
 
   time_offroad = 0
