@@ -152,7 +152,7 @@ class opParams:
     self.params.update({key: value})
     self._write()
 
-  def __getitem__(self, s):
+  def __getitem__(self, s):  # can also do op_params['param_name']
     return self.get(s)
 
   def delete(self, key):  # todo: might be obsolete. remove?
