@@ -103,10 +103,6 @@ class opParams:
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['no_ota_updates', 'auto_update']  # a list of unused params you want to delete
     self._run_init()  # restores, reads, and updates params
-    for param in self.fork_params:
-      def get_func(p=param):
-        return self.get(p)
-      setattr(self, param, get_func)
 
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
@@ -156,8 +152,8 @@ class opParams:
     self.params.update({key: value})
     self._write()
 
-  # def __getitem__(self, s):  # can also do op_params['param_name']
-  #   return self.get(s)
+  def __getitem__(self, s):  # can also do op_params['param_name']
+    return self.get(s)
 
   def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:
