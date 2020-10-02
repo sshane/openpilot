@@ -111,11 +111,11 @@ def set_eon_fan(val):
 
 
 # temp thresholds to control fan speed - high hysteresis
-_TEMP_THRS_H = [43., 50., 70., 10000]
+_TEMP_THRS_H = [50., 65., 80., 10000]
 # temp thresholds to control fan speed - low hysteresis
-_TEMP_THRS_L = [35.5, 42.5, 50.5, 10000]
+_TEMP_THRS_L = [42.5, 57.5, 72.5, 10000]
 # fan speed options
-_FAN_SPEEDS = [0, 32768, 32768, 65535]
+_FAN_SPEEDS = [0, 16384, 32768, 65535]
 # max fan speed only allowed if battery is hot
 _BAT_TEMP_THERSHOLD = 45.
 
