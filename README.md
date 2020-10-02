@@ -1,4 +1,4 @@
-# Stock Additions v0.5.2 (0.7.7)
+# Stock Additions v0.5.3 (0.7.7)
 
 Stock Additions is a fork of openpilot designed to be minimal in design while boasting various feature additions and behavior improvements over stock. I have a 2017 Toyota Corolla with comma pedal, so most of my changes are designed to improve the longitudinal performance.
 
@@ -131,11 +131,12 @@ Here are the main parameters you can change with this fork:
   - `camera_offset` **`(live!)`**: Your camera offset to use in lane_planner.py. Helps fix lane hugging
   - `steer_ratio` **`(live!)`**: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead
   - [`enable_long_derivative`](#pi---pid-controller-for-long-and-lat): This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals or cars with bad long tuning
+  `standstill_hack`: Some cars support stop and go, you just need to enable this
 - **General fork params**:
   - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
   - `alca_min_speed`: The minimum speed allowed for an automatic lane change
   - `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
-  - [`auto_update`](#Automatic-updates): Toggles whether your device will update and reboot automatically on this fork
+  - [`update_behavior`](#Automatic-updates): off will never update, alert shows an alert on-screen. auto will reboot the device when an update is seen
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
@@ -164,6 +165,7 @@ Parameters are stored at `/data/op_params.json`
 ### Automatic updates
 When a new update is available on GitHub for Stock Additions, your EON/C2 will pull and reset your local branch to the remote. It then queues a reboot to occur when the following is true:
 - your EON has been inactive or offroad for more than 5 minutes
+- `update_behavior` param is set to `auto`
 
 Therefore, if your device sees an update while you're driving it will reboot approximately 5 to 10 minutes after you finish your drive, it resets the timer if you start driving again before the time is up.
 

@@ -57,7 +57,7 @@ class opParams:
         - Finally, the live arg tells both opParams and opEdit that it's a live parameter that will change. Therefore, you must place the `op_params.get()` call in the update function so that it can update.
 
       Here's an example of a good fork_param entry:
-      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number)}  # VT.number allows both floats and ints
+      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number), live=True}  # VT.number allows both floats and ints
     """
 
     VT = ValueTypes()
@@ -81,7 +81,9 @@ class opParams:
                         'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
                                                                      'integral wind-down to help reduce overshooting within the long PID loop'),
                         'disengage_on_gas': Param(True, bool, 'Whether you want openpilot to disengage on gas input or not'),
-                        'auto_update': Param(False, bool, 'Toggles whether your device will update and reboot automatically on this fork'),
+                        'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
+                                                              'off will never update, alert shows an alert on-screen\n'
+                                                              'auto will reboot the device when an update is seen'),
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
@@ -92,13 +94,14 @@ class opParams:
                                                                   'localizer might not work correctly'),
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
                         'corolla_use_lqr': Param(False, bool, 'Enable this to use LQR for lateral control with your TSS1 Corolla\nFalse: PID, True: RAV4-tuned LQR'),
-                        'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your Corolla with TSS2')}
+                        'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your Corolla with TSS2'),
+                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 2.5  # max frequency to read with self.get(...) (sec)
-    self._to_delete = ['lane_hug_direction', 'lane_hug_angle_offset', 'prius_use_lqr', 'no_ota_updates']  # a list of params you want to delete (unused)
+    self._to_delete = ['no_ota_updates', 'auto_update']  # a list of unused params you want to delete
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
@@ -148,6 +151,9 @@ class opParams:
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
     self._write()
+
+  def __getitem__(self, s):  # can also do op_params['param_name']
+    return self.get(s)
 
   def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:

@@ -15,12 +15,14 @@ from selfdrive.swaglog import cloudlog, add_logentries_handler
 
 from common.basedir import BASEDIR, PARAMS
 from common.android import ANDROID
+from common.op_params import opParams
 WEBCAM = os.getenv("WEBCAM") is not None
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 os.environ['BASEDIR'] = BASEDIR
 
 TOTAL_SCONS_NODES = 1020
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
+kill_updated = opParams().get('update_behavior').lower().strip() == 'off' or os.path.exists('/data/no_ota_updates')
 
 # Create folders needed for msgq
 try:
@@ -228,9 +230,11 @@ if ANDROID:
   persistent_processes += [
     'logcatd',
     'tombstoned',
-    'updated',
+    # 'updated',
     'deleter',
   ]
+  if not kill_updated:
+    persistent_processes.append('updated')
 
 car_started_processes = [
   'controlsd',

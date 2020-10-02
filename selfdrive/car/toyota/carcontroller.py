@@ -6,6 +6,7 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
                                            create_fcw_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
 from opendbc.can.packer import CANPacker
+from common.op_params import opParams
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -37,6 +38,7 @@ class CarController():
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
+    self.op_params = opParams()
 
     self.last_fault_frame = -200
     self.steer_rate_limited = False
@@ -90,7 +92,7 @@ class CarController():
       pcm_cancel_cmd = 1
 
     # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill:
+    if CS.out.standstill and not self.last_standstill and not self.op_params.get('standstill_hack'):
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
