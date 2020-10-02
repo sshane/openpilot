@@ -106,7 +106,7 @@ class opParams:
     for p in self.fork_params:
       def temp():
         return self.get(p)
-      setattr(self, p, temp)
+      setattr(self, p, temp())
 
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
