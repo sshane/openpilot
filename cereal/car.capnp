@@ -433,7 +433,7 @@ struct CarParams {
 
   struct LateralINDITuning {
     outerLoopGainBP @0 :List(Float32);
-    outerLoopGainBP @1 List(Float32);
+    outerLoopGainV @1 :List(Float32);
     innerLoopGain @2 :Float32;
     timeConstant @3 :Float32;
     actuatorEffectiveness @4 :Float32;
