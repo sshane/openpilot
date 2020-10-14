@@ -219,16 +219,16 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   float dist = 1.8 * fmax(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
   float lat_pos = std::abs((p_poly[0] * pow(dist, 3)) + (p_poly[1] * pow(dist, 2)) + (p_poly[2] * dist));  // don't include path offset
   float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
-  if (is_mpc) {
+//  if (is_mpc) {
     // Draw colored MPC track
-    const uint8_t *clr = bg_colors[s->status];
-    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-      nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
-  } else {
-    // Draw colored vision track
-    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h*.9, vwp_w, vwp_h*.4,
-      nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
-  }
+  const uint8_t *clr = bg_colors[s->status];
+  track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+    nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
+//  } else {
+     Draw colored vision track
+//    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h*.9, vwp_w, vwp_h*.4,
+//      nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
+//  }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
 }
