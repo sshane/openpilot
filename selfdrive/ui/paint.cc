@@ -205,7 +205,7 @@ static void update_all_track_data(UIState *s) {
 }
 
 
-static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, const float *p_poly) {
+static void ui_draw_track(UIState *s, bool is_enabled, track_vertices_data *pvd, const float *p_poly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -219,16 +219,15 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd, con
   float dist = 1.8 * fmax(s->scene.controls_state.getVEgo(), 4.4704);  // eval car position at 1.8s from path (min 10 mph)
   float lat_pos = std::abs((p_poly[0] * pow(dist, 3)) + (p_poly[1] * pow(dist, 2)) + (p_poly[2] * dist));  // don't include path offset
   float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
-//  if (is_mpc) {
-    // Draw colored MPC track
-  const uint8_t *clr = bg_colors[s->status];
-  track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
-    nvgRGBA(clr[0], clr[1], clr[2], 255), nvgRGBA(clr[0], clr[1], clr[2], 255/2));
-//  } else {
-//     Draw colored vision track
-//    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h*.9, vwp_w, vwp_h*.4,
-//      nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
-//  }
+  if (is_enabled) {
+    // Draw colored vision track
+    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h*.9, vwp_w, vwp_h*.4,
+      nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
+  } else {
+    // Draw white vision track
+    track_bg = nvgLinearGradient(s->vg, vwp_w, vwp_h, vwp_w, vwp_h*.4,
+      COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+  }
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
 }
@@ -345,11 +344,11 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
   // Draw vision path
   const float *p_poly = scene->model.path.poly;
-  ui_draw_track(s, false, &s->track_vertices[0], p_poly);
-  if (scene->controls_state.getEnabled()) {
-    // Draw MPC path when engaged
-    ui_draw_track(s, true, &s->track_vertices[1], p_poly);
-  }
+  ui_draw_track(s, scene->controls_state.getEnabled(), &s->track_vertices[0], p_poly);
+//  if (scene->controls_state.getEnabled()) {
+//    // Draw MPC path when engaged
+//    ui_draw_track(s, true, &s->track_vertices[1], p_poly);
+//  }
 }
 
 // Draw all world space objects.
