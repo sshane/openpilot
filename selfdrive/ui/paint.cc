@@ -345,7 +345,7 @@ static void ui_draw_vision_lanes(UIState *s) {
   // Draw vision path
   const float *p_poly = scene->model.path.poly;
   bool enabled = true; //scene->controls_state.getEnabled();
-  ui_draw_track(s, false, &s->track_vertices[0], p_poly);
+//  ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   ui_draw_track(s, enabled, &s->track_vertices[0], p_poly);
 }
 
