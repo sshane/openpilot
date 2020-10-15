@@ -348,7 +348,7 @@ static void ui_draw_vision_lanes(UIState *s) {
   double t1 = nanos_since_boot();
   const float *p_poly = scene->model.path.poly;
   double end = nanos_since_boot() - t1;
-  std::cout << "Time to get poly: " << end;
+  std::cout << "Time to get poly: " << end << " us\n";
   ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   ui_draw_track(s, scene->controls_state.getEnabled(), &s->track_vertices[0], p_poly);
 }
