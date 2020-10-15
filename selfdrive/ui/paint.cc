@@ -3,8 +3,6 @@
 #include <map>
 #include <cmath>
 #include "common/util.h"
-#include "common/timing.h"
-#include <iostream>
 
 #define NANOVG_GLES3_IMPLEMENTATION
 
@@ -346,11 +344,8 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
   // Draw vision path
   const float *p_poly = scene->model.path.poly;
-  double t1 = nanos_since_boot();
   ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   ui_draw_track(s, scene->controls_state.getEnabled(), &s->track_vertices[0], p_poly);
-  double end = nanos_since_boot() - t1;
-  std::cout << "Time to draw poly: " << end << " us\n";
 }
 
 // Draw all world space objects.
