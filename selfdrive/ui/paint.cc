@@ -4,6 +4,7 @@
 #include <cmath>
 #include "common/util.h"
 #include "common/timing.h"
+#include <iostream>
 
 #define NANOVG_GLES3_IMPLEMENTATION
 
