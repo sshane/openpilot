@@ -4,6 +4,8 @@ import subprocess
 import sys
 import platform
 
+Decider('MD5-timestamp')
+
 AddOption('--test',
           action='store_true',
           help='build test files')
