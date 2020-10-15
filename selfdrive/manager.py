@@ -88,8 +88,6 @@ from multiprocessing import Process
 spinner = Spinner()
 spinner.update("0")
 
-scons_start_t = sec_since_boot()
-
 if not prebuilt:
   for retry in [True, False]:
     # run scons
@@ -154,8 +152,6 @@ if not prebuilt:
         exit(1)
     else:
       break
-
-print('\033[91mSCONS TOOK: {}'.format(sec_since_boot() - scons_start_t))
 
 import cereal
 import cereal.messaging as messaging
