@@ -454,9 +454,7 @@ def manager_thread():
   # start offroad
   if ANDROID:
     pm_apply_packages('enable')
-    t = sec_since_boot()
     start_offroad()
-    print('\033[91mSTART OFFROAD: {}'.format(sec_since_boot() - t))
 
   if os.getenv("NOBOARD") is None:
     start_managed_process("pandad")
