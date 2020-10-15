@@ -456,7 +456,7 @@ def manager_thread():
     pm_apply_packages('enable')
     t = sec_since_boot()
     start_offroad()
-    print('START OFFROAD: {}'.format(sec_since_boot() - t))
+    print('\033[91mSTART OFFROAD: {}'.format(sec_since_boot() - t))
 
   if os.getenv("NOBOARD") is None:
     start_managed_process("pandad")
