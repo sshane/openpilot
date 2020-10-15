@@ -16,7 +16,6 @@ from selfdrive.swaglog import cloudlog, add_logentries_handler
 from common.basedir import BASEDIR, PARAMS
 from common.android import ANDROID
 from common.op_params import opParams
-from common.realtime import sec_since_boot
 WEBCAM = os.getenv("WEBCAM") is not None
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 os.environ['BASEDIR'] = BASEDIR
