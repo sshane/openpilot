@@ -3,6 +3,7 @@
 #include <map>
 #include <cmath>
 #include "common/util.h"
+#include "common/timing.h"
 
 #define NANOVG_GLES3_IMPLEMENTATION
 
