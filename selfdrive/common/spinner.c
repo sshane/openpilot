@@ -14,7 +14,6 @@
 #define NANOVG_GLES3_IMPLEMENTATION
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
-#include "common/timing.h"
 
 #include "framebuffer.h"
 #include "spinner.h"
@@ -84,7 +83,6 @@ int spin(int argc, char** argv) {
   double hue_rate = 10;  // start at 10 * DT_SPIN
   double max_hue_rate = 300;
   for (int cnt = 0; ; cnt++) {
-    double t1 = millis_since_boot();
     // Check stdin for new text
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
@@ -147,7 +145,6 @@ int spin(int argc, char** argv) {
     if (draw_progress){
       color_hue += hue_rate * DT_SPIN;  // update hue and hue rate (gradually speed up)
       hue_rate += (hue_rate > max_hue_rate) ? 0 : (6 * DT_SPIN);  // clip to max
-      printf("hue rate: %f\n", hue_rate);
 
       // draw progress bar
       int progress_width = 1000;
@@ -181,13 +178,6 @@ int spin(int argc, char** argv) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 94.0f);
       nvgText(vg, fb_w/2, (fb_h*4/5), "Loading Stock Additions...", NULL);
-//      nvgFill(vg);
-
-//      NVGpaint text_bg = nvgLinearGradient(vg, 960-200, 834, 960+200, 834,
-//        nvgHSLA(247 / 360., .56, .82, 255), nvgHSLA(207 / 360., .59, .57, 255));
-//      nvgFillPaint(vg, text_bg);
-//      nvgFill(vg);
-
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
