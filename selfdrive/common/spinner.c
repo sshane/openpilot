@@ -79,10 +79,9 @@ int spin(int argc, char** argv) {
   int spinner_comma_img = nvgCreateImageMem(vg, 0, (unsigned char*)_binary_img_spinner_comma_png_start, _binary_img_spinner_comma_png_end - _binary_img_spinner_comma_png_start);
   assert(spinner_comma_img >= 0);
 
-  double t1 = millis_since_boot();
+  double t1 = 0;
   for (int cnt = 0; ; cnt++) {
-    t1 = millis_since_boot() - t1;
-    printf("%f ms\n", t1);
+    double t1 = millis_since_boot();
     // Check stdin for new text
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
@@ -192,6 +191,7 @@ int spin(int argc, char** argv) {
     nvgEndFrame(vg);
     framebuffer_swap(fb);
     assert(glGetError() == GL_NO_ERROR);
+    printf("%f ms\n", millis_since_boot() - t1);
   }
 
   return 0;
