@@ -174,7 +174,7 @@ int spin(int argc, char** argv) {
       nvgFill(vg);
 
       color_hue += hue_rate * DT_SPIN;
-      hue_rate += (hue_rate < max_hue_rate) ? (8 * DT_SPIN) : (0);
+      hue_rate += (hue_rate > max_hue_rate) ? 0 : (8 * DT_SPIN);
       printf("hue rate: %f\n", hue_rate);
       nvgFillColor(vg, nvgHSLA(color_hue / 360., .59, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
