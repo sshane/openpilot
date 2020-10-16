@@ -82,7 +82,7 @@ int spin(int argc, char** argv) {
   double t1 = millis_since_boot();
   for (int cnt = 0; ; cnt++) {
     double t2 = millis_since_boot() - t1;
-    printf("%f ms\n", t2)
+    printf("%f ms\n", t2);
     // Check stdin for new text
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
