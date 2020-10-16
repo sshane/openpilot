@@ -170,6 +170,13 @@ int spin(int argc, char** argv) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
+
+      NVGpaint text_bg;
+      text_bg = nvgLinearGradient(vg, 0, (fb_h*3/4)+24, 1920, (fb_h*3/4)+24,
+        nvgHSLA(247 / 360., .56, .82, 255), nvgHSLA(207 / 360., .59, .57, 255));
+      nvgFillPaint(vg, text_bg);
+      nvgFill(vg);
+
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
