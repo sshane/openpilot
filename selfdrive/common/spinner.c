@@ -166,6 +166,10 @@ int spin(int argc, char** argv) {
           bar_pos, progress_height-2, 12);
       nvgFillPaint(vg, paint);
       nvgFill(vg);
+
+      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+      nvgFontSize(vg, 96.0f);
+      nvgText(vg, fb_w/2, (fb_h*2/3)+24, "Loading Stock Additions...", NULL);
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
