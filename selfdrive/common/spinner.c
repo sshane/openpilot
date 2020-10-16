@@ -82,7 +82,7 @@ int spin(int argc, char** argv) {
   double DT_SPIN = 1 / 50.;
   double color_hue = 0;
   double hue_rate = 8;
-  double max_hue_rate = 50;
+  double max_hue_rate = 300;
   for (int cnt = 0; ; cnt++) {
     double t1 = millis_since_boot();
     // Check stdin for new text
@@ -174,7 +174,7 @@ int spin(int argc, char** argv) {
       nvgFill(vg);
 
       color_hue += hue_rate * DT_SPIN;
-      hue_rate += (hue_rate > max_hue_rate) ? 0 : (4 * DT_SPIN);
+      hue_rate += (hue_rate > max_hue_rate) ? 0 : (6 * DT_SPIN);
       printf("hue rate: %f\n", hue_rate);
       nvgFillColor(vg, nvgHSLA(color_hue / 360., .59, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
