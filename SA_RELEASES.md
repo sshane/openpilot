@@ -2,6 +2,7 @@ Stock Additions v0.5.4 - 2020-10-15 (0.7.7)
 ===
  * Make model path default grey when not engaged, only color when engaged
  * About 1.6 seconds faster starting up (from a recent commit from stock)
+ * Colorful loading spinner: RGB!
 
 Stock Additions v0.5.3 - 2020-9-15 (0.7.7)
 ===
