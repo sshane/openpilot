@@ -14,6 +14,7 @@
 #define NANOVG_GLES3_IMPLEMENTATION
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
+#include "common/timing.h"
 
 #include "framebuffer.h"
 #include "spinner.h"
@@ -78,7 +79,10 @@ int spin(int argc, char** argv) {
   int spinner_comma_img = nvgCreateImageMem(vg, 0, (unsigned char*)_binary_img_spinner_comma_png_start, _binary_img_spinner_comma_png_end - _binary_img_spinner_comma_png_start);
   assert(spinner_comma_img >= 0);
 
+  double t1 = millis_since_boot();
   for (int cnt = 0; ; cnt++) {
+    double t2 = millis_since_boot() - t1;
+    printf("%f ms\n", t2)
     // Check stdin for new text
     if (stdin_input_available()){
       fgets(spintext, SPINTEXT_LENGTH, stdin);
@@ -167,16 +171,15 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
 
-//      nvgFillColor(vg, nvgHSLA(207 / 360., .59, .57, 255));
-      NVGpaint text_bg = nvgLinearGradient(vg, 960-200, 834, 960+200, 834,
-        nvgHSLA(247 / 360., .56, .82, 255), nvgHSLA(207 / 360., .59, .57, 255));
-      nvgFillPaint(vg, text_bg);
+      nvgFillColor(vg, nvgHSLA(207 / 360., .59, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
 //      nvgFill(vg);
 
-
+//      NVGpaint text_bg = nvgLinearGradient(vg, 960-200, 834, 960+200, 834,
+//        nvgHSLA(247 / 360., .56, .82, 255), nvgHSLA(207 / 360., .59, .57, 255));
+//      nvgFillPaint(vg, text_bg);
 //      nvgFill(vg);
 
     } else {
