@@ -170,7 +170,7 @@ int spin(int argc, char** argv) {
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 96.0f);
       printf("%d\n", fb_h);
-      nvgText(vg, fb_w/2, (fb_h*2/4)+24, fb_h, NULL);
+      nvgText(vg, fb_w/2, (fb_h*2/4)+24, "Loading", NULL);
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
