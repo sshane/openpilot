@@ -167,7 +167,7 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
 
-      nvgFillColor(vg, nvgHSLA(247 / 360., .56, .82, 255));
+      nvgFillColor(vg, nvgHSLA(207 / 360., .59, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
