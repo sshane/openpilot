@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
-#include <iostream.h>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
