@@ -171,10 +171,14 @@ int spin(int argc, char** argv) {
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
 
-      NVGpaint text_bg = nvgLinearGradient(vg, 960-200, 834, 960+200, 834,
-        nvgHSLA(247 / 360., .56, .82, 50), nvgHSLA(207 / 360., .59, .57, 255));
-      nvgFillPaint(vg, text_bg);
+      NVGcolor color = nvgHSLA(hue / 360., .94, .51, 255)
+      nvgFillColor(vg, color);
       nvgFill(vg);
+
+//      NVGpaint text_bg = nvgLinearGradient(vg, 960-200, 834, 960+200, 834,
+//        nvgHSLA(247 / 360., .56, .82, 255), nvgHSLA(207 / 360., .59, .57, 255));
+//      nvgFillPaint(vg, text_bg);
+//      nvgFill(vg);
 
     } else {
       // message
