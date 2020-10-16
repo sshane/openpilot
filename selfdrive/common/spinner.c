@@ -168,8 +168,7 @@ int spin(int argc, char** argv) {
       nvgFill(vg);
 
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
-      nvgFontSize(vg, 96.0f);
-      printf("%d\n", fb_h);
+      nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
     } else {
       // message
