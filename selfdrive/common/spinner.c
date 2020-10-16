@@ -82,7 +82,7 @@ int spin(int argc, char** argv) {
   double DT_SPIN = 1 / 50.;
   double color_hue = 0;
   double hue_rate = 10;
-  double max_hue_rate = 200;
+  double max_hue_rate = 300;
   for (int cnt = 0; ; cnt++) {
     double t1 = millis_since_boot();
     // Check stdin for new text
@@ -145,6 +145,10 @@ int spin(int argc, char** argv) {
     nvgFill(vg);
 
     if (draw_progress){
+      color_hue += hue_rate * DT_SPIN;  // update hue and hue rate (gradually speed up)
+      hue_rate += (hue_rate > max_hue_rate) ? 0 : (6 * DT_SPIN);  // clip to max
+      printf("hue rate: %f\n", hue_rate);
+
       // draw progress bar
       int progress_width = 1000;
       int progress_x = fb_w/2-progress_width/2;
@@ -173,10 +177,7 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
 
-      color_hue += hue_rate * DT_SPIN;
-      hue_rate += (hue_rate > max_hue_rate) ? 0 : (6 * DT_SPIN);
-      printf("hue rate: %f\n", hue_rate);
-      nvgFillColor(vg, nvgHSLA(color_hue / 360., .59, .57, 255));
+      nvgFillColor(vg, nvgHSLA(color_hue / 360., .80, .76, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
