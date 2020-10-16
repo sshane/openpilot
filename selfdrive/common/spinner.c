@@ -79,9 +79,9 @@ int spin(int argc, char** argv) {
   int spinner_comma_img = nvgCreateImageMem(vg, 0, (unsigned char*)_binary_img_spinner_comma_png_start, _binary_img_spinner_comma_png_end - _binary_img_spinner_comma_png_start);
   assert(spinner_comma_img >= 0);
 
-  double DT_SPIN = 1 / 50.;
-  double color_hue = 0;
-  double hue_rate = 10;
+  double DT_SPIN = 1 / 50.;  // how quickly spinner draws
+  double color_hue = 108;  // start at green
+  double hue_rate = 10;  // start at 10 * DT_SPIN
   double max_hue_rate = 300;
   for (int cnt = 0; ; cnt++) {
     double t1 = millis_since_boot();
