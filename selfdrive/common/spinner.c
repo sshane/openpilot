@@ -81,8 +81,8 @@ int spin(int argc, char** argv) {
 
   double DT_SPIN = 1 / 50.;
   double color_hue = 0;
-  double hue_rate = 8;
-  double max_hue_rate = 300;
+  double hue_rate = 10;
+  double max_hue_rate = 200;
   for (int cnt = 0; ; cnt++) {
     double t1 = millis_since_boot();
     // Check stdin for new text
