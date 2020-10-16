@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
+#include <iostream>
 
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
@@ -169,6 +170,7 @@ int spin(int argc, char** argv) {
 
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 96.0f);
+      std::cout << fb_h << std::endl;
       nvgText(vg, fb_w/2, (fb_h*2/4)+24, "Loading Stock Additions...", NULL);
     } else {
       // message
