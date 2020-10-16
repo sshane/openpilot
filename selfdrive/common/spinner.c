@@ -132,7 +132,6 @@ int spin(int argc, char** argv) {
       spinner_img_s, spinner_img_s, 0, spinner_img, 0.6f);
     nvgBeginPath(vg);
     nvgFillPaint(vg, spinner_imgPaint);
-    nvgFillColor(vg, nvgHSLA(color_hue / 360., .80, .57, 255));
     nvgRect(vg, spinner_img_x, spinner_img_y, spinner_img_s, spinner_img_s);
     nvgFill(vg);
     nvgRestore(vg);
@@ -143,6 +142,7 @@ int spin(int argc, char** argv) {
     nvgBeginPath(vg);
     nvgFillPaint(vg, comma_imgPaint);
     nvgRect(vg, spinner_img_x, spinner_img_y, spinner_img_s, spinner_img_s);
+    nvgFillColor(vg, nvgHSLA(color_hue / 360., .80, .57, 255));
     nvgFill(vg);
 
     if (draw_progress){
