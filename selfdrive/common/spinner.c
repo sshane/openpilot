@@ -79,7 +79,8 @@ int spin(int argc, char** argv) {
   int spinner_comma_img = nvgCreateImageMem(vg, 0, (unsigned char*)_binary_img_spinner_comma_png_start, _binary_img_spinner_comma_png_end - _binary_img_spinner_comma_png_start);
   assert(spinner_comma_img >= 0);
 
-  double t1 = 0;
+  double DT_SPIN = 1 / 50.;
+  double color_hue = 0;
   for (int cnt = 0; ; cnt++) {
     double t1 = millis_since_boot();
     // Check stdin for new text
@@ -170,7 +171,8 @@ int spin(int argc, char** argv) {
       nvgFillPaint(vg, paint);
       nvgFill(vg);
 
-      nvgFillColor(vg, nvgHSLA(207 / 360., .59, .57, 255));
+      color_hue += 10.0 * DT_SPIN;
+      nvgFillColor(vg, nvgHSLA(color_hue / 360., .59, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 86.0f);
       nvgText(vg, fb_w/2, (fb_h*3/4)+24, "Loading Stock Additions...", NULL);
@@ -191,7 +193,6 @@ int spin(int argc, char** argv) {
     nvgEndFrame(vg);
     framebuffer_swap(fb);
     assert(glGetError() == GL_NO_ERROR);
-    printf("%f ms\n", millis_since_boot() - t1);
   }
 
   return 0;
