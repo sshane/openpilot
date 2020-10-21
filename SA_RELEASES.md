@@ -6,6 +6,7 @@ Stock Additions v0.5.3 - 2020-9-15 (0.7.7)
  * Add param `standstill_hack` for stop and go hack
  * Add param `update_behavior` to change how SA updates. off never updates, auto reboots if there's an update, and alert shows a button offroad with changelog
  * Retune TSS1 Corolla for better curve handling
+ * Tune TSS2 Corolla (INDI, thanks to birdman6450)
 
 Stock Additions v0.5.2 - 2020-9-11 (0.7.7)
 ===
