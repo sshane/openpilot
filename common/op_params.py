@@ -95,7 +95,23 @@ class opParams:
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
                         'corolla_use_lqr': Param(False, bool, 'Enable this to use LQR for lateral control with your TSS1 Corolla\nFalse: PID, True: RAV4-tuned LQR'),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your Corolla with TSS2'),
-                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
+                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this'),
+                        'STEER_MAX': Param(1500, VT.number, 'Default is 1500. Your tuning values are now converted if you change this to get similar turning response\n'
+                                                            'Equation is `original_tuning_gain / (NEW_STEER_MAX / 1500)`\n'
+                                                            'So make sure you apply this formula when you export your tuned PID values to another fork or for a PR', live=True),
+                        'STEER_DELTA_UP': Param(10, VT.number, 'Default is 10. How fast to ramp up torque', live=True),
+                        'STEER_DELTA_DOWN': Param(20, VT.number, 'Default is 25. How fast to ramp down torque', live=True),
+                        'STEER_ERROR_MAX': Param(350, VT.number, 'Default is 350. Not sure of the effects of this\n'
+                                                                 '(How far away from current torque can we send now)', live=True),
+                        'steer_rate_fix': Param(True, bool, 'To restrict torque when steering rate goes above 100 deg/s\n'
+                                                            'Disable when tuning to reduce steering faults natively (without this hacky fix)', live=True),
+                        'steer_rate_fix_rate': Param(100, int, 'The steer rate at which it cuts torque', live=True),
+                        'lat_p_gain': Param(.22, VT.number, 'actual proportional gain', live=True),
+                        'lat_i_gain': Param(.04125, VT.number, 'actual integral gain', live=True),
+                        'lat_d_gain': Param(1, VT.number, 'actual derivative gain', live=True),
+                        'lat_f_multiplier': Param(1, VT.number, 'feedforward multiplier (multiplied by the value in interface)', live=True),
+                        'steer_actuator_delay': Param(0.12, VT.number, 'The steer actuator delay', live=True),
+                        }
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'

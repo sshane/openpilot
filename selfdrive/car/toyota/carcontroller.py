@@ -4,7 +4,7 @@ from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, 
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command
-from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
+from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams
 
@@ -71,6 +71,11 @@ class CarController():
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     # steer torque
+    class SteerLimitParams:  # live updates
+      STEER_MAX = self.op_params.get('STEER_MAX')
+      STEER_DELTA_UP = self.op_params.get('STEER_DELTA_UP')
+      STEER_DELTA_DOWN = self.op_params.get('STEER_DELTA_DOWN')
+      STEER_ERROR_MAX = self.op_params.get('STEER_ERROR_MAX')
     new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
@@ -81,7 +86,7 @@ class CarController():
 
     # Cut steering for 2s after fault
     # if (CS.out.steeringAngle < 0 < CS.out.steeringRate or CS.out.steeringAngle > 0 > CS.out.steeringRate) and abs(CS.out.steeringRate) > 175:
-    if not enabled or (frame - self.last_fault_frame < 200) or abs(CS.out.steeringRate) > 100:
+    if not enabled or (frame - self.last_fault_frame < 200) or (abs(CS.out.steeringRate) > self.op_params.get('steer_rate_fix_rate') and self.op_params.get('steer_rate_fix')):
       apply_steer = 0
       apply_steer_req = 0
     else:
