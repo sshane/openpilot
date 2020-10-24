@@ -147,7 +147,7 @@ class Planner():
       y_pp = 6 * path[0] * self.path_x + 2 * path[1]
       curv = y_pp / (1. + y_p ** 2) ** 1.5
 
-      a_y_max = 2.975 - v_ego * 0.0375  # ~1.85 @ 75mph, ~2.6 @ 25mph
+      a_y_max = 3.05 - v_ego * 0.034
       v_curvature = np.sqrt(a_y_max / np.clip(np.abs(curv), 1e-4, None))
       model_speed = np.min(v_curvature)
       model_speed = max(20.0 * CV.MPH_TO_MS, model_speed)  # Don't slow down below 20mph
