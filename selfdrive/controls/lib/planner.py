@@ -26,12 +26,12 @@ _A_CRUISE_MIN_BP = [   0., 5.,  10., 20.,  40.]
 
 # need fast accel at very low speed for stop and go
 # make sure these accelerations are smaller than mpc limits
-_A_CRUISE_MAX_V = [1.55, 1.4, 0.7, .4]
+_A_CRUISE_MAX_V = [1.6, 1.4, 0.7, .4]
 _A_CRUISE_MAX_V_FOLLOWING = [1.7, 1.65, 0.7, .5]
 _A_CRUISE_MAX_BP = [0.,  6.4, 22.5, 40.]
 
 # Lookup table for turns
-_A_TOTAL_MAX_V = [2.2, 4.35]
+_A_TOTAL_MAX_V = [2.2, 4.15]
 _A_TOTAL_MAX_BP = [20., 40.]
 
 
@@ -74,6 +74,8 @@ class Planner():
     self.a_acc = 0.0
     self.v_cruise = 0.0
     self.a_cruise = 0.0
+    self.v_model = 0.0
+    self.a_model = 0.0
 
     self.longitudinalPlanSource = 'cruise'
     self.fcw_checker = FCWChecker()
@@ -85,7 +87,7 @@ class Planner():
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
     possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
     if enabled:
-      solutions = {'cruise': self.v_cruise}
+      solutions = {'cruise': self.v_cruise, 'old_model': self.v_model}
       if self.mpc1.prev_lead_status:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status:
@@ -110,6 +112,9 @@ class Planner():
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
+      elif slowest == 'old_model':
+        self.v_acc = self.v_model
+        self.a_acc = self.a_model
 
     self.v_acc_future = min(possible_futures)
 
@@ -131,6 +136,24 @@ class Planner():
     enabled = (long_control_state == LongCtrlState.pid) or (long_control_state == LongCtrlState.stopping)
     following = lead_1.status and lead_1.dRel < 45.0 and lead_1.vLeadK > v_ego and lead_1.aLeadK > 0.0
 
+    if len(sm['model'].path.poly):  # old slowdown for curves code
+      path = list(sm['model'].path.poly)
+
+      # Curvature of polynomial https://en.wikipedia.org/wiki/Curvature#Curvature_of_the_graph_of_a_function
+      # y = a x^3 + b x^2 + c x + d, y' = 3 a x^2 + 2 b x + c, y'' = 6 a x + 2 b
+      # k = y'' / (1 + y'^2)^1.5
+      # TODO: compute max speed without using a list of points and without numpy
+      y_p = 3 * path[0] * self.path_x ** 2 + 2 * path[1] * self.path_x + path[2]
+      y_pp = 6 * path[0] * self.path_x + 2 * path[1]
+      curv = y_pp / (1. + y_p ** 2) ** 1.5
+
+      a_y_max = 2.975 - v_ego * 0.0375  # ~1.85 @ 75mph, ~2.6 @ 25mph
+      v_curvature = np.sqrt(a_y_max / np.clip(np.abs(curv), 1e-4, None))
+      model_speed = np.min(v_curvature)
+      model_speed = max(20.0 * CV.MPH_TO_MS, model_speed)  # Don't slow down below 20mph
+    else:
+      model_speed = MAX_SPEED
+
     # Calculate speed for normal cruise control
     if enabled and not self.first_loop and not sm['carState'].gasPressed:
       accel_limits = [float(x) for x in calc_cruise_accel_limits(v_ego, following)]
@@ -147,6 +170,12 @@ class Planner():
                                                     accel_limits_turns[1], accel_limits_turns[0],
                                                     jerk_limits[1], jerk_limits[0],
                                                     LON_MPC_STEP)
+
+      self.v_model, self.a_model = speed_smoother(self.v_acc_start, self.a_acc_start,
+                                                  model_speed,
+                                                  2 * accel_limits[1], accel_limits[0],
+                                                  2 * jerk_limits[1], jerk_limits[0],
+                                                  LON_MPC_STEP)
 
       # cruise speed can't be negative even is user is distracted
       self.v_cruise = max(self.v_cruise, 0.)
