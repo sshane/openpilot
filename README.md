@@ -100,8 +100,8 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 **Changes for lat control: (NEW❗)**
 - Adding the derivative componenet to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves and smooths out steering in all situations. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
 
-  ***Currently Supported Cars:***
-  - 2017 Toyota Corolla (when param `corolla_use_lqr` is False)
+  ***Currently Supported Cars: (when param `use_lqr` is False)***
+  - 2017 Toyota Corolla
   - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from birdman!
   - All Prius years (when param `prius_use_pid` is True) - tune from [Trae](https://github.com/d412k5t412)!
 
@@ -131,12 +131,12 @@ Here are the main parameters you can change with this fork:
   - `camera_offset` **`(live!)`**: Your camera offset to use in lane_planner.py. Helps fix lane hugging
   - `steer_ratio` **`(live!)`**: The steering ratio you want to use with openpilot. If you enter None, it will use the learned steer ratio from openpilot instead
   - [`enable_long_derivative`](#pi---pid-controller-for-long-and-lat): This enables derivative-based integral wind-down to help overshooting within the PID loop. Useful for Toyotas with pedals or cars with bad long tuning
-  `standstill_hack`: Some cars support stop and go, you just need to enable this
+  - [`use_lqr`](#pi---pid-controller-for-long-and-lat): Enable this to use LQR for lateral control with any car. It uses the RAV4 tuning, but has proven to work well for many cars
 - **General fork params**:
   - `alca_nudge_required`: Whether to wait for applied torque to the wheel (nudge) before making lane changes
-  - `alca_min_speed`: The minimum speed allowed for an automatic lane change
+  - `alca_min_speed`: The minimum speed allowed for an automatic lane change in mph
   - `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
-  - [`update_behavior`](#Automatic-updates): off will never update, alert shows an alert on-screen. auto will reboot the device when an update is seen
+  - [`update_behavior`](#Automatic-updates): `off` will never update, `alert` shows an alert on-screen. `auto` will reboot the device when an update is seen
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
@@ -144,13 +144,13 @@ Here are the main parameters you can change with this fork:
   - `min_TR` **`(live!)`**: The minimum allowed following distance in seconds. Default is 0.9 seconds, the range of this mod is limited from 0.85 to 1.3 seconds. This is applied to ALL profiles!
   - `hide_auto_df_alerts`: Hides the alert that shows what profile the model has chosen
   - [`dynamic_camera_offset`](#Dynamic-camera-offset-based-on-oncoming-traffic): Whether to automatically keep away from oncoming traffic. Works from 35 to ~60 mph
-  - [`dynamic_camera_offset_time`](#Dynamic-camera-offset-based-on-oncoming-traffic): How long to keep the offset after losing the oncoming lane/radar track in seconds
+    - [`dynamic_camera_offset_time`](#Dynamic-camera-offset-based-on-oncoming-traffic): How long to keep the offset after losing the oncoming lane/radar track in seconds
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
 - **Experimental params**:
   - `support_white_panda`: This allows users with the original white panda to use openpilot above 0.7.7. The high precision localizer's performance may be reduced due to a lack of GPS
   - [`prius_use_pid`](#pi---pid-controller-for-long-and-lat): This enables the PID lateral controller with new a experimental derivative tune
-  - [`corolla_use_lqr`](#pi---pid-controller-for-long-and-lat): Enable this to use LQR for lateral control with your TSS1 Corolla *(can be enabled for all years by request)*
   - `corollaTSS2_use_indi`: Enable this to use INDI for lat with your TSS2 Corolla *(can be enabled for all years by request)*
+  - `standstill_hack`: Some cars support stop and go, you just need to enable this
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L40).
 

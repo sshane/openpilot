@@ -92,8 +92,13 @@ class opParams:
                         'dynamic_camera_offset_time': Param(3.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
+                        # 'lateral_controller': Param('default', str, 'You can change what lateral controller you use with this param!\n'
+                        #                                             '\'default\': use the default lateral controller for your vehicle\n'
+                        #                                             'Else, can be \'pid\', \'indi\', \'lqr\'\n'
+                        #                                             'If you choose a controller that hasn\'t been tuned for your vehicle, you will use default tuning that MAY not be optimal\n'
+                        #                                             'Check the README for which cars are tuned'),
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
-                        'corolla_use_lqr': Param(False, bool, 'Enable this to use LQR for lateral control with your TSS1 Corolla\nFalse: PID, True: RAV4-tuned LQR'),
+                        'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your Corolla with TSS2'),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
