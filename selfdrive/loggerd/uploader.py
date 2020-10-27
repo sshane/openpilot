@@ -8,6 +8,8 @@ import requests
 import threading
 import time
 import traceback
+import subprocess
+import re
 
 from cereal import log
 from common.hardware import HARDWARE
@@ -16,12 +18,14 @@ from common.params import Params
 from selfdrive.loggerd.xattr_cache import getxattr, setxattr
 from selfdrive.loggerd.config import ROOT
 from selfdrive.swaglog import cloudlog
+from common.op_params import opParams
 
 NetworkType = log.ThermalData.NetworkType
 UPLOAD_ATTR_NAME = 'user.upload'
 UPLOAD_ATTR_VALUE = b'1'
 
 fake_upload = os.getenv("FAKEUPLOAD") is not None
+upload_on_hotspot = opParams().get('upload_on_hotspot')
 
 
 def raise_on_thread(t, exctype):
@@ -70,6 +74,17 @@ def clear_locks(root):
 
 def is_on_wifi():
   return HARDWARE.get_network_type() == NetworkType.wifi
+
+def is_on_hotspot():
+  try:
+    result = subprocess.check_output(["ifconfig", "wlan0"], stderr=subprocess.STDOUT, encoding='utf8')
+    result = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
+    is_android = result.startswith('192.168.43.')
+    is_ios = result.startswith('172.20.10.')
+    is_entune = result.startswith('10.0.2.')
+    return (is_android or is_ios or is_entune)
+  except Exception:
+    return False
 
 class Uploader():
   def __init__(self, dongle_id, root):
@@ -233,7 +248,10 @@ def uploader_fn(exit_event):
       on_wifi = is_on_wifi()
     counter += 1
 
-    d = uploader.next_file_to_upload(with_raw=allow_raw_upload and on_wifi and offroad)
+    d = None
+    if (is_on_hotspot and upload_on_hotspot) or not is_on_hotspot:
+      d = uploader.next_file_to_upload(with_raw=allow_raw_upload and on_wifi and offroad)
+
     if d is None:  # Nothing to upload
       time.sleep(60 if offroad else 5)
       continue

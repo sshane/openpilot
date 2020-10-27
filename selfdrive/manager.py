@@ -11,6 +11,7 @@ import datetime
 import textwrap
 from typing import Dict, List
 from selfdrive.swaglog import cloudlog, add_logentries_handler
+from common.op_params import opParams
 
 
 from common.basedir import BASEDIR
@@ -21,6 +22,7 @@ os.environ['BASEDIR'] = BASEDIR
 
 TOTAL_SCONS_NODES = 1040
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
+kill_updated = opParams().get('update_behavior').lower().strip() == 'off' or os.path.exists('/data/no_ota_updates')
 
 # Create folders needed for msgq
 try:
@@ -189,6 +191,7 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
+  "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
 
 daemon_processes = {
@@ -218,11 +221,13 @@ persistent_processes = [
 
 if not PC:
   persistent_processes += [
-    'updated',
+    # 'updated',
     'logcatd',
     'tombstoned',
     'sensord',
   ]
+  if not kill_updated:
+    persistent_processes.append('updated')
 
 car_started_processes = [
   'controlsd',
@@ -235,6 +240,7 @@ car_started_processes = [
   'proclogd',
   'locationd',
   'clocksd',
+  'lanespeedd',
 ]
 
 driver_view_processes = [
@@ -481,7 +487,8 @@ def manager_thread():
     if msg.thermal.freeSpace < 0.05:
       logger_dead = True
 
-    if msg.thermal.started:
+    run_all = False
+    if msg.thermal.started or run_all:
       for p in car_started_processes:
         if p == "loggerd" and logger_dead:
           kill_managed_process(p)
@@ -607,10 +614,23 @@ if __name__ == "__main__":
 
     # Show last 3 lines of traceback
     error = traceback.format_exc(-3)
-    error = "Manager failed to start\n \n" + error
+    error = "Manager failed to start. Press Reset to pull and reset to origin!\n \n" + error
     with TextWindow(error) as t:
-      t.wait_for_exit()
+      exit_status = t.wait_for_exit()
+    if exit_status == 'reset':
+      for _ in range(2):
+        try:
+          subprocess.check_output(["git", "pull"], cwd=BASEDIR)
+          subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+          print('git reset successful!')
+          break
+        except subprocess.CalledProcessError as e:
+          if _ != 1:
+            print('git reset failed, trying again')
+            time.sleep(5)  # wait 5 seconds and try again
 
+    time.sleep(1)
+    subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
     raise
 
   # manual exit because we are forked
