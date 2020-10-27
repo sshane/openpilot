@@ -81,6 +81,13 @@ wideEncodeIdx: [8075, true, 20.]
 wideFrame: [8076, true, 20.]
 modelV2: [8077, true, 20., 20]
 
+dynamicFollowData: [8078, false, 20.]
+dynamicFollowButton: [8079, false, 0.]
+laneSpeed: [8081, false, 0.]  # 8080 is reverved
+laneSpeedButton: [8082, false, 0.]
+dynamicCameraOffset: [8083, false, 0.]
+modelLongButton: [8084, false, 0.]
+
 testModel: [8040, false, 0.]
 testLiveLocation: [8045, false, 0.]
 testJoystick: [8056, false, 0.]
