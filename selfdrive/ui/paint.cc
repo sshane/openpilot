@@ -329,10 +329,10 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
 
   // Draw left lane edge
-  ui_draw_lane(s, &scene->model.getLeftLane(), pvd, scene->model.getLeftLane().getProb());
+  ui_draw_lane(s, scene->model.getLeftLane(), pvd, scene->model.getLeftLane().getProb());
 
   // Draw right lane edge
-  ui_draw_lane(s, &scene->model.getRightLane(), pvd + MODEL_LANE_PATH_CNT, scene->model.getRightLane().getProb());
+  ui_draw_lane(s, scene->model.getRightLane(), pvd + MODEL_LANE_PATH_CNT, scene->model.getRightLane().getProb());
 
   if(s->sm->updated("radarState")) {
     update_all_track_data(s);
