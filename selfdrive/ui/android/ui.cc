@@ -108,7 +108,7 @@ static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
 
 static bool handle_SA_touched(UIState *s, int touch_x, int touch_y) {
   if (s->active_app == cereal::UiLayoutState::App::NONE) {  // if onroad (not settings or home)
-    if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {  // if car started or debug mode
+    if ((s->awake && s->vision_connected && s->status != STATUS_OFFROAD) || s->ui_debug) {  // if car started or debug mode
       if (handle_df_touch(s, touch_x, touch_y)) { return true; }  // only allow one button to be pressed at a time
       if (handle_ls_touch(s, touch_x, touch_y)) { return true; }
       if (handle_ml_touch(s, touch_x, touch_y)) { return true; }
@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
   touch_init(&touch);
   handle_display_state(s, true);
 
-  PubMaster *pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
+  PubMaster *pm = new PubMaster({"offroadLayout"});
 
   s->ui_debug = true;  // change to true while debugging
 

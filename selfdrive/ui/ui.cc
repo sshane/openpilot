@@ -27,6 +27,8 @@ void ui_init(UIState *s) {
   s->sm = new SubMaster({"model", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "thermal",
                          "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents"});
 
+  s->pm = new PubMaster({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
+
   s->started = false;
   s->status = STATUS_OFFROAD;
   s->scene.satelliteCount = -1;
