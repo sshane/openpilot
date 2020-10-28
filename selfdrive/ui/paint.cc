@@ -309,7 +309,7 @@ static void update_all_lane_lines_data(UIState *s, const cereal::ModelData::Path
   update_lane_line_data(s, points, fmin(path.getStd(), 0.7), pstart + 1, path.getValidLen());
 }
 
-static void ui_draw_lane(UIState *s, const cereal::ModelData::PathData *path, model_path_vertices_data *pstart, float prob) {
+static void ui_draw_lane(UIState *s, const cereal::ModelData::PathData::Reader &path, model_path_vertices_data *pstart, float prob) {
   float lane_pos = std::abs(path->getPoly()[3]);  // get redder when line is closer to car
   float hue = 332.5 * lane_pos - 332.5;  // equivalent to {1.4, 1.0}: {133, 0} (green to red)
   hue = fmin(133, fmax(0, hue)) / 360.;  // clip and normalize
