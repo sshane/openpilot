@@ -212,6 +212,62 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   # ********** events only containing alerts displayed in all states **********
 
+  'modelLongAlert': {
+    ET.PERMANENT: Alert(
+      "Model longitudinal ",
+      "Remain alert",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
+  },
+
+  'dfButtonAlert': {
+    ET.PERMANENT: Alert(
+      "Using profile: ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
+  },
+
+  'lsButtonAlert': {
+    ET.PERMANENT: Alert(
+      "Lane Speed set to: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., 1.5),
+  },
+
+  'dfButtonAlertSilent': {
+    ET.PERMANENT: Alert(
+      "Dynamic follow: ",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, .2, 0., 1.5),
+  },
+
+  'laneSpeedAlert': {
+    ET.PERMANENT: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeWarning1, .4, 0., .1),
+  },
+
+  'laneSpeedAlertSilent': {
+    ET.PERMANENT: Alert(
+      "",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
+  },
+
+  'laneSpeedKeeping': {
+    ET.PERMANENT: Alert(
+      "KEEPING ",
+      "",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, 0., .1),
+  },
+
   EventName.debugAlert: {
     ET.PERMANENT: Alert(
       "DEBUG ALERT",
