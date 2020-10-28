@@ -36,10 +36,8 @@ static void ui_set_brightness(UIState *s, int brightness) {
 }
 
 static void send_ls(UIState *s, int status) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto lsStatus = event.initLaneSpeedButton();
+  MessageBuilder msg;
+  auto lsStatus = msg.initEvent().initLaneSpeedButton();
   lsStatus.setStatus(status);
   s->pm->send("laneSpeedButton", msg);
 }
