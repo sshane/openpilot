@@ -43,19 +43,15 @@ static void send_ls(UIState *s, int status) {
 }
 
 static void send_df(UIState *s, int status) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto dfStatus = event.initDynamicFollowButton();
+  MessageBuilder msg;
+  auto dfStatus = msg.initEvent().initDynamicFollowButton();
   dfStatus.setStatus(status);
   s->pm->send("dynamicFollowButton", msg);
 }
 
 static void send_ml(UIState *s, bool enabled) {
-  capnp::MallocMessageBuilder msg;
-  auto event = msg.initRoot<cereal::Event>();
-  event.setLogMonoTime(nanos_since_boot());
-  auto mlStatus = event.initModelLongButton();
+  MessageBuilder msg;
+  auto mlStatus = msg.initEvent().initModelLongButton();
   mlStatus.setEnabled(enabled);
   s->pm->send("modelLongButton", msg);
 }
