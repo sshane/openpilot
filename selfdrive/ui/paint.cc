@@ -215,7 +215,7 @@ static void update_all_track_data(UIState *s) {
   }
 }
 
-static void ui_draw_track(UIState *s, bool is_enabled, track_vertices_data *pvd, const float *p_poly) {
+static void ui_draw_track(UIState *s, bool is_enabled, track_vertices_data *pvd, const capnp::List<float>::Reader p_poly) {
  if (pvd->cnt == 0) return;
 
   nvgBeginPath(s->vg);
@@ -339,7 +339,7 @@ static void ui_draw_vision_lanes(UIState *s) {
   }
 
   // Draw vision path
-  const float *p_poly = scene->model.getPath().getPoly();
+  const capnp::List<float>::Reader &p_poly = scene->model.getPath().getPoly();
   ui_draw_track(s, false, &s->track_vertices[0], p_poly);
   ui_draw_track(s, scene->controls_state.getEnabled(), &s->track_vertices[1], p_poly);
 }
