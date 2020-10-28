@@ -85,6 +85,10 @@ static std::map<UIStatus, NVGcolor> bg_colors = {
 
 typedef struct UIScene {
 
+  int dfButtonStatus;
+  int lsButtonStatus;
+  bool mlButtonEnabled;
+
   float mpc_x[50];
   float mpc_y[50];
 
@@ -184,6 +188,7 @@ typedef struct UIState {
   bool ignition;
   bool is_metric;
   bool longitudinal_control;
+  bool ui_debug;
   uint64_t last_athena_ping;
   uint64_t started_frame;
 

@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sys/resource.h>
+#include <iostream>
+#include "json11.hpp"
+#include <fstream>
 
 #include <algorithm>
 
@@ -20,6 +23,9 @@ static void set_do_exit(int sig) {
   do_exit = 1;
 }
 
+std::map<std::string, int> LS_TO_IDX = {{"off", 0}, {"audible", 1}, {"silent", 2}};
+std::map<std::string, int> DF_TO_IDX = {{"traffic", 0}, {"relaxed", 1}, {"roadtrip", 2}, {"auto", 3}};
+
 static void ui_set_brightness(UIState *s, int brightness) {
   static int last_brightness = -1;
   if (last_brightness != brightness && (s->awake || brightness == 0)) {
@@ -27,6 +33,88 @@ static void ui_set_brightness(UIState *s, int brightness) {
       last_brightness = brightness;
     }
   }
+}
+
+static void send_ls(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto lsStatus = event.initLaneSpeedButton();
+  lsStatus.setStatus(status);
+  s->pm->send("laneSpeedButton", msg);
+}
+
+static void send_df(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto dfStatus = event.initDynamicFollowButton();
+  dfStatus.setStatus(status);
+  s->pm->send("dynamicFollowButton", msg);
+}
+
+static void send_ml(UIState *s, bool enabled) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto mlStatus = event.initModelLongButton();
+  mlStatus.setEnabled(enabled);
+  s->pm->send("modelLongButton", msg);
+}
+
+static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
+  //lsButton manager
+  int padding = 40;
+  int btn_x_1 = 1660 - 200;
+  int btn_x_2 = 1660 - 50;
+  if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (855 - padding <= touch_y)) {
+    printf("ls button touched!\n");
+    s->scene.lsButtonStatus++;
+    if (s->scene.lsButtonStatus > 2) { s->scene.lsButtonStatus = 0; }
+    send_ls(s, s->scene.lsButtonStatus);
+    return true;
+  }
+  return false;
+}
+
+static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
+  //dfButton manager
+  int padding = 40;
+  if ((1660 - padding <= touch_x) && (855 - padding <= touch_y)) {
+    printf("df button touched!\n");
+    s->scene.dfButtonStatus++;
+    if (s->scene.dfButtonStatus > 3) { s->scene.dfButtonStatus = 0; }
+    send_df(s, s->scene.dfButtonStatus);
+    return true;
+  }
+  return false;
+}
+
+static bool handle_ml_touch(UIState *s, int touch_x, int touch_y) {
+  //mlButton manager
+  int padding = 40;
+  int btn_w = 500;
+  int btn_h = 138;
+  int xs[2] = {1920 / 2 - btn_w / 2, 1920 / 2 + btn_w / 2};
+  int y_top = 915 - btn_h / 2;
+  if (xs[0] <= touch_x + padding && touch_x - padding <= xs[1] && y_top - padding <= touch_y) {
+    printf("ml button touched!\n");
+    s->scene.mlButtonEnabled = !s->scene.mlButtonEnabled;
+    send_ml(s, s->scene.mlButtonEnabled);
+    return true;
+  }
+  return false;
+}
+
+static bool handle_SA_touched(UIState *s, int touch_x, int touch_y) {
+  if (s->active_app == cereal::UiLayoutState::App::NONE) {  // if onroad (not settings or home)
+    if ((s->awake && s->vision_connected && s->status != STATUS_STOPPED) || s->ui_debug) {  // if car started or debug mode
+      if (handle_df_touch(s, touch_x, touch_y)) { return true; }  // only allow one button to be pressed at a time
+      if (handle_ls_touch(s, touch_x, touch_y)) { return true; }
+      if (handle_ml_touch(s, touch_x, touch_y)) { return true; }
+    }
+  }
+  return false;
 }
 
 static void handle_display_state(UIState *s, bool user_input) {
@@ -122,7 +210,29 @@ int main(int argc, char* argv[]) {
   touch_init(&touch);
   handle_display_state(s, true);
 
-  PubMaster *pm = new PubMaster({"offroadLayout"});
+  PubMaster *pm = new PubMaster({"offroadLayout", "laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
+
+  s->ui_debug = true;  // change to true while debugging
+
+  // stock additions todo: run opparams first (in main()?) to ensure json values exist
+  std::ifstream op_params_file("/data/op_params.json");
+  std::string op_params_content((std::istreambuf_iterator<char>(op_params_file)),
+                                (std::istreambuf_iterator<char>()));
+
+  std::string err;
+  auto json = json11::Json::parse(op_params_content, err);
+  if (!json.is_null() && err.empty()) {
+    printf("successfully parsed opParams json\n");
+    s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
+    s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
+//    printf("dfButtonStatus: %d\n", s->scene.dfButtonStatus);
+//    printf("lsButtonStatus: %d\n", s->scene.lsButtonStatus);
+  } else {  // error parsing json
+    printf("ERROR PARSING OPPARAMS JSON!\n");
+    s->scene.dfButtonStatus = 0;
+    s->scene.lsButtonStatus = 0;
+  }
+  s->scene.mlButtonEnabled = false;  // state isn't saved yet
 
   // light sensor scaling and volume params
   const bool LEON = util::read_file("/proc/cmdline").find("letv") != std::string::npos;
@@ -154,8 +264,13 @@ int main(int argc, char* argv[]) {
     int touch_x = -1, touch_y = -1;
     int touched = touch_poll(&touch, &touch_x, &touch_y, 0);
     if (touched == 1) {
+      if (s->ui_debug) { printf("touched x: %d, y: %d\n", touch_x, touch_y); }
       handle_sidebar_touch(s, touch_x, touch_y);
-      handle_vision_touch(s, touch_x, touch_y);
+      if (!handle_SA_touched(s, touch_x, touch_y)) {  // if SA button not touched
+        handle_vision_touch(s, touch_x, touch_y);
+      } else {
+        s->scene.uilayout_sidebarcollapsed = true;  // collapse sidebar when tapping any SA button
+      }
     }
 
     // Don't waste resources on drawing in case screen is off
