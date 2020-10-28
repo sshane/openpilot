@@ -92,6 +92,7 @@ class opParams:
                         'dynamic_camera_offset_time': Param(3.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
+                        'gather': Param(True, bool, live=True),
                         # 'lateral_controller': Param('default', str, 'You can change what lateral controller you use with this param!\n'
                         #                                             '\'default\': use the default lateral controller for your vehicle\n'
                         #                                             'Else, can be \'pid\', \'indi\', \'lqr\'\n'

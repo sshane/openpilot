@@ -1,4 +1,6 @@
 from cereal import car
+from cereal.messaging import SubMaster
+from common.realtime import sec_since_boot
 from common.numpy_fast import clip
 from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, make_can_msg
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
@@ -33,12 +35,14 @@ def accel_hysteresis(accel, accel_steady, enabled):
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
+    self.sm = SubMaster(['pathPlan'])
     self.last_steer = 0
     self.accel_steady = 0.
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
-    self.standstill_hack = opParams().get('standstill_hack')
+    self.op_params = opParams()
+    self.standstill_hack = self.op_params.get('standstill_hack')
 
     self.last_fault_frame = -200
     self.steer_rate_limited = False
@@ -86,6 +90,13 @@ class CarController():
       apply_steer_req = 0
     else:
       apply_steer_req = 1
+
+    self.sm.update(0)
+
+    file_path = '/data/ff_data'
+    if not CS.out.steeringPressed and enabled and self.op_params.get('gather'):
+      with open(file_path, 'a') as f:
+        f.write('{}\n'.format([CS.out.vEgo, self.sm['pathPlan'].angleSteers, CS.out.steeringAngle, self.sm['pathPlan'].angleOffset, apply_steer, sec_since_boot()]))
 
     if not enabled and CS.pcm_acc_status:
       # send pcm acc cancel cmd if drive is disabled but pcm is still on, or if the system can't be activated
