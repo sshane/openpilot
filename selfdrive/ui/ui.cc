@@ -7,6 +7,8 @@
 #include <math.h>
 #include <poll.h>
 #include <sys/mman.h>
+#include "json11.hpp"
+#include <fstream>
 
 #include "common/util.h"
 #include "common/swaglog.h"
@@ -15,12 +17,43 @@
 #include "ui.hpp"
 #include "paint.hpp"
 
+std::map<std::string, int> LS_TO_IDX = {{"off", 0}, {"audible", 1}, {"silent", 2}};
+std::map<std::string, int> DF_TO_IDX = {{"traffic", 0}, {"relaxed", 1}, {"roadtrip", 2}, {"auto", 3}};
+
 extern volatile sig_atomic_t do_exit;
 
 int write_param_float(float param, const char* param_name, bool persistent_param) {
   char s[16];
   int size = snprintf(s, sizeof(s), "%f", param);
   return Params(persistent_param).write_db_value(param_name, s, size < sizeof(s) ? size : sizeof(s));
+}
+
+void sa_init(UIState *s, bool full_init) {
+  if (full_init) {
+    s->pm = new PubMaster({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
+  }
+
+  s->ui_debug = false;  // change to true while debugging
+
+  // stock additions todo: run opparams first (in main()?) to ensure json values exist
+  std::ifstream op_params_file("/data/op_params.json");
+  std::string op_params_content((std::istreambuf_iterator<char>(op_params_file)),
+                                (std::istreambuf_iterator<char>()));
+
+  std::string err;
+  auto json = json11::Json::parse(op_params_content, err);
+  if (!json.is_null() && err.empty()) {
+    printf("successfully parsed opParams json\n");
+    s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
+    s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
+//    printf("dfButtonStatus: %d\n", s->scene.dfButtonStatus);
+//    printf("lsButtonStatus: %d\n", s->scene.lsButtonStatus);
+  } else {  // error parsing json
+    printf("ERROR PARSING OPPARAMS JSON!\n");
+    s->scene.dfButtonStatus = 0;
+    s->scene.lsButtonStatus = 0;
+  }
+  s->scene.mlButtonEnabled = false;  // state isn't saved yet
 }
 
 void ui_init(UIState *s) {
