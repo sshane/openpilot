@@ -65,7 +65,7 @@ class opParams:
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
                                                              'retaining the smoothness and safety of dynamic follow!'),
-                        'global_df_mod': Param(1.0, VT.number, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2\n'
+                        'global_df_mod': Param(1.0, VT.number, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.5\n'
                                                                'Smaller values will get you closer, larger will get you farther\n'
                                                                'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
                         'min_TR': Param(0.9, VT.number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'

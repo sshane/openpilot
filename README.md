@@ -140,7 +140,7 @@ Here are the main parameters you can change with this fork:
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
-  - `global_df_mod` **`(live!)`**: The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.2. Smaller values will get you closer, larger will get you farther. This is applied to ALL profiles!
+  - `global_df_mod` **`(live!)`**: The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 1.5. Smaller values will get you closer, larger will get you farther. This is applied to ALL profiles!
   - `min_TR` **`(live!)`**: The minimum allowed following distance in seconds. Default is 0.9 seconds, the range of this mod is limited from 0.85 to 1.3 seconds. This is applied to ALL profiles!
   - `hide_auto_df_alerts`: Hides the alert that shows what profile the model has chosen
   - [`dynamic_camera_offset`](#Dynamic-camera-offset-based-on-oncoming-traffic): Whether to automatically keep away from oncoming traffic. Works from 35 to ~60 mph
