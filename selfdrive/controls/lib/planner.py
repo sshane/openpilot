@@ -152,7 +152,7 @@ class Planner():
       model_speed = np.min(v_curvature)
       model_speed = max(20.0 * CV.MPH_TO_MS, model_speed)  # Don't slow down below 20mph
     else:
-      model_speed = MAX_SPEED
+      model_speed = 255.  # (MAX_SPEED)
 
     # Calculate speed for normal cruise control
     if enabled and not self.first_loop and not sm['carState'].gasPressed:
