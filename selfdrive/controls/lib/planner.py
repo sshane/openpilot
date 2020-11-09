@@ -87,7 +87,7 @@ class Planner():
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
     possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
     if enabled:
-      solutions = {'cruise': self.v_cruise, 'old_model': self.v_model}
+      solutions = {'cruise': self.v_cruise, 'curveSlowdown': self.v_model}
       if self.mpc1.prev_lead_status:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status:
@@ -112,7 +112,7 @@ class Planner():
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
-      elif slowest == 'old_model':
+      elif slowest == 'curveSlowdown':
         self.v_acc = self.v_model
         self.a_acc = self.a_model
 
