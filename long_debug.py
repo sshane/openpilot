@@ -15,20 +15,12 @@ while 1:
   if not sm.updated['modelV2'] or len(modelV2.position.x) == 0:
     continue
 
-  distances = []  # everything is derived from x position since velocity is outputting weird values
-  speeds = []
-  accelerations = [0]
+  distances, speeds, accelerations = [], [], []  # everything is derived from x position since velocity is outputting weird values
   for t in model_t_idx:
-    distances.append(modelV2.position.x[t])
-
-    # if t == 0:
-    #   speeds.append(modelV2.position.x[speed_curr_idx] / model_t[speed_curr_idx])
-    # else:
-    #   speeds.append(modelV2.position.x[t] / model_t[t])
     speeds.append(modelV2.velocity.x[t])
-
+    distances.append(modelV2.position.x[t])
     if model_t_idx.index(t) > 0:  # skip first since we can't calculate (and don't want to use v_ego)
       accelerations.append((speeds[-1] - speeds[-2]) / model_t[t])
 
-  accelerations[0] = accelerations[1] - (accelerations[2] - accelerations[1])  # extrapolate back first accel from second and third, less weight
+  accelerations.insert(0, accelerations[1] - (accelerations[2] - accelerations[1]))  # extrapolate back first accel from second and third, less weight
   print([round(i * 2.23694, 2) for i in speeds[:5]])

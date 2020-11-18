@@ -118,27 +118,18 @@ class Planner():
       return distances, speeds, accelerations
 
     model_t = modelV2.position.t
-    mpc_times = [0.009765625] + list(range(1, 10))
+    mpc_times = list(range(0, 10))
 
     model_t_idx = [sorted(range(len(model_t)), key=[abs(idx - t) for t in model_t].__getitem__)[0] for idx in mpc_times]  # matches 0 to 9 interval to idx from t
-    speed_curr_idx = sorted(range(len(model_t)), key=[abs(t - .1) for t in model_t].__getitem__)[0]  # idx used for current speed, position still uses model_t_idx
 
-    distances = []  # everything is derived from x position since velocity is outputting weird values
-    speeds = []
-    accelerations = [0]
-    for t in model_t_idx:
+    for t in model_t_idx:  # everything is derived from x position since velocity is outputting weird values
+      speeds.append(modelV2.velocity.x[t])
       distances.append(modelV2.position.x[t])
-
-      if t == 0:
-        speeds.append(modelV2.position.x[speed_curr_idx] / model_t[speed_curr_idx])
-      else:
-        speeds.append(modelV2.position.x[t] / model_t[t])
-
       if model_t_idx.index(t) > 0:  # skip first since we can't calculate (and don't want to use v_ego)
         accelerations.append((speeds[-1] - speeds[-2]) / model_t[t])
 
-    accelerations[0] = accelerations[1] - (accelerations[2] - accelerations[1])  # extrapolate back first accel from second and third, less weight
-    return distances, speeds, accelerations  # hope this works
+    accelerations.insert(0, accelerations[1] - (accelerations[2] - accelerations[1]))  # extrapolate back first accel from second and third, less weight
+    return distances, speeds, accelerations
 
   def update(self, sm, pm, CP, VM, PP):
     """Gets called when new radarState is available"""
