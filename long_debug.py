@@ -25,7 +25,7 @@ while 1:
     #   speeds.append(modelV2.position.x[speed_curr_idx] / model_t[speed_curr_idx])
     # else:
     #   speeds.append(modelV2.position.x[t] / model_t[t])
-    speeds.append(modelV2.speeds.x[t])
+    speeds.append(modelV2.velocity.x[t])
 
     if model_t_idx.index(t) > 0:  # skip first since we can't calculate (and don't want to use v_ego)
       accelerations.append((speeds[-1] - speeds[-2]) / model_t[t])
