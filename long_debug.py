@@ -31,4 +31,4 @@ while 1:
       accelerations.append((speeds[-1] - speeds[-2]) / model_t[t])
 
   accelerations[0] = accelerations[1] - (accelerations[2] - accelerations[1])  # extrapolate back first accel from second and third, less weight
-  print(speeds[:5])
+  print([round(i * 2.23694, 2) for i in speeds[:5]])
