@@ -89,7 +89,7 @@ if not prebuilt:
     env['SCONS_CACHE'] = "1"
 
     nproc = os.cpu_count()
-    j_flag = "" if nproc is None else "-j%d" % (nproc - 1)
+    j_flag = "" if nproc is None else "-j8"
     scons = subprocess.Popen(["scons", j_flag], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
 
     compile_output = []
@@ -124,8 +124,8 @@ if not prebuilt:
           for i in range(3, -1, -1):
             print("....%d" % i)
             time.sleep(1)
-          subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
-          shutil.rmtree("/tmp/scons_cache")
+          # subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
+          # shutil.rmtree("/tmp/scons_cache")
         else:
           print("scons build failed after retry")
           sys.exit(1)
