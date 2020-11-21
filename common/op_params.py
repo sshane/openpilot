@@ -92,6 +92,7 @@ class opParams:
                         'dynamic_camera_offset_time': Param(3.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
+                        'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
                         # 'lateral_controller': Param('default', str, 'You can change what lateral controller you use with this param!\n'
                         #                                             '\'default\': use the default lateral controller for your vehicle\n'
                         #                                             'Else, can be \'pid\', \'indi\', \'lqr\'\n'

@@ -15,6 +15,7 @@ from selfdrive.controls.lib.fcw import FCWChecker
 from selfdrive.controls.lib.long_mpc import LongitudinalMpc
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 from selfdrive.controls.lib.long_mpc_model import LongitudinalMpcModel
+from common.op_params import opParams
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
@@ -61,6 +62,8 @@ def limit_accel_in_turns(v_ego, angle_steers, a_target, CP):
 class Planner():
   def __init__(self, CP):
     self.CP = CP
+    self.op_params = opParams()
+    self.slowdown_for_curves = self.op_params.get('slowdown_for_curves')
 
     self.mpc1 = LongitudinalMpc(1)
     self.mpc2 = LongitudinalMpc(2)
@@ -87,7 +90,7 @@ class Planner():
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
     possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
     if enabled:
-      solutions = {'cruise': self.v_cruise, 'curveSlowdown': self.v_model}
+      solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status:
@@ -95,6 +98,8 @@ class Planner():
       if self.mpc_model.valid and model_enabled:
         solutions['model'] = self.mpc_model.v_mpc
         possible_futures.append(self.mpc_model.v_mpc_future)  # only used when using model
+      if self.slowdown_for_curves:  # only add curve slowing when enabled by param
+        solutions['curveSlowdown'] = self.v_model
 
       slowest = min(solutions, key=solutions.get)
 
