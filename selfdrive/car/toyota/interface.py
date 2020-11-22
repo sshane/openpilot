@@ -243,17 +243,16 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
       if corollaTSS2_use_indi:  # birdman6450#7399's Corolla 2020 TSS2 Tune (PR thanks to majorwolf)
-        ret.safetyParam = 53
+        ret.lateralTuning.init('indi')
+        ret.lateralTuning.indi.innerLoopGain = 15.0
+        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25 ,26]
+        ret.lateralTuning.indi.outerLoopGainV = [5.0, 9.0, 9.0, 14.99]
+        ret.lateralTuning.indi.timeConstant = 5.5
+        ret.lateralTuning.indi.actuatorEffectiveness = 15.0
+        ret.safetyParam = 53 #needs seperate DBC to be complete, please help
         ret.steerActuatorDelay = 0.60
         ret.steerRatio = 15.33
-        ret.steerLimitTimer = 5.0
         tire_stiffness_factor = 0.996  # not optimized yet
-        ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 9.0
-        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25 ,26]
-        ret.lateralTuning.indi.outerLoopGainV = [5.0, 9.0, 9.0, 15.0]
-        ret.lateralTuning.indi.timeConstant = 5.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 9.0
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]
