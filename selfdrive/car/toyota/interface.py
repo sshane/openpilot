@@ -249,7 +249,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.innerLoopGain = 15.0
         ret.lateralTuning.indi.timeConstant = 5.5
         ret.lateralTuning.indi.actuatorEffectiveness = 15.0
-        ret.steerActuatorDelay = 0.60
+        ret.steerActuatorDelay = 0.60  # needs verification
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]
