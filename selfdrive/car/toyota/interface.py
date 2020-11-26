@@ -203,7 +203,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.RAV4_TSS2:
       stop_and_go = True
-      ret.safetyParam = 73
+      ret.safetyParam = 53
       ret.wheelbase = 2.68986
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
@@ -212,7 +212,6 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00004
       if Rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune
-        ret.safetyParam = 53
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25, 26]
         ret.lateralTuning.indi.outerLoopGainV = [11.0, 16.5, 17.0, 20.99]
@@ -229,7 +228,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.RAV4H_TSS2:
       stop_and_go = True
-      ret.safetyParam = 73
+      ret.safetyParam = 53
       ret.wheelbase = 2.68986
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
@@ -238,7 +237,6 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3800. * CV.LB_TO_KG + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00004
       if Rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune
-        ret.safetyParam = 53
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25, 26]
         ret.lateralTuning.indi.outerLoopGainV = [11.0, 16.5, 17.0, 20.99]
