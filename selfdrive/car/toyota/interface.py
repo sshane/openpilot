@@ -12,6 +12,7 @@ use_lqr = op_params.get('use_lqr')
 prius_use_pid = op_params.get('prius_use_pid')
 corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
+prius_use_communityINDI = op_params.get('prius_use_communityINDI')
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
@@ -75,6 +76,14 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kdV = [1.]  # corolla D times gain in PI values
         ret.lateralTuning.pid.kf = 0.00009531750004645412
         ret.lateralTuning.pid.newKfTuned = True
+      
+      if prius_use_communityINDI:
+        ret.lateralTuning.init('indi')
+        ret.lateralTuning.indi.innerLoopGain = 4.0
+        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25, 26]
+        ret.lateralTuning.indi.outerLoopGainV = [1, 2, 3, 3.99]
+        ret.lateralTuning.indi.timeConstant = 0.1 if ret.hasZss if prius_use_communityINDI else 1.47
+        ret.lateralTuning.indi.actuatorEffectiveness = 4.0
       else:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGain = 4.0
