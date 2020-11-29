@@ -219,7 +219,6 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.innerLoopGain = 21.0
         ret.lateralTuning.indi.timeConstant = 6.5
         ret.lateralTuning.indi.actuatorEffectiveness = 21.0
-        ret.steerActuatorDelay = 0.12
 
       for fw in car_fw:
         if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
