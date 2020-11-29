@@ -12,7 +12,7 @@ use_lqr = op_params.get('use_lqr')
 prius_use_pid = op_params.get('prius_use_pid')
 corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
-prius_use_communityINDI = op_params.get('prius_use_communityINDI')
+pruisTSS1_use_communityindi = op_params.get('pruisTSS1_use_communityindi')
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
