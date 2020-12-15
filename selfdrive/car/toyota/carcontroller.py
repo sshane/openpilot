@@ -81,7 +81,7 @@ class CarController():
       self.last_fault_frame = frame
 
     # Cut steering for 2s after fault
-    if not enabled or (frame - self.last_fault_frame < 200):
+    if not enabled or (frame - self.last_fault_frame < self.op_params.get('steer_fault_timer')):
     # if not enabled or (frame - self.last_fault_frame < 200) or \
     #         ((CS.out.steeringAngle < 0 < CS.out.steeringRate or CS.out.steeringAngle > 0 > CS.out.steeringRate) and
     #          abs(CS.out.steeringRate) > 150):
