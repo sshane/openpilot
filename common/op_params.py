@@ -100,6 +100,7 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
                         'steer_rate_fix': Param(100, VT.number, live=True),
                         'steer_fault_timer': Param(200, int, live=True),
+                        'switch_integral_logic': Param(False, bool, live=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
     self._params_file = '/data/op_params.json'
