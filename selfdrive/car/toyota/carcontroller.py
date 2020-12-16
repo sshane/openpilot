@@ -80,7 +80,8 @@ class CarController():
     # if not enabled or CS.steer_state in [9, 25] or (abs(CS.out.steeringAngle) < 10 and abs(CS.out.steeringRate) > 100 and abs(apply_steer) > 100):
     if not enabled or CS.steer_state in [9, 25] or \
             (((CS.out.steeringAngle < 0 < CS.out.steeringAngle + CS.out.steeringRate * self.op_params.get('steer_rate_multiplier')) or
-             (CS.out.steeringAngle > 0 > CS.out.steeringAngle + CS.out.steeringRate * self.op_params.get('steer_rate_multiplier'))) and abs(apply_steer) > self.op_params.get('apply_steer_lim')):
+              (CS.out.steeringAngle > 0 > CS.out.steeringAngle + CS.out.steeringRate * self.op_params.get('steer_rate_multiplier'))) and abs(apply_steer) > self.op_params.get('apply_steer_lim')) or \
+            (abs(CS.out.steeringAngle) > 20 and abs(apply_steer) > self.op_params.get('apply_steer_lim') and apply_steer * CS.out.steeringAngle < 0):
       apply_steer = 0
       apply_steer_req = 0
     else:
