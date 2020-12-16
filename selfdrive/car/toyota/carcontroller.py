@@ -77,11 +77,10 @@ class CarController():
     self.steer_rate_limited = new_steer != apply_steer
 
     # only cut torque when steer state is a known fault
-    if CS.steer_state in [9, 25]:
-      self.last_fault_frame = frame
+    steer_fault = CS.steer_state in [9, 25]
 
     # Cut steering for 2s after fault
-    if not enabled or (frame - self.last_fault_frame < self.op_params.get('steer_fault_timer')):
+    if not enabled or steer_fault:
     # if not enabled or (frame - self.last_fault_frame < 200) or \
     #         ((CS.out.steeringAngle < 0 < CS.out.steeringRate or CS.out.steeringAngle > 0 > CS.out.steeringRate) and
     #          abs(CS.out.steeringRate) > 150):
