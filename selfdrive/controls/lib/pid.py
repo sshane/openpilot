@@ -88,16 +88,10 @@ class LatPIDController():
 
       # Update when changing i will move the control away from the limits
       # or when i will move towards the sign of the error
-      if self.op_params.get('switch_integral_logic'):
-        if ((error >= 0 and (control <= self.pos_limit or i > 0.0)) or
-            (error <= 0 and (control >= self.neg_limit or i < 0.0))) and \
-           not freeze_integrator:
-          self.i = i
-      else:
-        if ((error >= 0 and (control <= self.pos_limit or i < 0.0)) or
-            (error <= 0 and (control >= self.neg_limit or i > 0.0))) and \
-           not freeze_integrator:
-          self.i = i
+      if ((error >= 0 and (control <= self.pos_limit or i < 0.0)) or
+          (error <= 0 and (control >= self.neg_limit or i > 0.0))) and \
+         not freeze_integrator:
+        self.i = i
 
     control = self.p + self.f + self.i + d
     if self.convert is not None:
