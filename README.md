@@ -33,8 +33,6 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Branches**](#Branches)
 * [**Videos**](#Videos)
 
----
-
 ### Dynamic follow (3 profiles)
 Dynamic follow aims to provide the stock (Toyota) experience of having three different distance settings. Dynamic follow works by dynamically changing the distance in seconds which is sent to the long MPC to predict a speed to travel at. Basically, if the lead is decelerating or might soon, increase distance to prepare. And if the lead is accelerating, reduce distance to get up to speed quicker.
 

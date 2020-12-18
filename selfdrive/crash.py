@@ -3,12 +3,12 @@ import os
 import sys
 import threading
 import capnp
-from selfdrive.version import version, dirty
 import traceback
 from datetime import datetime
+from selfdrive.version import version, dirty, origin, branch
 
+from selfdrive.hardware import PC
 from selfdrive.swaglog import cloudlog
-from common.hardware import PC
 
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
   def capture_exception(*args, **kwargs):
@@ -25,7 +25,7 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
-  from selfdrive.version import origin, branch, smiskol_remote, get_git_commit
+  from selfdrive.version import smiskol_remote, get_git_commit
   from common.op_params import opParams
 
   CRASHES_DIR = '/data/community/crashes'
