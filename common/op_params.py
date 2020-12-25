@@ -93,7 +93,16 @@ class opParams:
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
-                        'steer_fault_fix': Param(True, bool, live=True),
+
+                        'steer_rate_fix': Param(True, bool, 'To restrict torque when steering rate goes above 100 deg/s\n'
+                                                            'Disable when tuning to reduce steering faults natively (without this hacky fix)', live=True),
+                        'steer_rate_fix_rate': Param(100, int, 'The steer rate at which it cuts torque', live=True),
+                        'lat_p_gain': Param(.15, VT.number, 'actual proportional gain', live=True),
+                        'lat_i_gain': Param(.05, VT.number, 'actual integral gain', live=True),
+                        'lat_d_gain': Param(1, VT.number, 'actual derivative gain', live=True),
+                        'lat_f_multiplier': Param(1, VT.number, 'feedforward multiplier (multiplied by the value in interface)', live=True),
+                        'steer_actuator_delay': Param(0.12, VT.number, 'The steer actuator delay', live=True),
+                        'deriv_period': Param(1 / 20., VT.number, 'Period of time over which derivative is calculated (in sec)', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
                         'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
