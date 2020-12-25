@@ -104,6 +104,11 @@ class opParams:
                         'steer_actuator_delay': Param(0.12, VT.number, 'The steer actuator delay', live=True),
                         'deriv_period': Param(1 / 20., VT.number, 'Period of time over which derivative is calculated (in sec)', live=True),
 
+                        'STEER_MAX': Param(1500, int, 'Default: 1500', live=True),
+                        'STEER_DELTA_UP': Param(10, VT.number, 'Default: 10', live=True),
+                        'STEER_DELTA_DOWN': Param(25, VT.number, 'Default: 25', live=True),
+                        'STEER_ERROR_MAX': Param(350, VT.number, 'Default: 350', live=True),
+
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
                         'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla'),
