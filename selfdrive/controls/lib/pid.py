@@ -73,7 +73,7 @@ class LatPIDController():
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
     self.p = error * self.k_p
-    self.f = feedforward * self.k_f * (1500 / self.op_params.get('STEER_MAX'))
+    self.f = feedforward * self.k_f * (1500 / self.op_params.get('STEER_MAX')) * self.op_params.get('lat_f_multiplier')
 
     d = 0
     if len(self.errors) >= 5:  # makes sure list is long enough

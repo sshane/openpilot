@@ -102,7 +102,6 @@ class opParams:
                         'lat_d_gain': Param(1, VT.number, 'actual derivative gain', live=True),
                         'lat_f_multiplier': Param(1, VT.number, 'feedforward multiplier (multiplied by the value in interface)', live=True),
                         'steer_actuator_delay': Param(0.12, VT.number, 'The steer actuator delay', live=True),
-                        'deriv_period': Param(1 / 20., VT.number, 'Period of time over which derivative is calculated (in sec)', live=True),
 
                         'STEER_MAX': Param(1500, int, 'Default: 1500', live=True),
                         'STEER_DELTA_UP': Param(10, VT.number, 'Default: 10', live=True),
