@@ -54,11 +54,14 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kf = 0.000068  # full torque for 20 deg at 80mph means 0.00007818594
       else:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 4.0
+        ret.lateralTuning.indi.innerLoopGainBP = [0]
+        ret.lateralTuning.indi.innerLoopGainV = [4.0]
         ret.lateralTuning.indi.outerLoopGainBP = [0]
         ret.lateralTuning.indi.outerLoopGainV = [3.0]
-        ret.lateralTuning.indi.timeConstant = 0.1 if ret.hasZss else 1.0
-        ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+        ret.lateralTuning.indi.timeConstantBP = [0]
+        ret.lateralTuning.indi.timeConstantV = [0.1] if ret.hasZss else [1.0]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
 
     elif candidate == CAR.PRIUS_2020:
       stop_and_go = True
@@ -76,11 +79,15 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.newKfTuned = True
       else:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 4.0
+        ret.lateralTuning.indi.innerLoopGainBP = [0]
+        ret.lateralTuning.indi.innerLoopGainV = [4.0]
         ret.lateralTuning.indi.outerLoopGainBP = [0]
         ret.lateralTuning.indi.outerLoopGainV = [3.0]
-        ret.lateralTuning.indi.timeConstant = 0.1 if ret.hasZss else 1.0
-        ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+        ret.lateralTuning.indi.timeConstantBP = [0]
+        ret.lateralTuning.indi.timeConstantV = [0.1] if ret.hasZss else [1.0]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
+
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
@@ -214,13 +221,17 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kdV = [0.68]
       ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00004
-      if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be dialed in based on cgwtuning
+      if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, loosely based on cgwtuning
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25, 26]
-        ret.lateralTuning.indi.outerLoopGainV = [11.0, 16.5, 17.0, 20.99]
-        ret.lateralTuning.indi.innerLoopGain = 21.0
-        ret.lateralTuning.indi.timeConstant = 6.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 21.0
+        ret.lateralTuning.indi.innerLoopGainBP = [0]
+        ret.lateralTuning.indi.innerLoopGainV = [15.0]
+        ret.lateralTuning.indi.outerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.outerLoopGainV = [7.0, 17.5, 19.0]
+        ret.lateralTuning.indi.timeConstantBP = [18, 22, 26]
+        ret.lateralTuning.indi.timeConstantV = [2, 5.5, 8.5] if ret.hasZss else [1.0]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
+
 
       for fw in car_fw:
         if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
@@ -240,11 +251,14 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25, 26]
-        ret.lateralTuning.indi.outerLoopGainV = [11.0, 16.5, 17.0, 20.99]
-        ret.lateralTuning.indi.innerLoopGain = 21.0
-        ret.lateralTuning.indi.timeConstant = 6.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 21.0
+        ret.lateralTuning.indi.innerLoopGainBP = [0]
+        ret.lateralTuning.indi.innerLoopGainV = [15.0]
+        ret.lateralTuning.indi.outerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.outerLoopGainV = [7.0, 17.5, 19.0]
+        ret.lateralTuning.indi.timeConstantBP = [18, 22, 26]
+        ret.lateralTuning.indi.timeConstantV = [2, 5.5, 8.5] if ret.hasZss else [1.0]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
 
       for fw in car_fw:
         if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
