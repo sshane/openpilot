@@ -35,9 +35,10 @@ class LatControlINDI():
 
     self.enforce_rate_limit = CP.carName == "toyota"
 
-    self.RC = CP.lateralTuning.indi.timeConstant
-    self.G = CP.lateralTuning.indi.actuatorEffectiveness
-    self.inner_loop_gain = CP.lateralTuning.indi.innerLoopGain
+    self.RC = interp(0, CP.lateralTuning.indi.timeConstantBP, CP.lateralTuning.indi.timeConstantV)
+    self.G = interp(0, CP.lateralTuning.indi.actuatorEffectivenessBP, CP.lateralTuning.indi.actuatorEffectivenessV)
+    self.outer_loop_gain = interp(0, CP.lateralTuning.indi.outerLoopGainBP, CP.lateralTuning.indi.outerLoopGainV)
+    self.inner_loop_gain = interp(0, CP.lateralTuning.indi.innerLoopGainBP, CP.lateralTuning.indi.innerLoopGainV)
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
 
     self.sat_count_rate = 1.0 * DT_CTRL
@@ -50,10 +51,6 @@ class LatControlINDI():
     self.output_steer = 0.
     self.sat_count = 0.0
     self.v_ego = 0
-
-  @property
-  def outer_loop_gain(self):
-    return interp(self.v_ego, self.CP.lateralTuning.indi.outerLoopGainBP, self.CP.lateralTuning.indi.outerLoopGainV)
 
   def _check_saturation(self, control, check_saturation, limit):
     saturated = abs(control) == limit
