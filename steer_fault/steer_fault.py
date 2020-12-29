@@ -24,7 +24,8 @@ MIN_SAMPLES = 60 * 100
 
 # with open('/data/jwt', 'r') as f:
 #   set_token(f.read().strip())
-set_token(sys.argv[1])
+if len(sys.argv) > 1:
+  set_token(sys.argv[1])
 
 
 def to_signed(n, bits):
