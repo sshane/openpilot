@@ -13,6 +13,7 @@ class LatControlINDI():
   def __init__(self, CP):
     self.CP = CP
     self.angle_steers_des = 0.
+    self.v_ego = 0.
 
     A = np.array([[1.0, DT_CTRL, 0.0],
                   [0.0, 1.0, DT_CTRL],
