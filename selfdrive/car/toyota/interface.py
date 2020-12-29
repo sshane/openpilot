@@ -54,13 +54,9 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kf = 0.000068  # full torque for 20 deg at 80mph means 0.00007818594
       else:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0]
         ret.lateralTuning.indi.innerLoopGainV = [4.0]
-        ret.lateralTuning.indi.outerLoopGainBP = [0]
         ret.lateralTuning.indi.outerLoopGainV = [3.0]
-        ret.lateralTuning.indi.timeConstantBP = [0]
         ret.lateralTuning.indi.timeConstantV = [0.1] if ret.hasZss else [1.0]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
         ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
 
     elif candidate == CAR.PRIUS_2020:
@@ -79,13 +75,9 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.newKfTuned = True
       else:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0]
         ret.lateralTuning.indi.innerLoopGainV = [4.0]
-        ret.lateralTuning.indi.outerLoopGainBP = [0]
         ret.lateralTuning.indi.outerLoopGainV = [3.0]
-        ret.lateralTuning.indi.timeConstantBP = [0]
         ret.lateralTuning.indi.timeConstantV = [0.1] if ret.hasZss else [1.0]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
         ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
 
 
@@ -223,13 +215,11 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, loosely based on cgwtuning
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0]
         ret.lateralTuning.indi.innerLoopGainV = [15.0]
         ret.lateralTuning.indi.outerLoopGainBP = [8, 14, 16.7, 22.2, 25, 30.6, 33.3, 36]
         ret.lateralTuning.indi.outerLoopGainV = [6, 9, 12, 13, 15.5, 16.5, 18, 19]
         ret.lateralTuning.indi.timeConstantBP = [11, 11.01, 16, 16.01, 22, 22.01, 30, 30.01]
         ret.lateralTuning.indi.timeConstantV = [1, 1.5, 2.5, 3.5, 3.5, 5.5, 5.5, 9.0] 
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
         ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
 
 
@@ -251,13 +241,11 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning, needs to be verified
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0]
         ret.lateralTuning.indi.innerLoopGainV = [15.0]
         ret.lateralTuning.indi.outerLoopGainBP = [8, 14, 16.7, 22.2, 25, 30.6, 33.3, 36]
         ret.lateralTuning.indi.outerLoopGainV = [6, 9, 12, 13, 15.5, 16.5, 18, 19]
         ret.lateralTuning.indi.timeConstantBP = [11, 11.01, 16, 16.01, 22, 22.01, 30, 30.01]
         ret.lateralTuning.indi.timeConstantV = [1, 1.5, 2.5, 3.5, 3.5, 5.5, 5.5, 9.0] 
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0]
         ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
 
       for fw in car_fw:
