@@ -213,14 +213,18 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kdV = [0.68]
       ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00004
-      if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, loosely based on cgwtuning
+      if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, based on cgwtuning
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainV = [15.0]
-        ret.lateralTuning.indi.outerLoopGainBP = [8, 14, 16.7, 22.2, 25, 30.6, 33.3, 36]
-        ret.lateralTuning.indi.outerLoopGainV = [6, 9, 12, 13, 15.5, 16.5, 18, 19]
-        ret.lateralTuning.indi.timeConstantBP = [11, 11.01, 16, 16.01, 22, 22.01, 30, 30.01]
-        ret.lateralTuning.indi.timeConstantV = [1, 1.5, 2.5, 3.5, 3.5, 5.5, 5.5, 9.0] 
-        ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
+        ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.innerLoopGainV = [9.5, 15, 15]
+        ret.lateralTuning.indi.outerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.outerLoopGainV = [9.5, 14.99, 14.99]
+        ret.lateralTuning.indi.timeConstantBP = [16.7, 16.71, 22, 22.01, 26, 26.01, 36, 36.01]
+        ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
+        ret.steerActuatorDelay = 0.60  # needs verification
+        ret.steerRateCost = 0.45
 
 
       for fw in car_fw:
@@ -241,12 +245,16 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning, needs to be verified
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainV = [15.0]
-        ret.lateralTuning.indi.outerLoopGainBP = [8, 14, 16.7, 22.2, 25, 30.6, 33.3, 36]
-        ret.lateralTuning.indi.outerLoopGainV = [6, 9, 12, 13, 15.5, 16.5, 18, 19]
-        ret.lateralTuning.indi.timeConstantBP = [11, 11.01, 16, 16.01, 22, 22.01, 30, 30.01]
-        ret.lateralTuning.indi.timeConstantV = [1, 1.5, 2.5, 3.5, 3.5, 5.5, 5.5, 9.0] 
-        ret.lateralTuning.indi.actuatorEffectivenessV = [15.0]
+        ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.innerLoopGainV = [9.5, 15, 15]
+        ret.lateralTuning.indi.outerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.outerLoopGainV = [9.5, 14.99, 14.99]
+        ret.lateralTuning.indi.timeConstantBP = [16.7, 16.71, 22, 22.01, 26, 26.01, 36, 36.01]
+        ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
+        ret.steerActuatorDelay = 0.60  # needs verification
+        ret.steerRateCost = 0.45
 
       for fw in car_fw:
         if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
