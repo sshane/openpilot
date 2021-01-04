@@ -223,7 +223,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
-        ret.steerActuatorDelay = 0.60  # needs verification
+        ret.steerActuatorDelay = 0.35 # needs verification
         ret.steerRateCost = 0.45
 
 
@@ -253,7 +253,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
-        ret.steerActuatorDelay = 0.60  # needs verification
+        ret.steerActuatorDelay = 0.35  # needs verification
         ret.steerRateCost = 0.45
 
       for fw in car_fw:
