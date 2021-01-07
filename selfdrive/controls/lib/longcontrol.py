@@ -58,28 +58,30 @@ class LongControl():
   def __init__(self, CP, compute_gb, candidate):
     self.long_control_state = LongCtrlState.off  # initialized to off
 
-    self.gas_pid = PIController((CP.longitudinalTuning.kpBP, [1.2, 0.8, 0.5]),  # for gas, use pedal tuning
-                                (CP.longitudinalTuning.kiBP, [0.18, 0.12]),
-                                rate=RATE,
-                                sat_limit=0.8,
-                                convert=compute_gb)
+    self.pedal_pid = PIController((CP.longitudinalTuning.kpBP, [1.2, 0.8, 0.5]),  # handles pedal's different gas response
+                                  (CP.longitudinalTuning.kiBP, [0.18, 0.12]),
+                                  rate=RATE,
+                                  sat_limit=0.8,
+                                  convert=compute_gb)
 
-    self.brake_pid = PIController((CP.longitudinalTuning.kpBP, [3.6, 2.4, 1.5]),  # for brake use stock tuning since braking doesn't change
-                                  (CP.longitudinalTuning.kiBP, [0.54, 0.36]),     # when you install a comma pedal
+    self.stock_pid = PIController((CP.longitudinalTuning.kpBP, [3.6, 2.4, 1.5]),  # when pedal installed, use stock pid for braking
+                                  (CP.longitudinalTuning.kiBP, [0.54, 0.36]),     # else always use stock pid
                                   rate=RATE,
                                   sat_limit=0.8,
                                   convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
+    self.pid = self.stock_pid
 
     self.op_params = opParams()
     self.enable_dg = self.op_params.get('dynamic_gas')
     self.dynamic_gas = DynamicGas(CP, candidate)
+    self.enable_gas_interceptor = CP.enableGasInterceptor
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
-    self.gas_pid.reset()
-    self.brake_pid.reset()
+    self.pedal_pid.reset()
+    self.stock_pid.reset()
     self.v_pid = v_pid
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP, extras):
@@ -106,20 +108,26 @@ class LongControl():
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
       self.v_pid = v_target
-      self.gas_pid.pos_limit = gas_max
-      self.gas_pid.neg_limit = -brake_max
-      self.brake_pid.pos_limit = gas_max
-      self.brake_pid.neg_limit = -brake_max
+      self.pedal_pid.pos_limit = gas_max
+      self.pedal_pid.neg_limit = -brake_max
+      self.stock_pid.pos_limit = gas_max
+      self.stock_pid.neg_limit = -brake_max
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
-      output_gas = self.gas_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
-      output_brake = self.brake_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+      self.pid = self.stock_pid
+      output_stock = self.stock_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
 
-      output_gb = output_brake if output_brake <= 0 else output_gas  # prioritize using brake gb when brake controller says to coast or brake
+      if self.enable_gas_interceptor:  # if no pedal, don't even update loop for pedal
+        output_pedal = self.pedal_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+        if output_stock <= 0:  # prioritize using stock when stock controller says to coast or brake
+          output_gb = output_stock
+        else:
+          self.pid = self.pedal_pid
+          output_gb = output_pedal
 
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
