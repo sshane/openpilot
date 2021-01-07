@@ -568,9 +568,9 @@ class Controls:
     controlsState.longControlState = self.LoC.long_control_state
     controlsState.vPid = float(self.LoC.v_pid)
     controlsState.vCruise = float(self.v_cruise_kph)
-    controlsState.upAccelCmd = float(self.LoC.pid.p)
-    controlsState.uiAccelCmd = float(self.LoC.pid.id)
-    controlsState.ufAccelCmd = float(self.LoC.pid.f)
+    controlsState.upAccelCmd = float(self.LoC.gas_pid.p)
+    controlsState.uiAccelCmd = float(self.LoC.gas_pid.i)
+    controlsState.ufAccelCmd = float(self.LoC.gas_pid.f)
     controlsState.angleSteersDes = float(self.LaC.angle_steers_des)
     controlsState.vTargetLead = float(v_acc)
     controlsState.aTarget = float(a_acc)
