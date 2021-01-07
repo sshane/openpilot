@@ -1,6 +1,6 @@
 from cereal import log
 from common.numpy_fast import clip, interp
-from selfdrive.controls.lib.pid import LongPIDController
+from selfdrive.controls.lib.pid import PIController
 from selfdrive.controls.lib.dynamic_gas import DynamicGas
 from common.op_params import opParams
 
@@ -57,18 +57,18 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 class LongControl():
   def __init__(self, CP, compute_gb, candidate):
     self.long_control_state = LongCtrlState.off  # initialized to off
-    kdBP = [0., 16., 35.]
-    if CP.enableGasInterceptor:
-      kdV = [0.05, 1.0285 * 1.45, 1.8975 * 0.8]
-    else:
-      kdV = [0.08, 1.215, 2.51]
 
-    self.pid = LongPIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
-                                 (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                                 (kdBP, kdV),
-                                 rate=RATE,
-                                 sat_limit=0.8,
-                                 convert=compute_gb)
+    self.gas_pid = PIController((CP.longitudinalTuning.kpBP, [1.2, 0.8, 0.5]),  # for gas, use pedal tuning
+                                (CP.longitudinalTuning.kiBP, [0.18, 0.12]),
+                                rate=RATE,
+                                sat_limit=0.8,
+                                convert=compute_gb)
+
+    self.brake_pid = PIController((CP.longitudinalTuning.kpBP, [3.6, 2.4, 1.5]),  # for brake use stock tuning since braking doesn't change
+                                  (CP.longitudinalTuning.kiBP, [0.54, 0.36]),     # when you install a comma pedal
+                                  rate=RATE,
+                                  sat_limit=0.8,
+                                  convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 
@@ -78,7 +78,8 @@ class LongControl():
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
-    self.pid.reset()
+    self.gas_pid.reset()
+    self.brake_pid.reset()
     self.v_pid = v_pid
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP, extras):
@@ -105,15 +106,20 @@ class LongControl():
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
       self.v_pid = v_target
-      self.pid.pos_limit = gas_max
-      self.pid.neg_limit = - brake_max
+      self.gas_pid.pos_limit = gas_max
+      self.gas_pid.neg_limit = -brake_max
+      self.brake_pid.pos_limit = gas_max
+      self.brake_pid.neg_limit = -brake_max
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
-      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+      output_gas = self.gas_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+      output_brake = self.brake_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+
+      output_gb = output_brake if output_brake <= 0 else output_gas  # prioritize using brake gb when brake controller says to coast or brake
 
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
