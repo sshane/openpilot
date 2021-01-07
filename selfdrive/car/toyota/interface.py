@@ -226,7 +226,6 @@ class CarInterface(CarInterfaceBase):
         ret.steerActuatorDelay = 0.35 # needs verification
         ret.steerRateCost = 0.45
 
-
       for fw in car_fw:
         if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
           ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
