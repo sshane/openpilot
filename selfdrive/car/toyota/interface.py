@@ -225,21 +225,21 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
         ret.steerActuatorDelay = 0.35  # needs verification
         ret.steerRateCost = 0.45
-
-      for fw in car_fw:
-        if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
-          ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-          ret.lateralTuning.pid.kf = 0.00007818594
-          break
-
+      else: 
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
+        ret.lateralTuning.pid.kdV = [0.68]
+        for fw in car_fw:
+          if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
+            ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+            ret.lateralTuning.pid.kf = 0.00007818594
+            break
+            
     elif candidate == CAR.RAV4H_TSS2:
       stop_and_go = True
       ret.safetyParam = 56
       ret.wheelbase = 2.68986
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
-      ret.lateralTuning.pid.kdV = [0.68]
       ret.mass = 3800. * CV.LB_TO_KG + STD_CARGO_KG
       ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning, needs to be verified
@@ -254,12 +254,14 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
         ret.steerActuatorDelay = 0.35  # needs verification
         ret.steerRateCost = 0.45
-
-      for fw in car_fw:
-        if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
-          ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-          ret.lateralTuning.pid.kf = 0.00007818594
-          break
+      else: 
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
+        ret.lateralTuning.pid.kdV = [0.68]
+        for fw in car_fw:
+          if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
+            ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+            ret.lateralTuning.pid.kf = 0.00007818594
+            break
 
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
       stop_and_go = True
