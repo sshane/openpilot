@@ -123,8 +123,10 @@ class LongControl():
 
       if self.enable_gas_interceptor:  # if no pedal, don't even update loop for pedal
         output_pedal = self.pedal_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
-        if output_stock <= 0:  # prioritize using stock when stock controller says to coast or brake
-          output_gb = output_stock
+
+        if output_stock <= 0.05:  # prioritize using stock when stock controller says to coast or brake
+          stock_factor = min((0.05 - output_stock) * 20, 1.0)
+          output_gb = output_stock * stock_factor + output_pedal * (1 - stock_factor)  # smoothly ramp from stock to pedal gas
         else:
           self.pid = self.pedal_pid
           output_gb = output_pedal
