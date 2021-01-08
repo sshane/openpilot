@@ -212,7 +212,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
       ret.lateralTuning.pid.kdV = [0.68]
       ret.mass = 3370. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, based on cgwtuning
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
@@ -227,6 +226,7 @@ class CarInterface(CarInterfaceBase):
         ret.steerRateCost = 0.45
       else: 
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
+        ret.lateralTuning.pid.kf = 0.00004
         ret.lateralTuning.pid.kdV = [0.68]
         for fw in car_fw:
           if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
@@ -241,7 +241,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
       ret.mass = 3800. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.lateralTuning.pid.kf = 0.00004
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning, needs to be verified
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
@@ -257,6 +256,7 @@ class CarInterface(CarInterfaceBase):
       else: 
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15], [0.05]]
         ret.lateralTuning.pid.kdV = [0.68]
+        ret.lateralTuning.pid.kf = 0.00004
         for fw in car_fw:
           if fw.ecu == "eps" and fw.fwVersion == b"8965B42170\x00\x00\x00\x00\x00\x00":
             ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
