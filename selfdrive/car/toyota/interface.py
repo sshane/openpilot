@@ -116,7 +116,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.indi.innerLoopGainV = [9.]
       ret.lateralTuning.indi.outerLoopGainV = [15.]
       ret.lateralTuning.indi.timeConstantV = [5.5]
-      ret.lateralTuning.indi.actuatorEffectivenessV = [9.]
+      ret.lateralTuning.indi.actuatorEffectivenessV = [4.5]
 
     elif candidate == CAR.LEXUS_RX:
       stop_and_go = True
