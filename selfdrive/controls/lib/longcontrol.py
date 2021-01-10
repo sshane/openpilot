@@ -120,9 +120,9 @@ class LongControl():
 
       self.pid = self.stock_pid
       output_stock = self.stock_pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
-      if self.enable_gas_interceptor:
-        if output_stock > 0:
-          output_stock /= 3.
+      #if self.enable_gas_interceptor:
+      #  if output_stock > 0:
+      #    output_stock /= 3.
       output_gb = float(output_stock)
 
       # if self.enable_gas_interceptor:  # if no pedal, don't even update loop for pedal
