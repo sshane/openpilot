@@ -265,21 +265,23 @@ class CarInterface(CarInterfaceBase):
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
       stop_and_go = True
       ret.safetyParam = 53
-      ret.wheelbase = 2.63906
+      ret.wheelbase = 2.67
       ret.steerRatio = 13.9
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
       if corollaTSS2_use_indi:  # birdman6450#7399's Corolla 2020 TSS2 Tune
+        ret.steerRatio = 15.33
+        tire_stiffness_factor = 0.996  # not optimized yet
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [18, 22, 26]
-        ret.lateralTuning.indi.innerLoopGainV = [5, 10, 15]
+        ret.lateralTuning.indi.innerLoopGainV = [5, 12, 15]
         ret.lateralTuning.indi.outerLoopGainBP = [18, 22, 26]
-        ret.lateralTuning.indi.outerLoopGainV = [4, 9, 14.99]
+        ret.lateralTuning.indi.outerLoopGainV = [4, 11, 14.99]
         ret.lateralTuning.indi.timeConstantBP = [18, 22, 26]
         ret.lateralTuning.indi.timeConstantV = [2, 4, 5.5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [18, 22, 26]
-        ret.lateralTuning.indi.actuatorEffectivenessV = [5, 10, 15]
-        ret.steerActuatorDelay = 0.60  # needs verification
+        ret.lateralTuning.indi.actuatorEffectivenessV = [5, 12, 15]
+        ret.steerActuatorDelay = 0.45  # needs verification
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]
