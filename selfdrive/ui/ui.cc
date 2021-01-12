@@ -59,7 +59,7 @@ void sa_init(UIState *s, bool full_init) {
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({"modelV2", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "thermal",
-                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents"});
+                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents", "carControl"});
 
   s->started = false;
   s->status = STATUS_OFFROAD;
