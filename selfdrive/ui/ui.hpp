@@ -94,7 +94,7 @@ typedef struct UIScene {
   int dfButtonStatus;
   int lsButtonStatus;
   bool mlButtonEnabled;
-  cereal::CarControl::Reader controls_state;
+  cereal::CarControl::Reader car_control;
 
   mat4 extrinsic_matrix;      // Last row is 0 so we can use mat4.
   bool world_objects_visible;
