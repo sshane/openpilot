@@ -149,6 +149,11 @@ void update_sockets(UIState *s) {
     return;
   }
 
+  if (s->started && sm.updated("carControl")) {
+    auto event = sm["carControl"];
+    scene.car_control = event.getCarControl();
+  }
+
   if (s->started && sm.updated("controlsState")) {
     auto event = sm["controlsState"];
     scene.controls_state = event.getControlsState();
