@@ -266,12 +266,10 @@ class CarInterface(CarInterfaceBase):
       stop_and_go = True
       ret.safetyParam = 53
       ret.wheelbase = 2.67
-      ret.steerRatio = 13.9
-      tire_stiffness_factor = 0.444  # not optimized yet
+      ret.steerRatio = 15.33
+      tire_stiffness_factor = 0.996  # not optimized yet
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
       if corollaTSS2_use_indi:  # birdman6450#7399's Corolla 2020 TSS2 Tune
-        ret.steerRatio = 15.33
-        tire_stiffness_factor = 0.996  # not optimized yet
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [18, 22, 26]
         ret.lateralTuning.indi.innerLoopGainV = [5, 12, 15]
