@@ -59,7 +59,7 @@ void sa_init(UIState *s, bool full_init) {
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({"modelV2", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "thermal",
-                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents", "carControl"});
+                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents", "carState"});
 
   s->started = false;
   s->status = STATUS_OFFROAD;
@@ -149,9 +149,9 @@ void update_sockets(UIState *s) {
     return;
   }
 
-  if (s->started && sm.updated("carControl")) {
-    auto event = sm["carControl"];
-    scene.car_control = event.getCarControl();
+  if (s->started && sm.updated("carState")) {
+    auto event = sm["carState"];
+    scene.car_state = event.getCarState();
   }
 
   if (s->started && sm.updated("controlsState")) {

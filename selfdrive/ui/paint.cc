@@ -363,8 +363,7 @@ static void ui_draw_vision_speed(UIState *s) {
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
 
   snprintf(speed_str, sizeof(speed_str), "%d", (int)speed);
-  bool braking = s->scene.car_control.getActuators().getBrake() > 0.01f;
-  ui_draw_text(s->vg, viz_rect.centerX(), 240, speed_str, 96*2.5, braking?nvgRGBA(255, 66, 66, 255):COLOR_WHITE, s->font_sans_bold);
+  ui_draw_text(s->vg, viz_rect.centerX(), 240, speed_str, 96*2.5, s->scene.car_state.getBrakeLight()?nvgRGBA(255, 66, 66, 255):COLOR_WHITE, s->font_sans_bold);
   ui_draw_text(s->vg, viz_rect.centerX(), 320, s->is_metric?"km/h":"mph", 36*2.5, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
 }
 
