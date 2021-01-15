@@ -47,7 +47,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.4   # unknown end-to-end spec
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.steerActuatorDelay = 0.5
+      ret.steerActuatorDelay = 0.3
 
       if prius_use_pid:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.02]]  # todo: parametertize by zss
@@ -65,7 +65,7 @@ class CarInterface(CarInterfaceBase):
       ret.safetyParam = 54
       ret.wheelbase = 2.6924
       ret.steerRatio = 13.4  # unknown end-to-end spec
-      ret.steerActuatorDelay = 0.575
+      ret.steerActuatorDelay = 0.3
       tire_stiffness_factor = 0.6371  # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
 
@@ -230,7 +230,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
-        ret.steerActuatorDelay = 0.35  # needs verification
+        ret.steerActuatorDelay = 0.3  # needs verification
         ret.steerRateCost = 0.45
 
     elif candidate == CAR.RAV4H_TSS2:
@@ -259,7 +259,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
         ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
-        ret.steerActuatorDelay = 0.35  # needs verification
+        ret.steerActuatorDelay = 0.3  # needs verification
         ret.steerRateCost = 0.45
 
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
@@ -279,7 +279,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [2, 4, 5.5]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [18, 22, 26]
         ret.lateralTuning.indi.actuatorEffectivenessV = [5, 12, 15]
-        ret.steerActuatorDelay = 0.45  # needs verification
+        ret.steerActuatorDelay = 0.3  # needs verification
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kdV = [2.]
