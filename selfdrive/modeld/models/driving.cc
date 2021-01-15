@@ -8,21 +8,41 @@
 #include "common/timing.h"
 #include "common/params.h"
 #include "driving.h"
+#include "clutil.h"
 
-#define MIN_VALID_LEN 10.0
-#define TRAJECTORY_SIZE 33
-#define TRAJECTORY_TIME 10.0
-#define TRAJECTORY_DISTANCE 192.0
-#define PLAN_IDX 0
-#define LL_IDX PLAN_IDX + PLAN_MHP_N*(PLAN_MHP_GROUP_SIZE)
-#define LL_PROB_IDX LL_IDX + 4*2*2*33
-#define RE_IDX LL_PROB_IDX + 4
-#define LEAD_IDX RE_IDX + 2*2*2*33
-#define LEAD_PROB_IDX LEAD_IDX + LEAD_MHP_N*(LEAD_MHP_GROUP_SIZE)
-#define DESIRE_STATE_IDX LEAD_PROB_IDX + 3
-#define META_IDX DESIRE_STATE_IDX + DESIRE_LEN
-#define POSE_IDX META_IDX + OTHER_META_SIZE + DESIRE_PRED_SIZE
-#define OUTPUT_SIZE  POSE_IDX + POSE_SIZE
+constexpr int MODEL_PATH_DISTANCE = 192;
+constexpr int POLYFIT_DEGREE = 4;
+constexpr int DESIRE_PRED_SIZE = 32;
+constexpr int OTHER_META_SIZE = 4;
+
+constexpr int MODEL_WIDTH = 512;
+constexpr int MODEL_HEIGHT = 256;
+constexpr int MODEL_FRAME_SIZE = MODEL_WIDTH * MODEL_HEIGHT * 3 / 2;
+
+constexpr int PLAN_MHP_N = 5;
+constexpr int PLAN_MHP_COLUMNS = 30;
+constexpr int PLAN_MHP_VALS = 30*33;
+constexpr int PLAN_MHP_SELECTION = 1;
+constexpr int PLAN_MHP_GROUP_SIZE =  (2*PLAN_MHP_VALS + PLAN_MHP_SELECTION);
+
+constexpr int LEAD_MHP_N = 5;
+constexpr int LEAD_MHP_VALS = 4;
+constexpr int LEAD_MHP_SELECTION = 3;
+constexpr int LEAD_MHP_GROUP_SIZE = (2*LEAD_MHP_VALS + LEAD_MHP_SELECTION);
+
+constexpr int POSE_SIZE = 12;
+
+constexpr int MIN_VALID_LEN = 10;
+constexpr int PLAN_IDX = 0;
+constexpr int LL_IDX = PLAN_IDX + PLAN_MHP_N*PLAN_MHP_GROUP_SIZE;
+constexpr int LL_PROB_IDX = LL_IDX + 4*2*2*33;
+constexpr int RE_IDX = LL_PROB_IDX + 4;
+constexpr int LEAD_IDX = RE_IDX + 2*2*2*33;
+constexpr int LEAD_PROB_IDX = LEAD_IDX + LEAD_MHP_N*(LEAD_MHP_GROUP_SIZE);
+constexpr int DESIRE_STATE_IDX = LEAD_PROB_IDX + 3;
+constexpr int META_IDX = DESIRE_STATE_IDX + DESIRE_LEN;
+constexpr int POSE_IDX = META_IDX + OTHER_META_SIZE + DESIRE_PRED_SIZE;
+constexpr int OUTPUT_SIZE =  POSE_IDX + POSE_SIZE;
 #ifdef TEMPORAL
   #define TEMPORAL_SIZE 512
 #else
@@ -32,8 +52,6 @@
 // #define DUMP_YUV
 
 Eigen::Matrix<float, MODEL_PATH_DISTANCE, POLYFIT_DEGREE - 1> vander;
-float X_IDXS[TRAJECTORY_SIZE];
-float T_IDXS[TRAJECTORY_SIZE];
 
 void model_init(ModelState* s, cl_device_id device_id, cl_context context, int temporal) {
   frame_init(&s->frame, MODEL_WIDTH, MODEL_HEIGHT, device_id, context);
@@ -70,8 +88,6 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context, int t
   // Build Vandermonde matrix
   for(int i = 0; i < TRAJECTORY_SIZE; i++) {
     for(int j = 0; j < POLYFIT_DEGREE - 1; j++) {
-      X_IDXS[i] = (TRAJECTORY_DISTANCE/1024.0) * (pow(i,2));
-      T_IDXS[i] = (TRAJECTORY_TIME/1024.0) * (pow(i,2));
       vander(i, j) = pow(X_IDXS[i], POLYFIT_DEGREE-j-1);
     }
   }
