@@ -183,7 +183,7 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
-  "lanespeedd": "selfdrive.controls.lib.lane_speed",
+  # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
 
 daemon_processes = {
