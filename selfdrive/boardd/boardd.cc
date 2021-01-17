@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
@@ -39,12 +38,12 @@
 
 Panda * panda = NULL;
 std::atomic<bool> safety_setter_thread_running(false);
-volatile sig_atomic_t do_exit = 0;
 bool spoofing_started = false;
 bool fake_send = false;
 bool connected_once = false;
 bool ignition = false;
 
+ExitHandler do_exit;
 struct tm get_time(){
   time_t rawtime;
   time(&rawtime);
@@ -67,7 +66,7 @@ void safety_setter_thread() {
   panda->set_safety_model(cereal::CarParams::SafetyModel::ELM327);
 
   // switch to SILENT when CarVin param is read
-  while (1) {
+  while (true) {
     if (do_exit || !panda->connected){
       safety_setter_thread_running = false;
       return;
@@ -81,7 +80,7 @@ void safety_setter_thread() {
       LOGW("got CarVin %s", str_vin.c_str());
       break;
     }
-    usleep(100*1000);
+    util::sleep_for(100);
   }
 
   // VIN query done, stop listening to OBDII
@@ -89,7 +88,7 @@ void safety_setter_thread() {
 
   std::vector<char> params;
   LOGW("waiting for params to set safety model");
-  while (1) {
+  while (true) {
     if (do_exit || !panda->connected){
       safety_setter_thread_running = false;
       return;
@@ -97,7 +96,7 @@ void safety_setter_thread() {
 
     params = Params().read_db_bytes("CarParams");
     if (params.size() > 0) break;
-    usleep(100*1000);
+    util::sleep_for(100);
   }
   LOGW("got %d bytes CarParams", params.size());
 
@@ -189,7 +188,7 @@ bool usb_connect() {
 // must be called before threads or with mutex
 void usb_retry_connect() {
   LOGW("attempting to connect");
-  while (!usb_connect()) { usleep(100*1000); }
+  while (!usb_connect()) { util::sleep_for(100); }
   LOGW("connected to board");
 }
 
@@ -256,8 +255,7 @@ void can_recv_thread() {
     uint64_t cur_time = nanos_since_boot();
     int64_t remaining = next_frame_time - cur_time;
     if (remaining > 0){
-      useconds_t sleep = remaining / 1000;
-      usleep(sleep);
+      std::this_thread::sleep_for(std::chrono::nanoseconds(remaining));
     } else {
       if (ignition){
         LOGW("missed cycles (%d) %lld", (int)-1*remaining/dt, remaining);
@@ -278,13 +276,13 @@ void can_health_thread() {
   Params params = Params();
 
   // Broadcast empty health message when panda is not yet connected
-  while (!panda){
+  while (!do_exit && !panda) {
     MessageBuilder msg;
     auto healthData  = msg.initEvent().initHealth();
 
     healthData.setHwType(cereal::HealthData::HwType::UNKNOWN);
     pm.send("health", msg);
-    usleep(500*1000);
+    util::sleep_for(500);
   }
 
   // run at 2hz
@@ -352,8 +350,15 @@ void can_health_thread() {
 
     // set fields
     healthData.setUptime(health.uptime);
+
+#ifdef QCOM2
+    healthData.setVoltage(std::stoi(util::read_file("/sys/class/hwmon/hwmon1/in1_input")));
+    healthData.setCurrent(std::stoi(util::read_file("/sys/class/hwmon/hwmon1/curr1_input")));
+#else
     healthData.setVoltage(health.voltage);
     healthData.setCurrent(health.current);
+#endif
+
     healthData.setIgnitionLine(health.ignition_line);
     healthData.setIgnitionCan(health.ignition_can);
     healthData.setControlsAllowed(health.controls_allowed);
@@ -384,7 +389,7 @@ void can_health_thread() {
     }
     pm.send("health", msg);
     panda->send_heartbeat();
-    usleep(500*1000);
+    util::sleep_for(500);
   }
 }
 
@@ -504,7 +509,7 @@ void pigeon_thread() {
     ignition_last = ignition;
 
     // 10ms - 100 Hz
-    usleep(10*1000);
+    util::sleep_for(10);
   }
 
   delete pigeon;

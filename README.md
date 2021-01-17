@@ -53,7 +53,17 @@ I've trained a custom model with Keras that takes in the past 35 seconds of your
 
 It's only been trained on about an hour of data, so it's not perfect yet, but it's great for users who just want to set it and forget it. **To enable the `auto` profile, simply tap the profile changing button for dynamic follow until it reaches the `auto` profile!**
 
+<<<<<<< HEAD
 If you're annoyed by the silent alerts that show when the model has changed the profile automatically, just use [opEdit](#Customize-this-fork-opEdit) and set `hide_auto_df_alerts` to `True`. Auto profile and model will remain functional but will not show alerts.
+=======
+* openpilot observes ISO26262 guidelines, see [SAFETY.md](SAFETY.md) for more details.
+* openpilot has software in the loop [tests](.github/workflows/test.yaml) that run on every commit.
+* The safety model code lives in panda and is written in C, see [code rigor](https://github.com/commaai/panda#code-rigor) for more details.
+* panda has software in the loop [safety tests](https://github.com/commaai/panda/tree/master/tests/safety).
+* Internally, we have a hardware in the loop Jenkins test suite that builds and unit tests the various processes.
+* panda has additional hardware in the loop [tests](https://github.com/commaai/panda/blob/master/Jenkinsfile).
+* We run the latest openpilot in a testing closet containing 10 EONs continuously replaying routes.
+>>>>>>> 4085b308... openpilot v0.8.2 release
 
 Resources:
 - [The auto-df repo.](https://github.com/ShaneSmiskol/auto-df)

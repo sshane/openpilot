@@ -34,13 +34,13 @@ class TestCarInterfaces(unittest.TestCase):
         self.assertGreater(car_params.mass, 1)
         self.assertGreater(car_params.steerRateCost, 1e-3)
 
-        tuning = car_params.lateralTuning.which()
-        if tuning == 'pid':
-          self.assertTrue(len(car_params.lateralTuning.pid.kpV))
-        elif tuning == 'lqr':
-          self.assertTrue(len(car_params.lateralTuning.lqr.a))
-        elif tuning == 'indi':
-          self.assertGreater(car_params.lateralTuning.indi.outerLoopGain, 1e-3)
+      tuning = car_params.lateralTuning.which()
+      if tuning == 'pid':
+        self.assertTrue(len(car_params.lateralTuning.pid.kpV))
+      elif tuning == 'lqr':
+        self.assertTrue(len(car_params.lateralTuning.lqr.a))
+      elif tuning == 'indi':
+        self.assertTrue(len(car_params.lateralTuning.indi.outerLoopGainV))
 
         # Run car interface
         CC = car.CarControl.new_message()
