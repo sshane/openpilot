@@ -403,6 +403,7 @@ struct CarParams {
   minSpeedCan @51 :Float32; # Minimum vehicle speed from CAN (below this value drops to 0)
   stoppingBrakeRate @52 :Float32; # brake_travel/s while trying to stop
   startingBrakeRate @53 :Float32; # brake_travel/s while releasing on restart
+  hasZss @54: Bool;  # true if ZSS is detected
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
   openpilotLongitudinalControl @37 :Bool; # is openpilot doing the longitudinal control?
@@ -415,7 +416,6 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
-  hasZss @51: Bool;  # true if ZSS is detected
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
