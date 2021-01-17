@@ -9,6 +9,7 @@ Stock Additions v0.6.5 - 2020-12-07 (0.8)
  * Param `disengage_on_gas` is False by default
  * Detect if on OneUI 3.0 hotspot (different IP addresses)
  * Made ML button smaller
+ * Speed turns red while braking
 
 Stock Additions v0.6 - 2020-11-09 (0.7.10)
 ===
