@@ -15,6 +15,7 @@ def apply_deadzone(error, deadzone):
 
 class LatPIDController():
   def __init__(self, k_p, k_i, k_d, k_f=1., pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, convert=None):
+    self.op_params = opParams()
     self._k_p = k_p  # proportional gain
     self._k_i = k_i  # integral gain
     self._k_d = k_d  # derivative gain
@@ -33,15 +34,18 @@ class LatPIDController():
 
   @property
   def k_p(self):
-    return interp(self.speed, self._k_p[0], self._k_p[1])
+    return self.op_params.get('lat_p')
+    # return interp(self.speed, self._k_p[0], self._k_p[1])
 
   @property
   def k_i(self):
-    return interp(self.speed, self._k_i[0], self._k_i[1])
+    return self.op_params.get('lat_i')
+    # return interp(self.speed, self._k_i[0], self._k_i[1])
 
   @property
   def k_d(self):
-    return interp(self.speed, self._k_d[0], self._k_d[1])
+    return self.op_params.get('lat_d')
+    # return interp(self.speed, self._k_d[0], self._k_d[1])
 
   def _check_saturation(self, control, check_saturation, error):
     saturated = (control < self.neg_limit) or (control > self.pos_limit)
