@@ -111,7 +111,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
       ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[11, 31], [0.25, 0.2]]  # 25 to 70 mph
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [[11, 31], [0.06, 0.03]]
-      ret.lateralTuning.pid.kdV = [0.4]
+      ret.lateralTuning.pid.kdV = [0.5]
       ret.lateralTuning.pid.kf = 0.00006908923778520113  # full torque for 20 deg at 80mph means 0.00007818594
       ret.lateralTuning.pid.newKfTuned = True
 
