@@ -64,7 +64,7 @@ class LatPIDController():
     self.control = 0
     self.errors = []
 
-  def update(self, setpoint, measurement, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False):
+  def update(self, setpoint, measurement, measurement_rate, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False):
     self.speed = speed
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
@@ -75,6 +75,8 @@ class LatPIDController():
     if len(self.errors) >= 5:  # makes sure list is long enough
       d = (error - self.errors[-5]) / 5  # get deriv in terms of 100hz (tune scale doesn't change)
       d *= self.k_d
+    if measurement_rate * error > 0:  # reduce derivative when we're moving toward setpoint
+      d /= 10.
 
     if override:
       self.i -= self.i_unwind_rate * float(np.sign(self.i))
