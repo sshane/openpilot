@@ -1,5 +1,5 @@
 import numpy as np
-from common.numpy_fast import clip, interp
+from common.numpy_fast import clip, interp, interp_2d
 from common.op_params import opParams
 from selfdrive.config import Conversions as CV
 
@@ -33,7 +33,7 @@ class LatPIDController():
 
   @property
   def k_p(self):
-    return interp(self.speed, self._k_p[0], self._k_p[1])
+    return interp_2d(self.angle, self.speed, self._k_p[0], self._k_p[1])
 
   @property
   def k_i(self):
@@ -41,7 +41,7 @@ class LatPIDController():
 
   @property
   def k_d(self):
-    return interp(self.speed, self._k_d[0], self._k_d[1])
+    return interp_2d(self.angle, self.speed, self._k_d[0], self._k_d[1])
 
   def _check_saturation(self, control, check_saturation, error):
     saturated = (control < self.neg_limit) or (control > self.pos_limit)
@@ -66,6 +66,7 @@ class LatPIDController():
 
   def update(self, setpoint, measurement, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False):
     self.speed = speed
+    self.angle = setpoint  # or measurement?
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
     self.p = error * self.k_p
