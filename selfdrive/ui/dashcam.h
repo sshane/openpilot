@@ -1,4 +1,5 @@
 #include <time.h>
+#include <sys/stat.h>
 //#include <dirent.h>
 
 #define CAPTURE_STATE_NONE 0
