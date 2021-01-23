@@ -70,7 +70,9 @@ static bool handle_ls_touch(UIState *s, int touch_x, int touch_y) {
 static bool handle_df_touch(UIState *s, int touch_x, int touch_y) {
   //dfButton manager
   int padding = 40;
-  if ((1755 - padding <= touch_x) && (695 - padding <= touch_y)) {
+  int btn_x_1 = 1660 - 200;
+  int btn_x_2 = 1660 - 50;
+  if ((btn_x_1 - padding <= touch_x) && (touch_x <= btn_x_2 + padding) && (965 - padding <= touch_y)) {
     s->scene.dfButtonStatus++;
     if (s->scene.dfButtonStatus > 3) { s->scene.dfButtonStatus = 0; }
     send_df(s, s->scene.dfButtonStatus);
