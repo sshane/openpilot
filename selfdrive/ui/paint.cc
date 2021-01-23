@@ -475,9 +475,9 @@ static void ui_draw_df_button(UIState *s) {
   int btn_status = s->scene.dfButtonStatus;
   int btn_w = 150;
   int btn_h = 150;
-  int y_padding = 280;
-  int btn_x = 1920 - btn_w;
-  int btn_y = 1080 - btn_h - y_padding;
+  int y_padding = 40;
+  int btn_x = 1755 - btn_w;
+  int btn_y = 695 - btn_h - y_padding;
   int btn_colors[4][3] = {{4, 67, 137}, {36, 168, 188}, {252, 255, 75}, {55, 184, 104}};
 
   nvgBeginPath(s->vg);
