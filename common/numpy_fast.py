@@ -38,11 +38,13 @@ def interp_2d(x, y, bp, v):
         return v[-1][-1]
       elif hi_x == 0 and hi_y == 0:  # both at bottom
         return v[0][0]
-      # Since we know either x or y is at top or bottom we figure out which is what and then just do one interpolation
+
       bp_idx = 1 if hi_x in [N_x, 0] else 0  # Use y BPs if x is at top or bottom, else use x BPs (y is at top or bottom)
-      # Use last or first values if x is at top or bottom else get last or first value of each x values list (y is at top or bottom)
-      new_v = v[-1 if hi_x == N_x else 0] if hi_x in [N_x, 0] else (
-               [_v[-1 if hi_y == N_y else 0] for _v in v])
+      if hi_x in [N_x, 0]:  # if x is at top or bottom, use last or first y values
+        new_v = v[-1 if hi_x == N_x else 0]
+      else:  # if y is at top or bottom, get last or first x value of each y values list
+        new_v = [_v[-1 if hi_y == N_y else 0] for _v in v]
+
       return interp(yv if bp_idx == 1 else xv, bp[bp_idx], new_v)
     else:  # This branch is taken if both x and y are not top or bottom (interpolate both)
       # Gets us a new values list by interpolating x input first
