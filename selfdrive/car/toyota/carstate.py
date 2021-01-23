@@ -21,6 +21,10 @@ class CarState(CarStateBase):
     # Need to apply an offset as soon as the steering angle measurements are both received
     self.needs_angle_offset = CP.carFingerprint not in TSS2_CAR
     self.angle_offset = 0.
+    self.distance = 0
+    self.read_distance_lines = 0
+
+    self.pm = messaging.PubMaster(['dynamicFollowButton'])
 
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
@@ -68,6 +72,13 @@ class CarState(CarStateBase):
     ret.steeringRate = cp.vl["STEER_ANGLE_SENSOR"]['STEER_RATE']
     can_gear = int(cp.vl["GEAR_PACKET"]['GEAR'])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
+
+    if self.read_distance_lines != cp.vl["PCM_CRUISE_SM"]['DISTANCE_LINES']:
+      self.read_distance_lines = cp.vl["PCM_CRUISE_SM"]['DISTANCE_LINES']
+      msg_df = messaging.new_message('dynamicFollowButton')
+      msg_df.dynamicFollowButton.status = max(self.read_distance_lines - 1, 0)
+      self.pm.send('dynamicFollowButton', msg_df)
+
     ret.leftBlinker = cp.vl["STEERING_LEVERS"]['TURN_SIGNALS'] == 1
     ret.rightBlinker = cp.vl["STEERING_LEVERS"]['TURN_SIGNALS'] == 2
 
@@ -106,6 +117,8 @@ class CarState(CarStateBase):
     # 2 is standby, 10 is active. TODO: check that everything else is really a faulty state
     self.steer_state = cp.vl["EPS_STATUS"]['LKA_STATE']
 
+    self.distance = cp_cam.vl["ACC_CONTROL"]['DISTANCE']
+
     if self.CP.carFingerprint in TSS2_CAR:
       ret.leftBlindspot = (cp.vl["BSM"]['L_ADJACENT'] == 1) or (cp.vl["BSM"]['L_APPROACHING'] == 1)
       ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1)
@@ -143,6 +156,7 @@ class CarState(CarStateBase):
       ("LKA_STATE", "EPS_STATUS", 0),
       ("BRAKE_LIGHTS_ACC", "ESP_CONTROL", 0),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK", 0),
+      ("DISTANCE_LINES", "PCM_CRUISE_SM", 0),
     ]
 
     checks = [
@@ -189,7 +203,8 @@ class CarState(CarStateBase):
 
     signals = [
       ("FORCE", "PRE_COLLISION", 0),
-      ("PRECOLLISION_ACTIVE", "PRE_COLLISION", 0)
+      ("PRECOLLISION_ACTIVE", "PRE_COLLISION", 0),
+      ("DISTANCE", "ACC_CONTROL", 0),
     ]
 
     # use steering message to check if panda is connected to frc
