@@ -1,8 +1,11 @@
 # flake8: noqa
 
 from selfdrive.car import dbc_dict
+from selfdrive.config import Conversions as CV
 from cereal import car
 Ecu = car.CarParams.Ecu
+
+MIN_ACC_SPEED = 19. * CV.MPH_TO_MS  # for non-stop-and-go cars only
 
 # Steer torque limits
 class SteerLimitParams:

@@ -196,16 +196,15 @@ The `--depth 1` flag shallow clones the fork, it ends up being about 90 Mb so yo
 ### Branches
 Most of the branches on this fork are development branches I use as various openpilot tests. The few that more permanent are the following:
   * [`stock_additions`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions): This is similar to stock openpilot's release branch. Will receive occasional and tested updates to Stock Additions.
-  * [`stock_additions-devel`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-devel): My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommendeded as a daily driver.
-  * [`traffic_lights-074`](https://github.com/ShaneSmiskol/openpilot/tree/traffic_lights-074):  The development branch testing our traffic light detection model [found here](https://github.com/ShaneSmiskol/traffic-lights).
+  * `stock_additions-devel` or `SA-staging`: My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommendeded as a daily driver.
 
 ### Archive Stock Additions branches
-* [Stock Additions 0.7](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-07)
-* [Stock Additions 0.7.1](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-071)
-* [Stock Additions 0.7.4](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-074)
-* [Stock Additions 0.7.5](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-075)
-* [Stock Additions 0.7.7](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-077)
-* [Stock Additions 0.7.10](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-0710)
+* [Stock Additions 0.7](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-07)
+* [Stock Additions 0.7.1](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-071)
+* [Stock Additions 0.7.4](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-074)
+* [Stock Additions 0.7.5](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-075)
+* [Stock Additions 0.7.7](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-077)
+* [Stock Additions 0.7.10](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-0710)
 
 ---
 ### Videos
