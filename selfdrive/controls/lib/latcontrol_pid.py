@@ -6,13 +6,13 @@ from cereal import log
 
 class LatControlPID():
   def __init__(self, CP):
-    angle_speed_kpBP = [[45. / 2, 45, 90], [20, 31]]  # [angles], [45 to 70 mph]
-    angle_speed_kpV = [[0.1, 0.15], [0.05, 0.1], [0.025, 0.05]]  # 1st list is at 22.5 degrees, 2nd is 45 degrees, 3rd is 90
+    angle_speed_kpBP = [[0, 5, 20], [20, 31]]  # [angles], [45 to 70 mph]
+    angle_speed_kpV = [[0.1, 0.125], [0.05, 0.075], [0.025, 0.04]]  # 1st list is at 22.5 degrees, 2nd is 45 degrees, 3rd is 90
 
     # kiBP, kiV = [[20, 31], [0.005, 0.02]]  # integral is still old 1-d BP system
 
-    angle_speed_kdBP = [[22.5, 45, 90], [20, 31]]
-    angle_speed_kdV = [[0.125, 0.175], [0.2, 0.3], [0.3, 0.5]]
+    angle_speed_kdBP = [[0, 5, 20], [20, 31]]
+    angle_speed_kdV = [[0.125, 0.175], [0.2, 0.3], [0.3, 0.4]]
 
 
     self.pid = LatPIDController((angle_speed_kpBP, angle_speed_kpV),
