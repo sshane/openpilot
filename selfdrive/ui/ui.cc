@@ -34,7 +34,7 @@ void sa_init(UIState *s, bool full_init) {
     s->pm = new PubMaster({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
   }
 
-  s->ui_debug = false;  // change to true while debugging
+  s->ui_debug = true;  // change to true while debugging
 
   // stock additions todo: run opparams first (in main()?) to ensure json values exist
   std::ifstream op_params_file("/data/op_params.json");
