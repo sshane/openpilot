@@ -12,6 +12,7 @@ use_lqr = op_params.get('use_lqr')
 prius_use_pid = op_params.get('prius_use_pid')
 corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
+priusTSS2_use_inid = op_params.get('priusTSS2_use_indi')
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
@@ -34,6 +35,7 @@ class CarInterface(CarInterfaceBase):
     CARS_NOT_PID = [CAR.RAV4, CAR.RAV4H]
     if not prius_use_pid:
       CARS_NOT_PID.append(CAR.PRIUS_2020)
+      CARS_NOT_PID.append(CAR.PRIUS_TSS2)
       CARS_NOT_PID.append(CAR.PRIUS)
 
     if candidate not in CARS_NOT_PID and not use_lqr:  # These cars use LQR/INDI
@@ -337,14 +339,37 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00006
 
     elif candidate == CAR.PRIUS_TSS2:
+      #ret.longitudinalTuning.kpV = [0.4, 0.36, 0.325]  # braking tune from rav4h
+      #ret.longitudinalTuning.kiV = [0.195, 0.10]
+      ret.longitudinalTuning.deadzoneBP = [0., 8.05]
+      ret.longitudinalTuning.deadzoneV = [.0, .14]
+      ret.longitudinalTuning.kpBP = [0., 5., 20.]
+      ret.longitudinalTuning.kpV = [1.3, 1.0, 0.7]
+      ret.longitudinalTuning.kiBP = [0., 5., 12., 20., 27.] # 0, 11, 27, 45, 60
+      ret.longitudinalTuning.kiV = [.35, .23, .20, .17, .1]
       stop_and_go = True
-      ret.safetyParam = 73
-      ret.wheelbase = 2.70002  # from toyota online sepc.
+      ret.safetyParam = 55
+      ret.wheelbase = 2.70002
       ret.steerRatio = 13.4   # True steerRation from older prius
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.35], [0.15]]
-      ret.lateralTuning.pid.kf = 0.00007818594
+      ret.steerActuatorDelay = 0.5
+      ret.steerLimitTimer = 5.0
+      ret.steerRateCost = 0.45
+      if priusTSS2_use_indi:
+        ret.lateralTuning.init('pid')
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.21], [0.008]]
+        ret.lateralTuning.pid.kfV = 0.00009531750004645412
+      else:
+        ret.lateralTuning.init('indi')
+        ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.innerLoopGainV = [9.5, 15, 15]
+        ret.lateralTuning.indi.outerLoopGainBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.outerLoopGainV = [9.5, 14.99, 14.99]
+        ret.lateralTuning.indi.timeConstantBP = [16.7, 16.71, 22, 22.01, 26, 26.01, 36, 36.01]
+        ret.lateralTuning.indi.timeConstantV = [0.5, 1, 1, 2, 2, 4, 4, 5]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25, 36.1]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [9.5, 15, 15]
 
     ret.centerToFront = ret.wheelbase * 0.44
 
