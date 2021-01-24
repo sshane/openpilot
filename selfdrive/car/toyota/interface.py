@@ -12,7 +12,7 @@ use_lqr = op_params.get('use_lqr')
 prius_use_pid = op_params.get('prius_use_pid')
 corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
-priusTSS2_use_inid = op_params.get('priusTSS2_use_indi')
+priusTSS2_use_indi = op_params.get('priusTSS2_use_indi')
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
@@ -357,7 +357,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerLimitTimer = 5.0
       ret.steerRateCost = 0.45
       if priusTSS2_use_indi:
-        ret.lateralTuning.init('pid')
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.21], [0.008]]
         ret.lateralTuning.pid.kfV = 0.00009531750004645412
       else:
