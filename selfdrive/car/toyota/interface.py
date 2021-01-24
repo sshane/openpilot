@@ -358,7 +358,9 @@ class CarInterface(CarInterfaceBase):
       ret.steerRateCost = 0.45
       if priusTSS2_use_indi:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.21], [0.008]]
-        ret.lateralTuning.pid.kfV = 0.00009531750004645412
+        ret.lateralTuning.pid.kdV = [1.]  # corolla D times gain in PI values
+        ret.lateralTuning.pid.kf = 0.00009531750004645412
+        ret.lateralTuning.pid.newKfTuned = True
       else:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25, 36.1]
