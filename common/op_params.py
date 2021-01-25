@@ -75,7 +75,7 @@ class opParams:
                         'alca_min_speed': Param(25.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
                         'steer_ratio': Param(None, VT.none_or_number, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
                                                                       'If you use a float/int, openpilot will use that steer ratio instead', live=True),
-                        'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
+                        'lane_speed_alerts': Param('off', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                                   'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
                         'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
                         'enable_long_derivative': Param(False, bool, 'If you have longitudinal overshooting, enable this! This enables derivative-based\n'
@@ -85,7 +85,7 @@ class opParams:
                                                               'off will never update, alert shows an alert on-screen\n'
                                                               'auto will reboot the device when an update is seen'),
                         'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
-                        'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
+                        'hide_auto_df_alerts': Param(True, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
                         'dynamic_camera_offset': Param(False, bool, 'Whether to automatically keep away from oncoming traffic.\n'
                                                                     'Works from 35 to ~60 mph (requires radar)'),
@@ -99,7 +99,7 @@ class opParams:
                         'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla'),
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
-                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
+                        'standstill_hack': Param(True, bool, 'Some cars support stop and go, you just need to enable this')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
