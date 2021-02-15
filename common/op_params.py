@@ -3,6 +3,7 @@ import os
 import json
 import time
 from common.colors import COLORS
+from filelock import FileLock
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -150,12 +151,12 @@ class opParams:
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
-    lock_file = '/data/op_params.lock'
-    while os.path.exists(lock_file):
-      print('waiting for lock')
-      time.sleep(1/1000)
-    print('no lock!')
-    open(lock_file, 'a').close()
+    # lock_file = '/data/op_params.lock'
+    # while os.path.exists(lock_file):
+    #   print('waiting for lock')
+    #   time.sleep(1/1000)
+    # print('no lock!')
+    # open(lock_file, 'a').close()
 
 
     self._check_key_exists(key, 'put')
@@ -163,7 +164,7 @@ class opParams:
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
     self._write()
-    os.remove(lock_file)
+    # os.remove(lock_file)
 
   def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:
@@ -218,8 +219,9 @@ class opParams:
       return False
 
   def _write(self):
-    if not travis:
-      with open(self._params_file, "w") as f:
-        f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
+    with FileLock:
+      if not travis:
+        with open(self._params_file, "w") as f:
+          f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
 # op_params = opParams()
