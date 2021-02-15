@@ -3,7 +3,6 @@ import os
 import json
 import time
 from common.colors import COLORS
-from filelock import FileLock
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -108,7 +107,6 @@ class opParams:
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete from users' params file
     self._run_init()  # restores, reads, and updates params
-    print('opParams inited')
 
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
@@ -210,9 +208,6 @@ class opParams:
       return False
 
   def _write(self):
-    # with FileLock(self._params_file):
     if not travis:
       with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
-
-# op_params = opParams()
