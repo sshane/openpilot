@@ -155,7 +155,7 @@ class opParams:
     while os.path.exists(lock_file):
       # print('waiting for lock')
       time.sleep(1/1000)
-    open(lock_file, 'a').close()
+    os.mknod(lock_file)
     print('no lock!')
     print(os.path.exists(lock_file))
 
