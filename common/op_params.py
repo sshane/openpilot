@@ -19,13 +19,13 @@ NONE_OR_NUMBER = [type(None), float, int]
 
 class Param:
   def __init__(self, default=None, allowed_types=[], description=None, live=False, hidden=False):
-    self.default = default
+    self.default = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
-    self.allowed_types = allowed_types
-    self.description = description
-    self.hidden = hidden
-    self.live = live
+    self.allowed_types = allowed_types  # allowed python value types for opEdit
+    self.description = description  # description to be shown in opEdit
+    self.hidden = hidden  # hide this param to user in opEdit?
+    self.live = live  # whether opParams re-reads json file every time this param is .get
     self._create_attrs()
 
   def is_valid(self, value):
