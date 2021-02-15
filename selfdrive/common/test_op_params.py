@@ -3,11 +3,11 @@ import threading
 import time
 import random
 
-threads = 10
+threads = 5
 
 def start():
   op_params = opParams()
-  time.sleep(random.uniform(0.0, 0.01))
+  time.sleep(random.uniform(0.01, 0.02))
   op_params.get('camera_offset')
   op_params.put('camera_offset', 0.1)
   op_params.get('camera_offset')
