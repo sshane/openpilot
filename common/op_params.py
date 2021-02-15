@@ -153,10 +153,10 @@ class opParams:
   def put(self, key, value):
     lock_file = '/data/op_params.lock'
     while os.path.exists(lock_file):
-      print('waiting for lock')
+      # print('waiting for lock')
       time.sleep(1/1000)
-    print('no lock!')
     open(lock_file, 'a').close()
+    # print('no lock!')
 
 
     self._check_key_exists(key, 'put')
