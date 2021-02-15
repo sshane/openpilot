@@ -13,9 +13,8 @@ except ImportError:
 travis = False  # replace with travis_checker if you use travis or GitHub Actions
 
 
-class ValueTypes:
-  number = [float, int]
-  none_or_number = [type(None), float, int]
+NUMBER = [float, int]
+NONE_OR_NUMBER = [type(None), float, int]
 
 
 class Param:
@@ -57,23 +56,22 @@ class opParams:
         - Finally, the live arg tells both opParams and opEdit that it's a live parameter that will change. Therefore, you must place the `op_params.get()` call in the update function so that it can update.
 
       Here's an example of a good fork_param entry:
-      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number), live=True}  # VT.number allows both floats and ints
+      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=NUMBER), live=True}  # NUMBER allows both floats and ints
     """
 
-    VT = ValueTypes()
-    self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
+    self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'roadtrip\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
                                                              'retaining the smoothness and safety of dynamic follow!'),
-                        'global_df_mod': Param(1.0, VT.number, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
+                        'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                                'Smaller values will get you closer, larger will get you farther\n'
                                                                'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
-                        'min_TR': Param(0.9, VT.number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
+                        'min_TR': Param(0.9, NUMBER, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                         'The range is limited from 0.85 to 1.6.', live=True),
                         'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
-                        'alca_min_speed': Param(25.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
-                        'steer_ratio': Param(None, VT.none_or_number, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
+                        'alca_min_speed': Param(25.0, NUMBER, 'The minimum speed allowed for an automatic lane change (in MPH)'),
+                        'steer_ratio': Param(None, NONE_OR_NUMBER, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
                                                                       'If you use a float/int, openpilot will use that steer ratio instead', live=True),
                         'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                                   'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
@@ -89,7 +87,7 @@ class opParams:
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
                         'dynamic_camera_offset': Param(False, bool, 'Whether to automatically keep away from oncoming traffic.\n'
                                                                     'Works from 35 to ~60 mph (requires radar)'),
-                        'dynamic_camera_offset_time': Param(3.5, VT.number, 'How long to keep away from oncoming traffic in seconds after losing lead'),
+                        'dynamic_camera_offset_time': Param(3.5, NUMBER, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
