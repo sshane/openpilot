@@ -151,15 +151,15 @@ class opParams:
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
-    LOCK = False
+    LOCK = True
     if LOCK:
       lock_file = '/data/op_params.lock'
       while os.path.exists(lock_file):
-        # print('waiting for lock')
+        print('waiting for lock')
         time.sleep(1/1000)
       os.mknod(lock_file)
-      print('no lock!')
-      print(os.path.exists(lock_file))
+      # print('no lock!')
+      # print(os.path.exists(lock_file))
 
 
     self._check_key_exists(key, 'put')
