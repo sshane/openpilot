@@ -64,15 +64,15 @@ class opParams:
                                                              'All profiles support dynamic follow so you\'ll get your preferred distance while\n'
                                                              'retaining the smoothness and safety of dynamic follow!'),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
-                                                               'Smaller values will get you closer, larger will get you farther\n'
-                                                               'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
+                                                            'Smaller values will get you closer, larger will get you farther\n'
+                                                            'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
                         'min_TR': Param(0.9, NUMBER, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
-                                                        'The range is limited from 0.85 to 1.6.', live=True),
+                                                     'The range is limited from 0.85 to 1.6.', live=True),
                         'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(25.0, NUMBER, 'The minimum speed allowed for an automatic lane change (in MPH)'),
                         'steer_ratio': Param(None, NONE_OR_NUMBER, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
-                                                                      'If you use a float/int, openpilot will use that steer ratio instead', live=True),
+                                                                   'If you use a float/int, openpilot will use that steer ratio instead', live=True),
                         'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                                   'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
                         'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
@@ -93,7 +93,8 @@ class opParams:
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
                         'steer_fault_fix': Param(True, bool, live=True),
 
-                        'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\nFalse: stock INDI, True: TSS2-tuned PID'),
+                        'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
+                                                            'False: stock INDI, True: TSS2-tuned PID'),
                         'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla'),
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
