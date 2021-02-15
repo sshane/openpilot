@@ -7,7 +7,7 @@ threads = 5
 
 def start():
   op_params = opParams()
-  time.sleep(random.uniform(0.0001, 0.001))
+  time.sleep(random.uniform(0.0001, 0.01))
   op_params.get('camera_offset')
   op_params.put('camera_offset', 0.1)
   op_params.get('camera_offset')
