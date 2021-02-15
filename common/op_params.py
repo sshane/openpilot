@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import os
 import json
-import time
 from common.colors import COLORS
 try:
   from common.realtime import sec_since_boot
 except ImportError:
+  import time
   sec_since_boot = time.time
 
 
