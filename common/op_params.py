@@ -219,7 +219,7 @@ class opParams:
       return False
 
   def _write(self):
-    with FileLock:
+    with FileLock(self._params_file):
       if not travis:
         with open(self._params_file, "w") as f:
           f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
