@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 import os
 import json
-from common.colors import opParams_error as error
-from common.colors import opParams_warning as warning
+from common.colors import COLORS
 try:
   from common.realtime import sec_since_boot
 except ImportError:
   import time
   sec_since_boot = time.time
-  warning("Using python time.time() instead of faster sec_since_boot")
+
 
 travis = False  # replace with travis_checker if you use travis or GitHub Actions
 
+def warning(msg): print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
+def error(msg): print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLORS.ENDC))
 
-NUMBER = [float, int]
+NUMBER = [float, int]  # value types
 NONE_OR_NUMBER = [type(None), float, int]
 
 
@@ -104,8 +105,9 @@ class opParams:
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
-    self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete
+    self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete from users' params file
     self._run_init()  # restores, reads, and updates params
+    print('opParams inited')
 
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
@@ -210,3 +212,5 @@ class opParams:
     if not travis:
       with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
+
+# op_params = opParams()
