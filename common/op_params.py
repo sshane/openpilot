@@ -8,7 +8,6 @@ except ImportError:
   import time
   sec_since_boot = time.time
 
-
 travis = False  # replace with travis_checker if you use travis or GitHub Actions
 
 def warning(msg): print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
