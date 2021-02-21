@@ -177,7 +177,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.prompt('\nEnter your new value (enter to exit):')
         new_value = input('>> ').strip()
         if new_value == '':
-          self.info('Exiting this parameter...\n', 0.5)
+          self.info('Exiting this parameter...\n')
           return
 
         new_value = self.str_eval(new_value)
@@ -205,7 +205,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       self.prompt('\nEnter index to edit (0 to {}):'.format(len(old_value) - 1))
       choice_idx = self.str_eval(input('>> '))
       if choice_idx == '':
-        self.info('Exiting this parameter...', 0.5)
+        self.info('Exiting this parameter...')
         return
 
       if not isinstance(choice_idx, int) or choice_idx not in range(len(old_value)):
@@ -218,7 +218,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.prompt('\nEnter your new value:')
         new_value = input('>> ').strip()
         if new_value == '':
-          self.info('Exiting this list item...', 0.5)
+          self.info('Exiting this list item...')
           break
 
         new_value = self.str_eval(new_value)
