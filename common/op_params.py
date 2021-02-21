@@ -178,7 +178,7 @@ class opParams:
 
   def _delete_and_reset(self):
     needs_write = False
-    for param in self.params:
+    for param in self.params.keys():
       if param in self._to_delete:
         del self.params[param]
         needs_write = True
