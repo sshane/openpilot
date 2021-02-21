@@ -196,7 +196,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.op_params.put(chosen_key, new_value)
             self.success('Saved!')
           else:
-            self.info('Not saved!', sleep_time=0)
+            self.info('Not saved!')
           return
 
   def change_param_list(self, old_value, param_info, chosen_key):
