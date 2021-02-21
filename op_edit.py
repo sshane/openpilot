@@ -10,7 +10,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
     self.params = None
-    self.sleep_time = 0.75
+    self.sleep_time = 0.25
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
     self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),
@@ -34,13 +34,13 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         while username == '':
           username = input('>> ').strip()
         self.success('Thanks! Saved your Discord username\n'
-                     'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
+                     'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
         self.op_params.put('username', username)
         self.username = username
       elif username_choice == 2:
         self.op_params.put('username', False)
         self.info('Got it, bringing you into opEdit\n'
-                  'Edit the \'username\' parameter at any time to update', sleep_time=3.0)
+                  'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
     else:
       self.success('\nWelcome to the opParams command line editor, {}!'.format(self.username), sleep_time=0)
 
