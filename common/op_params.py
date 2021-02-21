@@ -104,7 +104,7 @@ class opParams:
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
-    self._to_delete = []  # a list of unused params you want to delete from users' params file
+    self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete from users' params file
     self._to_reset = ['corollaTSS2_use_indi']  # a list of params you want to be reset to the default value
     self._run_init()  # restores, reads, and updates params
 
