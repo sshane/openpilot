@@ -83,9 +83,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           line = COLORS.BASE(_color) + line
         to_print.append(line)
 
-      extras = {'a': ('Add new parameter', COLORS.OKGREEN),
-                'd': ('Delete parameter', COLORS.FAIL),
-                'l': ('Toggle live tuning', COLORS.WARNING),
+      extras = {'l': ('Toggle live tuning', COLORS.WARNING),
                 'e': ('Exit opEdit', COLORS.PINK)}
 
       to_print += ['---'] + ['{}. {}'.format(ext_col + e, ext_txt + COLORS.ENDC) for e, (ext_txt, ext_col) in extras.items()]
@@ -96,13 +94,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       parsed, choice = self.parse_choice(choice, len(to_print) - len(extras))
       if parsed == 'continue':
         continue
-      elif parsed == 'add':
-        self.add_parameter()
       elif parsed == 'change':
         self.last_choice = choice
         self.change_parameter(choice)
-      elif parsed == 'delete':
-        self.delete_parameter()
       elif parsed == 'live':
         self.last_choice = None
         self.live_tuning = not self.live_tuning
@@ -119,11 +113,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         return 'continue', choice
       return 'change', choice
 
-    if choice in ['a', 'add']:  # add new parameter
-      return 'add', choice
-    elif choice in ['d', 'delete', 'del']:  # delete parameter
-      return 'delete', choice
-    elif choice in ['l', 'live']:  # live tuning mode
+    if choice in ['l', 'live']:  # live tuning mode
       return 'live', choice
     elif choice in ['exit', 'e', '']:
       self.error('Exiting opEdit!', sleep_time=0)

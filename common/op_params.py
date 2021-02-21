@@ -112,7 +112,7 @@ class opParams:
     # Two required parameters for opEdit
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
-    self.params = self._get_all_params(default=True)  # in case file is corrupted
+    self.params = self._get_all_params(default=True)  # start at default values in case file is corrupted
 
     if travis:
       return
