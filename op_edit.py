@@ -310,57 +310,5 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         dat = True
     return dat
 
-  def delete_parameter(self):
-    while True:
-      self.prompt('Enter the name of the parameter to delete:')
-      key = self.str_eval(input('>> '))
-
-      if key == '':
-        return
-      if not isinstance(key, str):
-        self.error('Input must be a string!')
-        continue
-      if key not in self.params:
-        self.error("Parameter doesn't exist!")
-        continue
-
-      value = self.params.get(key)
-      print('Parameter name: {}'.format(key))
-      print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
-      self.prompt('Do you want to delete this?')
-
-      if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
-        self.op_params.delete(key)
-        self.success('Deleted!')
-      else:
-        self.info('Not deleted!')
-      return
-
-  def add_parameter(self):
-    while True:
-      self.prompt('Type the name of your new parameter:')
-      key = self.str_eval(input('>> '))
-
-      if key == '':
-        return
-      if not isinstance(key, str):
-        self.error('Input must be a string!')
-        continue
-
-      self.prompt("Enter the data you'd like to save with this parameter:")
-      value = input('>> ').strip()
-      value = self.str_eval(value)
-
-      print('Parameter name: {}'.format(key))
-      print('Parameter value: {} (type: {})'.format(value, type(value).__name__))
-      self.prompt('Do you want to save this?')
-
-      if self.input_with_options(['Y', 'n'], default='n')[0] == 0:
-        self.op_params.put(key, value)
-        self.success('Saved!')
-      else:
-        self.info('Not saved!')
-      return
-
 
 opEdit()
