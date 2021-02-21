@@ -105,6 +105,7 @@ class opParams:
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete from users' params file
+    self._to_reset = ['corollaTSS2_use_indi']  # a list of params you want to be reset to the default value
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
@@ -119,7 +120,7 @@ class opParams:
     if os.path.isfile(self._params_file):
       if self._read():
         to_write = self._add_default_params()  # if new default data has been added
-        to_write |= self._delete_old()  # or if old params have been deleted
+        to_write |= self._delete_and_reset()  # or if old params have been deleted
       else:  # backup and re-create params file
         error("Can't read op_params.json file, backing up to /data/op_params_corrupt.json and re-creating file!")
         to_write = True
@@ -175,13 +176,17 @@ class opParams:
         added = True
     return added
 
-  def _delete_old(self):
-    deleted = False
-    for param in self._to_delete:
-      if param in self.params:
+  def _delete_and_reset(self):
+    needs_write = False
+    for param in self.params:
+      if param in self._to_delete:
         del self.params[param]
-        deleted = True
-    return deleted
+        needs_write = True
+      elif param in self._to_reset:
+        print('resetting {} to {} from {}'.format(param, self.fork_params[param].default, self.params[param]))
+        self.params[param] = self.fork_params[param].default
+        needs_write = True
+    return needs_write
 
   def _get_all_params(self, default=False, return_hidden=False, to_update=False):
     self._update_params(to_update)
