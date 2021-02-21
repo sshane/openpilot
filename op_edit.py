@@ -10,7 +10,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def __init__(self):
     self.op_params = opParams()
     self.params = None
-    self.sleep_time = 0.25
+    self.sleep_time = 0.5
     self.live_tuning = self.op_params.get('op_edit_live_mode')
     self.username = self.op_params.get('username')
     self.type_colors = {int: COLORS.BASE(179), float: COLORS.BASE(179),
