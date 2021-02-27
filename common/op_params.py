@@ -97,6 +97,7 @@ class opParams:
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
+                        'ff_function': Param(0, int, 'If 0: Trained on user and engaged data, if 1: trained on just engaged data.', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),

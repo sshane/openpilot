@@ -33,10 +33,13 @@ def coast_accel(speed):  # given a speed, output coasting acceleration
   return interp(speed, *zip(*points))
 
 
-def compute_gb_pedal(desired_accel, speed):
+def compute_gb_pedal(desired_accel, speed, which_func):
   # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
   # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
-  _c1, _c2, _c3, _c4  = [0.014834278942078814, -0.019486618189634007, -0.04866680885268496, 0.18130227709359556]
+  if which_func == 0:
+    _c1, _c2, _c3, _c4  = [0.014834278942078814, -0.019486618189634007, -0.04866680885268496, 0.18130227709359556]  # fit on both engaged and disengaged
+  else:
+    _c1, _c2, _c3, _c4  = [0.015545494731421215, -0.011431576758264202, -0.056374605760840496, 0.1797404798536819]  # just fit on engaged
   return (_c1 * speed + _c2) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
 
 
@@ -71,7 +74,7 @@ class CarController():
 
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED and apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
       # converts desired acceleration to gas percentage for pedal
-      apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
+      apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
       if self.op_params.get('send_max_accel'):
         apply_accel = 1
       elif not self.op_params.get('always_apply_accel_offset'):
