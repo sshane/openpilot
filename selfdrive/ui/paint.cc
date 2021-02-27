@@ -172,8 +172,18 @@ static void draw_frame(UIState *s) {
 static void ui_draw_vision_lane_lines(UIState *s) {
   const UIScene &scene = s->scene;
   // paint lanelines
+  bool enabled = scene.controls_state.getEnabled();
+  const cereal::ModelDataV2::XYZTData::Reader &pos = scene.model.getPosition();
+  if (pos.getY().size() != 0) {
+    cout << std::abs(pos.getY()[16] - pos.getY()[0]) << std::endl;
+  }
+
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
-    NVGcolor color = nvgRGBAf(.0, .1, 1.0, scene.lane_line_probs[i]);
+    if (enabled) {
+      NVGcolor color = nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    } else {
+      NVGcolor color = nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    }
     ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
   }
 
