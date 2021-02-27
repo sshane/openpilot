@@ -95,7 +95,6 @@ class LateralPlanner():
     sr = max(sm['liveParameters'].steerRatio, 0.1)
     VM.update_params(x, sr)
     curvature_factor = VM.curvature_factor(v_ego)
-    print(curvature_factor)
     measured_curvature = -curvature_factor * math.radians(steering_wheel_angle_deg - steering_wheel_angle_offset_deg) / VM.sR
 
 
@@ -211,8 +210,16 @@ class LateralPlanner():
       curvature_desired = measured_curvature
       desired_curvature_rate = 0.0
 
+    print('measured curv: {}'.format(round(measured_curvature, 4)))
+    print(' desired curv: {}'.format(round(next_curvature, 4)))
+
     # negative sign, controls uses different convention
     self.desired_steering_wheel_angle_deg = -float(math.degrees(curvature_desired * VM.sR)/curvature_factor) + steering_wheel_angle_offset_deg
+    print('SR: {}'.format(round(VM.sR, 3)))
+    print('offset: {}'.format(round(steering_wheel_angle_offset_deg, 3)))
+    print('delay: {}'.format(delay))
+    print('---')
+
     self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
 
     #  Check for infeasable MPC solution
