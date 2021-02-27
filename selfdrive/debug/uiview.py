@@ -9,12 +9,12 @@ procs = ['camerad', 'ui', 'modeld', 'calibrationd']
 pm = messaging.PubMaster(services)
 
 dat_cs, dat_deviceState, dat_radar = [messaging.new_message(s) for s in services]
-dat_cs.controlsState.rearViewCam = False  # ui checks for these two messages
+# dat_cs.controlsState.rearViewCam = False  # ui checks for these two messages
 dat_deviceState.deviceState.started = True
 
 try:
   while True:
-    pm.send('controlsState', dat_cs)
+    # pm.send('controlsState', dat_cs)
     pm.send('deviceState', dat_deviceState)
     print('sending deviceState')
     pm.send('radarState', dat_radar)
