@@ -93,6 +93,10 @@ class opParams:
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
                         'send_max_accel': Param(False, bool, 'Send 1.5m/s/s when des. accel is above coast accel/using pedal', live=True),
                         'always_apply_accel_offset': Param(False, bool, 'Whether to always offset accel by 0.06, only at low speed', live=True),
+                        'lat_p': Param(.1, NUMBER, live=True),
+                        'lat_i': Param(.01, NUMBER, live=True),
+                        'lat_d': Param(.1, NUMBER, live=True),
+                        'lat_f_multiplier': Param(1, NUMBER, live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),
