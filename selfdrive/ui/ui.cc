@@ -242,6 +242,11 @@ static void update_sockets(UIState *s) {
     }
   }
   s->started = scene.deviceState.getStarted() || scene.frontview;
+  if (s->started) {
+    std::cout << "STARTED!\n";
+  } else {
+    std::cout << "NOT STARTED!\n";
+  }
 }
 
 static void update_alert(UIState *s) {
