@@ -91,6 +91,8 @@ class opParams:
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
+                        'send_max_accel': Param(False, bool, 'Send 1.5m/s/s when des. accel is above coast accel/using pedal', live=True),
+                        'always_apply_accel_offset': Param(False, bool, 'Whether to always offset accel by 0.06, only at low speed', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),

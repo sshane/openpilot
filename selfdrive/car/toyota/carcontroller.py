@@ -45,7 +45,8 @@ class CarController():
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
-    self.standstill_hack = opParams().get('standstill_hack')
+    self.op_params = opParams()
+    self.standstill_hack = self.op_params.get('standstill_hack')
 
     self.steer_rate_limited = False
 
@@ -69,7 +70,13 @@ class CarController():
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED and apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
       # converts desired acceleration to gas percentage for pedal
       apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
-      apply_accel += 0.06
+      if self.op_params.get('send_max_accel'):
+        apply_accel = 1
+      elif not self.op_params.get('always_apply_accel_offset'):
+        apply_accel += 0.06
+
+    if self.op_params.get('always_apply_accel_offset') and CS.out.vEgo < MIN_ACC_SPEED:
+      apply_accel += 0.06  # ramp this down as we approach min_acc_speed?
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
