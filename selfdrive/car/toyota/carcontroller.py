@@ -41,7 +41,7 @@ def compute_gb_pedal(desired_accel, speed, which_func):
   elif which_func == 1:
     _c1, _c2, _c3, _c4  = [0.015545494731421215, -0.011431576758264202, -0.056374605760840496, 0.1797404798536819]  # just fit on engaged
   else:
-    _c1, _c2, _c3, _c4  = [0.015189886836750014, -0.015459097473949104, -0.052520707306762726, 0.18052137847363875]  # average of above two
+    _c1, _c2, _c3, _c4  = [0.015403251573552735, -0.013042585044538164, -0.05483304637920939, 0.18005283930166466]  # 80/20 avg. for slow/fast
   return (_c1 * speed + _c2) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
 
 
