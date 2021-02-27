@@ -21,6 +21,24 @@ try:
     pm.send('controlsState', dat_cs)
     pm.send('deviceState', dat_ds)
     pm.send('radarState', dat_radar)
-    time.sleep(1 / 100)  # continually send, rate doesn't matter
+    time.sleep(1 / 20)  # continually send, rate doesn't matter
 except KeyboardInterrupt:
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
   [p.send_signal(signal.SIGINT) for p in started_procs]
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLING')
+  print('KILLED')
