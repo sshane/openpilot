@@ -194,10 +194,13 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   const float lat_pos = pos.getY().size() != 0 ? std::abs(pos.getY()[16] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
   const float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
 
-  NVGpaint track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
-                                 nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
-//  NVGpaint track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
-//                                        COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+  if (enabled) {
+    NVGpaint track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
+                                   nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
+  } else {
+    NVGpaint track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
+                                        COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+  }
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
 }
 
