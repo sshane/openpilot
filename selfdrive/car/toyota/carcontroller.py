@@ -27,9 +27,9 @@ def accel_hysteresis(accel, accel_steady, enabled):
 
 
 def coast_accel(speed):  # given a speed, output coasting acceleration
-  points = [[0, .504], [1.697, .266],
-            [2.839, -.187], [3.413, -.233],
-            [MIN_ACC_SPEED, -.145]]
+  points = [[0.0, 0.538], [1.697, 0.28],
+            [2.853, -0.199], [3.443, -0.249],
+            [MIN_ACC_SPEED, -0.145]]
   return interp(speed, *zip(*points))
 
 
@@ -72,21 +72,14 @@ class CarController():
 
     # gas and brake
     apply_gas = 0.
-    apply_accel = actuators.gas - actuators.brake
-
-    if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED and apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
-      # converts desired acceleration to gas percentage for pedal
-      apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
-      if self.op_params.get('send_max_accel'):
-        apply_accel = 1
-      elif not self.op_params.get('always_apply_accel_offset'):
-        apply_accel += 0.06
-
-    if self.op_params.get('always_apply_accel_offset') and CS.out.vEgo < MIN_ACC_SPEED:
-      apply_accel += 0.06  # ramp this down as we approach min_acc_speed?
-
-    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
+    apply_accel, self.accel_steady = accel_hysteresis(actuators.gas - actuators.brake, self.accel_steady, enabled)
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+
+    if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED and apply_accel > coast_accel(CS.out.vEgo):
+      # converts desired acceleration to gas percentage for pedal
+      # +0.06 offset to reduce ABS pump usage when applying very small gas
+      apply_gas = clip(compute_gb_pedal(apply_accel, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
+      apply_accel = min(apply_accel + 0.06 * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MAX)
 
     # steer torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
