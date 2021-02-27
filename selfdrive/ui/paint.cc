@@ -172,14 +172,18 @@ static void draw_frame(UIState *s) {
 static void ui_draw_vision_lane_lines(UIState *s) {
   const UIScene &scene = s->scene;
   // paint lanelines
-  bool enabled = scene.controls_state.getEnabled();
 
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
-//    if (enabled) {
-//      NVGcolor color = nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
-//    } else {
+    if (i == 1 || i == 2) {
+      const cereal::ModelDataV2::XYZTData::Reader &line = scene->model.getLaneLines()[ll_idx];
+      const float default_pos = 1.4;  // when lane poly isn't available
+      const float lane_pos = line.getY().size() > 0 ? std::abs(line.getY()[0]) : default_pos;  // get redder when line is closer to car
+      float hue = 332.5 * lane_pos - 332.5;  // equivalent to {1.4, 1.0}: {133, 0} (green to red)
+      hue = fmin(133, fmax(0, hue)) / 360.;  // clip and normalize
+      NVGcolor color = nvgHSLA(hue, 0.73, 0.64, scene->lane_line_probs[ll_idx] * 255);
+    } else {
       NVGcolor color = nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
-//    }
+    }
     ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
   }
 
@@ -190,8 +194,9 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   }
 
   // paint path
+  const bool enabled = scene.controls_state.getEnabled();
   const cereal::ModelDataV2::XYZTData::Reader &pos = scene.model.getPosition();
-  const float lat_pos = pos.getY().size() != 0 ? std::abs(pos.getY()[16] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
+  const float lat_pos = pos.getY().size() > 0 ? std::abs(pos.getY()[16] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
   const float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
 
   if (enabled) {
