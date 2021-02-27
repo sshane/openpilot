@@ -173,7 +173,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   const UIScene &scene = s->scene;
   // paint lanelines
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
-    NVGcolor color = nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    NVGcolor color = nvgRGBAf(.0, .1, 1.0, scene.lane_line_probs[i]);
     ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
   }
 
