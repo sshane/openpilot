@@ -38,8 +38,10 @@ def compute_gb_pedal(desired_accel, speed, which_func):
   # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
   if which_func == 0:
     _c1, _c2, _c3, _c4  = [0.014834278942078814, -0.019486618189634007, -0.04866680885268496, 0.18130227709359556]  # fit on both engaged and disengaged
-  else:
+  elif which_func == 1:
     _c1, _c2, _c3, _c4  = [0.015545494731421215, -0.011431576758264202, -0.056374605760840496, 0.1797404798536819]  # just fit on engaged
+  else:
+    _c1, _c2, _c3, _c4  = [0.015189886836750014, -0.015459097473949104, -0.052520707306762726, 0.18052137847363875]  # average of above two
   return (_c1 * speed + _c2) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
 
 
