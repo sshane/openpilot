@@ -178,7 +178,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     if (i == 1 || i == 2) {
       const cereal::ModelDataV2::XYZTData::Reader &line = scene.model.getLaneLines()[i];
       const float default_pos = 1.4;  // when lane poly isn't available
-      const float lane_pos = line.getY().size() > 0 ? std::abs(line.getY()[0]) : default_pos;  // get redder when line is closer to car
+      const float lane_pos = line.getY().size() > 0 ? std::abs(line.getY()[5]) : default_pos;  // get redder when line is closer to car
       float hue = 332.5 * lane_pos - 332.5;  // equivalent to {1.4, 1.0}: {133, 0} (green to red)
       hue = fmin(133, fmax(0, hue)) / 360.;  // clip and normalize
       color = nvgHSLA(hue, 0.73, 0.64, scene.lane_line_probs[i] * 255);
