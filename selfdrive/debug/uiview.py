@@ -16,6 +16,7 @@ try:
   while True:
     pm.send('controlsState', dat_cs)
     pm.send('deviceState', dat_deviceState)
+    print('sending deviceState')
     pm.send('radarState', dat_radar)
     time.sleep(1 / 100)  # continually send, rate doesn't matter for deviceState
 except KeyboardInterrupt:

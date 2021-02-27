@@ -198,6 +198,7 @@ static void update_sockets(UIState *s) {
     s->sidebar_collapsed = data.getSidebarCollapsed();
   }
   if (sm.updated("deviceState")) {
+    std::cout << "deviceState is updated!\n";
     scene.deviceState = sm["deviceState"].getDeviceState();
   }
   if (sm.updated("pandaState")) {
@@ -244,8 +245,6 @@ static void update_sockets(UIState *s) {
   s->started = scene.deviceState.getStarted() || scene.frontview;
   if (s->started) {
     std::cout << "STARTED!\n";
-  } else {
-    std::cout << "NOT STARTED!\n";
   }
 }
 
