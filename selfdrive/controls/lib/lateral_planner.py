@@ -95,6 +95,7 @@ class LateralPlanner():
     sr = max(sm['liveParameters'].steerRatio, 0.1)
     VM.update_params(x, sr)
     curvature_factor = VM.curvature_factor(v_ego)
+    print(curvature_factor)
     measured_curvature = -curvature_factor * math.radians(steering_wheel_angle_deg - steering_wheel_angle_offset_deg) / VM.sR
 
 
