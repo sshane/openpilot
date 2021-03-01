@@ -72,15 +72,15 @@ class ModelMpcHelper:
   def convert_data(self, sm):
     modelV2 = sm['modelV2']
     distances, speeds, accelerations = [], [], []
-    print(sm.alive['modelV2'])
+    # print(sm.alive['modelV2'])
     # print(modelV2.position.x)
-    if len(modelV2.position.x) == 0:
+    if not sm.alive['modelV2'] or len(modelV2.position.x) == 0:
       print('Not updated or model not filled out position')
       return distances, speeds, accelerations
 
     speeds = [modelV2.velocity.x[t] for t in self.model_t_idx]
     distances = [modelV2.position.x[t] for t in self.model_t_idx]
-    for t in self.mpc_t:
+    for t in self.mpc_t:  # todo these three in one loop
       if 0 < t < 9:
         accelerations.append((speeds[t + 1] - speeds[t - 1]) / 2)
 
@@ -121,15 +121,13 @@ class Planner():
     self.first_loop = True
 
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
-    possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
+    possible_futures = [self.mpc1.v_mpc_future if not model_enabled else 99, self.mpc2.v_mpc_future if not model_enabled else 99, v_cruise_setpoint]
     if enabled:
       solutions = {'cruise': self.v_cruise}
-      if self.mpc1.prev_lead_status:
+      if self.mpc1.prev_lead_status and not model_enabled:
         solutions['mpc1'] = self.mpc1.v_mpc
-      if self.mpc2.prev_lead_status:
+      if self.mpc2.prev_lead_status and not model_enabled:
         solutions['mpc2'] = self.mpc2.v_mpc
-      if not self.mpc_model.valid:
-        print('mpc_model not valid!')
       if self.mpc_model.valid and model_enabled:
         solutions['model'] = self.mpc_model.v_mpc
         possible_futures.append(self.mpc_model.v_mpc_future)  # only used when using model
@@ -150,7 +148,7 @@ class Planner():
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
-      print(round(self.mpc_model.v_mpc, 2), round(self.mpc_model.a_mpc, 2))
+    print(round(self.mpc_model.v_mpc, 2), round(self.mpc_model.a_mpc, 2))
 
     self.v_acc_future = min(possible_futures)
 
