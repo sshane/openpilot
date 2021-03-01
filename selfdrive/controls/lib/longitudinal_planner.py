@@ -118,7 +118,7 @@ class Planner():
     self.first_loop = True
 
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
-    possible_futures = [self.mpc1.v_mpc_future if not model_enabled else 99, self.mpc2.v_mpc_future if not model_enabled else 99, v_cruise_setpoint]
+    possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
     if enabled:
       solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status:
