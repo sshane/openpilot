@@ -12,7 +12,7 @@ try:
     time.sleep(1/3)
     if len(sm['modelV2'].velocity.x) == 0:
       continue
-    v.append(sm['modelV2'].velocity.x)
+    v.append(list(sm['modelV2'].velocity.x))
     print(v[-1])
 except:
   pass
