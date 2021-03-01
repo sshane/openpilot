@@ -25,17 +25,19 @@ class ModelMpcHelper:
     self.model_t = [i ** 2 / 102.4 for i in range(33)]  # the timesteps of the model predictions
     self.mpc_t = list(range(10))  # the timesteps of what the LongMpcModel class takes in, 1 sec intervels to 10
     self.model_t_idx = [sorted(range(len(self.model_t)), key=[abs(idx - t) for t in self.model_t].__getitem__)[0] for idx in self.mpc_t]  # matches 0 to 9 interval to idx from t
+    assert len(self.model_t_idx) == 10, 'Needs to be length 10 for mpc'
 
   def convert_data(self, modelV2):
     distances, speeds, accelerations = [], [], []
     if not sm.updated['modelV2'] or len(modelV2.position.x) == 0:
       return distances, speeds, accelerations
 
-    for t in self.model_t_idx:
-      speeds.append(modelV2.velocity.x[t])
-      distances.append(modelV2.position.x[t])
-      if self.model_t_idx.index(t) > 0:  # skip first since we can't calculate (and don't want to use v_ego)
-        accelerations.append((speeds[-1] - speeds[-2]) / self.model_t[t])
+    speeds = [modelV2.velocity.x[t] for t in self.model_t_idx]
+    for t in self.mpc_t:
+      if 0 < t < 9:
+        accelerations.append((speeds[t + 1] - speeds[t - 1]) / 2)
 
-    accelerations.insert(0, accelerations[1] - (accelerations[2] - accelerations[1]))  # extrapolate back first accel from second and third, less weight
+    # Extrapolate forward and backward at edges, dividing change by 2 to give less weight to these calculations
+    accelerations.append(accelerations[-1] - (accelerations[-2] - accelerations[-1]) / 2)
+    accelerations.insert(0, accelerations[0] - (accelerations[1] - accelerations[0]) / 2)
     return distances, speeds, accelerations
