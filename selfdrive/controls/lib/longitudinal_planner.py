@@ -73,7 +73,7 @@ class ModelMpcHelper:
     modelV2 = sm['modelV2']
     distances, speeds, accelerations = [], [], []
     print(sm.alive['modelV2'])
-    print(modelV2.position.x)
+    # print(modelV2.position.x)
     if len(modelV2.position.x) == 0:
       print('Not updated or model not filled out position')
       return distances, speeds, accelerations
