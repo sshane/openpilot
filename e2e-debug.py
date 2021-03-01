@@ -1,15 +1,24 @@
 import time
 import cereal.messaging as messaging
+import json
 
 sm = messaging.SubMaster(['modelV2'])
 print(sm['modelV2'].position.t)
 
+v = []
+try:
+  while True:
+    sm.update(0)
+    time.sleep(1/3)
+    if len(sm['modelV2'].velocity.x) == 0:
+      continue
+    v.append(sm['modelV2'].velocity.x)
+    print(v[-1])
+except:
+  pass
 
-while True:
-  sm.update(0)
-  if len(sm['modelV2'].velocity.x) == 0:
-    continue
-  print(sm['modelV2'].velocity.x)
+with open('/data/v', 'w') as f:
+  json.dump(v, f)
 
 class ModelMpcHelper:
   def __init__(self):
