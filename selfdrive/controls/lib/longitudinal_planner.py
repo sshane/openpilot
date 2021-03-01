@@ -68,10 +68,10 @@ def parse_modelV2_data(sm):
   if not sm.updated['modelV2'] or len(modelV2.position.x) == 0:
     return distances, speeds, accelerations
 
-  model_t = modelV2.position.t
-  mpc_times = list(range(10))
+  model_t = modelV2.position.t  # this is [i ** 2 / 102.4 for i in range(33)]
+  mpc_t = list(range(10))
 
-  model_t_idx = [sorted(range(len(model_t)), key=[abs(idx - t) for t in model_t].__getitem__)[0] for idx in mpc_times]  # matches 0 to 9 interval to idx from t
+  model_t_idx = [sorted(range(len(model_t)), key=[abs(idx - t) for t in model_t].__getitem__)[0] for idx in mpc_t]  # matches 0 to 9 interval to idx from t
 
   for t in model_t_idx:  # everything is derived from x position since velocity is outputting weird values
     speeds.append(modelV2.velocity.x[t])
