@@ -72,10 +72,7 @@ class ModelMpcHelper:
   def convert_data(self, sm):
     modelV2 = sm['modelV2']
     distances, speeds, accelerations = [], [], []
-    # print(sm.alive['modelV2'])
-    # print(modelV2.position.x)
     if not sm.alive['modelV2'] or len(modelV2.position.x) == 0:
-      print('Not updated or model not filled out position')
       return distances, speeds, accelerations
 
     speeds = [modelV2.velocity.x[t] for t in self.model_t_idx]
@@ -84,7 +81,7 @@ class ModelMpcHelper:
       if 0 < t < 9:
         accelerations.append((speeds[t + 1] - speeds[t - 1]) / 2)
 
-    # Extrapolate forward and backward at edges, dividing change by 2 to give less weight to these calculations
+    # Extrapolate forward and backward at edges
     accelerations.append(accelerations[-1] - (accelerations[-2] - accelerations[-1]))
     accelerations.insert(0, accelerations[0] - (accelerations[1] - accelerations[0]))
     return distances, speeds, accelerations
@@ -124,9 +121,9 @@ class Planner():
     possible_futures = [self.mpc1.v_mpc_future if not model_enabled else 99, self.mpc2.v_mpc_future if not model_enabled else 99, v_cruise_setpoint]
     if enabled:
       solutions = {'cruise': self.v_cruise}
-      if self.mpc1.prev_lead_status and not model_enabled:
+      if self.mpc1.prev_lead_status:
         solutions['mpc1'] = self.mpc1.v_mpc
-      if self.mpc2.prev_lead_status and not model_enabled:
+      if self.mpc2.prev_lead_status:
         solutions['mpc2'] = self.mpc2.v_mpc
       if self.mpc_model.valid and model_enabled:
         solutions['model'] = self.mpc_model.v_mpc
@@ -148,7 +145,7 @@ class Planner():
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
-    print('{} mph, {} mph/s'.format(round(self.mpc_model.v_mpc * 2.23694, 2), round(self.mpc_model.a_mpc * 2.23694, 2)))
+    # print('{} mph, {} mph/s'.format(round(self.mpc_model.v_mpc * 2.23694, 2), round(self.mpc_model.a_mpc * 2.23694, 2)))
 
     self.v_acc_future = min(possible_futures)
 
@@ -216,9 +213,6 @@ class Planner():
                           distances,
                           speeds,
                           accelerations)
-
-    if not sm['modelLongButton'].enabled:
-      print('model long button disabled!')
 
     self.choose_solution(v_cruise_setpoint, enabled, sm['modelLongButton'].enabled)
 
