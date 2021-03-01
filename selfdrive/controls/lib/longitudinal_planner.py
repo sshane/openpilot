@@ -85,8 +85,8 @@ class ModelMpcHelper:
         accelerations.append((speeds[t + 1] - speeds[t - 1]) / 2)
 
     # Extrapolate forward and backward at edges, dividing change by 2 to give less weight to these calculations
-    accelerations.append(accelerations[-1] - (accelerations[-2] - accelerations[-1]) / 2)
-    accelerations.insert(0, accelerations[0] - (accelerations[1] - accelerations[0]) / 2)
+    accelerations.append(accelerations[-1] - (accelerations[-2] - accelerations[-1]))
+    accelerations.insert(0, accelerations[0] - (accelerations[1] - accelerations[0]))
     return distances, speeds, accelerations
 
 
