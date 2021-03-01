@@ -72,11 +72,13 @@ class ModelMpcHelper:
   def convert_data(self, sm):
     modelV2 = sm['modelV2']
     distances, speeds, accelerations = [], [], []
+    print(sm.updated['modelV2'])
     if not sm.updated['modelV2'] or len(modelV2.position.x) == 0:
       print('Not updated or model not filled out position')
       return distances, speeds, accelerations
 
     speeds = [modelV2.velocity.x[t] for t in self.model_t_idx]
+    distances = [modelV2.position.x[t] for t in self.model_t_idx]
     for t in self.mpc_t:
       if 0 < t < 9:
         accelerations.append((speeds[t + 1] - speeds[t - 1]) / 2)
