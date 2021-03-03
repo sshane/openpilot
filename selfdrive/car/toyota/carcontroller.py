@@ -7,6 +7,7 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, CarControllerParams, MIN_ACC_SPEED
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams
+from selfdrive.config import Conversions as CV
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -33,11 +34,18 @@ def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acce
   return interp(speed, *zip(*points))
 
 
-def compute_gb_pedal(desired_accel, speed, which_func):
-  _s1, _s2, _a1, _a2, _a3, offset = [0.0009841113716207149, 0.00689750569472691, 0.0007984729087513325, -0.018098809559785194, 0.15039654912695333, -0.013618462797098094]
-  speed_part = (_s1 * speed ** 2 + _s2 * speed)  # this can be linear
-  accel_part = (_a1 * desired_accel ** 3 + _a2 * desired_accel ** 2 + _a3 * desired_accel)
-  return accel_part + speed_part + offset
+def compute_gb_pedal(accel, speed, which_func):
+  # return (_c1 * v_ego + _c2) + (_c3 * a_ego + (_c4 * v_ego))
+  # _s1, offset = [((0.011+.02)/2 + .02) / 2, 0.011371989131620245 - .02 - (.016+.0207)/2]
+  _s1, offset = [((0.011 + .02) / 2 + .0155) / 2, 0.011371989131620245 - .02 - (.016 + .0207) / 2]  # these two have been tuned manually since the curve_fit function didn't seem exactly right
+  _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778, ]
+
+  speed_part = _s1 * speed + offset
+  # if we multiply the cubed and squared part of the polynomial, we can make the accel response more linear as speed increases (which it does get in data)
+  accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.7])  # below 12 mph no change to linearity, above make the curve straighter
+  accel_part += _a3 * accel
+  return accel_part + speed_part
+
   # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
   # # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
   # if which_func == 0:
