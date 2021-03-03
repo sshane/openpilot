@@ -67,8 +67,8 @@ class CarInterfaceBase():
     ret.enableCruise = True
     ret.minEnableSpeed = -1.  # enable is done by stock ACC, so ignore this
     ret.steerRatioRear = 0.  # no rear steering, at least on the listed cars aboveA
-    ret.gasMaxBP = [0.]
-    ret.gasMaxV = [.5]  # half max brake
+    ret.gasMaxBP = [4.47, 22]
+    ret.gasMaxV = [.5, .16]
     ret.brakeMaxBP = [0.]
     ret.brakeMaxV = [1.]
     ret.openpilotLongitudinalControl = False
