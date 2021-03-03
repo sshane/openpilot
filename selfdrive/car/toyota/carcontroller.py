@@ -41,11 +41,10 @@ def compute_gb_pedal(accel, speed, which_func):
   _s1, offset = [((0.011 + .02) / 2 + .0155) / 2, 0.011371989131620245 - .02 - (.016 + .0207) / 2]  # these two have been tuned manually since the curve_fit function didn't seem exactly right
 
   speed_part = (_s1 * speed)
-
   # if we multiply the cubed and squared part of the polynomial, we can make the accel response more linear as speed increases (which it does get in data)
   accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [10. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.6])  # todo make this a linear function and clip (quicker)
+  accel_part *= interp(accel, [0.5, 2], [1.2, 1])
   accel_part += (_a3 * accel)
-  offset -= interp(speed, [0 * CV.MPH_TO_MS, 3. * CV.MPH_TO_MS], [.025, 0]) * interp(accel, [0, 1], [1, 0])  # np.clip(1 - accel, 0, 1)
 
   return accel_part + speed_part + offset
 
