@@ -34,7 +34,7 @@ def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acce
 
 
 def compute_gb_pedal(desired_accel, speed, which_func):
-  _s1, _s2, _a1, _a2, _a3, offset = [0.00011472033606023426, 0.013876213350425473, 0.023210616718880393, -0.09075484756780133, 0.1956935192117445, -0.01095416947337976]
+  _s1, _s2, _a1, _a2, _a3, offset = [0.002100595045905214, -0.007926407598573259, -0.0004989402036808659, -0.003116214276447807, 0.10396703856636116, 0.0622476777856181]
   speed_part = (_s1 * speed ** 2 + _s2 * speed)  # this can be linear
   accel_part = (_a1 * desired_accel ** 3 + _a2 * desired_accel ** 2 + _a3 * desired_accel)
   return accel_part + speed_part + offset
