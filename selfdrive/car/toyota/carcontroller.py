@@ -39,21 +39,15 @@ def compute_gb_pedal(accel, speed, which_func):
   # _s1, offset = [((0.011+.02)/2 + .02) / 2, 0.011371989131620245 - .02 - (.016+.0207)/2]
   _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778]
   _s1, offset = [((0.011 + .02) / 2 + .0155) / 2, 0.011371989131620245 - .02 - (.016 + .0207) / 2]  # these two have been tuned manually since the curve_fit function didn't seem exactly right
-  if which_func in [0, 1]:
-    if which_func == 0:
-      _s1, offset = [((0.011 + .02) / 2 + .023) / 2, 0.011371989131620245 - .02]  # uncomment to test higher gas all around
-    else:
-      _s1, offset = [((0.011 + .02) / 2 + .027) / 2, 0.011371989131620245 - .02]  # even higher
 
-  speed_part = _s1 * speed + offset
+  speed_part = (_s1 * speed)
+
   # if we multiply the cubed and squared part of the polynomial, we can make the accel response more linear as speed increases (which it does get in data)
-  if which_func == 2:
-    accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [0, 6. * CV.MPH_TO_MS, 12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1.15, 1, 1, 0.65])  # this gives less gas at low speed
-  else:
-    accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.7])  # uncomment when testing above higher gas change
+  accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [10. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.6])  # todo make this a linear function and clip (quicker)
+  accel_part += (_a3 * accel)
+  offset -= interp(speed, [0 * CV.MPH_TO_MS, 3. * CV.MPH_TO_MS], [.025, 0]) * interp(accel, [0, 1], [1, 0])  # np.clip(1 - accel, 0, 1)
 
-  accel_part += _a3 * accel
-  return accel_part + speed_part
+  return accel_part + speed_part + offset
 
   # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
   # # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
