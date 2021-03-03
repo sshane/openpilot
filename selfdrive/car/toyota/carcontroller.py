@@ -37,12 +37,16 @@ def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acce
 def compute_gb_pedal(accel, speed, which_func):
   # return (_c1 * v_ego + _c2) + (_c3 * a_ego + (_c4 * v_ego))
   # _s1, offset = [((0.011+.02)/2 + .02) / 2, 0.011371989131620245 - .02 - (.016+.0207)/2]
+  _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778]
   _s1, offset = [((0.011 + .02) / 2 + .0155) / 2, 0.011371989131620245 - .02 - (.016 + .0207) / 2]  # these two have been tuned manually since the curve_fit function didn't seem exactly right
-  _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778, ]
+  # _s1, offset = [((0.011 + .02) / 2 + .023) / 2, 0.011371989131620245 - .02]  # uncomment to test higher gas all around
+  # _s1, offset = [((0.011 + .02) / 2 + .027) / 2, 0.011371989131620245 - .02]  # even higher
 
   speed_part = _s1 * speed + offset
   # if we multiply the cubed and squared part of the polynomial, we can make the accel response more linear as speed increases (which it does get in data)
-  accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.7])  # below 12 mph no change to linearity, above make the curve straighter
+  # accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.7])  # uncomment when testing above higher gas change
+  accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [0, 6. * CV.MPH_TO_MS, 12. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1.15, 1, 1, 0.65])  # this gives less gas at low speed
+
   accel_part += _a3 * accel
   return accel_part + speed_part
 
