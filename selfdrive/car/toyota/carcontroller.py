@@ -8,6 +8,7 @@ from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams
 from selfdrive.config import Conversions as CV
+from selfdrive.accel_to_gas import predict as accel_to_gas
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -35,6 +36,7 @@ def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acce
 
 
 def compute_gb_pedal(accel, speed, which_func):
+  return accel_to_gas([accel, speed])[0]
   # return (_c1 * v_ego + _c2) + (_c3 * a_ego + (_c4 * v_ego))
   # _s1, offset = [((0.011+.02)/2 + .02) / 2, 0.011371989131620245 - .02 - (.016+.0207)/2]
   _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778]
