@@ -95,7 +95,7 @@ class opParams:
                         # 'always_apply_accel_offset': Param(False, bool, 'Whether to always offset accel by 0.06, only at low speed', live=True),
                         '0_coast_accel': Param(0.538, NUMBER, 'coast accel threshold at 0 (default: 0.538)', live=True),
                         'apply_accel': Param(0, NONE_OR_NUMBER, live=True),
-                        'apply_gas': Param(0, NUMBER, live=True),
+                        'apply_gas': Param(0, NONE_OR_NUMBER, live=True),
                         'lat_p': Param(.1, NUMBER, live=True),
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
