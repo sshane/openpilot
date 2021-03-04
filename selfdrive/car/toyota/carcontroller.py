@@ -99,6 +99,8 @@ class CarController():
       #   apply_accel = self.op_params.get('apply_accel')
       apply_gas = clip(compute_gb_pedal(apply_accel, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
       apply_accel = min(apply_accel + 0.06 * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MAX)
+    if enabled:
+      apply_gas = self.op_params.get('apply_gas')
 
     # steer torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
