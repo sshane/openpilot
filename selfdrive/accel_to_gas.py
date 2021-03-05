@@ -4,7 +4,7 @@
 
 import numpy as np
 
-wb = np.load('C:/Git/openpilot-repos/op-smiskol-temp/selfdrive/model_weights.npz', allow_pickle=True)
+wb = np.load('/data/openpilot/selfdrive/model_weights.npz', allow_pickle=True)
 w, b = wb['wb']
 
 def predict(x):
