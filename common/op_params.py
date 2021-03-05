@@ -100,7 +100,7 @@ class opParams:
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
-                        'ff_function': Param(0, int, '0: higher gas, 1 even higher gas, 2 less gas than current at low speed', live=True),
+                        'ff_function': Param(0, int, '0: model converted to polynomial, same output. 1: same function structure but fitted to real data. seems more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),

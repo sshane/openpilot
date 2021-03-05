@@ -36,19 +36,16 @@ def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acce
 
 
 def compute_gb_pedal(accel, speed, which_func):
-  return accel_to_gas([accel, speed])[0]
-  # return (_c1 * v_ego + _c2) + (_c3 * a_ego + (_c4 * v_ego))
-  # _s1, offset = [((0.011+.02)/2 + .02) / 2, 0.011371989131620245 - .02 - (.016+.0207)/2]
-  _a1, _a2, _a3 = [0.022130745681601702, -0.09109186615316711, 0.20997207156680778]
-  _s1, offset = [((0.011 + .02) / 2 + .0155) / 2, 0.011371989131620245 - .02 - (.016 + .0207) / 2]  # these two have been tuned manually since the curve_fit function didn't seem exactly right
+  # return accel_to_gas([accel, speed])[0]
 
-  speed_part = (_s1 * speed)
-  # if we multiply the cubed and squared part of the polynomial, we can make the accel response more linear as speed increases (which it does get in data)
-  accel_part = (_a1 * accel ** 3 + _a2 * accel ** 2) * interp(speed, [10. * CV.MPH_TO_MS, 19. * CV.MPH_TO_MS], [1, 0.6])  # todo make this a linear function and clip (quicker)
-  accel_part += (_a3 * accel)
-  accel_part *= interp(accel, [0, 2], [0.8, 1])
-
-  return accel_part + speed_part + offset
+  if which_func == 0:  # this is the above model converted to two polynomials
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [0.003237731717735036, -0.014032122419520062, 0.06717810220003029, 0.06629322939776298, -0.0006271460492818756, 0.0003429579347678683, 0.0019324020352106985, 0.0005829182414089772, 0.0002115616066200471, 0.0003269658627676601, 0.001992360262648108, 0.0035529270807654876]
+  else:  # this is the bottom function fitted on data
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06422063203977699, -0.050581273963371365, 0.17818016859237865, 0.023714314008974217, -3.252691334194793e-05, -0.010896366108285527, -4.9532709490005374e-05, 0.05710749135553888, 0.00252533877125634, -0.0018781669414424638, -0.011011063211527635, 0.020655986024734195]
+  # reverse engineered the model, almost identical output. super cool how it uses the inputs in a linear function as coefficients for the opposite input poly
+  speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
+  accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + _a3 * accel ** 3 + _a4 * accel ** 2 + _a5 * accel)
+  return speed_part + accel_part + _offset
 
   # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
   # # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
