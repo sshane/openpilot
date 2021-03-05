@@ -210,15 +210,15 @@ class LateralPlanner():
       curvature_desired = measured_curvature
       desired_curvature_rate = 0.0
 
-    print('measured curv: {}'.format(round(measured_curvature, 4)))
-    print(' desired curv: {}'.format(round(next_curvature, 4)))
+    #print('measured curv: {}'.format(round(measured_curvature, 4)))
+    #rint(' desired curv: {}'.format(round(next_curvature, 4)))
 
     # negative sign, controls uses different convention
     self.desired_steering_wheel_angle_deg = -float(math.degrees(curvature_desired * VM.sR)/curvature_factor) + steering_wheel_angle_offset_deg
-    print('SR: {}'.format(round(VM.sR, 3)))
-    print('offset: {}'.format(round(steering_wheel_angle_offset_deg, 3)))
-    print('delay: {}'.format(delay))
-    print('---')
+    #int('SR: {}'.format(round(VM.sR, 3)))
+    #print('offset: {}'.format(round(steering_wheel_angle_offset_deg, 3)))
+    #rint('delay: {}'.format(delay))
+    #rint('---')
 
     self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
 
