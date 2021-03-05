@@ -93,8 +93,8 @@ class CarController():
       # +0.06 offset to reduce ABS pump usage when applying very small gas
       # if self.op_params.get('apply_accel') is not None:
       #   apply_accel = self.op_params.get('apply_accel')
-      if apply_accel > coast_accel(CS.out.vEgo, self.op_params.get('0_coast_accel')):
-        apply_gas = clip(compute_gb_pedal(apply_accel, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
+      if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo, self.op_params.get('0_coast_accel')):
+        apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
       apply_accel = 0.06 - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
