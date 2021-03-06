@@ -93,14 +93,20 @@ class opParams:
                         'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
                         # 'send_max_accel': Param(False, bool, 'Send 1.5m/s/s when des. accel is above coast accel/using pedal. Else just offsets apply_accel by 0.06*3', live=True),
                         # 'always_apply_accel_offset': Param(False, bool, 'Whether to always offset accel by 0.06, only at low speed', live=True),
-                        '0_coast_accel': Param(0.538, NUMBER, 'coast accel threshold at 0 (default: 0.538)', live=True),
+                        # '0_coast_accel': Param(0.538, NUMBER, 'coast accel threshold at 0 (default: 0.538)', live=True),
                         'apply_accel': Param(0, NONE_OR_NUMBER, live=True),
                         'apply_gas': Param(0, NONE_OR_NUMBER, live=True),
                         'lat_p': Param(.1, NUMBER, live=True),
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
-                        'ff_function': Param(0, int, '0: model converted to polynomial, same output. 1: same function structure but fitted to real data. seems more accurate', live=True),
+                        'ff_function': Param(0, int, '0: model converted to polynomial, same output.\n'
+                                                     '1: same function structure but fitted to real data. seems more accurate\n'
+                                                     '2: offsetting speed as well as accel\n'
+                                                     '3: same as 1 but reducing accel offset from 5 to 0 mph\n'
+                                                     '4: applying accel filter on func 3\n'
+                                                     '5: applying accel filter and reducing offset from 5 to 0 mph on func 2', live=True),
+                        'coast_function': Param(0, int, '0: original function, 1: new function with less accel offset at low speed. should be more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),

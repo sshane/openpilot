@@ -28,10 +28,15 @@ def accel_hysteresis(accel, accel_steady, enabled):
   return accel, accel_steady
 
 
-def coast_accel(speed, coast_accel_at_0):  # given a speed, output coasting acceleration
-  points = [[0.0, coast_accel_at_0], [1.697, 0.28],
-            [2.853, -0.199], [3.443, -0.249],
-            [MIN_ACC_SPEED, -0.145]]
+def coast_accel(speed, which_func):  # given a speed, output coasting acceleration
+  if which_func == 0:
+    points = [[0.0, 0.538], [1.697, 0.28],
+              [2.853, -0.199], [3.443, -0.249],
+              [MIN_ACC_SPEED, -0.145]]
+  else:
+    points = [[0.0, 0.03], [.166, .424], [.335, .568],
+              [.731, .440], [1.886, 0.262], [2.809, -0.207],
+              [3.443, -0.249], [MIN_ACC_SPEED, -0.145]]
   return interp(speed, *zip(*points))
 
 
@@ -40,8 +45,20 @@ def compute_gb_pedal(accel, speed, which_func):
 
   if which_func == 0:  # this is the above model converted to two polynomials
     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [0.003237731717735036, -0.014032122419520062, 0.06717810220003029, 0.06629322939776298, -0.0006271460492818756, 0.0003429579347678683, 0.0019324020352106985, 0.0005829182414089772, 0.0002115616066200471, 0.0003269658627676601, 0.001992360262648108, 0.0035529270807654876]
-  else:  # this is the bottom function fitted on data
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06422063203977699, -0.050581273963371365, 0.17818016859237865, 0.023714314008974217, -3.252691334194793e-05, -0.010896366108285527, -4.9532709490005374e-05, 0.05710749135553888, 0.00252533877125634, -0.0018781669414424638, -0.011011063211527635, 0.020655986024734195]
+  elif which_func == 1:  # this is the bottom function fitted on data
+    # this is using future accel with current speed, gas, etc
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05852890417685879, -0.0547687121098424, 0.17805761080500854, 0.02495029020857692, -1.3833659932240724e-05, -0.01051744191918636, -0.00010315551743123573, 0.05453987977699605, 0.0025468819577489994, -0.0018799608421947848, -0.010975243196134687, 0.020412221507199665]
+  elif which_func == 2:
+    # this is offsetting speed as well as accel
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.034972355520499945, -0.07258554000950052, 0.16766449798907357, 0.03796260968937626, 0.0006959184578795798, -0.010998968796341645, -0.002003721891231214, 0.049407329593411174, 0.002330180120906204, -0.0012535103221882832, -0.007723171310009469, 0.01441869761201456]
+  elif which_func == 3:
+    # This is same as 1 but reducing accel offset from 5 to 0 mph
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05105606659218529, -0.0576261315554768, 0.15081380210023376, 0.05133068734696987, 5.9146813042508826e-05, -0.010139940821540159, -0.0003663558989772673, 0.05160370603505373, 0.0016194893168806697, -0.000803750169959028, -0.0006693327099676753, 0.009085497532847294]
+  elif which_func == 4:
+    # this is applying the accel filter on func 3: 3.0 > line['a_ego'] > coast_accel(line['v_ego']) - 0.2
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [0.022149049850234834, -0.11598085079184534, 0.16992234903369172, 0.04655053410459134, 5.010745172143593e-05, -0.00463810139475851, -0.0002985399523045501, 0.016845335025805565, 0.0018906355335290609, -0.0010547338746394025, -0.0038444819348291545, 0.011862218030372108]
+  else:
+    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [0.029256062736492627, -0.12102238822617944, 0.15981781977529405, 0.05496682933138211, 0.0008371370146672613, -0.0067242068166888155, -0.0023957293554218305, 0.02042199676500777, 0.0018610460523360629, -0.0006628198431291858, -0.002073832055454375, 0.007970801443623363]
   # reverse engineered the model, almost identical output. super cool how it uses the inputs in a linear function as coefficients for the opposite input poly
   speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
   accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + _a3 * accel ** 3 + _a4 * accel ** 2 + _a5 * accel)
@@ -94,7 +111,7 @@ class CarController():
       # if self.op_params.get('apply_accel') is not None:
       #   apply_accel = self.op_params.get('apply_accel')
       print(round(apply_accel * 3, 2), round(CS.out.aEgo, 2))
-      if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo, self.op_params.get('0_coast_accel')):
+      if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo, self.op_params.get('coast_function')):
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
       apply_accel = 0.06 - actuators.brake
 
