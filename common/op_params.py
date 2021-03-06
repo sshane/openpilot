@@ -105,7 +105,8 @@ class opParams:
                                                      '2: offsetting speed as well as accel\n'
                                                      '3: same as 1 but reducing accel offset from 5 to 0 mph\n'
                                                      '4: applying accel filter on func 3\n'
-                                                     '5: applying accel filter and reducing offset from 5 to 0 mph on func 2', live=True),
+                                                     '5: applying accel filter and reducing offset from 5 to 0 mph on func 2'
+                                                     '6: reducing gas predictions near 0 speed and accel', live=True),
                         'coast_function': Param(0, int, '0: original function, 1: new function with less accel offset at low speed. should be more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
