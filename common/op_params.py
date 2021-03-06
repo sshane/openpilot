@@ -101,7 +101,7 @@ class opParams:
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
                         'ff_function': Param(0, int, '0: model converted to polynomial, same output.\n'
-                                                     '1: same function structure but fitted to real data. seems more accurate\n'
+                                                     '1: same function structure but fitted to real data. seems more accurate (removed high maxfev)\n'
                                                      '2: offsetting speed as well as accel\n'
                                                      '3: same as 1 but reducing accel offset from 5 to 0 mph\n'
                                                      '4: applying accel filter on func 3\n'
