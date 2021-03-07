@@ -100,13 +100,7 @@ class opParams:
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
-                        'ff_function': Param(0, int, '0: model converted to polynomial, same output.\n'
-                                                     '1: same function structure but fitted to real data. seems more accurate (removed high maxfev)\n'
-                                                     '2: offsetting speed as well as accel\n'
-                                                     '3: same as 1 but reducing accel offset from 5 to 0 mph\n'
-                                                     '4: applying accel filter on func 3\n'
-                                                     '5: applying accel filter and reducing offset from 5 to 0 mph on func 2'
-                                                     '6: reducing gas predictions near 0 speed and accel', live=True),
+                        'ff_function': Param(0, int, '', live=True),
                         'coast_function': Param(0, int, '0: original function, 1: new function with less accel offset at low speed. should be more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
