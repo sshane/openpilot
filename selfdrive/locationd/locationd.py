@@ -7,26 +7,36 @@ import sympy as sp
 import cereal.messaging as messaging
 from cereal import log
 from common.params import Params
+print(f'import time 1: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 import common.transformations.coordinates as coord
+print(f'import time 2: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 from common.transformations.orientation import ecef_euler_from_ned, \
                                                euler_from_quat, \
                                                ned_euler_from_ecef, \
                                                quat_from_euler, euler_from_rot, \
                                                rot_from_quat, rot_from_euler
+print(f'import time 3: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 from rednose.helpers import KalmanError
 from selfdrive.locationd.models.live_kf import LiveKalman, States, ObservationKind
 from selfdrive.locationd.models.constants import GENERATED_DIR
 from selfdrive.swaglog import cloudlog
-print(f'import time: {sec_since_boot() - t}')
+print(f'import time 4: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 
 #from datetime import datetime
 #from laika.gps_time import GPSTime
 
 from sympy.utilities.lambdify import lambdify
 from rednose.helpers.sympy_helpers import euler_rotate
+print(f'import time 5: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 
 SensorSource = log.SensorEventData.SensorSource
-
+print(f'import time: {sec_since_boot() - t}', flush=True)
+t = sec_since_boot()
 
 VISION_DECIMATION = 2
 SENSOR_DECIMATION = 10
