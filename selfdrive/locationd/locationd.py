@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from common.clock import sec_since_boot
+t = sec_since_boot()
 import json
 import numpy as np
 import sympy as sp
@@ -15,6 +17,7 @@ from rednose.helpers import KalmanError
 from selfdrive.locationd.models.live_kf import LiveKalman, States, ObservationKind
 from selfdrive.locationd.models.constants import GENERATED_DIR
 from selfdrive.swaglog import cloudlog
+print(f'import time: {sec_since_boot() - t}')
 
 #from datetime import datetime
 #from laika.gps_time import GPSTime

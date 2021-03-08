@@ -180,7 +180,7 @@ managed_processes = {
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
   "locationd": "selfdrive.locationd.locationd",
-  "paramsd": "selfdrive.locationd.paramsd",
+  # "paramsd": "selfdrive.locationd.paramsd",
 
   # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
