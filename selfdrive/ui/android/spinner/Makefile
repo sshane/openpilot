@@ -70,6 +70,7 @@ img_spinner_comma.o: $(ROOT_DIR)/selfdrive/assets/img_spinner_comma.png
           -I$(PHONELIBS)/android_frameworks_native/include \
           -I$(PHONELIBS)/android_system_core/include \
           -I$(PHONELIBS)/android_hardware_libhardware/include \
+          -I$(COMMON) \
           $(NANOVG_FLAGS) \
           -c -o '$@' '$<'
 
