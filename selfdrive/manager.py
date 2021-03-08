@@ -31,7 +31,7 @@ sys.path.append(os.path.join(BASEDIR, "pyextra"))
 TOTAL_SCONS_NODES = 1225
 MAX_BUILD_PROGRESS = 70
 WEBCAM = os.getenv("WEBCAM") is not None
-PREBUILT = True# os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
+PREBUILT = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 KILL_UPDATED = opParams().get('update_behavior').lower().strip() == 'off' or os.path.exists('/data/no_ota_updates')
 
 
@@ -576,6 +576,7 @@ def main():
   manager_prepare()
 
   if os.getenv("PREPAREONLY") is not None:
+    spinner.close()
     return
 
   # SystemExit on sigterm
