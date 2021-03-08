@@ -36,16 +36,16 @@ DEPS := $(OBJS:.o=.d)
 .PHONY: all
 all: spinner
 
-spinner: spinner.o $(OBJS)
+spinner: $(OBJS)
 	@echo "[ LINK ] $@"
-	$(CXX) -fPIC -o 'spinner' $^ \
+	$(CXX) -fPIC -o '$@' $^ \
+	      -s \
         $(FRAMEBUFFER_LIBS) \
         -L/system/vendor/lib64 \
         $(OPENGL_LIBS) \
-        -lcutils -lm -llog \
         -lm -llog
 
-opensans_semibold.ttf.o: $(ROOT_DIR)/selfdrive/assets/fonts/opensans_semibold.ttf
+opensans_semibold.o: $(ROOT_DIR)/selfdrive/assets/fonts/opensans_semibold.ttf
 	@echo "[ bin2o ] $@"
 	cd '$(dir $<)' && ld -r -b binary '$(notdir $<)' -o '$(abspath $@)'
 
