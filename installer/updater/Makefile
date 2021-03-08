@@ -86,9 +86,6 @@ opensans_semibold.ttf.o: ../../selfdrive/assets/fonts/opensans_semibold.ttf
            -I$(PHONELIBS)/android_system_core/include \
            -I$(PHONELIBS)/android_hardware_libhardware/include \
            $(NANOVG_FLAGS) \
-           $(JSON11_FLAGS) \
-           $(CURL_FLAGS) \
-           $(BORINGSSL_FLAGS) \
            -c -o '$@' '$<'
 
 
