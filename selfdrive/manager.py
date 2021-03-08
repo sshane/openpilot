@@ -449,6 +449,8 @@ def manager_thread():
   # start persistent processes
   for p in persistent_processes:
     start_managed_process(p)
+    if p == 'ui':
+      spinner.close()
 
   # start offroad
   if EON:
@@ -535,7 +537,6 @@ def manager_prepare():
     prepare_managed_process(p)
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     spinner.update_progress(perc, 100)
-  time.sleep(0.25)
 
 def main():
   params = Params()
@@ -574,7 +575,6 @@ def main():
     update_apks()
   manager_init()
   manager_prepare()
-  spinner.close()
 
   if os.getenv("PREPAREONLY") is not None:
     return
