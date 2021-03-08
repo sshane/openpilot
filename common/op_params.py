@@ -102,7 +102,9 @@ class opParams:
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
                         'ff_function': Param(0, int, '0: original\n'
                                                      '1: original but fitted up to 25 mph so the transition should be smoother\n'
-                                                     '2: original fitted to only 22 mph', live=True),
+                                                     '2: original fitted to only 22 mph\n'
+                                                     '3: fitted to 22 mph with more data (should be end game here)\n'
+                                                     '4: same as func 3 but decreasing gas around 0 accel (up to 18 mph)', live=True),
                         'coast_function': Param(0, int, '0: original function, 1: new function with less accel offset at low speed. should be more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
