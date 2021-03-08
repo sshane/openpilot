@@ -536,11 +536,11 @@ def manager_prepare():
 
   for i, p in enumerate(managed_processes):
     print(sec_since_boot() - t)
+    t = sec_since_boot()
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     # print(p, perc)
     spinner.update_progress(int(perc), 100)
     prepare_managed_process(p)
-    t = sec_since_boot()
   print('sleeping', flush=True)
   time.sleep(5)
 
