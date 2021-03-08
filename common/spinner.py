@@ -27,6 +27,7 @@ class Spinner():
       try:
         self.spinner_proc.stdin.flush()
       except BrokenPipeError:
+        print('BrokenPipeError!')
         pass
 
   def update_progress(self, cur: float, total: float):
