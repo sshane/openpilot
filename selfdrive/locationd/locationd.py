@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-from common.clock import sec_since_boot
 import json
 import numpy as np
-t = sec_since_boot()
 import sympy as sp
-print(f'import time 1: {sec_since_boot() - t}', flush=True)
-t = sec_since_boot()
 import cereal.messaging as messaging
 from cereal import log
 from common.params import Params
@@ -27,8 +23,6 @@ from sympy.utilities.lambdify import lambdify
 from rednose.helpers.sympy_helpers import euler_rotate
 
 SensorSource = log.SensorEventData.SensorSource
-print(f'import time: {sec_since_boot() - t}', flush=True)
-t = sec_since_boot()
 
 VISION_DECIMATION = 2
 SENSOR_DECIMATION = 10
