@@ -179,8 +179,8 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
-  # "locationd": "selfdrive.locationd.locationd",
-  # "paramsd": "selfdrive.locationd.paramsd",
+  "locationd": "selfdrive.locationd.locationd",
+  "paramsd": "selfdrive.locationd.paramsd",
 
   # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
