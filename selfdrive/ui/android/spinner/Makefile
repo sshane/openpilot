@@ -3,7 +3,7 @@ CXX = clang++
 
 ROOT_DIR = ../../../..
 PHONELIBS = $(ROOT_DIR)/phonelibs
-COMMON = $(ROOT)/selfdrive/common
+COMMON = $(ROOT_DIR)/selfdrive/common
 
 WARN_FLAGS = -Werror=implicit-function-declaration \
              -Werror=incompatible-pointer-types \
