@@ -534,9 +534,10 @@ def manager_prepare():
   total = 100.0 - (0 if PREBUILT else MAX_BUILD_PROGRESS)
 
   for i, p in enumerate(managed_processes):
+    prepare_managed_process(p)
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     spinner.update_progress(int(perc), 100)
-    prepare_managed_process(p)
+  time.sleep(1 / 20)
 
 def main():
   params = Params()
