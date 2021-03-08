@@ -1,6 +1,8 @@
 import os
 import subprocess
 from common.basedir import BASEDIR
+from common.clock import sec_since_boot
+import time
 
 
 class Spinner():
@@ -13,6 +15,9 @@ class Spinner():
     except OSError:
       self.spinner_proc = None
 
+    self.update_t = -1
+    self.sleep_t = 1 / 50.
+
   def __enter__(self):
     return self
 
@@ -24,8 +29,13 @@ class Spinner():
       except BrokenPipeError:
         pass
 
-  def update_progress(self, cur: int, total: int):
-    self.update(str(int(100 * cur / total)))
+  def update_progress(self, cur: float, total: float):
+    elapsed_t = sec_since_boot() - self.update_t
+    if elapsed_t < self.sleep_t:
+      time.sleep(self.sleep_t - elapsed_t)
+
+    self.update(str(round(100 * cur / total)))
+    self.update_t = sec_since_boot()
 
   def close(self):
     if self.spinner_proc is not None:
@@ -44,7 +54,6 @@ class Spinner():
 
 
 if __name__ == "__main__":
-  import time
   with Spinner() as s:
     s.update("Spinner text")
     time.sleep(5.0)
