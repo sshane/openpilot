@@ -45,6 +45,16 @@ spinner: $(OBJS)
         $(OPENGL_LIBS) \
         -lm -llog
 
+
+$(COMMON)/framebuffer.o: $(COMMON)/framebuffer.cc
+	@echo "[ CXX ] $@"
+	$(CXX) $(CXXFLAGS) -MMD \
+           -I$(PHONELIBS)/android_frameworks_native/include \
+           -I$(PHONELIBS)/android_system_core/include \
+           -I$(PHONELIBS)/android_hardware_libhardware/include \
+           -c -o '$@' '$<'
+
+
 opensans_semibold.o: $(ROOT_DIR)/selfdrive/assets/fonts/opensans_semibold.ttf
 	@echo "[ bin2o ] $@"
 	cd '$(dir $<)' && ld -r -b binary '$(notdir $<)' -o '$(abspath $@)'
