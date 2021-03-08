@@ -31,8 +31,8 @@ class Spinner():
 
   def update_progress(self, cur: int, total: int):
     elapsed_t = sec_since_boot() - self.update_t
-    if elapsed_t < self.sleep_t:
-      time.sleep(self.sleep_t - elapsed_t)
+    # if elapsed_t < self.sleep_t:
+    #   time.sleep(self.sleep_t - elapsed_t)
 
     self.update(str(int(100 * cur / total)))
     self.update_t = sec_since_boot()
