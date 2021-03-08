@@ -40,6 +40,7 @@ spinner: $(OBJS)
 	$(CXX) -fPIC -o '$@' $^ \
 	      -s \
         $(FRAMEBUFFER_LIBS) \
+	    -I$(ROOT_DIR)/selfdrive/common \
         -L/system/vendor/lib64 \
         $(OPENGL_LIBS) \
         -lm -llog
@@ -48,6 +49,7 @@ spinner: $(OBJS)
 $(COMMON)/framebuffer.o: $(COMMON)/framebuffer.cc
 	@echo "[ CXX ] $@"
 	$(CXX) $(CXXFLAGS) -MMD \
+		   -I$(ROOT_DIR)/selfdrive/common \
            -I$(PHONELIBS)/android_frameworks_native/include \
            -I$(PHONELIBS)/android_system_core/include \
            -I$(PHONELIBS)/android_hardware_libhardware/include \
@@ -69,6 +71,8 @@ img_spinner_comma.o: $(ROOT_DIR)/selfdrive/assets/img_spinner_comma.png
 %.o: %.c
 	@echo "[ CC ] $@"
 	$(CC) $(CFLAGS) -MMD \
+          -I$(ROOT_DIR)/selfdrive/common \
+          -I$(ROOT_DIR)/selfdrive \
           -I$(ROOT_DIR) \
           -I$(PHONELIBS)/android_frameworks_native/include \
           -I$(PHONELIBS)/android_system_core/include \
@@ -80,6 +84,7 @@ img_spinner_comma.o: $(ROOT_DIR)/selfdrive/assets/img_spinner_comma.png
 	mkdir -p $(@D)
 	@echo "[ CXX ] $@"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
+           -I$(ROOT_DIR)/selfdrive/common \
            -I$(ROOT_DIR)/selfdrive \
            -I$(ROOT_DIR) \
            -I$(PHONELIBS)/android_frameworks_native/include \
