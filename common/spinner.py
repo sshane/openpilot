@@ -26,9 +26,9 @@ class Spinner():
       except BrokenPipeError:
         pass
 
-  def update_progress(self, cur: int, total: int, force: bool = False):
-    if sec_since_boot() - self.t_update > 0.05 or force:
-      if force:
+  def update_progress(self, cur: int, total: int):
+    if sec_since_boot() - self.t_update > 0.05 or cur == 100:
+      if cur == 100:
         time.sleep(0.05)
       self.update(str(int(100 * cur / total)))
       self.t_update = sec_since_boot()

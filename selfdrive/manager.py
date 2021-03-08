@@ -100,7 +100,7 @@ def build():
         prefix = b'progress: '
         if line.startswith(prefix):
           i = int(line[len(prefix):])
-          spinner.update_progress(MAX_BUILD_PROGRESS * min(1., i / TOTAL_SCONS_NODES), 100.)
+          spinner.update_progress(int(MAX_BUILD_PROGRESS * min(1., i / TOTAL_SCONS_NODES)), 100)
         elif len(line):
           compile_output.append(line)
           print(line.decode('utf8', 'replace'))
@@ -534,7 +534,7 @@ def manager_prepare():
   for i, p in enumerate(managed_processes):
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     print(p, perc)
-    spinner.update_progress(perc, 100., perc == 100.)
+    spinner.update_progress(int(perc), 100)
     prepare_managed_process(p)
   print('sleeping', flush=True)
   time.sleep(5)
