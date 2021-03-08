@@ -20,17 +20,14 @@ OPENGL_LIBS = -lGLESv3
 
 FRAMEBUFFER_LIBS = -lutils -lgui -lEGL
 
-all: spinner
-
 OBJS = spinner.o \
-	         opensans_regular.ttf.o \
+	   $(COMMON)/framebuffer.o \
 			 opensans_semibold.ttf.o \
 			 opensans_bold.ttf.o \
        $(COMMON)/util.o \
-       $(COMMON)/touch.o \
-       $(COMMON)/framebuffer.o \
        $(PHONELIBS)/nanovg/nanovg.o \
        $(COMMON)/spinner.o \
+       opensans_semibold.o \
        img_spinner_track.o \
        img_spinner_comma.o
 
