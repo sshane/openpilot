@@ -2,6 +2,7 @@ import os
 import subprocess
 from common.basedir import BASEDIR
 from common.clock import sec_since_boot
+import time
 
 
 class Spinner():
@@ -50,7 +51,6 @@ class Spinner():
 
 
 if __name__ == "__main__":
-  import time
   with Spinner() as s:
     s.update("Spinner text")
     time.sleep(5.0)
