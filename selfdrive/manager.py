@@ -11,7 +11,6 @@ import subprocess
 import textwrap
 import time
 import traceback
-
 from common.op_params import opParams
 
 from multiprocessing import Process
