@@ -100,7 +100,6 @@ int main(int argc, char** argv) {
 
       if (is_number) {
         progress_val = (float)(atoi(spintext)) / 100.0;
-        std::cout << "received " << progress_val << std::endl;
         progress_val = fmin(1.0, progress_val);
         progress_val = fmax(0.0, progress_val);
       }

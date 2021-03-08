@@ -1,7 +1,7 @@
 CC = clang
 CXX = clang++
 
-ROOT_DIR = ../../../..
+ROOT_DIR = ../../..
 PHONELIBS = $(ROOT_DIR)/phonelibs
 COMMON = $(ROOT)/selfdrive/common
 
@@ -67,10 +67,6 @@ img_spinner_comma.o: $(ROOT_DIR)/selfdrive/assets/img_spinner_comma.png
 	@echo "[ CC ] $@"
 	$(CC) $(CFLAGS) -MMD \
           -I../.. \
-          -I$(PHONELIBS)/android_frameworks_native/include \
-          -I$(PHONELIBS)/android_system_core/include \
-          -I$(PHONELIBS)/android_hardware_libhardware/include \
-          -I/data/openpilot/selfdrive/common \
           $(NANOVG_FLAGS) \
           -c -o '$@' '$<'
 
