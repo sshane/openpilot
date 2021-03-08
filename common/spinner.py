@@ -27,7 +27,7 @@ class Spinner():
         pass
 
   def update_progress(self, cur: int, total: int, force: bool = False):
-    if sec_since_boot() - self.t_update > 0.01 or force:
+    if sec_since_boot() - self.t_update > 1/20 or force:
       self.update(str(int(100 * cur / total)))
       self.t_update = sec_since_boot()
 
