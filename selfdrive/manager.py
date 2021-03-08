@@ -537,8 +537,8 @@ def manager_prepare():
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     prepare_managed_process(p)
     spinner.update_progress(int(perc), 100)
-  print('sleeping', flush=True)
-  time.sleep(5)
+  # print('sleeping', flush=True)
+  # time.sleep(5)
 
 def main():
   params = Params()
