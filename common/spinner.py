@@ -30,12 +30,12 @@ class Spinner():
         pass
 
   def update_progress(self, cur: float, total: float):
-    elapsed_t = sec_since_boot() - self.update_t
-    if elapsed_t < self.sleep_t:
-      time.sleep(self.sleep_t - elapsed_t)
+    # elapsed_t = sec_since_boot() - self.update_t
+    # if elapsed_t < self.sleep_t:
+    #   time.sleep(self.sleep_t - elapsed_t)
 
     self.update(str(round(100 * cur / total)))
-    self.update_t = sec_since_boot()
+    # self.update_t = sec_since_boot()
 
   def close(self):
     if self.spinner_proc is not None:
