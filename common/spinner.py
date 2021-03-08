@@ -1,6 +1,7 @@
 import os
 import subprocess
 from common.basedir import BASEDIR
+from common.clock import sec_since_boot
 
 
 class Spinner():
@@ -24,8 +25,10 @@ class Spinner():
       except BrokenPipeError:
         pass
 
-  def update_progress(self, cur: int, total: int):
-    self.update(str(int(100 * cur / total)))
+  def update_progress(self, cur: int, total: int, force: bool):
+    if sec_since_boot() - self.t_update > 0.5 or force:
+      self.update(str(int(100 * cur / total)))
+      self.t_update = sec_since_boot()
 
   def close(self):
     if self.spinner_proc is not None:
