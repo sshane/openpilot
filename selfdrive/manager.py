@@ -536,7 +536,8 @@ def manager_prepare():
     print(p, perc)
     prepare_managed_process(p)
     spinner.update_progress(perc, 100.)
-    spinner.update_progress(perc, 100.)
+  time.sleep(1)
+  spinner.update_progress(perc, 100.)
   print('sleeping', flush=True)
   time.sleep(5)
 
