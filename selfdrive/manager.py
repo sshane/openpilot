@@ -534,7 +534,9 @@ def manager_prepare():
   total = 100.0 - (0 if PREBUILT else MAX_BUILD_PROGRESS)
 
   for i, p in enumerate(managed_processes):
+    t = sec_since_boot()
     prepare_managed_process(p)
+    print(p, sec_since_boot() - t)
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     spinner.update_progress(int(perc), 100)
   time.sleep(0.25)
