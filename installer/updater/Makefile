@@ -46,8 +46,6 @@ updater: updater.o $(OBJS)
 	@echo "[ LINK ] $@"
 	$(CXX) $(CPPFLAGS) -fPIC -o 'updater' $^ \
     $(FRAMEBUFFER_LIBS) \
-    $(CURL_LIBS) \
-    $(BORINGSSL_LIBS) \
     -L/system/vendor/lib64 \
     $(OPENGL_LIBS) \
     -lcutils -lm -llog
