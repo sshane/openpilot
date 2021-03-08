@@ -14,7 +14,9 @@ class Spinner():
                                            close_fds=True)
     except OSError:
       self.spinner_proc = None
-    self.t_update = -1
+
+    self.update_t = -1
+    self.sleep_t = 1 / 50.
 
   def __enter__(self):
     return self
@@ -28,9 +30,12 @@ class Spinner():
         pass
 
   def update_progress(self, cur: int, total: int):
-    time.sleep(1 / 50)
+    elapsed_t = sec_since_boot() - self.update_t
+    if elapsed_t < self.sleep_t:
+      time.sleep(self.sleep_t - elapsed_t)
+
     self.update(str(int(100 * cur / total)))
-    self.t_update = sec_since_boot()
+    self.update_t = sec_since_boot()
 
   def close(self):
     if self.spinner_proc is not None:
