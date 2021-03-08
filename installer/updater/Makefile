@@ -34,7 +34,6 @@ all: updater
 OBJS = opensans_regular.ttf.o \
 			 opensans_semibold.ttf.o \
 			 opensans_bold.ttf.o \
-       ../../selfdrive/common/util.o \
        ../../selfdrive/common/touch.o \
        ../../selfdrive/common/framebuffer.o \
        $(PHONELIBS)/json11/json11.o \
@@ -46,6 +45,8 @@ updater: updater.o $(OBJS)
 	@echo "[ LINK ] $@"
 	$(CXX) $(CPPFLAGS) -fPIC -o 'updater' $^ \
     $(FRAMEBUFFER_LIBS) \
+    $(CURL_LIBS) \
+    $(BORINGSSL_LIBS) \
     -L/system/vendor/lib64 \
     $(OPENGL_LIBS) \
     -lcutils -lm -llog
@@ -84,6 +85,9 @@ opensans_semibold.ttf.o: ../../selfdrive/assets/fonts/opensans_semibold.ttf
            -I$(PHONELIBS)/android_system_core/include \
            -I$(PHONELIBS)/android_hardware_libhardware/include \
            $(NANOVG_FLAGS) \
+           $(JSON11_FLAGS) \
+           $(CURL_FLAGS) \
+           $(BORINGSSL_FLAGS) \
            -c -o '$@' '$<'
 
 
