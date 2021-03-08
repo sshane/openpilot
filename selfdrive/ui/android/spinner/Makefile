@@ -41,14 +41,14 @@ all: spinner
 
 spinner: spinner.o $(OBJS)
 	@echo "[ LINK ] $@"
-	$(CXX) -fPIC -o '$@' $^ \
+	$(CXX) -fPIC -o 'spinner' $^ \
         $(FRAMEBUFFER_LIBS) \
         -L/system/vendor/lib64 \
         $(OPENGL_LIBS) \
         -lcutils -lm -llog \
         -lm -llog
 
-opensans_semibold.o: $(ROOT_DIR)/selfdrive/assets/fonts/opensans_semibold.ttf
+opensans_semibold.ttf.o: $(ROOT_DIR)/selfdrive/assets/fonts/opensans_semibold.ttf
 	@echo "[ bin2o ] $@"
 	cd '$(dir $<)' && ld -r -b binary '$(notdir $<)' -o '$(abspath $@)'
 
@@ -63,14 +63,24 @@ img_spinner_comma.o: $(ROOT_DIR)/selfdrive/assets/img_spinner_comma.png
 %.o: %.c
 	@echo "[ CC ] $@"
 	$(CC) $(CFLAGS) -MMD \
-          -I../../.. \
-          -I../.. \
-          -I../../../.. \
+          -I$(ROOT_DIR) \
           -I$(PHONELIBS)/android_frameworks_native/include \
           -I$(PHONELIBS)/android_system_core/include \
           -I$(PHONELIBS)/android_hardware_libhardware/include \
           $(NANOVG_FLAGS) \
           -c -o '$@' '$<'
+
+%.o: %.cc
+	mkdir -p $(@D)
+	@echo "[ CXX ] $@"
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
+           -I$(ROOT_DIR)/selfdrive \
+           -I$(ROOT_DIR) \
+           -I$(PHONELIBS)/android_frameworks_native/include \
+           -I$(PHONELIBS)/android_system_core/include \
+           -I$(PHONELIBS)/android_hardware_libhardware/include \
+           $(NANOVG_FLAGS) \
+           -c -o '$@' '$<'
 
 .PHONY: clean
 clean:
