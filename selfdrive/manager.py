@@ -172,7 +172,6 @@ managed_processes = {
   "pandad": "selfdrive.pandad",
   "ui": ("selfdrive/ui", ["./ui"]),
   "calibrationd": "selfdrive.locationd.calibrationd",
-  "paramsd": "selfdrive.locationd.paramsd",
   "camerad": ("selfdrive/camerad", ["./camerad"]),
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
@@ -180,7 +179,9 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
-  "locationd": "selfdrive.locationd.locationd",
+  # "locationd": "selfdrive.locationd.locationd",
+  # "paramsd": "selfdrive.locationd.paramsd",
+
   # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
 
