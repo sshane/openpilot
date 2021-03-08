@@ -11,6 +11,8 @@ import subprocess
 import textwrap
 import time
 import traceback
+
+from common.clock import sec_since_boot
 from common.op_params import opParams
 
 from multiprocessing import Process
@@ -530,12 +532,15 @@ def manager_prepare():
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
   total = 100.0 - (0 if PREBUILT else MAX_BUILD_PROGRESS)
+  t = sec_since_boot()
 
   for i, p in enumerate(managed_processes):
+    print(sec_since_boot() - t)
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
-    print(p, perc)
+    # print(p, perc)
     spinner.update_progress(int(perc), 100)
     prepare_managed_process(p)
+    t = sec_since_boot()
   print('sleeping', flush=True)
   time.sleep(5)
 
