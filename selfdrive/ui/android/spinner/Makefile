@@ -41,6 +41,7 @@ spinner: $(OBJS)
         $(FRAMEBUFFER_LIBS) \
         -L/system/vendor/lib64 \
         $(OPENGL_LIBS) \
+        -lcutils -lm -llog \
         -lm -llog
 
 $(COMMON)/framebuffer.o: $(COMMON)/framebuffer.cc
