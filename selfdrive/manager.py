@@ -12,7 +12,6 @@ import textwrap
 import time
 import traceback
 
-from common.clock import sec_since_boot
 from common.op_params import opParams
 
 from multiprocessing import Process
@@ -156,8 +155,6 @@ from selfdrive.launcher import launcher
 
 # comment out anything you don't want to run
 managed_processes = {
-  "locationd": "selfdrive.locationd.locationd",
-  "paramsd": "selfdrive.locationd.paramsd",
   "thermald": "selfdrive.thermald.thermald",
   "uploader": "selfdrive.loggerd.uploader",
   "deleter": "selfdrive.loggerd.deleter",
@@ -168,12 +165,14 @@ managed_processes = {
   "ubloxd": ("selfdrive/locationd", ["./ubloxd"]),
   "loggerd": ("selfdrive/loggerd", ["./loggerd"]),
   "logmessaged": "selfdrive.logmessaged",
+  "locationd": "selfdrive.locationd.locationd",
   "tombstoned": "selfdrive.tombstoned",
   "logcatd": ("selfdrive/logcatd", ["./logcatd"]),
   "proclogd": ("selfdrive/proclogd", ["./proclogd"]),
   "pandad": "selfdrive.pandad",
   "ui": ("selfdrive/ui", ["./ui"]),
   "calibrationd": "selfdrive.locationd.calibrationd",
+  "paramsd": "selfdrive.locationd.paramsd",
   "camerad": ("selfdrive/camerad", ["./camerad"]),
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
@@ -181,7 +180,6 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
-
   # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
 
@@ -535,9 +533,7 @@ def manager_prepare():
   total = 100.0 - (0 if PREBUILT else MAX_BUILD_PROGRESS)
 
   for i, p in enumerate(managed_processes):
-    t = sec_since_boot()
     prepare_managed_process(p)
-    print(p, sec_since_boot() - t)
     perc = (100.0 - total) + total * (i + 1) / len(managed_processes)
     spinner.update_progress(int(perc), 100)
   time.sleep(0.25)

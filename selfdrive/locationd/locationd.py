@@ -24,6 +24,7 @@ from rednose.helpers.sympy_helpers import euler_rotate
 
 SensorSource = log.SensorEventData.SensorSource
 
+
 VISION_DECIMATION = 2
 SENSOR_DECIMATION = 10
 POSENET_STD_HIST = 40
