@@ -449,13 +449,12 @@ def manager_thread():
   # start persistent processes
   for p in persistent_processes:
     start_managed_process(p)
-    if p == 'ui':
-      spinner.close()
 
   # start offroad
   if EON:
     pm_apply_packages('enable')
     start_offroad()
+  spinner.close()
 
   if os.getenv("NOBOARD") is not None:
     del managed_processes["pandad"]
