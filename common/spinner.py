@@ -13,6 +13,7 @@ class Spinner():
                                            close_fds=True)
     except OSError:
       self.spinner_proc = None
+    self.t_update = -1
 
   def __enter__(self):
     return self
