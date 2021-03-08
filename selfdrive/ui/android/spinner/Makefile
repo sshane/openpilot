@@ -24,6 +24,7 @@ OBJS = spinner.o \
        $(COMMON)/framebuffer.o \
        $(COMMON)/util.o \
        $(PHONELIBS)/nanovg/nanovg.o \
+       /data/openpilot/selfdrive/common/framebuffer.o \
        $(COMMON)/spinner.o \
        opensans_semibold.o \
        img_spinner_track.o \
