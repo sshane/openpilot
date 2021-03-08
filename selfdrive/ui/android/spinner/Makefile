@@ -11,8 +11,8 @@ WARN_FLAGS = -Werror=implicit-function-declaration \
              -Werror=return-type \
              -Werror=format-extra-args
 
-CFLAGS = -std=gnu11 -fPIC -O2 $(WARN_FLAGS)
-CXXFLAGS = -std=c++1z -fPIC -O2 $(WARN_FLAGS)
+CFLAGS = -std=gnu11 -g -fPIC -O2 $(WARN_FLAGS)
+CXXFLAGS = -std=c++1z -g -fPIC -O2 $(WARN_FLAGS)
 
 NANOVG_FLAGS = -I$(PHONELIBS)/nanovg
 
@@ -20,13 +20,17 @@ OPENGL_LIBS = -lGLESv3
 
 FRAMEBUFFER_LIBS = -lutils -lgui -lEGL
 
+all: spinner
+
 OBJS = spinner.o \
-       $(COMMON)/framebuffer.o \
+	         opensans_regular.ttf.o \
+			 opensans_semibold.ttf.o \
+			 opensans_bold.ttf.o \
        $(COMMON)/util.o \
+       $(COMMON)/touch.o \
+       $(COMMON)/framebuffer.o \
        $(PHONELIBS)/nanovg/nanovg.o \
-       /data/openpilot/selfdrive/common/framebuffer.o \
        $(COMMON)/spinner.o \
-       opensans_semibold.o \
        img_spinner_track.o \
        img_spinner_comma.o
 
@@ -35,10 +39,9 @@ DEPS := $(OBJS:.o=.d)
 .PHONY: all
 all: spinner
 
-spinner: $(OBJS)
+spinner: spinner.o $(OBJS)
 	@echo "[ LINK ] $@"
 	$(CXX) -fPIC -o '$@' $^ \
-	      -s \
         $(FRAMEBUFFER_LIBS) \
         -L/system/vendor/lib64 \
         $(OPENGL_LIBS) \
