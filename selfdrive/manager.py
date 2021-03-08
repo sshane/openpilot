@@ -156,6 +156,8 @@ from selfdrive.launcher import launcher
 
 # comment out anything you don't want to run
 managed_processes = {
+  "locationd": "selfdrive.locationd.locationd",
+  "paramsd": "selfdrive.locationd.paramsd",
   "thermald": "selfdrive.thermald.thermald",
   "uploader": "selfdrive.loggerd.uploader",
   "deleter": "selfdrive.loggerd.deleter",
@@ -179,8 +181,6 @@ managed_processes = {
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "rtshield": "selfdrive.rtshield",
-  "locationd": "selfdrive.locationd.locationd",
-  "paramsd": "selfdrive.locationd.paramsd",
 
   # "lanespeedd": "selfdrive.controls.lib.lane_speed",
 }
