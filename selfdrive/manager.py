@@ -454,6 +454,7 @@ def manager_thread():
   if EON:
     pm_apply_packages('enable')
     start_offroad()
+  spinner.close()
 
   if os.getenv("NOBOARD") is not None:
     del managed_processes["pandad"]
@@ -467,7 +468,6 @@ def manager_thread():
   params = Params()
   device_state_sock = messaging.sub_sock('deviceState')
   pm = messaging.PubMaster(['managerState'])
-  spinner.close()
 
   while 1:
     msg = messaging.recv_sock(device_state_sock, wait=True)
