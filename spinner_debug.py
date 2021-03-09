@@ -3,7 +3,7 @@ from common.spinner import Spinner
 import sys
 
 spinner = Spinner()
-spinner.update_progress(0, 100)
+spinner.update_progress(0, 100, 1/50)
 
 argv = sys.argv[1:]
 rate = 1 / float(argv[0])
