@@ -33,6 +33,8 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
     ret.steerRateCost = 0.5 if ret.hasZss else 1.0
     ret.hasZss = 0x23 in fingerprint[0]  # Detect whether car has accurate ZSS
+    with open('/data/steercost', 'a') as f:
+      f.write('{}\n'.format(ret.steerRateCost))
 
     # Improved longitudinal tune
     if candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.RAV4_TSS2, CAR.RAV4H_TSS2]:
