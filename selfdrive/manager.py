@@ -449,7 +449,8 @@ def manager_thread():
   # start persistent processes
   for p in persistent_processes:
     start_managed_process(p)
-    print(f'p: {p}')
+    if p == 'ui':
+      spinner.close()
 
   # start offroad
   if EON:
