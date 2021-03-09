@@ -10,7 +10,7 @@ rate = 1 / float(argv[0])
 
 for i in range(100):
   print(i)
-  spinner.update_progress(i, 100)
-  time.sleep(rate)
+  spinner.update_progress(i, 100, rate)
+  # time.sleep(rate)
 time.sleep(5)
 spinner.close()
