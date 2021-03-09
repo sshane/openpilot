@@ -27,6 +27,8 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "toyota"
     ret.safetyModel = car.CarParams.SafetyModel.toyota
 
+    ret.gasMaxV = [2 / 3.]
+
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     ret.steerLimitTimer = 0.4
     ret.steerRateCost = 0.5 if ret.hasZss else 1.0
