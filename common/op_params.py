@@ -100,6 +100,7 @@ class opParams:
                         'lat_i': Param(.01, NUMBER, live=True),
                         'lat_d': Param(.1, NUMBER, live=True),
                         'lat_f_multiplier': Param(1, NUMBER, live=True),
+                        'gas_max': Param(0.5, NUMBER, '0.5 is stock (1.5 m/s/s), 0.666_ is 2.0 m/s/s', live=True),
                         'ff_function': Param(0, int, '0: original\n'
                                                      '1: original but fitted up to 25 mph so the transition should be smoother\n'
                                                      '2: original fitted to only 22 mph\n'
