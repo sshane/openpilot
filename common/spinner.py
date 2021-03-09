@@ -27,8 +27,7 @@ class Spinner():
       except BrokenPipeError:
         pass
 
-  def update_progress(self, cur: int, total: int, sleep_t):
-    self.sleep_t = sleep_t
+  def update_progress(self, cur: int, total: int):
     elapsed_t = time.time() - self.update_t
     if elapsed_t < self.sleep_t:
       time.sleep(self.sleep_t - elapsed_t)
