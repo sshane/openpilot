@@ -449,6 +449,7 @@ def manager_thread():
   # start persistent processes
   for p in persistent_processes:
     start_managed_process(p)
+    print(f'p: {p}')
 
   # start offroad
   if EON:
@@ -480,7 +481,6 @@ def manager_thread():
         if p == "loggerd" and logger_dead:
           kill_managed_process(p)
         else:
-          print(f'p: {p}')
           start_managed_process(p)
     else:
       logger_dead = False
