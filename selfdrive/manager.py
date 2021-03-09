@@ -449,8 +449,6 @@ def manager_thread():
   # start persistent processes
   for p in persistent_processes:
     start_managed_process(p)
-    if p == 'ui':
-      spinner.close()
 
   # start offroad
   if EON:
@@ -469,6 +467,7 @@ def manager_thread():
   params = Params()
   device_state_sock = messaging.sub_sock('deviceState')
   pm = messaging.PubMaster(['managerState'])
+  spinner.close()
 
   while 1:
     msg = messaging.recv_sock(device_state_sock, wait=True)
