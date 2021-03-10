@@ -49,6 +49,25 @@ class Param:
       self.allowed_types.remove(list)
 
 
+def _read_param(key):  # Returns None, False if a json error occurs
+  try:
+    with open(os.path.join(PARAMS_PATH, key), 'r') as f:
+      value = json.loads(f.read())
+    return value, True
+  except json.decoder.JSONDecodeError:
+    return None, False
+
+
+def _write_param(key, value):
+  tmp = os.path.join(PARAMS_PATH, '.' + key)
+  with open(tmp, 'w') as f:
+    f.write(json.dumps(value))
+    f.flush()
+    os.fsync(f.fileno())
+  os.rename(tmp, os.path.join(PARAMS_PATH, key))
+  os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
+
+
 class opParams:
   def __init__(self):
     """
@@ -121,33 +140,13 @@ class opParams:
     for key in os.listdir(PARAMS_PATH):  # PARAMS_PATH is guaranteed to exist
       if key.startswith('.'):
         continue
-      value, success = self._read_param(key)
+      value, success = _read_param(key)
       if success:
         params[key] = value
       elif key in self.fork_params:
         params[key] = self.fork_params[key].default_value
         self._write_param(key, params[key])
     return params
-
-  @staticmethod
-  def _read_param(key):  # Returns None, False if a json error occurs
-    try:
-      with open(os.path.join(PARAMS_PATH, key), 'r') as f:
-        value = json.loads(f.read())
-      return value, True
-    except json.decoder.JSONDecodeError:
-      return None, False
-
-  @staticmethod
-  def _write_param(key, value):
-    tmp = os.path.join(PARAMS_PATH, '.' + key)
-    with open(tmp, 'w') as f:
-      f.write(json.dumps(value))
-      f.flush()
-      os.fsync(f.fileno())
-    os.rename(tmp, os.path.join(PARAMS_PATH, key))
-    os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
-
 
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
@@ -167,10 +166,10 @@ class opParams:
     param_info = self.fork_params[key]
 
     if not param_info.static or force_update:
-      value, success = self._read_param(key)
+      value, success = _read_param(key)
       if not success:
         value = param_info.default_value
-        self._write_param(key, value)
+        _write_param(key, value)
       self.params[key] = value
 
     if param_info.is_valid(value := self.params[key]):
@@ -184,7 +183,7 @@ class opParams:
     if not self.fork_params[key].is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
-    self._write_param(key, value)
+    _write_param(key, value)
 
   def _check_key_exists(self, key, met):
     if key not in self.fork_params:
@@ -194,11 +193,11 @@ class opParams:
     for key, param in self.fork_params.items():
       if key not in self.params:
         self.params[key] = param.default_value
-        self._write_param(key, self.params[key])
+        _write_param(key, self.params[key])
       elif not param.is_valid(self.params[key]):
         print(warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key)))
         self.params[key] = param.default_value
-        self._write_param(key, self.params[key])
+        _write_param(key, self.params[key])
 
   def _delete_and_reset(self):
     for key in list(self.params):
@@ -207,7 +206,7 @@ class opParams:
         os.remove(os.path.join(PARAMS_PATH, key))
       elif key in self._to_reset and key in self.fork_params:
         self.params[key] = self.fork_params[key].default_value
-        self._write_param(key, self.params[key])
+        _write_param(key, self.params[key])
 
   def _get_all_params(self, to_update=False):
     if to_update:
@@ -232,19 +231,8 @@ class opParams:
           old_params = json.loads(f.read())
         for key in old_params:
           if not os.path.exists(os.path.join(PARAMS_PATH, key)):
-            self._write_param(key, old_params[key])
+            _write_param(key, old_params[key])
         return True, old_params
       except:
         pass
     return False, None
-
-
-
-if __name__ == "__main__":
-  op = opParams()
-  # op.put(sys.argv[1], eval(sys.argv[2]))
-  # t = sec_since_boot()
-  # for _ in range(100):
-  #   op.put(sys.argv[1], eval(sys.argv[2]))
-  # t = sec_since_boot() - t
-  # print(t)
