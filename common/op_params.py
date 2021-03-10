@@ -134,8 +134,8 @@ class opParams:
     with open(tmp, 'w') as f:
       f.write(json.dumps(value))
     print(os.path.join(PARAMS_PATH, key))
-    os.rename(tmp, os.path.join(PARAMS_PATH, key))
-    os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
+    # os.rename(tmp, os.path.join(PARAMS_PATH, key))
+    # os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
 
   def _run_init(self):  # does first time initializing of default params
