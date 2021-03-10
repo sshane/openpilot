@@ -112,6 +112,9 @@ class opParams:
   def _load_params(self):
     ret = self._import_params()  # returns success (bool), params (dict)
     if ret[0]:
+      for key in ret[1]:
+        if not os.path.exists(os.path.join(PARAMS_PATH, key)):
+          self._write_param(key, ret[1][key])
       return ret[1]
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
@@ -234,8 +237,7 @@ class opParams:
     if needs_import:
       try:
         with open(OLD_PARAMS_FILE, 'r') as f:
-          old_params = f.read()
-        return True, json.loads(old_params)
+          return True, json.loads(f.read())
       except:
         pass
     return False, None
