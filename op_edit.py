@@ -83,7 +83,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           line = COLORS.BASE(_color) + line
         to_print.append(line)
 
-      extras = {'l': ('Toggle static params', COLORS.WARNING),
+      extras = {'l': ('Toggle live params', COLORS.WARNING),
                 'e': ('Exit opEdit', COLORS.PINK)}
 
       to_print += ['---'] + ['{}. {}'.format(ext_col + e, ext_txt + COLORS.ENDC) for e, (ext_txt, ext_col) in extras.items()]
