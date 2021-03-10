@@ -117,7 +117,7 @@ class opParams:
       return ret[1]
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
-    return {p: self._read_param(p) for p in param_files if p in self.fork_params}
+    return {p: self._read_param(p) for p in param_files if not p.startswith('.')}
 
   @staticmethod
   def _read_param(key):  # todo: add sanity checks like returning default value if it fails
