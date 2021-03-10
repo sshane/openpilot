@@ -130,12 +130,12 @@ class opParams:
   @staticmethod
   def _write_param(key, value):
     tmp = os.path.join(PARAMS_PATH, '.' + key)
-    # print(tmp)
+    print(tmp)
     with open(tmp, 'w') as f:
       f.write(json.dumps(value))
       f.flush()
-      # os.fsync(f.fileno())
-    # print(os.path.join(PARAMS_PATH, key))
+      os.fsync(f.fileno())
+    print(os.path.join(PARAMS_PATH, key))
     os.rename(tmp, os.path.join(PARAMS_PATH, key))
     os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
