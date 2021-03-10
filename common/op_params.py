@@ -133,7 +133,7 @@ class opParams:
     # print(tmp)
     with open(tmp, 'w') as f:
       f.write(json.dumps(value))
-      # f.flush()
+      f.flush()
       # os.fsync(f.fileno())
     # print(os.path.join(PARAMS_PATH, key))
     os.rename(tmp, os.path.join(PARAMS_PATH, key))
