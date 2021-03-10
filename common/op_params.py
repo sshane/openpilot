@@ -105,7 +105,6 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
-    self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
@@ -124,8 +123,8 @@ class opParams:
   @staticmethod
   def _read_param(key):  # todo: add sanity checks like returning default value if it fails
     with open(os.path.join(PARAMS_PATH, key), 'r') as f:
-      param = json.loads(f.read())
-    return param
+      value = json.loads(f.read())
+    return value
 
   @staticmethod
   def _write_param(key, value):
@@ -144,19 +143,19 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     self.params = self._load_params(can_import=True)
-    # print(f'LOADED PARAMS: {self.params}')
 
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
 
-
-  def get(self, key=None, force_live=False):  # key=None is dict of all params
+  def get(self, key=None, force_live=False):  # key=None returns dict of all params
     if key is None:
       return self._get_all_params(to_update=force_live)
 
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
-    self._update_params(param_info.live or force_live)
+
+    if param_info.live or force_live:
+      self.params[key] = self._read_param(key)
 
     if param_info.is_valid(value := self.params[key]):
       return value  # all good, returning user's value
@@ -170,11 +169,6 @@ class opParams:
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
     self._write_param(key, value)
-
-  def delete(self, key):  # todo: might be obsolete. remove?
-    if key in self.params:
-      del self.params[key]
-      self._write()
 
   def _check_key_exists(self, key, met):
     if key not in self.fork_params:
@@ -199,31 +193,13 @@ class opParams:
         self.params[key] = self.fork_params[key].default_value
         self._write_param(key, self.params[key])
 
-  def _get_all_params(self, return_hidden=False, to_update=False):
-    self._update_params(to_update)
-    return {k: self.params[k] for k, p in self.fork_params.items() if k in self.params and (not p.hidden or return_hidden)}
-
-  def _update_params(self, to_update):
-    if not travis and sec_since_boot() - self._last_read_time >= self.read_frequency and to_update:  # make sure we aren't reading file too often
-      if self._read():
-        self._last_read_time = sec_since_boot()
+  def _get_all_params(self, to_update=False):
+    if to_update:
+      self.params = self._load_params()
+    return {k: self.params[k] for k, p in self.fork_params.items() if k in self.params and not p.hidden}
 
   def __getitem__(self, s):  # can also do op_params['param_name']
     return self.get(s)
-
-  def _read(self):
-    try:
-      with open(self._params_file, "r") as f:
-        self.params = json.loads(f.read())
-      return True
-    except Exception as e:
-      print(error(e))
-      return False
-
-  def _write(self):
-    if not travis:
-      with open(self._params_file, "w") as f:
-        f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
   def _import_params(self, can_import):
     needs_import = False  # if opParams needs to import from old params file
