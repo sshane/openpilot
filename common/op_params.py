@@ -130,12 +130,14 @@ class opParams:
   @staticmethod
   def _write_param(key, value):
     tmp = os.path.join(PARAMS_PATH, '.' + key)
-    print(tmp)
+    # print(tmp)
     with open(tmp, 'w') as f:
       f.write(json.dumps(value))
-    print(os.path.join(PARAMS_PATH, key))
-    # os.rename(tmp, os.path.join(PARAMS_PATH, key))
-    # os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
+      f.flush()
+      os.fsync(f.fileno())
+    # print(os.path.join(PARAMS_PATH, key))
+    os.rename(tmp, os.path.join(PARAMS_PATH, key))
+    os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
 
   def _run_init(self):  # does first time initializing of default params
@@ -249,4 +251,8 @@ class opParams:
 
 
 op = opParams()
-# op.put(sys.argv[1], eval(sys.argv[2]))
+t = sec_since_boot()
+for _ in range(100):
+  op.put(sys.argv[1], eval(sys.argv[2]))
+t = sec_since_boot() - t
+print(t)
