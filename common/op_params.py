@@ -130,12 +130,10 @@ class opParams:
   @staticmethod
   def _write_param(key, value):
     tmp = os.path.join(PARAMS_PATH, '.' + key)
-    print(tmp)
     with open(tmp, 'w') as f:
       f.write(json.dumps(value))
       f.flush()
       os.fsync(f.fileno())
-    print(os.path.join(PARAMS_PATH, key))
     os.rename(tmp, os.path.join(PARAMS_PATH, key))
     os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
@@ -251,8 +249,9 @@ class opParams:
 
 
 op = opParams()
-t = sec_since_boot()
-for _ in range(100):
-  op.put(sys.argv[1], eval(sys.argv[2]))
-t = sec_since_boot() - t
-print(t)
+op.put(sys.argv[1], eval(sys.argv[2]))
+# t = sec_since_boot()
+# for _ in range(100):
+#   op.put(sys.argv[1], eval(sys.argv[2]))
+# t = sec_since_boot() - t
+# print(t)
