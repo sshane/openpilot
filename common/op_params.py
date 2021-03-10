@@ -115,8 +115,6 @@ class opParams:
     if ret[0]:
       open(IMPORTED_PATH, 'w').close()
       return ret[1]
-    else:
-      print('DIDNT IMPORT!')
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
     return {p: self._read_param(p) for p in param_files if not p.startswith('.')}
@@ -129,8 +127,10 @@ class opParams:
 
   @staticmethod
   def _write_param(key, value):
-    with open(os.path.join(PARAMS_PATH, key), 'w') as f:
+    tmp = os.path.join(PARAMS_PATH, '.' + key)
+    with open(tmp, 'w') as f:
       f.write(json.dumps(value))
+    os.rename(tmp, os.path.join(PARAMS_PATH, key))
     os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
 
@@ -144,8 +144,6 @@ class opParams:
 
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
-
-    # self.params = self._get_all_params(default=True)  # start at default values in case file is corrupted
 
 
   def get(self, key=None, force_live=False):  # key=None is dict of all params
@@ -167,7 +165,7 @@ class opParams:
     if not self.fork_params[key].is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
-    self._write()
+    self._write_param(key, value)
 
   def delete(self, key):  # todo: might be obsolete. remove?
     if key in self.params:
