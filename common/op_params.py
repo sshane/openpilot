@@ -117,14 +117,26 @@ class opParams:
       open(IMPORTED_PATH, 'w').close()
       return ret[1]
 
-    param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
-    return {p: self._read_param(p) for p in param_files if not p.startswith('.')}
+    params = {}
+    for key in os.listdir(PARAMS_PATH):  # PARAMS_PATH is guaranteed to exist
+      if key.startswith('.'):
+        continue
+      value, success = self._read_param(key)
+      if success:
+        params[key] = value
+      elif key in self.fork_params:
+        params[key] = self.fork_params[key].default_value
+        self._write_param(key, params[key])
+    return params
 
   @staticmethod
-  def _read_param(key):  # todo: add sanity checks like returning default value if it fails
-    with open(os.path.join(PARAMS_PATH, key), 'r') as f:
-      value = json.loads(f.read())
-    return value
+  def _read_param(key):  # Returns None, False if a json error occurs
+    try:
+      with open(os.path.join(PARAMS_PATH, key), 'r') as f:
+        value = json.loads(f.read())
+      return value, True
+    except json.decoder.JSONDecodeError:
+      return None, False
 
   @staticmethod
   def _write_param(key, value):
@@ -155,7 +167,11 @@ class opParams:
     param_info = self.fork_params[key]
 
     if param_info.live or force_live:
-      self.params[key] = self._read_param(key)
+      value, success = self._read_param(key)
+      if not success:
+        value = param_info.default_value
+        self._write_param(key, value)
+      self.params[key] = value
 
     if param_info.is_valid(value := self.params[key]):
       return value  # all good, returning user's value
