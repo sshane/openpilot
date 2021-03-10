@@ -109,7 +109,7 @@ class opParams:
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
-    self._to_reset = ['dynamic_gas']  # a list of params you want reset to their default values
+    self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
   def _load_params(self, can_import=False):
