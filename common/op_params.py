@@ -226,7 +226,7 @@ class opParams:
 
 if __name__ == "__main__":
   op = opParams()
-  op.put(sys.argv[1], eval(sys.argv[2]))
+  # op.put(sys.argv[1], eval(sys.argv[2]))
   # t = sec_since_boot()
   # for _ in range(100):
   #   op.put(sys.argv[1], eval(sys.argv[2]))
