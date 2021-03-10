@@ -70,12 +70,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
         values_list.append(v)
 
-      live = [COLORS.INFO + '(live!)' + COLORS.ENDC if not self.op_params.fork_params[k].static else COLORS.INFO + '(static)' for k in self.params]
+      static = [COLORS.INFO + '(static)' + COLORS.ENDC if self.op_params.fork_params[k].static else '' for k in self.params]
 
       to_print = []
       blue_gradient = [33, 39, 45, 51, 87]
       for idx, param in enumerate(self.params):
-        line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], live[idx])
+        line = '{}. {}: {}  {}'.format(idx + 1, param, values_list[idx], static[idx])
         if idx == self.last_choice and self.last_choice is not None:
           line = COLORS.OKGREEN + line
         else:
