@@ -83,7 +83,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           line = COLORS.BASE(_color) + line
         to_print.append(line)
 
-      extras = {'l': ('Toggle live params', COLORS.WARNING),
+      extras = {'l': ('Toggle static params', COLORS.WARNING),
                 'e': ('Exit opEdit', COLORS.PINK)}
 
       to_print += ['---'] + ['{}. {}'.format(ext_col + e, ext_txt + COLORS.ENDC) for e, (ext_txt, ext_col) in extras.items()]
@@ -140,13 +140,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if not param_info.static:
         self.info2('Chosen parameter: {}{} (live!)'.format(chosen_key, COLORS.BASE(207)), sleep_time=0)
       else:
-        self.info2('Chosen parameter: {}'.format(chosen_key), sleep_time=0)
+        self.info2('Chosen parameter: {} (static)'.format(chosen_key), sleep_time=0)
 
       to_print = []
       if param_info.has_description:
         to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
       if param_info.has_allowed_types:
         to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + COLORS.ENDC)
+      if param_info.static:
+        to_print.append(COLORS.WARNING + '>>  A reboot is required for changes to this parameter!' + COLORS.ENDC)
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
