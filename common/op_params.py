@@ -115,11 +115,10 @@ class opParams:
       return ret[1]
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
-    params = {p: self._load_param(p) for p in param_files}
-    print(f'PARAMS FROM PATH: {params}')
+    return {p: self._load_param(p) for p in param_files}
 
   @staticmethod
-  def _load_param(param_name):  # todo: add sanity checks
+  def _load_param(param_name):  # todo: add sanity checks like returning default value if it fails
     with open(os.path.join(PARAMS_PATH, param_name), 'r') as f:
       param = json.loads(f.read())
     return param
@@ -131,6 +130,8 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     self.params = self._load_params()
+
+    print(f'LOADED PARAMS: {self.params}')
 
 
 
