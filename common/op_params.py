@@ -119,7 +119,7 @@ class opParams:
     print(f'PARAMS FROM PATH: {params}')
 
   @staticmethod
-  def _load_param(self, param_name):  # todo: add sanity checks
+  def _load_param(param_name):  # todo: add sanity checks
     with open(os.path.join(PARAMS_PATH, param_name), 'r') as f:
       param = json.loads(f.read())
     return param
@@ -240,7 +240,7 @@ class opParams:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
   @staticmethod
-  def _import_params(self):
+  def _import_params():
     needs_import = False  # if opParams needs to import from old params file
     if not os.path.exists(PARAMS_PATH):
       os.makedirs(PARAMS_PATH)
