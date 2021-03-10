@@ -115,7 +115,6 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     needs_import = False  # if opParams needs to import from old params file
-    print(f'params path: {os.path.exists(PARAMS_PATH)}')
     if not os.path.exists(PARAMS_PATH):
       os.makedirs(PARAMS_PATH)
       needs_import = True
@@ -123,10 +122,9 @@ class opParams:
     needs_import &= os.path.exists(OLD_PARAMS_FILE)
     # Imports if no params path or params path is empty
     if needs_import:
+      print('NEEDS IMPORT!')
       with open(OLD_PARAMS_FILE, "r") as f:
         old_params = json.loads(f.read())
-
-
 
 
 
