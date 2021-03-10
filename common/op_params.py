@@ -249,4 +249,4 @@ class opParams:
 
 
 op = opParams()
-op.put(sys.argv[1], eval(sys.argv[2]))
+# op.put(sys.argv[1], eval(sys.argv[2]))
