@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-
 from common.colors import COLORS
 try:
   from common.realtime import sec_since_boot
