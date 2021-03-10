@@ -12,7 +12,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ### Behavior Changes
 * [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles) - 3 + auto profiles to control distance
   * [**`auto-df` model for automatic distance profile switching**](#Automatic-DF-profile-switching)
-* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/ShaneSmiskol/openpilot/blob/SA-082/SA_RELEASES.md#stock-additions-v066---2020-02-27-082)
+* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/ShaneSmiskol/openpilot/blob/stock_additions/SA_RELEASES.md#stock-additions-v066---2020-02-27-082)
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
@@ -138,7 +138,6 @@ Here are the main parameters you can change with this fork:
   - `upload_on_hotspot`: Controls whether your EON will upload driving data on your phone's hotspot
   - [`update_behavior`](#Automatic-updates): `off` will never update, `alert` shows an alert on-screen. `auto` will reboot the device when an update is seen
   - `disengage_on_gas`: Whether you want openpilot to disengage on gas input or not
-  - `slowdown_for_curves`: Whether your car will slow down for curves using the old planner code from 0.5/0.6
 - **Dynamic params**:
   - `dynamic_gas`: Whether to use [dynamic gas](#dynamic-gas) if your car is supported
   - `global_df_mod` **`(live!)`**: The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5. Smaller values will get you closer, larger will get you farther. This is applied to ALL profiles!
@@ -205,6 +204,7 @@ Most of the branches on this fork are development branches I use as various open
 * [Stock Additions 0.7.5](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-075)
 * [Stock Additions 0.7.7](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-077)
 * [Stock Additions 0.7.10](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-0710)
+* [Stock Additions 0.8](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions-08)
 
 ---
 ### Videos

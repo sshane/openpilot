@@ -82,7 +82,7 @@ class opParams:
                         'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
                                                               'off will never update, alert shows an alert on-screen\n'
                                                               'auto will reboot the device when an update is seen'),
-                        'dynamic_gas': Param(True, bool, 'Whether to use dynamic gas if your car is supported'),
+                        'dynamic_gas': Param(False, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
                         # 'dynamic_camera_offset': Param(False, bool, 'Whether to automatically keep away from oncoming traffic.\n'
@@ -90,7 +90,6 @@ class opParams:
                         # 'dynamic_camera_offset_time': Param(3.5, NUMBER, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
                                                                   'localizer might not work correctly'),
-                        'slowdown_for_curves': Param(True, bool, 'Whether your car will slow down for curves using the old planner code from 0.5/0.6'),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),
@@ -104,7 +103,7 @@ class opParams:
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix']  # a list of unused params you want to delete from users' params file
-    self._to_reset = []  # a list of params you want to be reset to the default value
+    self._to_reset = ['dynamic_gas']  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
   def _run_init(self):  # does first time initializing of default params
