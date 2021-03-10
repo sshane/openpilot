@@ -142,7 +142,7 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     self.params = self._load_params(can_import=True)
-    print(f'LOADED PARAMS: {self.params}')
+    # print(f'LOADED PARAMS: {self.params}')
 
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
@@ -247,4 +247,4 @@ class opParams:
 
 
 op = opParams()
-op.put('camera_offset', float(sys.argv[1]))
+op.put(sys.argv[1], eval(sys.argv[2]))
