@@ -157,14 +157,13 @@ class opParams:
 
     params = {}
     for key in os.listdir(PARAMS_PATH):  # PARAMS_PATH is guaranteed to exist
-      if key.startswith('.'):
+      if key.startswith('.') or key not in self.fork_params:
         continue
       value, success = _read_param(key)
-      if success:
-        params[key] = value
-      elif key in self.fork_params:
-        params[key] = self.fork_params[key].default_value
-        _write_param(key, params[key])
+      if not success:
+        value = self.fork_params[key].default_value
+        _write_param(key, value)
+      params[key] = value
     return params
 
   def _run_init(self):  # does first time initializing of default params
