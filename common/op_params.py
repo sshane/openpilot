@@ -18,6 +18,7 @@ NONE_OR_NUMBER = [type(None), float, int]
 
 OLD_PARAMS_FILE = '/data/op_params.json'
 PARAMS_PATH = '/data/community/params'
+IMPORTED_PATH = os.path.join(PARAMS_PATH, '.imported')
 
 
 class Param:
@@ -112,9 +113,7 @@ class opParams:
   def _load_params(self):
     ret = self._import_params()  # returns success (bool), params (dict)
     if ret[0]:
-      for key in ret[1]:
-        if not os.path.exists(os.path.join(PARAMS_PATH, key)):
-          self._write_param(key, ret[1][key])
+      open(IMPORTED_PATH, 'w').close()
       return ret[1]
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
@@ -224,23 +223,26 @@ class opParams:
       with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
-  @staticmethod
-  def _import_params():
+  def _import_params(self):
     needs_import = False  # if opParams needs to import from old params file
     if not os.path.exists(PARAMS_PATH):
       os.makedirs(PARAMS_PATH)
       needs_import = True
-
-    needs_import |= len(os.listdir(PARAMS_PATH)) == 0
     needs_import &= os.path.exists(OLD_PARAMS_FILE)
+    needs_import &= not os.path.exists(IMPORTED_PATH)
 
     if needs_import:
       try:
         with open(OLD_PARAMS_FILE, 'r') as f:
-          return True, json.loads(f.read())
+          old_params = json.loads(f.read())
+        for key in old_params:
+          if not os.path.exists(os.path.join(PARAMS_PATH, key)):
+            self._write_param(key, old_params[key])
+        return True, old_params
       except:
         pass
     return False, None
+
 
 
 opParams()
