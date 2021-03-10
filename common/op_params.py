@@ -22,7 +22,7 @@ PARAMS_PATH = '/data/community/params'
 
 class Param:
   def __init__(self, default=None, allowed_types=[], description=None, live=False, hidden=False):
-    self.default = default  # value first saved and returned if actual value isn't a valid type
+    self.default_value = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types  # allowed python value types for opEdit
@@ -41,7 +41,7 @@ class Param:
     self.has_description = self.description is not None
     self.is_list = list in self.allowed_types
     if self.has_allowed_types:
-      assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
+      assert type(self.default_value) in self.allowed_types, 'Default value type must be in specified allowed_types!'
     if self.is_list:
       self.allowed_types.remove(list)
 
@@ -115,13 +115,19 @@ class opParams:
       return ret[1]
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
-    return {p: self._load_param(p) for p in param_files}
+    return {p: self._read_param(p) for p in param_files}
 
   @staticmethod
-  def _load_param(param_name):  # todo: add sanity checks like returning default value if it fails
-    with open(os.path.join(PARAMS_PATH, param_name), 'r') as f:
+  def _read_param(key):  # todo: add sanity checks like returning default value if it fails
+    with open(os.path.join(PARAMS_PATH, key), 'r') as f:
       param = json.loads(f.read())
     return param
+
+  @staticmethod
+  def _write_param(key, value):
+    with open(os.path.join(PARAMS_PATH, key), 'w') as f:
+      f.write(json.dumps(value))
+    os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
 
   def _run_init(self):  # does first time initializing of default params
@@ -130,33 +136,13 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     self.params = self._load_params()
-
     print(f'LOADED PARAMS: {self.params}')
 
+    self._add_default_params()  # adds missing params and resets values with invalid types to self.params
+    self._delete_and_reset()  # removes old params
 
+    # self.params = self._get_all_params(default=True)  # start at default values in case file is corrupted
 
-
-
-    self.params = self._get_all_params(default=True)  # start at default values in case file is corrupted
-
-
-
-    if os.path.isfile(self._params_file):
-      if self._read():
-        to_write = self._add_default_params()  # if new default data has been added
-        to_write |= self._delete_and_reset()  # or if old params have been deleted
-      else:  # backup and re-create params file
-        print(error("Can't read op_params.json file, backing up to /data/op_params_corrupt.json and re-creating file!"))
-        to_write = True
-        if os.path.isfile(self._backup_file):
-          os.remove(self._backup_file)
-        os.rename(self._params_file, self._backup_file)
-    else:
-      to_write = True  # user's first time running a fork with op_params, write default params
-
-    if to_write:
-      self._write()
-      os.chmod(self._params_file, 0o764)
 
   def get(self, key=None, force_live=False):  # key=None is dict of all params
     if key is None:
@@ -170,7 +156,7 @@ class opParams:
       return value  # all good, returning user's value
 
     print(warning('User\'s value type is not valid! Returning default'))  # somehow... it should always be valid
-    return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
+    return param_info.default_value  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
     self._check_key_exists(key, 'put')
@@ -189,33 +175,28 @@ class opParams:
       raise Exception('opParams: Tried to {} an unknown parameter! Key not in fork_params: {}'.format(met, key))
 
   def _add_default_params(self):
-    added = False
     for key, param in self.fork_params.items():
       if key not in self.params:
-        self.params[key] = param.default
-        added = True
+        self.params[key] = param.default_value
+        self._write_param(key, self.params[key])
       elif not param.is_valid(self.params[key]):
         print(warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key)))
-        self.params[key] = param.default
-        added = True
-    return added
+        self.params[key] = param.default_value
+        self._write_param(key, self.params[key])
 
   def _delete_and_reset(self):
-    needs_write = False
-    for param in list(self.params):
-      if param in self._to_delete:
-        del self.params[param]
-        needs_write = True
-      elif param in self._to_reset and param in self.fork_params:
-        print('resetting {} to {} from {}'.format(param, self.fork_params[param].default, self.params[param]))
-        self.params[param] = self.fork_params[param].default
-        needs_write = True
-    return needs_write
+    for key in list(self.params):
+      if key in self._to_delete:
+        del self.params[key]
+        os.remove(os.path.join(PARAMS_PATH, key))
+      elif key in self._to_reset and key in self.fork_params:
+        self.params[key] = self.fork_params[key].default_value
+        self._write_param(key, self.params[key])
 
   def _get_all_params(self, default=False, return_hidden=False, to_update=False):
     self._update_params(to_update)
     if default:
-      return {k: p.default for k, p in self.fork_params.items()}
+      return {k: p.default_value for k, p in self.fork_params.items()}
     return {k: self.params[k] for k, p in self.fork_params.items() if k in self.params and (not p.hidden or return_hidden)}
 
   def _update_params(self, to_update):
