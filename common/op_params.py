@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 import json
+import sys
+
 from common.colors import COLORS
 try:
   from common.realtime import sec_since_boot
@@ -244,4 +246,5 @@ class opParams:
 
 
 
-opParams()
+op = opParams()
+op.put('camera_offset', float(sys.argv[1]))
