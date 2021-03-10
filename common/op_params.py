@@ -10,11 +10,14 @@ except ImportError:
 
 travis = False  # replace with travis_checker if you use travis or GitHub Actions
 
-def warning(msg): print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
-def error(msg): print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLORS.ENDC))
+warning = lambda msg: print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
+error = lambda msg: print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLORS.ENDC))
 
 NUMBER = [float, int]  # value types
 NONE_OR_NUMBER = [type(None), float, int]
+
+OLD_PARAMS_FILE = '/data/op_params.json'
+PARAMS_PATH = '/data/community/params'
 
 
 class Param:
@@ -99,7 +102,6 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
-    self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
@@ -111,17 +113,32 @@ class opParams:
     # Two required parameters for opEdit
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
+
+    needs_import = False  # if opParams needs to import from old params file
+    if not os.path.exists(PARAMS_PATH):
+      os.makedirs(PARAMS_PATH)
+      needs_import = True
+    needs_import |= len(os.listdir(PARAMS_PATH)) == 0
+    needs_import &= os.path.exists(OLD_PARAMS_FILE)
+    # Imports if no params path or params path is empty
+    if needs_import:
+      with open(PARAMS_PATH, "r") as f:
+        old_params = json.loads(f.read())
+
+
+
+
+
     self.params = self._get_all_params(default=True)  # start at default values in case file is corrupted
 
-    if travis:
-      return
+
 
     if os.path.isfile(self._params_file):
       if self._read():
         to_write = self._add_default_params()  # if new default data has been added
         to_write |= self._delete_and_reset()  # or if old params have been deleted
       else:  # backup and re-create params file
-        error("Can't read op_params.json file, backing up to /data/op_params_corrupt.json and re-creating file!")
+        print(error("Can't read op_params.json file, backing up to /data/op_params_corrupt.json and re-creating file!"))
         to_write = True
         if os.path.isfile(self._backup_file):
           os.remove(self._backup_file)
@@ -144,7 +161,7 @@ class opParams:
     if param_info.is_valid(value := self.params[key]):
       return value  # all good, returning user's value
 
-    warning('User\'s value type is not valid! Returning default')  # somehow... it should always be valid
+    print(warning('User\'s value type is not valid! Returning default'))  # somehow... it should always be valid
     return param_info.default  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
   def put(self, key, value):
@@ -170,7 +187,7 @@ class opParams:
         self.params[key] = param.default
         added = True
       elif not param.is_valid(self.params[key]):
-        warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key))
+        print(warning('Value type of user\'s {} param not in allowed types, replacing with default!'.format(key)))
         self.params[key] = param.default
         added = True
     return added
@@ -207,7 +224,7 @@ class opParams:
         self.params = json.loads(f.read())
       return True
     except Exception as e:
-      error(e)
+      print(error(e))
       return False
 
   def _write(self):
