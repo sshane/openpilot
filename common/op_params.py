@@ -24,14 +24,14 @@ IMPORTED_PATH = os.path.join(PARAMS_PATH, '.imported')
 
 
 class Param:
-  def __init__(self, default=None, allowed_types=[], description=None, live=False, hidden=False):
+  def __init__(self, default=None, allowed_types=[], description=None, static=False, hidden=False):
     self.default_value = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types  # allowed python value types for opEdit
     self.description = description  # description to be shown in opEdit
     self.hidden = hidden  # hide this param to user in opEdit?
-    self.live = live  # whether opParams re-reads json file every time this param is .get
+    self.static = static  # opParams will use cached value, never reads to update
     self._create_attrs()
 
   def is_valid(self, value):
@@ -65,20 +65,20 @@ class opParams:
       self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=NUMBER), live=True}  # NUMBER allows both floats and ints
     """
 
-    self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
+    self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py'),
                         'dynamic_follow': Param('auto', str, 'Can be: (\'traffic\', \'relaxed\', \'stock\'): Left to right increases in following distance.\n'
                                                              'All profiles support dynamic follow except stock so you\'ll get your preferred distance while\n'
-                                                             'retaining the smoothness and safety of dynamic follow!'),
+                                                             'retaining the smoothness and safety of dynamic follow!', static=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'
-                                                            'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
+                                                            'This is multiplied by any profile that\'s active. Set to 1. to disable'),
                         'min_TR': Param(0.9, NUMBER, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
-                                                     'The range is limited from 0.85 to 1.6.', live=True),
+                                                     'The range is limited from 0.85 to 1.6.'),
                         'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(25.0, NUMBER, 'The minimum speed allowed for an automatic lane change (in MPH)'),
                         'steer_ratio': Param(None, NONE_OR_NUMBER, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
-                                                                   'If you use a float/int, openpilot will use that steer ratio instead', live=True),
+                                                                   'If you use a float/int, openpilot will use that steer ratio instead'),
                         # 'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                         #                                           'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
                         'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
@@ -87,7 +87,7 @@ class opParams:
                         'disengage_on_gas': Param(False, bool, 'Whether you want openpilot to disengage on gas input or not'),
                         'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
                                                               'off will never update, alert shows an alert on-screen\n'
-                                                              'auto will reboot the device when an update is seen'),
+                                                              'auto will reboot the device when an update is seen', static=True),
                         'dynamic_gas': Param(False, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df'),
@@ -95,14 +95,14 @@ class opParams:
                         #                                             'Works from 35 to ~60 mph (requires radar)'),
                         # 'dynamic_camera_offset_time': Param(3.5, NUMBER, 'How long to keep away from oncoming traffic in seconds after losing lead'),
                         'support_white_panda': Param(False, bool, 'Enable this to allow engagement with the deprecated white panda.\n'
-                                                                  'localizer might not work correctly'),
-                        'disable_charging': Param(30, NUMBER, 'How many hours until charging is disabled while idle'),
+                                                                  'localizer might not work correctly', static=True),
+                        'disable_charging': Param(30, NUMBER, 'How many hours until charging is disabled while idle', static=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
-                                                            'False: stock INDI, True: TSS2-tuned PID'),
-                        'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car'),
-                        'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla'),
-                        'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4'),
+                                                            'False: stock INDI, True: TSS2-tuned PID', static=True),
+                        'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car', static=True),
+                        'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla', static=True),
+                        'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
     self._last_read_time = sec_since_boot()
@@ -159,14 +159,14 @@ class opParams:
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
 
-  def get(self, key=None, force_live=False):  # key=None returns dict of all params
+  def get(self, key=None, force_update=False):  # key=None returns dict of all params
     if key is None:
-      return self._get_all_params(to_update=force_live)
+      return self._get_all_params(to_update=force_update)
 
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
 
-    if param_info.live or force_live:
+    if not param_info.static or force_update:
       value, success = self._read_param(key)
       if not success:
         value = param_info.default_value
