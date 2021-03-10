@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import sys
 
 from common.colors import COLORS
 try:
@@ -9,8 +8,6 @@ try:
 except ImportError:
   import time
   sec_since_boot = time.time
-
-travis = False  # replace with travis_checker if you use travis or GitHub Actions
 
 warning = lambda msg: print('{}opParams WARNING: {}{}'.format(COLORS.WARNING, msg, COLORS.ENDC))
 error = lambda msg: print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLORS.ENDC))
@@ -66,6 +63,28 @@ def _write_param(key, value):
     os.fsync(f.fileno())
   os.rename(tmp, os.path.join(PARAMS_PATH, key))
   os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
+
+
+def _import_params(can_import):
+  needs_import = False  # if opParams needs to import from old params file
+  if not os.path.exists(PARAMS_PATH):
+    os.makedirs(PARAMS_PATH)
+    needs_import = True
+  needs_import &= os.path.exists(OLD_PARAMS_FILE)
+  needs_import &= not os.path.exists(IMPORTED_PATH)
+  needs_import &= can_import
+
+  if needs_import:
+    try:
+      with open(OLD_PARAMS_FILE, 'r') as f:
+        old_params = json.loads(f.read())
+      for key in old_params:
+        if not os.path.exists(os.path.join(PARAMS_PATH, key)):
+          _write_param(key, old_params[key])
+      return True, old_params
+    except:
+      pass
+  return False, None
 
 
 class opParams:
@@ -125,13 +144,13 @@ class opParams:
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
     self._last_read_time = sec_since_boot()
-    self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 1  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
   def _load_params(self, can_import=False):
-    ret = self._import_params(can_import)  # returns success (bool), params (dict)
+    ret = _import_params(can_import)  # returns success (bool), params (dict)
     if ret[0]:
       open(IMPORTED_PATH, 'w').close()
       return ret[1]
@@ -145,7 +164,7 @@ class opParams:
         params[key] = value
       elif key in self.fork_params:
         params[key] = self.fork_params[key].default_value
-        self._write_param(key, params[key])
+        _write_param(key, params[key])
     return params
 
   def _run_init(self):  # does first time initializing of default params
@@ -154,7 +173,6 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
     self.params = self._load_params(can_import=True)
-
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
 
@@ -212,27 +230,3 @@ class opParams:
     if to_update:
       self.params = self._load_params()
     return {k: self.params[k] for k, p in self.fork_params.items() if k in self.params and not p.hidden}
-
-  def __getitem__(self, s):  # can also do op_params['param_name']
-    return self.get(s)
-
-  def _import_params(self, can_import):
-    needs_import = False  # if opParams needs to import from old params file
-    if not os.path.exists(PARAMS_PATH):
-      os.makedirs(PARAMS_PATH)
-      needs_import = True
-    needs_import &= os.path.exists(OLD_PARAMS_FILE)
-    needs_import &= not os.path.exists(IMPORTED_PATH)
-    needs_import &= can_import
-
-    if needs_import:
-      try:
-        with open(OLD_PARAMS_FILE, 'r') as f:
-          old_params = json.loads(f.read())
-        for key in old_params:
-          if not os.path.exists(os.path.join(PARAMS_PATH, key)):
-            _write_param(key, old_params[key])
-        return True, old_params
-      except:
-        pass
-    return False, None
