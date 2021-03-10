@@ -110,11 +110,13 @@ class opParams:
     self._to_reset = ['dynamic_gas']  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
-  def _load_params(self):
-    ret = self._import_params()  # returns success (bool), params (dict)
+  def _load_params(self, can_import=False):
+    ret = self._import_params(can_import)  # returns success (bool), params (dict)
     if ret[0]:
       open(IMPORTED_PATH, 'w').close()
       return ret[1]
+    else:
+      print('DIDNT IMPORT!')
 
     param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
     return {p: self._read_param(p) for p in param_files if not p.startswith('.')}
@@ -137,7 +139,7 @@ class opParams:
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
-    self.params = self._load_params()
+    self.params = self._load_params(can_import=True)
     print(f'LOADED PARAMS: {self.params}')
 
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
@@ -195,10 +197,8 @@ class opParams:
         self.params[key] = self.fork_params[key].default_value
         self._write_param(key, self.params[key])
 
-  def _get_all_params(self, default=False, return_hidden=False, to_update=False):
+  def _get_all_params(self, return_hidden=False, to_update=False):
     self._update_params(to_update)
-    if default:
-      return {k: p.default_value for k, p in self.fork_params.items()}
     return {k: self.params[k] for k, p in self.fork_params.items() if k in self.params and (not p.hidden or return_hidden)}
 
   def _update_params(self, to_update):
@@ -223,13 +223,14 @@ class opParams:
       with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
 
-  def _import_params(self):
+  def _import_params(self, can_import):
     needs_import = False  # if opParams needs to import from old params file
     if not os.path.exists(PARAMS_PATH):
       os.makedirs(PARAMS_PATH)
       needs_import = True
     needs_import &= os.path.exists(OLD_PARAMS_FILE)
     needs_import &= not os.path.exists(IMPORTED_PATH)
+    needs_import &= can_import
 
     if needs_import:
       try:
