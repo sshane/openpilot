@@ -123,7 +123,7 @@ class opParams:
     needs_import &= os.path.exists(OLD_PARAMS_FILE)
     # Imports if no params path or params path is empty
     if needs_import:
-      with open(PARAMS_PATH, "r") as f:
+      with open(OLD_PARAMS_FILE, "r") as f:
         old_params = json.loads(f.read())
 
 
