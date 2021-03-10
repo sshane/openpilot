@@ -140,7 +140,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if not param_info.static:
         self.info2('Chosen parameter: {}{} (live!)'.format(chosen_key, COLORS.BASE(207)), sleep_time=0)
       else:
-        self.info2('Chosen parameter: {} (static)'.format(chosen_key), sleep_time=0)
+        self.info2('Chosen parameter: {}{} (static)'.format(chosen_key, COLORS.BASE(207)), sleep_time=0)
 
       to_print = []
       if param_info.has_description:
