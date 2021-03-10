@@ -109,22 +109,30 @@ class opParams:
     self._to_reset = ['dynamic_gas']  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
+  def _load_params(self):
+    ret = self._import_params()  # returns success (bool), params (dict)
+    if ret[0]:
+      return ret[1]
+
+    param_files = os.listdir(PARAMS_PATH)  # PARAMS_PATH is guaranteed to exist
+    params = {p: self._load_param(p) for p in param_files}
+    print(f'PARAMS FROM PATH: {params}')
+
+  @staticmethod
+  def _load_param(self, param_name):  # todo: add sanity checks
+    with open(os.path.join(PARAMS_PATH, param_name), 'r') as f:
+      param = json.loads(f.read())
+    return param
+
+
   def _run_init(self):  # does first time initializing of default params
     # Two required parameters for opEdit
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
-    needs_import = False  # if opParams needs to import from old params file
-    if not os.path.exists(PARAMS_PATH):
-      os.makedirs(PARAMS_PATH)
-      needs_import = True
-    needs_import |= len(os.listdir(PARAMS_PATH)) == 0
-    needs_import &= os.path.exists(OLD_PARAMS_FILE)
-    # Imports if no params path or params path is empty
-    if needs_import:
-      print('NEEDS IMPORT!')
-      with open(OLD_PARAMS_FILE, "r") as f:
-        old_params = json.loads(f.read())
+    self.params = self._load_params()
+
+
 
 
 
@@ -230,6 +238,25 @@ class opParams:
     if not travis:
       with open(self._params_file, "w") as f:
         f.write(json.dumps(self.params, indent=2))  # can further speed it up by remove indentation but makes file hard to read
+
+  @staticmethod
+  def _import_params(self):
+    needs_import = False  # if opParams needs to import from old params file
+    if not os.path.exists(PARAMS_PATH):
+      os.makedirs(PARAMS_PATH)
+      needs_import = True
+
+    needs_import |= len(os.listdir(PARAMS_PATH)) == 0
+    needs_import &= os.path.exists(OLD_PARAMS_FILE)
+
+    if needs_import:
+      try:
+        with open(OLD_PARAMS_FILE, 'r') as f:
+          old_params = f.read()
+        return True, json.loads(old_params)
+      except:
+        pass
+    return False, None
 
 
 opParams()
