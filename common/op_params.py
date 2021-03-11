@@ -142,7 +142,6 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
 
-    self._last_read_time = sec_since_boot()
     self.read_frequency = 1  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
@@ -156,6 +155,7 @@ class opParams:
     self.params = self._load_params(can_import=True)
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
+    self._last_read_times = {p: sec_since_boot() for p in self.params}
 
   def get(self, key=None, force_update=False):  # key=None returns dict of all params
     if key is None:
@@ -164,8 +164,9 @@ class opParams:
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
 
-    if not param_info.static or force_update:
+    if (not param_info.static and sec_since_boot() - self._last_read_times[key] >= self.read_frequency) or force_update:
       value, success = _read_param(key)
+      self._last_read_times[key] = sec_since_boot()
       if not success:  # in case of read error, use default and overwrite param
         value = param_info.default_value
         _write_param(key, value)
@@ -233,7 +234,7 @@ if __name__ == "__main__":
   op = opParams()
   # op.put(sys.argv[1], eval(sys.argv[2]))
   t = sec_since_boot()
-  for _ in range(100):
+  for _ in range(500):
     op.get('camera_offset')
   t = sec_since_boot() - t
   print(t)
