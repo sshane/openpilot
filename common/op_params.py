@@ -140,9 +140,9 @@ class opParams:
                         'use_lqr': Param(False, bool, 'Enable this to use LQR as your lateral controller over default with any car', static=True),
                         'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla', static=True),
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
-                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this')}
+                        'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True)}
 
-    self.read_frequency = 1  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 2  # max frequency to read with self.get(...) (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
@@ -157,13 +157,15 @@ class opParams:
     self._delete_and_reset()  # removes old params
     self._last_read_times = {p: sec_since_boot() for p in self.params}
 
-  def get(self, key=None, force_update=False):  # key=None returns dict of all params
+  def get(self, key=None, *, force_update=False, rate=None):  # key=None returns dict of all params
+    if rate is None:
+      rate = self.read_frequency
     if key is None:
       return self._get_all_params(to_update=force_update)
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
 
-    if (not param_info.static and sec_since_boot() - self._last_read_times[key] >= self.read_frequency) or force_update:
+    if (not param_info.static and sec_since_boot() - self._last_read_times[key] >= rate) or force_update:
       value, success = _read_param(key)
       self._last_read_times[key] = sec_since_boot()
       if not success:  # in case of read error, use default and overwrite param
