@@ -160,7 +160,6 @@ class opParams:
   def get(self, key=None, force_update=False):  # key=None returns dict of all params
     if key is None:
       return self._get_all_params(to_update=force_update)
-
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
 
@@ -174,7 +173,6 @@ class opParams:
 
     if param_info.is_valid(value := self.params[key]):
       return value  # all good, returning user's value
-
     print(warning('User\'s value type is not valid! Returning default'))  # somehow... it should always be valid
     return param_info.default_value  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
@@ -229,12 +227,3 @@ class opParams:
       elif key in self._to_reset and key in self.fork_params:
         self.params[key] = self.fork_params[key].default_value
         _write_param(key, self.params[key])
-
-if __name__ == "__main__":
-  op = opParams()
-  # op.put(sys.argv[1], eval(sys.argv[2]))
-  t = sec_since_boot()
-  for _ in range(100):
-    op.get('camera_offset')
-  t = sec_since_boot() - t
-  print(t)
