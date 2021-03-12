@@ -114,7 +114,7 @@ class CarController():
           apply_accel = apply_accel - coast if apply_accel > coast else apply_accel - (coast - apply_accel)
 
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
-      apply_accel = 0.06 - min(apply_accel, 0.)
+      apply_accel = 0.06 - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
