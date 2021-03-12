@@ -60,7 +60,7 @@ def compute_gb_pedal(accel, speed, which_func):
   speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
   accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + _a3 * accel ** 3 + _a4 * accel ** 2 + _a5 * accel)
   ret = speed_part + accel_part + _offset
-  ret *= interp(speed, [0, 5 * CV.MPH_TO_MS], [0.5, 1]) * interp(accel, [0, 1], [0.5, 1])
+  ret *= interp(speed, [0, 5 * CV.MPH_TO_MS], [0.75, 1]) * interp(accel, [0, 0.75], [0.75, 1])
   return ret
 
   # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
