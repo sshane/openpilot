@@ -28,15 +28,10 @@ def accel_hysteresis(accel, accel_steady, enabled):
   return accel, accel_steady
 
 
-def coast_accel(speed, which_func):  # given a speed, output coasting acceleration
-  if which_func == 0:
-    points = [[0.0, 0.538], [1.697, 0.28],
-              [2.853, -0.199], [3.443, -0.249],
-              [MIN_ACC_SPEED, -0.145]]
-  else:
-    points = [[0.0, 0.03], [.166, .424], [.335, .568],
-              [.731, .440], [1.886, 0.262], [2.809, -0.207],
-              [3.443, -0.249], [MIN_ACC_SPEED, -0.145]]
+def coast_accel(speed):  # given a speed, output coasting acceleration
+  points = [[0.0, 0.03], [.166, .424], [.335, .568],
+            [.731, .440], [1.886, 0.262], [2.809, -0.207],
+            [3.443, -0.249], [MIN_ACC_SPEED, -0.145]]
   return interp(speed, *zip(*points))
 
 
@@ -112,10 +107,9 @@ class CarController():
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED:
       # converts desired acceleration to gas percentage for pedal
       # +0.06 offset to reduce ABS pump usage when applying very small gas
-      # if self.op_params.get('apply_accel') is not None:
-      #   apply_accel = self.op_params.get('apply_accel')
-      print(round(apply_accel * 3, 2), round(CS.out.aEgo, 2))
-      if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo, self.op_params.get('coast_function')):
+      if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
+        if coast_accel(CS.out.vEgo) > 0 and apply_accel > 0:
+          apply_accel = apply_accel - coast_accel(CS.out.vEgo) / CarControllerParams.ACCEL_SCALE
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
       apply_accel = 0.06 - actuators.brake
 
