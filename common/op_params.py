@@ -107,7 +107,8 @@ class opParams:
                                                      '3: fitted to 22 mph with more data, reduced gas FURTHER around 0 accel\n'
                                                      '4: Average of last two functions (too fast, too slow)\n'
                                                      '5: Less gas under 5 mph and low accel, more gas above 5 mph and high accel\n'
-                                                     '6: 5 but less gas all around', live=True),
+                                                     '6: 5 but less gas all around\n'
+                                                     '7: 4 but less gas at low accel', live=True),
                         'coast_function': Param(0, int, '0: original function, 1: new function with less accel offset at low speed. should be more accurate', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
