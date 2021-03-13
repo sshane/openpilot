@@ -111,7 +111,7 @@ class CarController():
         if coast_accel(CS.out.vEgo) > 0 and apply_accel > 0:
           # apply_accel = apply_accel - coast_accel(CS.out.vEgo) / CarControllerParams.ACCEL_SCALE
           coast = coast_accel(CS.out.vEgo) / CarControllerParams.ACCEL_SCALE
-          apply_accel_weight = interp(CS.out.vEgo, [0, 2 * CV.MPH_TO_MS], [1, 0])
+          apply_accel_weight = interp(CS.out.vEgo, [0, 2 * CV.MPH_TO_MS], [1, 0.5])
           apply_accel = (apply_accel - coast) * (1 - apply_accel_weight) + apply_accel * apply_accel_weight
 
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
