@@ -109,6 +109,7 @@ class opParams:
                                                      '5: Less gas under 5 mph and low accel, more gas above 5 mph and high accel\n'
                                                      '6: 5 but less gas all around\n'
                                                      '7: 4 but more coefficients', live=True),
+                        'weight': Param(0.5, NUMBER, 'Try 0.5 to 1.0', live=True),
 
                         'prius_use_pid': Param(False, bool, 'This enables the PID lateral controller with new a experimental derivative tune\n'
                                                             'False: stock INDI, True: TSS2-tuned PID'),
