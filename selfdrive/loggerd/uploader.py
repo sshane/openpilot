@@ -16,7 +16,7 @@ from common.params import Params
 from selfdrive.loggerd.xattr_cache import getxattr, setxattr
 from selfdrive.loggerd.config import ROOT
 from selfdrive.swaglog import cloudlog
-from common.op_params import opParam
+from common.op_params import opParams
 
 NetworkType = log.DeviceState.NetworkType
 UPLOAD_ATTR_NAME = 'user.upload'
@@ -226,6 +226,7 @@ def uploader_fn(exit_event):
 
     d = None
     on_hotspot = is_on_hotspot()
+    opParams.get('unknown_param')
     if (on_hotspot and upload_on_hotspot) or not on_hotspot:
       d = uploader.next_file_to_upload(with_raw=allow_raw_upload and on_wifi and offroad)
 
