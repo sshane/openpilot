@@ -52,6 +52,7 @@ else:
     print('Logged current crash to {}'.format(log_file))
 
   def capture_exception(*args, **kwargs):
+    print('CAPTURE_EXCEPTION')
     save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
