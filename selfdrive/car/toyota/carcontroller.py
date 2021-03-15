@@ -8,7 +8,7 @@ from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams
 from selfdrive.config import Conversions as CV
-from selfdrive.accel_to_gas import predict as accel_to_gas
+# from selfdrive.accel_to_gas import predict as accel_to_gas
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -35,44 +35,69 @@ def coast_accel(speed):  # given a speed, output coasting acceleration
   return interp(speed, *zip(*points))
 
 
-def compute_gb_pedal(accel, speed, which_func):
-  # return accel_to_gas([accel, speed])[0]
-  if which_func == 0:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05340517679465475, -0.053495524853591506, 0.1692496880860915, 0.02378568771700229, 5.9774819503946536e-05, -0.009988274638231051, -0.0003203880816858484, 0.051321083586716484, 0.0023280402254177005, -0.0018446446967463183, -0.008536402106750801, 0.020362858606493128]
-  elif which_func == 1:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06339414227380791, -0.04252182325129261, 0.16496700047827587, 0.02163184652060803, -7.819573625765886e-05, -0.009744998610583465, 8.451435790895213e-05, 0.05286121507616371, 0.002001649470366154, -0.0019889859912089877, -0.006508368592432109, 0.02155006142761783]
-  elif which_func == 2:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05594094062330375, -0.048062873804399726, 0.16403002481440093, 0.022714205305227296, -5.7173431029146585e-06, -0.009542845370903873, -0.0001208699128506703, 0.050350551862265606, 0.0020345465756747383, -0.0019496194481763256, -0.006443694337832591, 0.021190635052137256]
-  elif which_func == 3:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.061649360532346216, -0.004917289926341796, 0.15355568143854717, -0.005072052411820398, 0.00019662217949411142, -0.007342717402517755, -0.0005688909172110014, 0.041480849002471086, 0.001880822114313993, -0.0014727057513696277, -0.0071366447268704555, 0.020673978167611646]
-  elif which_func == 4:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.07264304340456754, -0.007522016704006004, 0.16234124452228196, 0.0029096574419830296, 1.1674372321165579e-05, -0.008010070095545522, -5.834025253616562e-05, 0.04722441060805912, 0.001887454016549489, -0.0014370672920621269, -0.007577594283906699, 0.01943515032956308]
-  elif which_func == 5:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06713195658855746, -0.023450527717881073, 0.1745896831920949, -0.007296857981847622, 7.236149432069842e-05, -0.009064968448433007, -0.00022193411610820104, 0.04985709418327566, 0.002171840642000584, -0.0019409690646680923, -0.010695641108741443, 0.02544971629177782]
-  elif which_func == 6:
-    _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.07650987241491732, -0.01313506396806189, 0.18263091764989609, -0.014502272327707318, -5.820955538936409e-05, -0.008699449190029246, 0.00017672175610891123, 0.05076145276583945, 0.002276624696779062, -0.001990422687692836, -0.012951649094935302, 0.026524904498754612]
-  else:
-    _a1, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8, _e9, _e10, _e11, _e12 = [0.051928027407770125, -0.017021340933399423, -0.004932336090691233, 0.012117573094709328, 0.024127324154840687, -0.05483055648050864, 0.002061550701289086, -0.002374642289248953, 0.012143971642267916, 0.029754476475536706, -0.029432879500629568, 0.05542071632500463, -0.00888044738417222, 0.0399769546754697]
-    speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
-    accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + (_e9 * speed + _e10) * accel ** 3 + (_e11 * speed + _e12) * accel ** 2 + _a1 * accel)
-    return speed_part + accel_part + _offset
+def compute_gb_pedal(accel, speed, coast, which_func):
+  def accel_to_gas(a_ego, v_ego):
+    speed_part = (_e5 * a_ego + _e6) * v_ego ** 2 + (_e7 * a_ego + _e8) * v_ego
+    # accel_part = ((_e1 * v_ego + _e2) * a_ego ** 5 + (_e3 * v_ego + _e4) * a_ego ** 4 + (_e9 * v_ego + _e10) * a_ego ** 3 + (_e11 * v_ego + _e12) * a_ego ** 2 + _a1 * a_ego)
+    accel_part = ((_e1 * v_ego + _e2) * a_ego ** 5 + (_e3 * v_ego + _e4) * a_ego ** 4 + _a3 * a_ego ** 3 + _a4 * a_ego ** 2 + _a5 * a_ego)
+    ret = speed_part + accel_part + _offset
+    return ret
 
-  speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
-  accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + _a3 * accel ** 3 + _a4 * accel ** 2 + _a5 * accel)
-  ret = speed_part + accel_part + _offset
-  # ret *= interp(speed, [0, 5 * CV.MPH_TO_MS], [0.75, 1]) * interp(accel, [0, 1], [0.75, 1])
-  return ret
+  _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.059593129912793315, -0.04577402603783469, 0.14512438169245576, 0.04943206089162375, 4.829796740317816e-06, -0.009924418151981399, -0.00020755632476486248, 0.052758381188947025, 0.0015371659949146228, -0.001104170167117192, -0.00012929098933089165, 0.011347420516706773]
 
-  # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
-  # # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
-  # if which_func == 0:
-  #   _c1, _c2, _c3, _c4  = [0.014834278942078814, -0.019486618189634007, -0.04866680885268496, 0.18130227709359556]  # fit on both engaged and disengaged
-  # elif which_func == 1:
-  #   _c1, _c2, _c3, _c4  = [0.015545494731421215, -0.011431576758264202, -0.056374605760840496, 0.1797404798536819]  # just fit on engaged
-  # else:
-  #   _c1, _c2, _c3, _c4, _c5  = [0.0004504646112499155, 0.010911174152383137, 0.020950462773718394, 0.0971672107576878, -0.007383724106218966]
-  #   return (_c1 * speed ** 2 + _c2 * speed + _c5) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
-  # return (_c1 * speed + _c2) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
+  gas = accel_to_gas(accel, speed)
+  gas_at_coast = accel_to_gas(coast, speed)
+
+  if coast > 0:
+    weight = interp(accel, [coast, coast * 1.5], [0.5, 1])
+    gas = (gas - gas_at_coast) * (1 - weight) + gas * weight
+
+  return gas
+
+
+# def compute_gb_pedal(accel, speed, coast, which_func):
+#   # return accel_to_gas([accel, speed])[0]
+#   if which_func == 0:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05340517679465475, -0.053495524853591506, 0.1692496880860915, 0.02378568771700229, 5.9774819503946536e-05, -0.009988274638231051, -0.0003203880816858484, 0.051321083586716484, 0.0023280402254177005, -0.0018446446967463183, -0.008536402106750801, 0.020362858606493128]
+#   elif which_func == 1:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06339414227380791, -0.04252182325129261, 0.16496700047827587, 0.02163184652060803, -7.819573625765886e-05, -0.009744998610583465, 8.451435790895213e-05, 0.05286121507616371, 0.002001649470366154, -0.0019889859912089877, -0.006508368592432109, 0.02155006142761783]
+#   elif which_func == 2:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.05594094062330375, -0.048062873804399726, 0.16403002481440093, 0.022714205305227296, -5.7173431029146585e-06, -0.009542845370903873, -0.0001208699128506703, 0.050350551862265606, 0.0020345465756747383, -0.0019496194481763256, -0.006443694337832591, 0.021190635052137256]
+#   elif which_func == 3:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.061649360532346216, -0.004917289926341796, 0.15355568143854717, -0.005072052411820398, 0.00019662217949411142, -0.007342717402517755, -0.0005688909172110014, 0.041480849002471086, 0.001880822114313993, -0.0014727057513696277, -0.0071366447268704555, 0.020673978167611646]
+#   elif which_func == 4:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.07264304340456754, -0.007522016704006004, 0.16234124452228196, 0.0029096574419830296, 1.1674372321165579e-05, -0.008010070095545522, -5.834025253616562e-05, 0.04722441060805912, 0.001887454016549489, -0.0014370672920621269, -0.007577594283906699, 0.01943515032956308]
+#   elif which_func == 5:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.06713195658855746, -0.023450527717881073, 0.1745896831920949, -0.007296857981847622, 7.236149432069842e-05, -0.009064968448433007, -0.00022193411610820104, 0.04985709418327566, 0.002171840642000584, -0.0019409690646680923, -0.010695641108741443, 0.02544971629177782]
+#   elif which_func == 6:
+#     _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.07650987241491732, -0.01313506396806189, 0.18263091764989609, -0.014502272327707318, -5.820955538936409e-05, -0.008699449190029246, 0.00017672175610891123, 0.05076145276583945, 0.002276624696779062, -0.001990422687692836, -0.012951649094935302, 0.026524904498754612]
+#   else:
+#     _a1, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8, _e9, _e10, _e11, _e12 = [0.051928027407770125, -0.017021340933399423, -0.004932336090691233, 0.012117573094709328, 0.024127324154840687, -0.05483055648050864, 0.002061550701289086, -0.002374642289248953, 0.012143971642267916, 0.029754476475536706, -0.029432879500629568, 0.05542071632500463, -0.00888044738417222, 0.0399769546754697]
+#     speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
+#     accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + (_e9 * speed + _e10) * accel ** 3 + (_e11 * speed + _e12) * accel ** 2 + _a1 * accel)
+#     return speed_part + accel_part + _offset
+#
+#   speed_part = (_e5 * accel + _e6) * speed ** 2 + (_e7 * accel + _e8) * speed
+#   accel_part = ((_e1 * speed + _e2) * accel ** 5 + (_e3 * speed + _e4) * accel ** 4 + _a3 * accel ** 3 + _a4 * accel ** 2 + _a5 * accel)
+#   ret = speed_part + accel_part + _offset
+#
+#   if coast > 0:
+#     weight = interp(accel, [coast / 2, coast * 2], [0, 1.0])
+#     apply_accel = (accel - coast) * weight + accel * (1 - weight)
+#
+#   # ret *= interp(speed, [0, 5 * CV.MPH_TO_MS], [0.75, 1]) * interp(accel, [0, 1], [0.75, 1])
+#   return ret
+#
+#   # # _c1, _c2, _c3, _c4 = [0.04412016647510183, 0.018224465923095633, 0.09983653162564889, 0.08837909527049172]
+#   # # return (desired_accel * _c1 + (_c4 * (speed * _c2 + 1))) * (speed * _c3 + 1)
+#   # if which_func == 0:
+#   #   _c1, _c2, _c3, _c4  = [0.014834278942078814, -0.019486618189634007, -0.04866680885268496, 0.18130227709359556]  # fit on both engaged and disengaged
+#   # elif which_func == 1:
+#   #   _c1, _c2, _c3, _c4  = [0.015545494731421215, -0.011431576758264202, -0.056374605760840496, 0.1797404798536819]  # just fit on engaged
+#   # else:
+#   #   _c1, _c2, _c3, _c4, _c5  = [0.0004504646112499155, 0.010911174152383137, 0.020950462773718394, 0.0971672107576878, -0.007383724106218966]
+#   #   return (_c1 * speed ** 2 + _c2 * speed + _c5) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
+#   # return (_c1 * speed + _c2) + (_c3 * desired_accel ** 2 + _c4 * desired_accel)
 
 
 class CarController():
@@ -107,13 +132,14 @@ class CarController():
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED:
       # converts desired acceleration to gas percentage for pedal
       # +0.06 offset to reduce ABS pump usage when applying very small gas
-      coast = coast_accel(CS.out.vEgo) / CarControllerParams.ACCEL_SCALE
+      coast = coast_accel(CS.out.vEgo)
+      apply_accel *= CarControllerParams.ACCEL_SCALE
       if apply_accel > coast:
-        if coast > 0:
-          weight = interp(apply_accel, [coast, coast * 2], [0, self.op_params.get('weight')])
-          apply_accel = (apply_accel - coast) * weight + apply_accel * (1 - weight)
+        # if coast > 0:
+        #   weight = interp(apply_accel, [coast, coast * 2], [0, self.op_params.get('weight')])
+        #   apply_accel = (apply_accel - coast) * weight + apply_accel * (1 - weight)
 
-        apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo, self.op_params.get('ff_function')), 0., 1.)
+        apply_gas = clip(compute_gb_pedal(apply_accel, CS.out.vEgo, coast, self.op_params.get('ff_function')), 0., 1.)
       apply_accel = 0.06 - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
