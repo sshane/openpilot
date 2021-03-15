@@ -83,7 +83,7 @@ if (origin is not None) and (branch is not None):
         except subprocess.CalledProcessError:
           pass
 
-    dirty = dirty or not comma_remote or not smiskol_remote
+    dirty = dirty or (not comma_remote and not smiskol_remote)
     dirty = dirty or ('master' in branch)
 
   except subprocess.CalledProcessError:
