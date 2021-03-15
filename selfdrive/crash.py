@@ -27,6 +27,7 @@ else:
   from raven.transport.http import HTTPTransport
   from selfdrive.version import origin, branch, smiskol_remote, get_git_commit
   from common.op_params import opParams
+  import shutil
 
   CRASHES_DIR = '/data/community/crashes'
   if not os.path.exists(CRASHES_DIR):
@@ -47,10 +48,10 @@ else:
     log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%Y-%m-%d|%H:%M.log'))
     with open(log_file, 'w') as f:
       f.write(exc_text)
-    print('Logged current crash to {}'.format(log_file))
+    shutil.copyfile(log_file, '{}/latest.log'.format(CRASHES_DIR))
+    print('Logged current crash to {} and {}'.format(log_file, '{}/latest.log'.format(CRASHES_DIR)))
 
   def capture_exception(*args, **kwargs):
-    print('CAPTURE_EXCEPTION')
     save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
