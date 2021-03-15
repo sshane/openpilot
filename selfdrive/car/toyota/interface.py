@@ -133,11 +133,12 @@ class CarInterface(CarInterfaceBase):
       ret.minSpeedCan = 0.1 * CV.KPH_TO_MS
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[20, 31], [0.04, 0.08]]  # 45 to 70 mph
+      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[20, 31], [0.04, 0.1]]  # 45 to 70 mph
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [[20, 31], [0.001, 0.005]]
-      ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[20, 31], [0.1, 0.2]]
-      ret.lateralTuning.pid.kf = 0.00006908923778520113  # full torque for 20 deg at 80mph means 0.00007818594
-      ret.lateralTuning.pid.newKfTuned = True
+      ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[20, 31], [0.0, 0.0]]
+      ret.lateralTuning.pid.kf = 0.00003
+      # ret.lateralTuning.pid.kf = 0.00006908923778520113  # full torque for 20 deg at 80mph means 0.00007818594
+      # ret.lateralTuning.pid.newKfTuned = True
 
     elif candidate == CAR.LEXUS_RX:
       stop_and_go = True
