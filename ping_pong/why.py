@@ -3,7 +3,6 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import os
 import sys
-from models.konverter.accel_to_gas import predict as best_model_predict
 
 from numpy.random import seed
 seed(2147483648)
@@ -11,7 +10,6 @@ seed(2147483648)
 try:
   from opendbc.can.parser import CANParser
   from tools.lib.logreader import MultiLogIterator
-  from tools.lib.route import Route
   from cereal import car
   os.chdir('/openpilot/ping_pong')
 except:
@@ -63,6 +61,8 @@ def load_and_process_rlogs(lrs, file_name):
     a_target, v_target = None, None
     des_steering_angle = None
     actuator_delay = None
+    offset = None
+    steer_ratio = None
     rate_cost = None
 
     apply_accel = None
@@ -79,8 +79,15 @@ def load_and_process_rlogs(lrs, file_name):
       ("BRAKE_PRESSED", "BRAKE_MODULE", 0),
       ("SPORT_ON", "GEAR_PACKET", 0),
       ("GEAR", "GEAR_PACKET", 0),
+      ("STEER_ANGLE", "STEER_ANGLE_SENSOR", 0),
+      ("STEER_FRACTION", "STEER_ANGLE_SENSOR", 0),
+
+      ("STEER_TORQUE_DRIVER", "STEER_TORQUE_SENSOR", 0),
+      ("STEER_TORQUE_EPS", "STEER_TORQUE_SENSOR", 0),
+      ("STEER_REQUEST", "STEERING_LKA", 0),
+      ("STEER_TORQUE_CMD", "STEERING_LKA", 0),
     ]
-    cp = CANParser("toyota_corolla_2017_pt_generated", signals)
+    cp = CANParser("toyota_nodsu_hybrid_pt_generated", signals)
 
     all_msgs = sorted(lr, key=lambda msg: msg.logMonoTime)
 
@@ -89,7 +96,7 @@ def load_and_process_rlogs(lrs, file_name):
       if msg.which() == 'carState':
         v_ego = msg.carState.vEgo
         a_ego = msg.carState.aEgo
-        steering_angle = msg.carState.steeringAngle
+        steering_angle = msg.carState.steeringAngleDeg
         engaged = msg.carState.cruiseState.enabled
         gear_shifter = msg.carState.gearShifter
       elif msg.which() == 'controlsState':
@@ -102,6 +109,15 @@ def load_and_process_rlogs(lrs, file_name):
       elif msg.which() == 'carParams':
         actuator_delay = msg.carParams.steerActuatorDelay
         rate_cost = msg.carParams.steerRateCost
+        print(msg.carParams.lateralTuning.pid.kpV)
+        print(msg.carParams.lateralTuning.pid.kiV)
+        print(msg.carParams.lateralTuning.pid.kdV)
+        print(msg.carParams.lateralTuning.pid.kf)
+        print(msg.carParams.lateralTuning.pid.newKfTuned)
+        print()
+      elif msg.which() == 'liveParameters':
+        offset = msg.liveParameters.angleOffsetAverageDeg
+        steer_ratio = msg.liveParameters.steerRatio
       # elif msg.which() == 'sensorEvents':
       #   for sensor_reading in msg.sensorEvents:
       #     if sensor_reading.sensor == 4 and sensor_reading.type == 4:
@@ -115,22 +131,21 @@ def load_and_process_rlogs(lrs, file_name):
       if msg.which() not in ['can', 'sendcan']:
         continue
       cp_updated = cp.update_string(msg.as_builder().to_bytes())  # usually all can signals are updated so we don't need to iterate through the updated list
-
       for u in cp_updated:
-        if u == 0x200:  # GAS_COMMAND
+        if u == 0x25:  # STEER_ANGLE_SENSOR
           can_updated = True
-
-      gas_enable = bool(cp.vl['GAS_COMMAND']['ENABLE'])
-      gas_command = max(round(cp.vl['GAS_COMMAND']['GAS_COMMAND'] / 255., 5), 0.0)  # unscale, round, and clip
-      assert gas_command <= 1, "Gas command above 100%, look into this"
-
-      user_gas = (cp.vl['GAS_SENSOR']['INTERCEPTOR_GAS'] + cp.vl['GAS_SENSOR']['INTERCEPTOR_GAS2']) / 2.  # only for user todo: is the max 232?
-      car_gas = cp.vl['GAS_PEDAL']['GAS_PEDAL']  # for user AND openpilot/car (less noisy than interceptor but need to check we're not engaged)
+      # if not can_updated:
+      #   continue
 
       steering_angle_can = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
 
+      torque_driver = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
+      torque_eps = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"]
+      steer_req = cp.vl["STEERING_LKA"]["STEER_REQUEST"]
+      torque_cmd = cp.vl["STEERING_LKA"]["STEER_TORQUE_CMD"]
+
       brake_pressed = bool(cp.vl['BRAKE_MODULE']['BRAKE_PRESSED'])
-      sport_on = bool(cp.vl['GEAR_PACKET']['SPORT_ON'])
+      # sport_on = bool(cp.vl['GEAR_PACKET']['SPORT_ON'])
 
       if msg.which() != 'can':  # only store when can is updated
         continue
@@ -139,11 +154,11 @@ def load_and_process_rlogs(lrs, file_name):
         print('TIME BREAK!')
         print(abs(msg.logMonoTime - last_time) * 1e-9)
 
-      if (v_ego is not None and can_updated and gear_shifter == car.CarState.GearShifter.drive and not sport_on and  # creates uninterupted sections of engaged data
+      if (v_ego is not None and can_updated and gear_shifter == car.CarState.GearShifter.drive and steering_angle_can is not None and engaged and  # creates uninterupted sections of engaged data
               abs(msg.logMonoTime - last_time) * 1e-9 < 1 / 20):  # also split if there's a break in time
-        data[-1].append({'v_ego': v_ego, 'gas_command': gas_command, 'a_ego': a_ego, 'user_gas': user_gas,
-                         'car_gas': car_gas, 'brake_pressed': brake_pressed, 'pitch': pitch, 'engaged': engaged, 'gas_enable': gas_enable,
-                         'steering_angle': steering_angle, 'a_target': a_target, 'v_target': v_target, 'apply_accel': apply_accel,
+        data[-1].append({'v_ego': v_ego, 'gas_command': gas_command, 'a_ego': a_ego, 'brake_pressed': brake_pressed, 'pitch': pitch, 'engaged': engaged, 'gas_enable': gas_enable,
+                         'steering_angle': steering_angle, 'a_target': a_target, 'v_target': v_target, 'apply_accel': apply_accel, 'offset': offset, 'torque_driver': torque_driver,
+                         'torque_eps': torque_eps, 'steer_req': steer_req, 'torque_cmd': torque_cmd, 'steer_ratio': steer_ratio,
                          'des_steering_angle': des_steering_angle, 'steering_angle_can': steering_angle_can, 'actuator_delay': actuator_delay, 'rate_cost': rate_cost,
 
                          'time': msg.logMonoTime * 1e-9})
@@ -173,26 +188,28 @@ def fit_ff_model(use_dir, plot=False):
     lrs = [MultiLogIterator(rd, wraparound=False) for rd in route_files]
     data = load_and_process_rlogs(lrs, file_name='data')
 
-  if os.path.exists('data_coasting'):  # for 2nd function that ouputs decel from speed (assuming coasting)
-    data_coasting = load_processed('data_coasting')
-  else:
-    coast_dir = os.path.join(os.path.dirname(use_dir), 'coast')
-    data_coasting = load_and_process_rlogs([MultiLogIterator([os.path.join(coast_dir, f) for f in os.listdir(coast_dir) if '.ini' not in f], wraparound=False)], file_name='data_coasting')
-
-  # print(len(data))
-  # print([len(l) for l in data])
-  # data = data[0]
-  # data = [l for l in data if l['v_ego'] < 19 * CV.MPH_TO_MS and l['engaged'] and l['user_gas'] < 15]
-  # # plt.plot([l['a_target'] for l in data], label='a_target')
-  # plt.plot([l['apply_accel'] * 3 for l in data], label='apply_accel')
-  # plt.plot([l['a_ego'] for l in data], label='a_ego')
-  # plt.legend()
-  # plt.figure()
-  # plt.plot([l['v_target'] for l in data], label='v_target')
-  # plt.plot([l['v_ego'] for l in data], label='v_ego')
-  # plt.legend()
-  # plt.show()
-  # raise Exception
+  print(len(data))
+  print([len(l) for l in data])
+  data_0 = data[2]
+  data_0 = [l for l in data_0 if l['engaged'] and abs(l['torque_driver']) < 100]
+  # plt.plot([l['a_target'] for l in data_0], label='a_target')
+  plt.plot([l['steering_angle'] for l in data_0], label='steering_angle')
+  plt.plot([l['steering_angle_can'] for l in data_0], label='steering_angle_can')
+  plt.legend()
+  plt.figure()
+  plt.plot([l['steering_angle'] for l in data_0], label='steering_angle')
+  plt.plot([l['des_steering_angle'] for l in data_0], label='des_steering_angle')
+  plt.legend()
+  plt.figure()
+  # plt.plot([l['offset'] for l in data_0], label='offset')
+  plt.plot([l['steer_ratio'] for l in data_0], label='steer_ratio')
+  plt.legend()
+  plt.figure()
+  plt.plot([l['torque_cmd'] for l in data_0], label='torque_cmd')
+  plt.plot([l['torque_eps'] * .54 for l in data_0], label='torque_eps')
+  plt.legend()
+  plt.show()
+  return data
 
   # for data_0 in data:
   #   data_0 = [l for l in data_0 if not l['engaged']]
@@ -217,11 +234,6 @@ def fit_ff_model(use_dir, plot=False):
   #   input()
   # raise Exception
 
-  if OFFSET_ACCEL := True:
-    data = offset_accel(data)
-  if COAST_OFFSET_ACCEL := True:
-    data_coasting = offset_accel(data_coasting)
-
   # data_tmp = [l for l in [i for j in data for i in j] if l['engaged'] and l['user_gas'] < 14]  # todo: this all is to convert car gas to gas cmd scale. can be removed when done experimenting with
   # print(len(data_tmp))
   #
@@ -240,18 +252,6 @@ def fit_ff_model(use_dir, plot=False):
   # plt.pause(0.01)
   # raise Exception
 
-  new_data = []
-  for sec in data:  # remove samples where we're braking in the future but not now
-    new_sec = []
-    for idx, line in enumerate(sec):
-      accel_delay = get_accel_delay(line['v_ego'])  # interpolate accel delay from speed
-      if idx + accel_delay < len(sec):
-        if line['brake_pressed'] is sec[idx + accel_delay]['brake_pressed']:
-          new_sec.append(line)
-    if len(new_sec) > 0:
-      new_data.append(new_sec)
-  data = new_data
-  del new_data
   # raise Exception
   #
   # Removes cases where user brakes shortly after giving gas (gas would be positive, accel negative due to accel offsetting)
@@ -259,30 +259,17 @@ def fit_ff_model(use_dir, plot=False):
   #                                                   idx + get_accel_delay(np.mean(i['v_ego'] for i in sec)) < len(sec) else False)] for sec in data]
 
   data = [i for j in data for i in j]  # flatten
-  data_coasting = [i for j in data_coasting for i in j]  # flatten
   print(f'Samples (before filtering): {len(data)}')
   # data += data_coasting
 
-  for line in data:
-    if line['engaged'] and line['gas_enable'] and line['gas_command'] > 0.001:  # reduce gas near 0 accel and speed to bias the final function/model
-      if line['v_ego'] < 18 * CV.MPH_TO_MS and line['a_ego'] < 1.1:
-        # # reduction = np.interp(line['v_ego'], [2 * CV.MPH_TO_MS, 12 * CV.MPH_TO_MS], [1.0, 0])
-        # reduction = np.interp(line['a_ego'], [0.8, 1.4], [np.interp(line['v_ego'] * CV.MS_TO_MPH, [2, 10], [1.0, 0]), 0.0])
-        # reduction *= 0.08
-        reduction = np.interp(line['v_ego'], [0, 5 * CV.MPH_TO_MS, 8 * CV.MPH_TO_MS, 18 * CV.MPH_TO_MS], [1.0, 0.75, 0.6, 0])
-        reduction *= np.interp(line['a_ego'], [0.25, .9], [1, 0])
-        reduction *= 0.055
-        line['gas_command'] = max(line['gas_command'] - reduction, 0)
 
-        # reduction = np.interp(line['a_ego'], [-0.2, 0.6], [1, 0]) * np.interp(line['v_ego'], [4 * CV.MPH_TO_MS, 8 * CV.MPH_TO_MS, 19 * CV.MPH_TO_MS], [1.0, 0.6, 0.1])
-        # line['gas_command'] -= reduction * line['gas_command']
+
 
 
   # Data filtering
   def general_filters(_line):  # general filters
     return 0.01 * CV.MPH_TO_MS < _line['v_ego'] < TOP_FIT_SPEED and not _line['brake_pressed'] and abs(_line['steering_angle']) <= 25
 
-  data_coasting = [line for line in data_coasting if general_filters(line) and line['car_gas'] == 0 and not line['engaged']]
 
   engaged_samples = 0
   user_samples = 0
@@ -610,4 +597,4 @@ if __name__ == "__main__":
   # lr = MultiLogIterator(r.log_paths(), wraparound=False)
   use_dir = '/openpilot/ping_pong/rlogs/use'
   # lr = MultiLogIterator([os.path.join(use_dir, i) for i in os.listdir(use_dir)], wraparound=False)
-  model, data = fit_ff_model(use_dir, plot="--plot" in sys.argv)
+  data = fit_ff_model(use_dir, plot="--plot" in sys.argv)
