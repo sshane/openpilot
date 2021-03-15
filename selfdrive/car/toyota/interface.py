@@ -9,8 +9,8 @@ from common.op_params import opParams
 
 op_params = opParams()
 use_lqr = op_params.get('use_lqr')
-prius_use_pid = op_params.get('prius_use_pid')
-corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
+prius_use_pid = False  # op_params.get('prius_use_pid')
+corollaTSS2_use_indi = False  # op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
 EventName = car.CarEvent.EventName
 
@@ -62,22 +62,24 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.PRIUS:
       stop_and_go = True
-      ret.safetyParam = 66  # see conversion factor for STEER_TORQUE_EPS in dbc file
+      ret.safetyParam = 54  # see conversion factor for STEER_TORQUE_EPS in dbc file
       ret.wheelbase = 2.70
-      ret.steerRatio = 15.74  # unknown end-to-end spec
+      ret.steerRatio = 13.4  # unknown end-to-end spec
       tire_stiffness_factor = 0.6371  # hand-tune
-      ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
-
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGainBP = [0.]
-      ret.lateralTuning.indi.innerLoopGainV = [4.0]
-      ret.lateralTuning.indi.outerLoopGainBP = [0.]
-      ret.lateralTuning.indi.outerLoopGainV = [3.0]
-      ret.lateralTuning.indi.timeConstantBP = [0.]
-      ret.lateralTuning.indi.timeConstantV = [1.0]
-      ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
-      ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
+      ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
       ret.steerActuatorDelay = 0.3
+
+      if prius_use_pid:
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.07], [0.04]]
+        ret.lateralTuning.pid.kdV = [0.]
+        ret.lateralTuning.pid.kf = 0.00009531750004645412
+        ret.lateralTuning.pid.newKfTuned = True
+      else:
+        ret.lateralTuning.init('indi')
+        ret.lateralTuning.indi.innerLoopGainV = [4.0]
+        ret.lateralTuning.indi.outerLoopGainV = [3.0]
+        ret.lateralTuning.indi.timeConstantV = [0.1] if ret.hasZss else [1.0]
+        ret.lateralTuning.indi.actuatorEffectivenessV = [1.0]
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
