@@ -50,6 +50,7 @@ terms_version: bytes = b"2"
 dirty: bool = True
 comma_remote: bool = False
 tested_branch: bool = False
+dirty_files = None
 origin = get_git_remote()
 branch = get_git_full_branchname()
 commit = get_git_commit()

@@ -25,14 +25,14 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
-  from selfdrive.version import origin, branch, smiskol_remote, get_git_commit
+  from selfdrive.version import origin, branch, smiskol_remote, get_git_commit, dirty_files
   from common.op_params import opParams
 
   CRASHES_DIR = '/data/community/crashes'
   if not os.path.exists(CRASHES_DIR):
     os.makedirs(CRASHES_DIR)
 
-  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit()}
+  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit(), 'dirty_files': dirty_files}
   username = opParams().get('username')
   if username is None or not isinstance(username, str):
     username = 'undefined'
