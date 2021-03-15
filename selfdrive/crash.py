@@ -25,18 +25,16 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
 else:
   from raven import Client
   from raven.transport.http import HTTPTransport
-  from selfdrive.version import origin, branch, smiskol_remote, get_git_commit, dirty_files
+  from selfdrive.version import origin, branch, smiskol_remote, get_git_commit
   from common.op_params import opParams
 
   CRASHES_DIR = '/data/community/crashes'
   if not os.path.exists(CRASHES_DIR):
     os.makedirs(CRASHES_DIR)
 
-  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit(), 'dirty_files': dirty_files}
-  username = opParams().get('username')
-  if username is None or not isinstance(username, str):
+  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit(), 'username': opParams().get('username')}
+  if error_tags['username'] is None or not isinstance(error_tags['username'], str):
     username = 'undefined'
-  error_tags['username'] = username
 
   if smiskol_remote:  # CHANGE TO YOUR remote and sentry key to receive errors if you fork this fork
     sentry_uri = 'https://a83947fe6772400bb220c3f0e4a6e63b@o237581.ingest.sentry.io/5252098'
@@ -46,7 +44,7 @@ else:
 
 
   def save_exception(exc_text):
-    log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%d-%m-%Y--%I:%M.%S-%p.log'))
+    log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%Y-%m-%d--%I:%M.%S-%p.log'))
     with open(log_file, 'w') as f:
       f.write(exc_text)
     print('Logged current crash to {}'.format(log_file))
