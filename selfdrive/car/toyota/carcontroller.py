@@ -29,9 +29,9 @@ def accel_hysteresis(accel, accel_steady, enabled):
 
 
 def coast_accel(speed):  # given a speed, output coasting acceleration
-  points = [[0.0, 0.03], [.166, .424], [.335, .568],
-            [.731, .440], [1.886, 0.262], [2.809, -0.207],
-            [3.443, -0.249], [MIN_ACC_SPEED, -0.145]]
+  points = [[0.01, 0.0], [.21, .425], [.3107, .535], [.431, .555],  # with no delay
+            [.777, .438], [1.928, 0.265], [2.66, -0.179],
+            [3.336, -0.250], [MIN_ACC_SPEED, -0.145]]
   return interp(speed, *zip(*points))
 
 
@@ -43,14 +43,23 @@ def compute_gb_pedal(accel, speed, coast, which_func):
     ret = speed_part + accel_part + _offset
     return ret
 
-  _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.059593129912793315, -0.04577402603783469, 0.14512438169245576, 0.04943206089162375, 4.829796740317816e-06, -0.009924418151981399, -0.00020755632476486248, 0.052758381188947025, 0.0015371659949146228, -0.001104170167117192, -0.00012929098933089165, 0.011347420516706773]
+  _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.0783068519841404, -0.02425620872221965, 0.13060194634915956, 0.048408210211338176, 5.543874388291277e-05, -0.011102981702528086, -0.0003173850406700908, 0.0604232557901408, 0.0012248938828813751, -0.0010763810268259095, 0.0017804236356551181, 0.011950706937897477]
 
+  coast_spread = 0 if speed < 0.555 else 0.05
   gas = accel_to_gas(accel, speed)
-  gas_at_coast = accel_to_gas(coast, speed)
+  if accel >= coast - coast_spread:
+    coast_spread_weight = interp(accel, [coast - coast_spread, coast + coast_spread], [0, 1])
+    return clip(gas * coast_spread_weight, 0., 1.)
+  else:
+    return 0.
 
-  if coast > 0:
-    weight = interp(accel, [coast, coast * 1.5], [0.5, 1])
-    gas = (gas - gas_at_coast) * (1 - weight) + gas * weight
+
+  # gas = accel_to_gas(accel, speed)
+  # gas_at_coast = accel_to_gas(coast, speed)
+  #
+  # if coast > 0:
+  #   weight = interp(accel, [coast, coast * 1.5], [0.5, 1])
+  #   gas = (gas - gas_at_coast) * (1 - weight) + gas * weight
 
   return gas
 
@@ -134,12 +143,13 @@ class CarController():
       # +0.06 offset to reduce ABS pump usage when applying very small gas
       coast = coast_accel(CS.out.vEgo)
       apply_accel *= CarControllerParams.ACCEL_SCALE
-      if apply_accel > coast:
-        # if coast > 0:
-        #   weight = interp(apply_accel, [coast, coast * 2], [0, self.op_params.get('weight')])
-        #   apply_accel = (apply_accel - coast) * weight + apply_accel * (1 - weight)
-
-        apply_gas = clip(compute_gb_pedal(apply_accel, CS.out.vEgo, coast, self.op_params.get('ff_function')), 0., 1.)
+      # if apply_accel > coast:
+      #   # if coast > 0:
+      #   #   weight = interp(apply_accel, [coast, coast * 2], [0, self.op_params.get('weight')])
+      #   #   apply_accel = (apply_accel - coast) * weight + apply_accel * (1 - weight)
+      #
+      #   apply_gas = compute_gb_pedal(apply_accel, CS.out.vEgo, coast, self.op_params.get('ff_function'))
+      apply_gas = compute_gb_pedal(apply_accel, CS.out.vEgo, coast, self.op_params.get('ff_function'))
       apply_accel = 0.06 - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
