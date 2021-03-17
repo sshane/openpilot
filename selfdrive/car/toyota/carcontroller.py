@@ -49,8 +49,8 @@ def compute_gb_pedal(accel, speed, coast, which_func):
   coast_spread = 0.08
   if accel >= coast - coast_spread:
     gas *= interp(accel, [coast - coast_spread, coast + coast_spread * 2], [0, 1])
-
-  return clip(gas, 0, 1)
+    return clip(gas, 0, 1)
+  return 0.
 
   # gas = accel_to_gas(accel, speed)
   # if accel >= coast - coast_spread:
