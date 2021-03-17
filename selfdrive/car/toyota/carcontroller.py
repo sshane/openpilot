@@ -45,13 +45,19 @@ def compute_gb_pedal(accel, speed, coast, which_func):
 
   _a3, _a4, _a5, _offset, _e1, _e2, _e3, _e4, _e5, _e6, _e7, _e8 = [-0.0783068519841404, -0.02425620872221965, 0.13060194634915956, 0.048408210211338176, 5.543874388291277e-05, -0.011102981702528086, -0.0003173850406700908, 0.0604232557901408, 0.0012248938828813751, -0.0010763810268259095, 0.0017804236356551181, 0.011950706937897477]
 
-  coast_spread = 0 if speed < 0.555 else 0.05
   gas = accel_to_gas(accel, speed)
+  coast_spread = 0.08
   if accel >= coast - coast_spread:
-    coast_spread_weight = interp(accel, [coast - coast_spread, coast + coast_spread], [0, 1])
-    return clip(gas * coast_spread_weight, 0., 1.)
-  else:
-    return 0.
+    gas *= interp(accel, [coast - coast_spread, coast + coast_spread * 2], [0, 1])
+
+  return clip(gas, 0, 1)
+
+  # gas = accel_to_gas(accel, speed)
+  # if accel >= coast - coast_spread:
+  #   coast_spread_weight = interp(accel, [coast - coast_spread, coast + coast_spread], [0, 1])
+  #   return clip(gas * coast_spread_weight, 0., 1.)
+  # else:
+  #   return 0.
 
 
   # gas = accel_to_gas(accel, speed)
