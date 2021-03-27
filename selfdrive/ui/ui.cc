@@ -38,7 +38,7 @@ void sa_init(UIState *s, bool full_init) {
   char** value;
   size_t sz;
   std::string params_path = "/data/community/params/camera_offset";
-  *value = static_cast<char*>(read_file(params_path.c_str(), &sz));
+  *value = static_cast<char*>(read_file(params_path.c_str(), *sz));
 
 //  // stock additions todo: run opparams first (in main()?) to ensure json values exist
 //  std::ifstream op_params_file("/data/op_params.json");
