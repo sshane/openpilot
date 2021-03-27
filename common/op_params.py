@@ -144,7 +144,7 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True)}
 
-    self.read_frequency = 2  # max frequency to read with self.get(...) (sec)
+    self.read_frequency = 1  # max frequency to read with self.get (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
