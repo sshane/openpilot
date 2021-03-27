@@ -226,7 +226,7 @@ def uploader_fn(exit_event):
 
     d = None
     on_hotspot = is_on_hotspot()
-    if (on_hotspot and op_params.get('upload_on_hotspot', rate=10)) or not on_hotspot:
+    if (on_hotspot and op_params.get('upload_on_hotspot')) or not on_hotspot:
       d = uploader.next_file_to_upload(with_raw=allow_raw_upload and on_wifi and offroad)
 
     if d is None:  # Nothing to upload

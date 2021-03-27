@@ -317,7 +317,7 @@ class Controls:
       df_alert = 'dfButtonAlert'
       if df_out.is_auto and df_out.last_is_auto:
         # only show auto alert if engaged, not hiding auto, and time since lane speed alert not showing
-        if CS.cruiseState.enabled and not self.op_params.get('hide_auto_df_alerts', rate=10):
+        if CS.cruiseState.enabled and not self.op_params.get('hide_auto_df_alerts'):
           df_alert += 'Silent'
           self.AM.SA_add(df_alert, extra_text_1=df_out.model_profile_text + ' (auto)')
           return
