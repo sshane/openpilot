@@ -2,7 +2,6 @@
 import os
 import json
 from common.colors import COLORS
-from common.travis_checker import travis
 from common.basedir import BASEDIR
 try:
   from common.realtime import sec_since_boot
@@ -144,7 +143,7 @@ class opParams:
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
-    self.params = self._load_params(can_import=not travis)
+    self.params = self._load_params(can_import=True)
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
 
