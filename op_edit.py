@@ -148,6 +148,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
       if param_info.static:
         to_print.append(COLORS.WARNING + '>>  A reboot is required for changes to this parameter!' + COLORS.ENDC)
+      print(param_info.static, param_info.live)
       if not param_info.static and not param_info.live:
         to_print.append(COLORS.WARNING + '>>  Changes take effect in 10 seconds for this parameter!' + COLORS.ENDC)
       if param_info.has_allowed_types:
