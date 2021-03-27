@@ -2,7 +2,7 @@
 import os
 import json
 from common.colors import COLORS
-from common.basedir import BASEDIR
+from common.travis_checker import BASEDIR
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -76,6 +76,7 @@ def _import_params():
         old_params = json.loads(f.read())
       for key in old_params:
         _write_param(key, old_params[key])
+      open(IMPORTED_PATH, 'w').close()
     except:
       pass
 
