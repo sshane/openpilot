@@ -39,22 +39,21 @@ void sa_init(UIState *s, bool full_init) {
 //  size_t sz;
 //  *value = static_cast<char*>(read_file(params_path.c_str(), *sz));
   std::string params_path = "/data/community/params/dynamic_follow";
-  std::string value = util::read_file(params_path);
-  std::cout << "dynamic_follow: " << value << std::endl;
+  std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
+  std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
+  std::cout << "dynamic_follow: " << dynamic_follow << std::endl;
+  std::cout << "lane_speed_alerts: " << lane_speed_alerts << std::endl;
+  if (dynamic_follow == NULL) {
+    std::cout << "dynamic_follow is NULL!" << std::endl;
+  }
+  if (lane_speed_alerts == NULL) {
+    std::cout << "lane_speed_alerts is NULL!" << std::endl;
+  }
 
-//  // stock additions todo: run opparams first (in main()?) to ensure json values exist
-//  std::ifstream op_params_file("/data/op_params.json");
-//  std::string op_params_content((std::istreambuf_iterator<char>(op_params_file)),
-//                                (std::istreambuf_iterator<char>()));
-//
-//  std::string err;
-//  auto json = json11::Json::parse(op_params_content, err);
 //  if (!json.is_null() && err.empty()) {
 //    printf("successfully parsed opParams json\n");
-//    s->scene.dfButtonStatus = DF_TO_IDX[json["dynamic_follow"].string_value()];
-//    s->scene.lsButtonStatus = LS_TO_IDX[json["lane_speed_alerts"].string_value()];
-////    printf("dfButtonStatus: %d\n", s->scene.dfButtonStatus);
-////    printf("lsButtonStatus: %d\n", s->scene.lsButtonStatus);
+//    s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
+//    s->scene.lsButtonStatus = LS_TO_IDX[lane_speed_alerts];
 //  } else {  // error parsing json
 //    printf("ERROR PARSING OPPARAMS JSON!\n");
 //    s->scene.dfButtonStatus = 0;
