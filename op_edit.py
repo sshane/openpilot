@@ -30,7 +30,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
       username_choice = self.input_with_options(['Y', 'n', 'don\'t ask again'], default='n')[0]
       if username_choice == 0:
-        self.prompt('Please enter your Discord username so the developers can reach out if a crash occurs:')
+        self.prompt('Enter a unique identifer/username:')
         username = ''
         while username == '':
           username = input('>> ').strip()
