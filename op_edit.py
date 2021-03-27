@@ -34,10 +34,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         username = ''
         while username == '':
           username = input('>> ').strip()
-        self.success('Thanks! Saved your Discord username\n'
-                     'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
         self.op_params.put('username', username)
         self.username = username
+        self.success('Thanks! Saved your Discord username\n'
+                     'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
       elif username_choice == 2:
         self.op_params.put('username', False)
         self.info('Got it, bringing you into opEdit\n'
