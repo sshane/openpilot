@@ -49,7 +49,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def run_loop(self):
     while True:
       if not self.live_tuning:
-        self.info('Here are all your parameters:', end='\n', sleep_time=0)
+        self.info('Here are all your parameters:', sleep_time=0)
         self.info('(non-static params update live)', end='\n', sleep_time=0)
       else:
         self.info('Here are your live parameters:', sleep_time=0)
