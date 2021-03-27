@@ -25,7 +25,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def run_init(self):
     if self.username is None:
       self.success('\nWelcome to the opParams command line editor!', sleep_time=0)
-      self.prompt('Parameter \'username\' is missing! Would you like to add your Discord username for easier crash debugging?')
+      self.prompt('Would you like to add your Discord username for easier crash debugging for the fork owner?')
+      self.prompt('Your username is only used for reaching out if a crash occurs.')
 
       username_choice = self.input_with_options(['Y', 'n', 'don\'t ask again'], default='n')[0]
       if username_choice == 0:
