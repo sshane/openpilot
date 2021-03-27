@@ -38,16 +38,15 @@ void sa_init(UIState *s, bool full_init) {
 //  char** value;
 //  size_t sz;
 //  *value = static_cast<char*>(read_file(params_path.c_str(), *sz));
-  std::string params_path = "/data/community/params/dynamic_follow";
   std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
   std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
   std::cout << "dynamic_follow: " << dynamic_follow << std::endl;
   std::cout << "lane_speed_alerts: " << lane_speed_alerts << std::endl;
-  if (dynamic_follow == NULL) {
-    std::cout << "dynamic_follow is NULL!" << std::endl;
+  if (dynamic_follow == "") {
+    std::cout << "dynamic_follow is empty!" << std::endl;
   }
-  if (lane_speed_alerts == NULL) {
-    std::cout << "lane_speed_alerts is NULL!" << std::endl;
+  if (lane_speed_alerts == "") {
+    std::cout << "lane_speed_alerts is empty!" << std::endl;
   }
 
 //  if (!json.is_null() && err.empty()) {
