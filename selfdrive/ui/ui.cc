@@ -35,29 +35,20 @@ void sa_init(UIState *s, bool full_init) {
 
   s->ui_debug = false;  // change to true while debugging
 
-//  char** value;
-//  size_t sz;
-//  *value = static_cast<char*>(read_file(params_path.c_str(), *sz));
   std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
   std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
-  std::cout << "dynamic_follow: " << dynamic_follow << std::endl;
-  std::cout << "lane_speed_alerts: " << lane_speed_alerts << std::endl;
-  if (dynamic_follow == "") {
-    std::cout << "dynamic_follow is empty!" << std::endl;
+  if (dynamic_follow != "") {
+    std::cout << "Set dfButtonStatus to " << dynamic_follow << std::endl;
+    s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
+  } else {
+    s->scene.dfButtonStatus = 0;
   }
-  if (lane_speed_alerts == "") {
-    std::cout << "lane_speed_alerts is empty!" << std::endl;
+  if (lane_speed_alerts != "") {
+    std::cout << "Set lsButtonStatus to " << lane_speed_alerts << std::endl;
+    s->scene.lsButtonStatus = DF_TO_IDX[lane_speed_alerts];
+  } else {
+    s->scene.lsButtonStatus = 0;
   }
-
-//  if (!json.is_null() && err.empty()) {
-//    printf("successfully parsed opParams json\n");
-//    s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
-//    s->scene.lsButtonStatus = LS_TO_IDX[lane_speed_alerts];
-//  } else {  // error parsing json
-//    printf("ERROR PARSING OPPARAMS JSON!\n");
-//    s->scene.dfButtonStatus = 0;
-//    s->scene.lsButtonStatus = 0;
-//  }
   s->scene.mlButtonEnabled = false;  // state isn't saved yet
 }
 
