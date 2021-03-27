@@ -24,26 +24,26 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def run_init(self):
     if self.username is None:
-      self.success('\nWelcome to the opParams command line editor!', sleep_time=0)
+      self.success('\nWelcome to the {}opParams{} command line editor!'.format(COLORS.CYAN, COLORS.ENDC), sleep_time=0)
       self.prompt('Would you like to add your Discord username for easier crash debugging for the fork owner?')
       self.prompt('Your username is only used for reaching out if a crash occurs.')
 
       username_choice = self.input_with_options(['Y', 'n', 'don\'t ask again'], default='n')[0]
       if username_choice == 0:
-        self.prompt('Enter a unique identifer/username:')
+        self.prompt('Enter a unique identifer/Discord username:')
         username = ''
         while username == '':
           username = input('>> ').strip()
         self.op_params.put('username', username)
         self.username = username
-        self.success('Thanks! Saved your Discord username\n'
-                     'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
+        self.success('Thanks! Saved your username\n'
+                     'Edit the \'username\' parameter at any time to update', sleep_time=1.5)
       elif username_choice == 2:
         self.op_params.put('username', False)
         self.info('Got it, bringing you into opEdit\n'
                   'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
     else:
-      self.success('\nWelcome to the opParams command line editor, {}!'.format(self.username), sleep_time=0)
+      self.success('\nWelcome to the {}opParams{} command line editor, {}!'.format(COLORS.CYAN, COLORS.ENDC, self.username), sleep_time=0)
 
     self.run_loop()
 
