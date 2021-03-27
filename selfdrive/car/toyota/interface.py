@@ -9,7 +9,7 @@ from common.op_params import opParams
 
 op_params = opParams()
 use_lqr = op_params.get('use_lqr')
-prius_use_pid = False  # op_params.get('prius_use_pid')
+prius_use_pid = False  # op_params.get('prius_use_pid')  # todo move these into get_params
 corollaTSS2_use_indi = False  # op_params.get('corollaTSS2_use_indi')
 rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
 EventName = car.CarEvent.EventName
