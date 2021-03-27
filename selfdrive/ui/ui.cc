@@ -41,15 +41,11 @@ void sa_init(UIState *s, bool full_init) {
     dynamic_follow = dynamic_follow.substr(0, dynamic_follow.size() - 1);
     std::cout << "Set dfButtonStatus to " << dynamic_follow << std::endl;
     s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
-  } else {
-    s->scene.dfButtonStatus = 0;
   }
-  if (lane_speed_alerts != "") {
-    std::cout << "Set lsButtonStatus to " << lane_speed_alerts << std::endl;
-    s->scene.lsButtonStatus = DF_TO_IDX[lane_speed_alerts];
-  } else {
-    s->scene.lsButtonStatus = 0;
-  }
+//  if (lane_speed_alerts != "") {
+//    std::cout << "Set lsButtonStatus to " << lane_speed_alerts << std::endl;
+//    s->scene.lsButtonStatus = DF_TO_IDX[lane_speed_alerts];
+//  }
   s->scene.mlButtonEnabled = false;  // state isn't saved yet
 }
 
