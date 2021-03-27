@@ -22,7 +22,7 @@ OLD_PARAMS_FILE = os.path.join(BASEDIR, 'op_params.json')
 
 
 class Param:
-  def __init__(self, default=None, allowed_types=[], description=None, *, static=False, live=False, hidden=False):
+  def __init__(self, default, allowed_types=[], description=None, *, static=False, live=False, hidden=False):
     self.default_value = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
@@ -88,13 +88,15 @@ class opParams:
       The allowed_types and description args are not required but highly recommended to help users edit their parameters with opEdit safely.
         - The description value will be shown to users when they use opEdit to change the value of the parameter.
         - The allowed_types arg is used to restrict what kinds of values can be entered with opEdit so that users can't crash openpilot with unintended behavior.
-              (setting a param intended to be a number with a boolean, or viceversa for example)
+          (setting a param intended to be a number with a boolean, or viceversa for example)
           Limiting the range of floats or integers is still recommended when `.get`ting the parameter.
           When a None value is allowed, use `type(None)` instead of None, as opEdit checks the type against the values in the arg with `isinstance()`.
-        - Finally, the live arg tells both opParams and opEdit that it's a live parameter that will change. Therefore, you must place the `op_params.get()` call in the update function so that it can update.
+        - If you want your param to update within a second, specify live=True. If your param is designed to be read once, specify static=True.
+          Specifying neither will have the param update every 10 seconds if constantly .get()
+          If the param is not static, call the .get() function on it in the update function of the file you're reading from to use live updating
 
       Here's an example of a good fork_param entry:
-      self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=NUMBER), live=True}  # NUMBER allows both floats and ints
+      self.fork_params = {'camera_offset': Param(0.06, allowed_types=NUMBER), live=True}  # NUMBER allows both floats and ints
     """
 
     self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
