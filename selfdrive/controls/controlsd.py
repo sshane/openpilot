@@ -77,7 +77,7 @@ class Controls:
                                            'laneSpeed', 'dynamicCameraOffset', 'modelLongButton'])
 
     self.op_params = opParams()
-    self.df_manager = dfManager(self.op_params)
+    self.df_manager = dfManager()
     self.support_white_panda = self.op_params.get('support_white_panda')
     self.last_model_long = False
 
