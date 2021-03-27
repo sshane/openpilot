@@ -56,7 +56,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.info('(changes take effect within a second)', end='\n', sleep_time=0)
       self.params = self.op_params.get(force_update=True)
       if self.live_tuning:  # only display live tunable params
-        self.params = {k: v for k, v in self.params.items() if not self.op_params.fork_params[k].static}
+        self.params = {k: v for k, v in self.params.items() if self.op_params.fork_params[k].live}
 
       values_list = []
       for k, v in self.params.items():
@@ -148,6 +148,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
       if param_info.static:
         to_print.append(COLORS.WARNING + '>>  A reboot is required for changes to this parameter!' + COLORS.ENDC)
+      if not param_info.static and not param_info.live:
+        to_print.append(COLORS.WARNING + '>>  Changes take effect in 10 seconds for this parameter!' + COLORS.ENDC)
       if param_info.has_allowed_types:
         to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + COLORS.ENDC)
 
