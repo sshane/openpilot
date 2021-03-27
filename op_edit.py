@@ -24,7 +24,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
 
   def run_init(self):
     if self.username is None:
-      self.success('\nWelcome to the {}opParams{} command line editor!'.format(COLORS.CYAN, COLORS.ENDC), sleep_time=0)
+      self.success('\nWelcome to the {}opParams{} command line editor!'.format(COLORS.CYAN, COLORS.SUCCESS), sleep_time=0)
       self.prompt('Would you like to add your Discord username for easier crash debugging for the fork owner?')
       self.prompt('Your username is only used for reaching out if a crash occurs.')
 
@@ -43,7 +43,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.info('Got it, bringing you into opEdit\n'
                   'Edit the \'username\' parameter at any time to update', sleep_time=1.0)
     else:
-      self.success('\nWelcome to the {}opParams{} command line editor, {}!'.format(COLORS.CYAN, COLORS.ENDC, self.username), sleep_time=0)
+      self.success('\nWelcome to the {}opParams{} command line editor, {}!'.format(COLORS.CYAN, COLORS.SUCCESS, self.username), sleep_time=0)
 
     self.run_loop()
 
