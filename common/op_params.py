@@ -3,6 +3,7 @@ import os
 import json
 from common.colors import COLORS
 from common.travis_checker import travis
+from common.basedir import BASEDIR
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -15,10 +16,10 @@ error = lambda msg: print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLO
 NUMBER = [float, int]  # value types
 NONE_OR_NUMBER = [type(None), float, int]
 
-BASE_DIR = '/data' if not travis else '/tmp'
-PARAMS_DIR = os.path.join(BASE_DIR, 'community', 'params')
+BASEDIR = os.path.dirname(BASEDIR)
+PARAMS_DIR = os.path.join(BASEDIR, 'community', 'params')
 IMPORTED_PATH = os.path.join(PARAMS_DIR, '.imported')
-OLD_PARAMS_FILE = os.path.join(BASE_DIR, 'op_params.json')
+OLD_PARAMS_FILE = os.path.join(BASEDIR, 'op_params.json')
 
 
 class Param:
