@@ -22,14 +22,15 @@ OLD_PARAMS_FILE = os.path.join(BASE_DIR, 'op_params.json')
 
 
 class Param:
-  def __init__(self, default=None, allowed_types=[], description=None, static=False, hidden=False):
+  def __init__(self, default=None, allowed_types=[], description=None, *, static=False, live=True, hidden=False):
     self.default_value = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types  # allowed python value types for opEdit
     self.description = description  # description to be shown in opEdit
-    self.hidden = hidden  # hide this param to user in opEdit?
-    self.static = static  # opParams will use cached value, never reads to update
+    self.hidden = hidden  # hide this param to user in opEdit
+    self.live = live  # show under the live menu in opEdit
+    self.static = static  # use cached value, never reads to update
     self._create_attrs()
 
   def is_valid(self, value):
@@ -41,6 +42,7 @@ class Param:
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
     self.is_list = list in self.allowed_types
+    self.read_frequency = None if self.static else (1 if self.live else 10)  # how often to read param file (sec)
     if self.has_allowed_types:
       assert type(self.default_value) in self.allowed_types, 'Default value type must be in specified allowed_types!'
     if self.is_list:
@@ -144,7 +146,6 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True)}
 
-    self.read_frequency = 1  # max frequency to read with self.get (sec)
     self._to_delete = ['steer_rate_fix', 'uniqueID']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
@@ -159,13 +160,12 @@ class opParams:
     self._delete_and_reset()  # removes old params
     self._last_read_times = {p: sec_since_boot() for p in self.params}
 
-  def get(self, key=None, *, force_update=False, rate=None):  # key=None returns dict of all params
-    if rate is None:
-      rate = self.read_frequency
+  def get(self, key=None, *, force_update=False):  # key=None returns dict of all params
     if key is None:
       return self._get_all_params(to_update=force_update)
     self._check_key_exists(key, 'get')
     param_info = self.fork_params[key]
+    rate = param_info.read_frequency  # will be None if param is static, so check below
 
     if (not param_info.static and sec_since_boot() - self._last_read_times[key] >= rate) or force_update:
       value, success = _read_param(key)
