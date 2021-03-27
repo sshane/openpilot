@@ -43,6 +43,7 @@ class Param:
     self.has_description = self.description is not None
     self.is_list = list in self.allowed_types
     self.read_frequency = None if self.static else (1 if self.live else 10)  # how often to read param file (sec)
+    self.last_read = -1
     if self.has_allowed_types:
       assert type(self.default_value) in self.allowed_types, 'Default value type must be in specified allowed_types!'
     if self.is_list:
@@ -158,7 +159,6 @@ class opParams:
     self.params = self._load_params(can_import=not travis)
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
-    self._last_read_times = {p: sec_since_boot() for p in self.params}
 
   def get(self, key=None, *, force_update=False):  # key=None returns dict of all params
     if key is None:
@@ -167,9 +167,9 @@ class opParams:
     param_info = self.fork_params[key]
     rate = param_info.read_frequency  # will be None if param is static, so check below
 
-    if (not param_info.static and sec_since_boot() - self._last_read_times[key] >= rate) or force_update:
+    if (not param_info.static and sec_since_boot() - self.fork_params[key].last_read >= rate) or force_update:
       value, success = _read_param(key)
-      self._last_read_times[key] = sec_since_boot()
+      self.fork_params[key].last_read = sec_since_boot()
       if not success:  # in case of read error, use default and overwrite param
         value = param_info.default_value
         _write_param(key, value)
