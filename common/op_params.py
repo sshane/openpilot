@@ -16,8 +16,8 @@ NUMBER = [float, int]  # value types
 NONE_OR_NUMBER = [type(None), float, int]
 
 BASE_DIR = '/data' if not travis else '/tmp'
-PARAMS_PATH = os.path.join(BASE_DIR, 'community', 'params')
-IMPORTED_PATH = os.path.join(PARAMS_PATH, '.imported')
+PARAMS_DIR = os.path.join(BASE_DIR, 'community', 'params')
+IMPORTED_PATH = os.path.join(PARAMS_DIR, '.imported')
 OLD_PARAMS_FILE = os.path.join(BASE_DIR, 'op_params.json')
 
 
@@ -52,7 +52,7 @@ class Param:
 
 def _read_param(key):  # Returns None, False if a json error occurs
   try:
-    with open(os.path.join(PARAMS_PATH, key), 'r') as f:
+    with open(os.path.join(PARAMS_DIR, key), 'r') as f:
       value = json.loads(f.read())
     return value, True
   except json.decoder.JSONDecodeError:
@@ -60,33 +60,24 @@ def _read_param(key):  # Returns None, False if a json error occurs
 
 
 def _write_param(key, value):
-  tmp = os.path.join(PARAMS_PATH, '.' + key)
+  tmp = os.path.join(PARAMS_DIR, '.' + key)
   with open(tmp, 'w') as f:
     f.write(json.dumps(value))
     f.flush()
     os.fsync(f.fileno())
-  os.rename(tmp, os.path.join(PARAMS_PATH, key))
-  os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
+  os.rename(tmp, os.path.join(PARAMS_DIR, key))
+  os.chmod(os.path.join(PARAMS_DIR, key), 0o777)
 
 
 def _import_params():
-  needs_import = False  # if opParams needs to import from old params file
-  if not os.path.exists(PARAMS_PATH):
-    os.makedirs(PARAMS_PATH)
-    needs_import = True
-  needs_import &= os.path.exists(OLD_PARAMS_FILE)
-  needs_import &= not os.path.exists(IMPORTED_PATH)
-  if needs_import:
+  if os.path.exists(OLD_PARAMS_FILE) and not os.path.exists(IMPORTED_PATH):  # if opParams needs to import from old params file
     try:
       with open(OLD_PARAMS_FILE, 'r') as f:
         old_params = json.loads(f.read())
       for key in old_params:
-        if not os.path.exists(os.path.join(PARAMS_PATH, key)):
-          _write_param(key, old_params[key])
-      return True, old_params
+        _write_param(key, old_params[key])
     except:
       pass
-  return False, None
 
 
 class opParams:
@@ -184,14 +175,13 @@ class opParams:
     _write_param(key, value)
 
   def _load_params(self, can_import=False):
-    if can_import:
-      ret = _import_params()  # returns success (bool), params (dict)
-      if ret[0]:
-        open(IMPORTED_PATH, 'w').close()
-        return ret[1]
+    if not os.path.exists(PARAMS_DIR):
+      os.makedirs(PARAMS_DIR)
+      if can_import:
+        _import_params()  # just imports old params. below we read them in
 
     params = {}
-    for key in os.listdir(PARAMS_PATH):  # PARAMS_PATH is guaranteed to exist
+    for key in os.listdir(PARAMS_DIR):  # PARAMS_DIR is guaranteed to exist
       if key.startswith('.') or key not in self.fork_params:
         continue
       value, success = _read_param(key)
@@ -224,7 +214,7 @@ class opParams:
     for key in list(self.params):
       if key in self._to_delete:
         del self.params[key]
-        os.remove(os.path.join(PARAMS_PATH, key))
+        os.remove(os.path.join(PARAMS_DIR, key))
       elif key in self._to_reset and key in self.fork_params:
         self.params[key] = self.fork_params[key].default_value
         _write_param(key, self.params[key])
