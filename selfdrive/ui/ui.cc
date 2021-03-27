@@ -38,8 +38,9 @@ void sa_init(UIState *s, bool full_init) {
 //  char** value;
 //  size_t sz;
 //  *value = static_cast<char*>(read_file(params_path.c_str(), *sz));
-  std::string params_path = "/data/community/params/camera_offset";
+  std::string params_path = "/data/community/params/dynamic_follow";
   std::string value = util::read_file(params_path);
+  std::cout << "dynamic_follow: " << value << std::endl;
 
 //  // stock additions todo: run opparams first (in main()?) to ensure json values exist
 //  std::ifstream op_params_file("/data/op_params.json");
