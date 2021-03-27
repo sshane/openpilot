@@ -22,7 +22,7 @@ OLD_PARAMS_FILE = os.path.join(BASE_DIR, 'op_params.json')
 
 
 class Param:
-  def __init__(self, default=None, allowed_types=[], description=None, *, static=False, live=True, hidden=False):
+  def __init__(self, default=None, allowed_types=[], description=None, *, static=False, live=False, hidden=False):
     self.default_value = default  # value first saved and returned if actual value isn't a valid type
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
