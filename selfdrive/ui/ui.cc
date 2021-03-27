@@ -38,7 +38,7 @@ void sa_init(UIState *s, bool full_init) {
   std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
   std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
   if (dynamic_follow != "") {
-    dynamic_follow = dynamic_follow.substr(1, dynamic_follow.size() - 2);
+    dynamic_follow = dynamic_follow.substr(1, dynamic_follow.find_last_of('"') - 1);
     std::cout << "Set dfButtonStatus to " << dynamic_follow << std::endl;
     s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
     std::cout << "dfButtonStatus: " << s->scene.dfButtonStatus << std::endl;
