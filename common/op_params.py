@@ -2,6 +2,7 @@
 import os
 import json
 from common.colors import COLORS
+from common.travis_checker import travis
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -14,9 +15,10 @@ error = lambda msg: print('{}opParams ERROR: {}{}'.format(COLORS.FAIL, msg, COLO
 NUMBER = [float, int]  # value types
 NONE_OR_NUMBER = [type(None), float, int]
 
-OLD_PARAMS_FILE = '/data/op_params.json'
-PARAMS_PATH = '/data/community/params'
+BASE_DIR = '/data' if not travis else '/tmp'
+PARAMS_PATH = os.path.join(BASE_DIR, 'community', 'params')
 IMPORTED_PATH = os.path.join(PARAMS_PATH, '.imported')
+OLD_PARAMS_FILE = os.path.join(BASE_DIR, 'op_params.json')
 
 
 class Param:
@@ -152,7 +154,7 @@ class opParams:
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
 
-    self.params = self._load_params(can_import=True)
+    self.params = self._load_params(can_import=not travis)
     self._add_default_params()  # adds missing params and resets values with invalid types to self.params
     self._delete_and_reset()  # removes old params
     self._last_read_times = {p: sec_since_boot() for p in self.params}
