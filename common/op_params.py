@@ -106,7 +106,7 @@ class opParams:
                                                             'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
                         'min_TR': Param(0.9, NUMBER, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                      'The range is limited from 0.85 to 1.6.', live=True),
-                        'alca_no_nudge_speed': Param(90., NUMBER, 'Above this speed, lane changes initiate IMMEDIATELY (mph). Behavior is stock under'),
+                        'alca_no_nudge_speed': Param(90., NUMBER, 'Above this speed (mph), lane changes initiate IMMEDIATELY. Behavior is stock under'),
                         'steer_ratio': Param(None, NONE_OR_NUMBER, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
                                                                    'If you use a float/int, openpilot will use that steer ratio instead', live=True),
                         # 'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
