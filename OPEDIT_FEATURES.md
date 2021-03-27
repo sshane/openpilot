@@ -8,7 +8,7 @@
 - Case-insensitive boolean and NoneType entrance. Type `faLsE` to save `False (bool)`, etc
 
 ## ❗NEW❗:
-- **Now, any parameter that isn't marked with `(static)` can update while driving and onroad. Only the parameters in the "live" view update within a second, the rest update within 10 seconds. If you enter a parameter it will tell you if it takes 10 seconds.**
+- **Now, any parameter that isn't marked with `(static)` can update while driving and onroad. Only the parameters in the "live" view update within a second, the rest update within 10 seconds. If you enter a parameter, it will tell you its update behavior**
 - As before, static parameters will need a reboot of the device, or ignition in some cases.
 
 ## To run the opEdit parameter manager:
