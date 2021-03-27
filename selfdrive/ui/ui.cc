@@ -37,7 +37,7 @@ void sa_init(UIState *s, bool full_init) {
 
   char** value;
   size_t sz;
-  *value = static_cast<char*>(read_file("/data/op_params.json".c_str(), value_sz));
+  *value = static_cast<char*>(read_file("/data/op_params.json".c_str(), sz));
 
 //  // stock additions todo: run opparams first (in main()?) to ensure json values exist
 //  std::ifstream op_params_file("/data/op_params.json");
