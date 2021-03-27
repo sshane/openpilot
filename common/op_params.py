@@ -69,15 +69,13 @@ def _write_param(key, value):
   os.chmod(os.path.join(PARAMS_PATH, key), 0o777)
 
 
-def _import_params(can_import):
+def _import_params():
   needs_import = False  # if opParams needs to import from old params file
   if not os.path.exists(PARAMS_PATH):
     os.makedirs(PARAMS_PATH)
     needs_import = True
   needs_import &= os.path.exists(OLD_PARAMS_FILE)
   needs_import &= not os.path.exists(IMPORTED_PATH)
-  needs_import &= can_import
-
   if needs_import:
     try:
       with open(OLD_PARAMS_FILE, 'r') as f:
@@ -186,10 +184,11 @@ class opParams:
     _write_param(key, value)
 
   def _load_params(self, can_import=False):
-    ret = _import_params(can_import)  # returns success (bool), params (dict)
-    if ret[0]:
-      open(IMPORTED_PATH, 'w').close()
-      return ret[1]
+    if can_import:
+      ret = _import_params()  # returns success (bool), params (dict)
+      if ret[0]:
+        open(IMPORTED_PATH, 'w').close()
+        return ret[1]
 
     params = {}
     for key in os.listdir(PARAMS_PATH):  # PARAMS_PATH is guaranteed to exist
