@@ -34,20 +34,20 @@ void sa_init(UIState *s, bool full_init) {
   }
 
   s->ui_debug = false;  // change to true while debugging
+  s->scene.mlButtonEnabled = false;  // state isn't saved yet
 
   std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
-  std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
   if (dynamic_follow != "") {
     dynamic_follow = dynamic_follow.substr(1, dynamic_follow.find_last_of('"') - 1);
     std::cout << "Set dfButtonStatus to " << dynamic_follow << std::endl;
     s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
-    std::cout << "dfButtonStatus: " << s->scene.dfButtonStatus << std::endl;
   }
+//  std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
 //  if (lane_speed_alerts != "") {
+//    lane_speed_alerts = lane_speed_alerts.substr(1, lane_speed_alerts.find_last_of('"') - 1);
 //    std::cout << "Set lsButtonStatus to " << lane_speed_alerts << std::endl;
 //    s->scene.lsButtonStatus = DF_TO_IDX[lane_speed_alerts];
 //  }
-  s->scene.mlButtonEnabled = false;  // state isn't saved yet
 }
 
 static void ui_init_vision(UIState *s) {
