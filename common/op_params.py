@@ -3,6 +3,7 @@ import os
 import json
 from common.colors import COLORS
 from common.travis_checker import BASEDIR
+from atomicwrites import atomic_write
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -61,13 +62,8 @@ def _read_param(key):  # Returns None, False if a json error occurs
 
 def _write_param(key, value):
   param_path = os.path.join(PARAMS_DIR, key)
-  tmp_path = os.path.join(PARAMS_DIR, '.' + key)
-  with open(tmp_path, 'w') as f:
+  with atomic_write(param_path, overwrite=True) as f:
     f.write(json.dumps(value))
-    f.flush()
-    os.fsync(f.fileno())
-  os.rename(tmp_path, param_path)
-  os.chmod(param_path, 0o777)
 
 
 def _import_params():
