@@ -60,13 +60,14 @@ def _read_param(key):  # Returns None, False if a json error occurs
 
 
 def _write_param(key, value):
-  tmp = os.path.join(PARAMS_DIR, '.' + key)
-  with open(tmp, 'w') as f:
+  param_path = os.path.join(PARAMS_DIR, key)
+  tmp_path = os.path.join(PARAMS_DIR, '.' + key)
+  with open(tmp_path, 'w') as f:
     f.write(json.dumps(value))
     f.flush()
     os.fsync(f.fileno())
-  os.rename(tmp, os.path.join(PARAMS_DIR, key))
-  os.chmod(os.path.join(PARAMS_DIR, key), 0o777)
+  os.rename(tmp_path, param_path)
+  os.chmod(param_path, 0o777)
 
 
 def _import_params():
