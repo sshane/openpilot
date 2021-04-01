@@ -475,7 +475,7 @@ def manager_thread():
     if msg.deviceState.freeSpacePercent < 5:
       logger_dead = True
 
-    run_all = False
+    run_all = True
     if msg.deviceState.started or run_all:
       for p in car_started_processes:
         if p == "loggerd" and logger_dead:
