@@ -60,6 +60,16 @@ def _read_param(key):  # Returns None, False if a json error occurs
     return None, False
 
 
+def _write_param_old(key, value):
+  tmp = os.path.join(PARAMS_DIR, '.' + key)
+  with open(tmp, 'w') as f:
+    f.write(json.dumps(value))
+    f.flush()
+    os.fsync(f.fileno())
+  os.rename(tmp, os.path.join(PARAMS_DIR, key))
+  os.chmod(os.path.join(PARAMS_DIR, key), 0o777)
+
+
 def _write_param(key, value):
   param_path = os.path.join(PARAMS_DIR, key)
   with atomic_write(param_path, overwrite=True) as f:
@@ -168,12 +178,16 @@ class opParams:
     print(warning('User\'s value type is not valid! Returning default'))  # somehow... it should always be valid
     return param_info.default_value  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
-  def put(self, key, value):
+  def put(self, key, value, old):
     self._check_key_exists(key, 'put')
     if not self.fork_params[key].is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
     self.params.update({key: value})
-    _write_param(key, value)
+    if old:
+      _write_param_old(key, value)
+    else:
+      _write_param(key, value)
+
 
   def _load_params(self, can_import=False):
     if not os.path.exists(PARAMS_DIR):
