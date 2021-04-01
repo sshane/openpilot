@@ -176,7 +176,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
 
-          self.error('\nOld value: {}{} (type: {})'.format(self.color_from_type(old_value), COLORS.FAIL, type(old_value).__name__), sleep_time=0, surround=False)
+          self.warning('\nOld value: {}{} (type: {})'.format(self.color_from_type(old_value), COLORS.FAIL, type(old_value).__name__))
           self.success('New value: {}{} (type: {})'.format(self.color_from_type(new_value), COLORS.OKGREEN, type(new_value).__name__), sleep_time=0)
           self.prompt('\nDo you want to save this?')
           if self.input_with_options(['Y', 'N'], 'N')[0] == 0:
@@ -237,6 +237,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     msg = self.str_color(msg, style='prompt')
     print(msg, flush=True, end='\n' + end)
 
+  def warning(self, msg, end=''):
+    msg = self.str_color(msg, style='warning')
+    print(msg, flush=True, end='\n' + end)
+
   def info(self, msg, sleep_time=None, end=''):
     if sleep_time is None:
       sleep_time = self.sleep_time
@@ -281,6 +285,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       style = COLORS.INFO
     elif style == 'cyan':
       style = COLORS.CYAN
+    elif style == 'warning':
+      style = COLORS.WARNING
     elif isinstance(style, int):
       style = COLORS.BASE(style)
 
