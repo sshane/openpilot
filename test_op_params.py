@@ -12,6 +12,6 @@ while 1:
   time.sleep(random.uniform(.01, .05))
   v = profiles[i % 4]
   i += 1
-  op.put('dynamic_follow', v, old=True)
+  op.put('dynamic_follow', v, old=False)
   print('Put dynamic_follow with {}'.format(v), flush=True)
 
