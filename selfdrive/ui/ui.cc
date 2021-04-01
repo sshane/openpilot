@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include "json11.hpp"
 #include <fstream>
+#include <algorithm>
 
 #include "common/util.h"
 #include "common/swaglog.h"
@@ -44,7 +45,8 @@ void sa_init(UIState *s, bool full_init) {
   }
   std::string model_laneless = util::read_file("/data/community/params/model_laneless");
   if (model_laneless != "") {
-    model_laneless = model_laneless.substr(0, model_laneless.find_last_of(' ') - 1);
+    model_laneless.erase(std::remove(model_laneless.begin(), model_laneless.end(), '\n'), model_laneless.end());
+    model_laneless.erase(std::remove(model_laneless.begin(), model_laneless.end(), ' '), model_laneless.end());
     std::cout << "model_laneless is  " << model_laneless << std::endl;
     s->scene.end_to_end = model_laneless == "true";
     std::cout << "end_to_end is  " << s->scene.end_to_end << std::endl;
