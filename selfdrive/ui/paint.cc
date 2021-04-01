@@ -216,7 +216,9 @@ static void ui_draw_world(UIState *s) {
   nvgScissor(s->vg, s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, s->viz_rect.h);
 
   // Draw lane edges and vision/mpc tracks
-  ui_draw_vision_lane_lines(s);
+  if (!scene.end_to_end) {
+    ui_draw_vision_lane_lines(s);
+  }
 
   // Draw lead indicators if openpilot is handling longitudinal
   if (s->longitudinal_control) {
