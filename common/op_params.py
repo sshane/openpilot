@@ -66,6 +66,8 @@ def _write_param_old(key, value):
     f.write(json.dumps(value))
     f.flush()
     os.fsync(f.fileno())
+  print('{} exists: {}'.format(tmp, os.path.exists(tmp)))
+  print('{} exists: {}'.format(PARAMS_DIR, os.path.exists(PARAMS_DIR)))
   os.rename(tmp, os.path.join(PARAMS_DIR, key))
   os.chmod(os.path.join(PARAMS_DIR, key), 0o777)
 
@@ -178,7 +180,7 @@ class opParams:
     print(warning('User\'s value type is not valid! Returning default'))  # somehow... it should always be valid
     return param_info.default_value  # return default value because user's value of key is not in allowed_types to avoid crashing openpilot
 
-  def put(self, key, value, old=False):
+  def put(self, key, value, old=True):
     self._check_key_exists(key, 'put')
     if not self.fork_params[key].is_valid(value):
       raise Exception('opParams: Tried to put a value of invalid type!')
