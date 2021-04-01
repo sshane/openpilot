@@ -148,6 +148,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         to_print.append(COLORS.WARNING + '>>  Changes take effect within 10 seconds for this parameter!' + COLORS.ENDC)
       if param_info.has_allowed_types:
         to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + COLORS.ENDC)
+      to_print.append(COLORS.WARNING + '>>  Default value: {}'.format(param_info.default_value) + COLORS.ENDC)
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
