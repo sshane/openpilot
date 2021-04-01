@@ -62,12 +62,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       values_list = []
       for k, v in self.params.items():
         if len(str(v)) < 20:
-          v_color = ''
-          if type(v) in self.type_colors:
-            v_color = self.type_colors[type(v)]
-            if isinstance(v, bool):
-              v_color = v_color[v]
-          v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
+          v = self.color_from_type(v)
         else:
           v = '{} ... {}'.format(str(v)[:30], str(v)[-15:])
         values_list.append(v)
@@ -185,8 +180,9 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           self.op_params.put(chosen_key, new_value)
           self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
-          print('\nOld value: {} (type: {})'.format(old_value, type(old_value).__name__))
-          print('New value: {} (type: {})'.format(new_value, type(new_value).__name__))
+
+          print('\nOld value: {} (type: {})'.format(self.color_from_type(old_value), type(old_value).__name__))
+          print('New value: {} (type: {})'.format(self.color_from_type(new_value), type(new_value).__name__))
           self.prompt('\nDo you want to save this?')
           if self.input_with_options(['Y', 'n'], 'n')[0] == 0:
             self.op_params.put(chosen_key, new_value)
@@ -227,6 +223,15 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.op_params.put(chosen_key, old_value)
         self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), end='\n')
         break
+
+  def color_from_type(self, v):
+    v_color = ''
+    if type(v) in self.type_colors:
+      v_color = self.type_colors[type(v)]
+      if isinstance(v, bool):
+        v_color = v_color[v]
+    v = '{}{}{}'.format(v_color, v, COLORS.ENDC)
+    return v
 
   def cyan(self, msg, end=''):
     msg = self.str_color(msg, style='cyan')
