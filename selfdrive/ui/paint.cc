@@ -172,7 +172,7 @@ static void draw_frame(UIState *s) {
 static void ui_draw_vision_lane_lines(UIState *s) {
   const UIScene &scene = s->scene;
   // paint lanelines
-  if (!scene->end_to_end) {
+  if (!scene.end_to_end) {
     for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
       NVGcolor color;
       if (i == 1 || i == 2) {
