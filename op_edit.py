@@ -176,8 +176,8 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
           self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__))
         else:  # else ask to save and break
 
-          self.prompt('\nOld value: {} (type: {})'.format(self.color_from_type(old_value), type(old_value).__name__))
-          self.prompt('New value: {} (type: {})'.format(self.color_from_type(new_value), type(new_value).__name__))
+          self.info('\nOld value: {}{} (type: {})'.format(self.color_from_type(old_value), COLORS.INFO, type(old_value).__name__))
+          self.info('New value: {}{} (type: {})'.format(self.color_from_type(new_value), COLORS.INFO, type(new_value).__name__))
           self.prompt('\nDo you want to save this?')
           if self.input_with_options(['Y', 'N'], 'N')[0] == 0:
             self.op_params.put(chosen_key, new_value)
