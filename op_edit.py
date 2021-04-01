@@ -142,13 +142,13 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       to_print = []
       if param_info.has_description:
         to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
+      to_print.append(COLORS.OKGREEN + '>>  Default value: {}'.format(self.color_from_type(param_info.default_value)) + COLORS.ENDC)
       if param_info.static:
         to_print.append(COLORS.WARNING + '>>  A reboot is required for changes to this parameter!' + COLORS.ENDC)
       if not param_info.static and not param_info.live:
         to_print.append(COLORS.WARNING + '>>  Changes take effect within 10 seconds for this parameter!' + COLORS.ENDC)
       if param_info.has_allowed_types:
         to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ for at in param_info.allowed_types])) + COLORS.ENDC)
-      to_print.append(COLORS.YELLOW + '>>  Default value: {}'.format(param_info.default_value) + COLORS.ENDC)
 
       if to_print:
         print('\n{}\n'.format('\n'.join(to_print)))
@@ -157,13 +157,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         self.change_param_list(old_value, param_info, chosen_key)  # TODO: need to merge the code in this function with the below to reduce redundant code
         return
 
-      v_color = ''
-      if type(old_value) in self.type_colors:
-        v_color = self.type_colors[type(old_value)]
-        if isinstance(old_value, bool):
-          v_color = v_color[old_value]
-
-      self.info('Current value: {}{}{} (type: {})'.format(v_color, old_value, COLORS.INFO, type(old_value).__name__), sleep_time=0)
+      self.info('Current value: {}{} (type: {})'.format(self.color_from_type(old_value), COLORS.INFO, type(old_value).__name__), sleep_time=0)
 
       while True:
         self.prompt('\nEnter your new value (enter to exit):')
