@@ -105,7 +105,7 @@ class LateralPlanner():
 
     # Lane change logic
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
-    below_lane_change_speed = v_ego < CV.MPH_TO_MS
+    below_lane_change_speed = v_ego < 1
 
     if sm['carState'].leftBlinker:
       self.lane_change_direction = LaneChangeDirection.left
