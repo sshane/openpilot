@@ -208,7 +208,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.RAV4_TSS2:
       stop_and_go = True
-      ret.safetyParam = 56
+      ret.safetyParam = 73
       ret.wheelbase = 2.68986
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
@@ -224,19 +224,19 @@ class CarInterface(CarInterfaceBase):
 
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, needs to be verified, based on cgwtuning
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25]
-        ret.lateralTuning.indi.innerLoopGainV = [15, 15]
-        ret.lateralTuning.indi.outerLoopGainBP = [8.3, 11.1, 13.9, 16.7, 19.4, 22.2, 25, 30.1, 33.3, 36.1]
-        ret.lateralTuning.indi.outerLoopGainV = [4.7, 6.1, 8.35, 10.5, 12.8, 14.99, 16, 17, 18, 19]
-        ret.lateralTuning.indi.timeConstantBP = [8.3, 11.1, 13.9, 16.7, 19.4, 22.2, 25, 30.1, 33.3, 36.1]
-        ret.lateralTuning.indi.timeConstantV = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.0, 4.0, 4.0]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25]
+        ret.lateralTuning.indi.innerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.innerLoopGainV = [11.86, 14.46, 15]
+        ret.lateralTuning.indi.outerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.outerLoopGainV = [10.67, 13.37, 14.99]
+        ret.lateralTuning.indi.timeConstantBP = [18, 22, 26, 36]
+        ret.lateralTuning.indi.timeConstantV = [1.2, 3, 4.5, 5]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [18, 26]
         ret.lateralTuning.indi.actuatorEffectivenessV = [15, 15]
-        ret.steerRateCost = 0.3
+        ret.steerRateCost = 0.5
 
     elif candidate == CAR.RAV4H_TSS2:
       stop_and_go = True
-      ret.safetyParam = 56
+      ret.safetyParam = 73
       ret.wheelbase = 2.68986
       ret.steerRatio = 14.3
       tire_stiffness_factor = 0.7933
@@ -252,15 +252,15 @@ class CarInterface(CarInterfaceBase):
 
       if rav4TSS2_use_indi:  # Rav4 2020 TSS2 Tune, based on cgwtuning, needs to be verified
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [16.7, 25]
-        ret.lateralTuning.indi.innerLoopGainV = [15, 15]
-        ret.lateralTuning.indi.outerLoopGainBP = [8.3, 11.1, 13.9, 16.7, 19.4, 22.2, 25, 30.1, 33.3, 36.1]
-        ret.lateralTuning.indi.outerLoopGainV = [4.7, 6.1, 8.35, 10.5, 12.8, 14.99, 16, 17, 18, 19]
-        ret.lateralTuning.indi.timeConstantBP = [8.3, 11.1, 13.9, 16.7, 19.4, 22.2, 25, 30.1, 33.3, 36.1]
-        ret.lateralTuning.indi.timeConstantV = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.0, 4.0, 4.0]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [16.7, 25]
+        ret.lateralTuning.indi.innerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.innerLoopGainV = [11.86, 14.46, 15]
+        ret.lateralTuning.indi.outerLoopGainBP = [18, 22, 26]
+        ret.lateralTuning.indi.outerLoopGainV = [10.67, 13.37, 14.99]
+        ret.lateralTuning.indi.timeConstantBP = [18, 22, 26, 36]
+        ret.lateralTuning.indi.timeConstantV = [1.2, 3, 4.5, 5]
+        ret.lateralTuning.indi.actuatorEffectivenessBP = [18, 26]
         ret.lateralTuning.indi.actuatorEffectivenessV = [15, 15]
-        ret.steerRateCost = 0.3
+        ret.steerRateCost = 0.5
 
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
       stop_and_go = True
