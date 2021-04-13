@@ -81,10 +81,18 @@ class CarController():
       apply_accel = 0
       self.eager_accel = 0
 
+    data_sample = {'apply_accel': apply_accel, 'enabled': enabled, 'a_ego': CS.out.aEgo, 'v_ego': CS.out.vEgo}
+
     RC = interp(CS.out.vEgo, [0, 5, 35], [self.op_params.get('accel_time_constant_0_mph'), self.op_params.get('accel_time_constant_10_mph'), self.op_params.get('accel_time_constant_80_mph')])
     alpha = 1. - DT_CTRL / (RC + DT_CTRL)
     self.eager_accel = self.eager_accel * alpha + apply_accel * (1. - alpha)
+    data_sample['delayed_output'] = self.eager_accel
+
     apply_accel = apply_accel - (self.eager_accel - apply_accel) * self.op_params.get('accel_eagerness')
+    data_sample['eager_accel'] = apply_accel
+
+    with open('/data/eager.txt', 'a') as f:
+      f.write('{}\n'.format(data_sample))
 
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
