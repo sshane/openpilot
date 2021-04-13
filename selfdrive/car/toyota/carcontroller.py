@@ -76,14 +76,16 @@ class CarController():
       # +0.06 offset to reduce ABS pump usage when applying very small gas
       if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
-      apply_accel = 0.06 - actuators.brake
+      # apply_accel = 0.06 - actuators.brake
+    elif not enabled:
+      apply_accel = 0
+      self.eager_accel = 0
 
     RC = interp(CS.out.vEgo, [0, 5, 35], [self.op_params.get('accel_time_constant_0_mph'), self.op_params.get('accel_time_constant_10_mph'), self.op_params.get('accel_time_constant_80_mph')])
     alpha = 1. - DT_CTRL / (RC + DT_CTRL)
     self.eager_accel = self.eager_accel * alpha + apply_accel * (1. - alpha)
     apply_accel = apply_accel - (self.eager_accel - apply_accel) * self.op_params.get('accel_eagerness')
 
-    apply_accel = apply_accel if enabled else 0
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
     # steer torque
