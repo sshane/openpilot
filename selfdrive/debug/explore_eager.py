@@ -34,7 +34,7 @@ print('Sequences: {}'.format(len(sequences)))
 
 def plot_seq(idx=33):
   seq = sequences[idx]
-  apply_accel, eager_accel, a_ego = zip(*[(l['apply_accel'], l['eager_accel'], l['a_ego']) for l in seq])
+  apply_accel, eager_accel, a_ego, v_ego = zip(*[(l['apply_accel'], l['eager_accel'], l['a_ego'], l['v_ego']) for l in seq])
 
   RC_orig = 0.5
   alpha_orig = 1. - DT_CTRL / (RC_orig + DT_CTRL)
@@ -90,6 +90,8 @@ def plot_seq(idx=33):
   plt.plot(apply_accel, label='original desired accel')
   plt.plot(_new_accels, label='new_accels')
   plt.plot(eager_accel, label='current eager accel')
+  plt.figure()
+  plt.plot(v_ego, label='current eager accel')
   # plt.plot(eags, label='exp. average')
   # plt.plot(derivatives, label='reg derivative')
   # plt.plot(jerks, label='jerk of reg deriv')
@@ -109,4 +111,9 @@ def plot_seq(idx=33):
   # plt.plot(calc_eager_accels, label='calc. accel sent to car')
   # plt.plot(a_ego, label='a_ego')
   plt.show()
-plot_seq()
+
+
+plot_seq(10)
+
+# with open('C:/Users/Shane Smiskol/apply_accel_test', 'w') as f:
+#   f.write(json.dumps(apply_accel))

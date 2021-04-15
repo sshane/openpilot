@@ -103,6 +103,7 @@ class opParams:
                         'accel_time_constant_10_mph': Param(0.1, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
                         'accel_time_constant_80_mph': Param(1.0, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
                         'accel_eagerness': Param(1.0, NUMBER, 'Multiplier for change in accel to make it eager (1 is still eager)', live=True),
+                        'replay_accel': Param(False, bool, 'Set param to True while engaged at 20 mph', live=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'
                                                             'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),

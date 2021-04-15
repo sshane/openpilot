@@ -1,3 +1,4 @@
+import json
 from cereal import car
 from common.numpy_fast import clip, interp
 from common.realtime import DT_CTRL
@@ -65,14 +66,34 @@ class CarController():
 
     self.packer = CANPacker(dbc_name)
 
+    with open('/data/openpilot/apply_accel_replay', 'r') as f:
+      self.apply_accel_list = json.loads(f.read())
+    self.replay_idx = 0
+    self.replaying = False
+    self.last_to_replay = self.op_params.get('replay_accel')
+
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
 
     # *** compute control surfaces ***
 
+    to_replay = self.op_params.get('replay_accel')  # on rising edge of param, start replay
+    if not self.last_to_replay and to_replay and not self.replaying:
+      self.replaying = True
+      self.replay_idx = 0
+    self.last_to_replay = to_replay
+
+    if self.replay_idx >= len(self.apply_accel_list):
+      self.replaying = False
+      self.replay_idx = 0
+
     # gas and brake
     apply_gas = 0.
-    apply_accel = actuators.gas - actuators.brake
+    if not self.replaying:
+      apply_accel = actuators.gas - actuators.brake
+    else:
+      apply_accel = self.apply_accel_list[self.replay_idx] / CarControllerParams.ACCEL_SCALE
+      self.replay_idx += 1
 
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED:
       # converts desired acceleration to gas percentage for pedal
@@ -98,6 +119,7 @@ class CarController():
     data_sample['RC'] = RC
     data_sample['delayed_output'] = self.delayed_output
     data_sample['eager_accel'] = apply_accel
+    data_sample['eagerness'] = self.op_params.get('accel_eagerness')
 
     with open('/data/eager.txt', 'a') as f:
       f.write('{}\n'.format(data_sample))
