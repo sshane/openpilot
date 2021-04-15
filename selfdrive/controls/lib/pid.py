@@ -31,6 +31,27 @@ class LatPIDController():
 
     self.reset()
 
+  def convert_pid_gains(self, setpoint, measurement, error, pid):
+    _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10 = [0.010969681918287285, -1.317303952625088, 0.003090297042995128, 0.0006174063280014462, -0.11408303431617882, -0.004223466361442405,
+                                                         0.5459159299542625, -0.4208442440715394, -0.016940226962729534, 1.1968717444641879]
+
+    if abs(setpoint) < abs(measurement) or setpoint * measurement < 0:
+      mod = _c1 * abs(error)
+      mod += _c3 * abs(setpoint)
+      mod += _c2
+    else:
+      mod = _c4 * abs(error)
+      mod += _c6 * abs(setpoint)
+      mod += _c5
+
+    new_pid = pid + pid * mod
+
+    weight = np.interp(abs(error), [0, _c7 * abs(measurement) + _c8], [1, 0])
+
+    pid = (new_pid * weight) + ((1 - weight) * pid)
+    pid *= (_c9 * self.speed + _c10)
+    return pid
+
   @property
   def k_p(self):
     return interp(self.speed, self._k_p[0], self._k_p[1])
@@ -92,7 +113,9 @@ class LatPIDController():
          not freeze_integrator:
         self.i = i
 
-    control = self.p + self.f + self.i + d
+    new_pid = self.convert_pid_gains(setpoint, measurement, error, self.p + self.i + d)
+
+    control = new_pid + d
     if self.convert is not None:
       control = self.convert(control, speed=self.speed)
 
