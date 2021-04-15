@@ -50,7 +50,7 @@ class LatPIDController():
 
     pid = (new_pid * weight) + ((1 - weight) * pid)
     pid *= (_c9 * self.speed + _c10)
-    return pid
+    return float(pid)
 
   @property
   def k_p(self):
