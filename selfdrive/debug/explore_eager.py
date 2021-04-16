@@ -8,7 +8,7 @@ from common.numpy_fast import clip
 
 DT_CTRL = 0.01
 
-eager_file = 'C:/Users/Shane Smiskol/eager.txt'
+eager_file = 'C:/Users/Shane Smiskol/eager-new.txt'
 with open(eager_file, 'r') as f:
   data = f.read()
 
@@ -16,7 +16,7 @@ data = [ast.literal_eval(l) for l in data.split('\n') if len(l) > 1]
 
 sequences = [[]]
 for idx, line in enumerate(data):
-  if line['enabled'] and line['v_ego'] > .25 and (line['apply_accel'] < 0.5 and line['v_ego'] < 8.9 or line['v_ego'] > 8.9):
+  if line['enabled']:  # and line['v_ego'] > .25 and (line['apply_accel'] < 0.5 and line['v_ego'] < 8.9 or line['v_ego'] > 8.9):
     line['apply_accel'] *= 3  # this is what we want a_ego to match
     line['eager_accel'] *= 3  # this is the actual accel sent to the car
     sequences[-1].append(line)
@@ -24,7 +24,7 @@ for idx, line in enumerate(data):
     sequences.append([])
 del data
 
-sequences = [seq for seq in sequences if len(seq) > 5 * 100]
+# todo: sequences = [seq for seq in sequences if len(seq) > 5 * 100]
 
 print('Samples: {}'.format(sum([len(s) for s in sequences])))
 print('Sequences: {}'.format(len(sequences)))
@@ -32,7 +32,7 @@ print('Sequences: {}'.format(len(sequences)))
 
 # 34, 35, 36  these sequences have eager accel disabled
 
-def plot_seq(idx=33):
+def plot_seq(idx=33, title=''):
   seq = sequences[idx]
   apply_accel, eager_accel, a_ego, v_ego = zip(*[(l['apply_accel'], l['eager_accel'], l['a_ego'], l['v_ego']) for l in seq])
 
@@ -86,18 +86,22 @@ def plot_seq(idx=33):
     accel_with_sorta_smooth_jerk.append(line['apply_accel'] + sorta_smooth_jerks[-1] / 2)
     # calc_eager_accels.append(line['apply_accel'] - (eag - line['apply_accel']) * 0.5)
 
-  plt.clf()
-  plt.plot(apply_accel, label='original desired accel')
-  plt.plot(_new_accels, label='new_accels')
-  plt.plot(eager_accel, label='current eager accel')
   plt.figure()
-  plt.plot(v_ego, label='current eager accel')
+  plt.plot(apply_accel, label='original desired accel')
+  plt.plot(a_ego, label='a_ego')
+  # plt.plot(_new_accels, label='new_accels')
+  # plt.plot(eager_accel, label='current eager accel')
+  plt.legend()
+  plt.title(title)
+  plt.figure()
+  plt.plot(v_ego, label='v_ego')
+  plt.legend()
+  plt.title(title)
   # plt.plot(eags, label='exp. average')
   # plt.plot(derivatives, label='reg derivative')
   # plt.plot(jerks, label='jerk of reg deriv')
   # plt.plot(accel_with_sorta_smooth_jerk, label='acc with sorta smooth jerk')
   # plt.plot(accel_with_deriv, label='acc with true derivative')
-  plt.legend()
 
 
 
@@ -113,7 +117,15 @@ def plot_seq(idx=33):
   plt.show()
 
 
-plot_seq(10)
+# plot_seq(10)
+
+
+# 0 to 6 are good seqs with new data
+plot_seq(2, title='eager 1')  # eager
+plot_seq(3, title='eager 2')  # eager
+# plot_seq(4)  # not eager (todo: think this is bad)
+plot_seq(5, title='not eager 1')  # not eager
+plot_seq(6, title='not eager 2')  # not eager
 
 # with open('C:/Users/Shane Smiskol/apply_accel_test', 'w') as f:
 #   f.write(json.dumps(apply_accel))
