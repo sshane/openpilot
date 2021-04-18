@@ -8,7 +8,8 @@ from common.numpy_fast import clip
 
 DT_CTRL = 0.01
 
-eager_file = 'C:/Users/Shane Smiskol/eager-new.txt'
+# eager_file = 'C:/Users/Shane Smiskol/eager-new.txt'  # to compare with and without eagerness
+eager_file = 'C:/Users/Shane Smiskol/eager.txt'
 with open(eager_file, 'r') as f:
   data = f.read()
 
@@ -88,13 +89,9 @@ def plot_seq(idx=33, title=''):
 
   plt.figure()
   plt.plot(apply_accel, label='original desired accel')
-  plt.plot(a_ego, label='a_ego')
+  # plt.plot(a_ego, label='a_ego')
   # plt.plot(_new_accels, label='new_accels')
   # plt.plot(eager_accel, label='current eager accel')
-  plt.legend()
-  plt.title(title)
-  plt.figure()
-  plt.plot(v_ego, label='v_ego')
   plt.legend()
   plt.title(title)
   # plt.plot(eags, label='exp. average')
@@ -102,6 +99,11 @@ def plot_seq(idx=33, title=''):
   # plt.plot(jerks, label='jerk of reg deriv')
   # plt.plot(accel_with_sorta_smooth_jerk, label='acc with sorta smooth jerk')
   # plt.plot(accel_with_deriv, label='acc with true derivative')
+
+  # plt.figure()
+  # plt.plot(v_ego, label='v_ego')
+  # plt.legend()
+  # plt.title(title)
 
 
 
@@ -117,15 +119,15 @@ def plot_seq(idx=33, title=''):
   plt.show()
 
 
-# plot_seq(10)
+plot_seq(10)
 
-
-# 0 to 6 are good seqs with new data
-plot_seq(2, title='eager 1')  # eager
-plot_seq(3, title='eager 2')  # eager
-# plot_seq(4)  # not eager (todo: think this is bad)
-plot_seq(5, title='not eager 1')  # not eager
-plot_seq(6, title='not eager 2')  # not eager
-
-# with open('C:/Users/Shane Smiskol/apply_accel_test', 'w') as f:
-#   f.write(json.dumps(apply_accel))
+# # to compare with and without eagerness
+# # 0 to 6 are good seqs with new data
+# plot_seq(2, title='eager 1')  # eager
+# plot_seq(3, title='eager 2')  # eager
+# # plot_seq(4)  # not eager (todo: think this is bad)
+# plot_seq(5, title='not eager 1')  # not eager
+# plot_seq(6, title='not eager 2')  # not eager
+#
+# # with open('C:/Users/Shane Smiskol/apply_accel_test', 'w') as f:
+# #   f.write(json.dumps(apply_accel))
