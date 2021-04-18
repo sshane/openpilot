@@ -172,7 +172,7 @@ class CarController():
 
     send_ui = False
     if ((fcw_alert or steer_alert) and not self.alert_active) or \
-            (not (fcw_alert or steer_alert) and self.alert_active):
+       (not (fcw_alert or steer_alert) and self.alert_active):
       send_ui = True
       self.alert_active = not self.alert_active
     elif pcm_cancel_cmd:
