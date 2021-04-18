@@ -102,11 +102,13 @@ class opParams:
                         'eager_accel': Param(False, [bool, int], 'This experimental feature combats hysteresis in the cruise control system, braking and accelerating sooner to eliminate overshoot and jerking\n'
                                                                  'Set the param to `1` to use the first method: using the difference in the delayed desired acceleration and current des. accel\n'
                                                                  'Setting the param to `2` uses the smoothened jerk of acceleration to more tightly modify acceleration\n'
-                                                                 'Try out both and see which is smoother. False disables this feature', live=True),
-                        'accel_time_constant_0_mph': Param(0.01, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
+                                                                 'Try out both and see which is smoother. False disables this feature (so does True)', live=True),
+                        'accel_eagerness': Param(1.0, NUMBER, 'Multiplier for the acceleration modifier. 1 is full eagerness and the default, 0.5 is half, etc.', live=True),
+
+                        'accel_time_constant_0_mph': Param(0.025, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),  # todo: tune using these then remove
                         'accel_time_constant_10_mph': Param(0.1, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
                         'accel_time_constant_80_mph': Param(1.0, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
-                        'accel_eagerness': Param(1.0, NUMBER, 'Multiplier for change in accel to make it eager (1 is still eager)', live=True),
+
                         'replay_accel': Param(False, bool, 'Set param to True while engaged at 20 mph', live=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'

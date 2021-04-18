@@ -87,8 +87,8 @@ def plot_seq(idx=33, title=''):
     _delayed_derivative_jerk = _delayed_derivative_jerk * alpha_jerk + _derivative_jerk * (1. - alpha_jerk)
 
     # Visualize
-    _new_accels_jerk.append(line['apply_accel'] + (_derivative_jerk - _delayed_derivative_jerk))
-    _eager_accels.append(line['apply_accel'] - (_delayed_output_eager - line['apply_accel']))
+    _new_accels_jerk.append(line['apply_accel'] - (_delayed_derivative_jerk - _derivative_jerk))
+    _eager_accels.append(line['apply_accel'] + (line['apply_accel'] - _delayed_output_eager))
 
     # # _delayed_outputs_jerk.append(_delayed_output_jerk)
     #
@@ -114,13 +114,13 @@ def plot_seq(idx=33, title=''):
   plt.figure()
   plt.plot(apply_accel, label='original desired accel')
   # plt.plot(a_ego, label='a_ego')
-  plt.plot(_new_accels_jerk, label='new_accels')
+  plt.plot(_new_accels_jerk, label='eager accel using jerk')
   # plt.plot(eager_accel, label='current eager accel')
   # plt.plot(eags, label='exp. average')
   # plt.plot(derivatives, label='reg derivative')
   # plt.plot(jerks, label='jerk of reg deriv')
   # plt.plot(accel_with_sorta_smooth_jerk, label='acc with sorta smooth jerk')
-  plt.plot(_eager_accels, label='original eager accel')
+  # plt.plot(_eager_accels, label='original eager accel')
   # plt.plot(accel_with_deriv, label='acc with true derivative')
 
   plt.legend()
@@ -145,7 +145,7 @@ def plot_seq(idx=33, title=''):
   plt.show()
 
 
-plot_seq(10)
+plot_seq(14)
 
 # # to compare with and without eagerness
 # # 0 to 6 are good seqs with new data
