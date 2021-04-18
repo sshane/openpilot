@@ -52,8 +52,7 @@ class CarController():
 
     self.op_params = opParams()
     self.standstill_hack = self.op_params.get('standstill_hack')
-    self.delayed_accel = 0.
-    self.delayed_derivative = 0.
+    self.reset_eager()
 
     self.steer_rate_limited = False
 
@@ -64,6 +63,10 @@ class CarController():
       self.fake_ecus.add(Ecu.dsu)
 
     self.packer = CANPacker(dbc_name)
+
+  def reset_eager(self):
+    self.delayed_accel = 0.
+    self.delayed_derivative = 0.
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
@@ -80,26 +83,23 @@ class CarController():
       if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
       # apply_accel = 0.06 - actuators.brake
-    elif not enabled:
-      apply_accel = 0
-      self.delayed_accel = 0
-      self.delayed_derivative = 0
 
     eager_accel_method = self.op_params.get('eager_accel')
-    use_eager_accel = eager_accel_method in [1, 2]
+    if eager_accel_method in [1, 2]:
+      if not enabled:  # reset states
+        self.reset_eager()
 
-    if use_eager_accel:
-      RC = interp(CS.out.vEgo, [0, 5, 35], [0.025, 0.1, 1.0])  # subject to tuning
+      y = [self.op_params.get(p) for p in ['accel_time_constant_0_mph', 'accel_time_constant_10_mph', 'accel_time_constant_80_mph']]
+      RC = interp(CS.out.vEgo, [0, 5, 35], y)
       alpha = 1. - DT_CTRL / (RC + DT_CTRL)
       self.delayed_accel = self.delayed_accel * alpha + apply_accel * (1. - alpha)
 
       eagerness = self.op_params.get('accel_eagerness')
       if eager_accel_method == 1:  # new accel is simply accel - change in accel over exponential time (time constant varies with speed)
         apply_accel = apply_accel - (self.delayed_accel - apply_accel) * eagerness
-
       else:  # subtracting difference in smoothened accel derivative and current derivative (jerk, takes one more variable to keep track of derivative over time but control is more tight)
         derivative = apply_accel - self.delayed_accel  # store change in accel over some time constant (using exponential moving avg.)
-        self.delayed_derivative = self.delayed_derivative * alpha + derivative * (1. - alpha)  # then calc exp. moving average for derivative
+        self.delayed_derivative = self.delayed_derivative * alpha + derivative * (1. - alpha)  # calc exp. moving average for derivative
         apply_accel = apply_accel - (self.delayed_derivative - derivative) * eagerness  # then modify accel using jerk of accel
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
