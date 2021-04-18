@@ -45,7 +45,6 @@ class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.last_steer = 0
     self.accel_steady = 0.
-
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
@@ -82,7 +81,7 @@ class CarController():
       # +0.06 offset to reduce ABS pump usage when applying very small gas
       if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
-      # apply_accel = 0.06 - actuators.brake
+
 
     eager_accel_method = self.op_params.get('eager_accel')
     if eager_accel_method in [1, 2]:
