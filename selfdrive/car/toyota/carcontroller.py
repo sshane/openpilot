@@ -66,34 +66,14 @@ class CarController():
 
     self.packer = CANPacker(dbc_name)
 
-    with open('/data/openpilot/apply_accel_replay', 'r') as f:
-      self.apply_accel_list = json.loads(f.read())
-    self.replay_idx = 0
-    self.replaying = False
-    self.last_to_replay = self.op_params.get('replay_accel')
-
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
 
     # *** compute control surfaces ***
 
-    to_replay = self.op_params.get('replay_accel')  # on rising edge of param, start replay
-    if not self.last_to_replay and to_replay and not self.replaying:
-      self.replaying = True
-      self.replay_idx = 0
-    self.last_to_replay = to_replay
-
-    if self.replay_idx >= len(self.apply_accel_list):
-      self.replaying = False
-      self.replay_idx = 0
-
     # gas and brake
     apply_gas = 0.
-    if not self.replaying:
-      apply_accel = actuators.gas - actuators.brake
-    else:
-      apply_accel = self.apply_accel_list[self.replay_idx] / CarControllerParams.ACCEL_SCALE
-      self.replay_idx += 1
+    apply_accel = actuators.gas - actuators.brake
 
     if CS.CP.enableGasInterceptor and enabled and CS.out.vEgo < MIN_ACC_SPEED:
       # converts desired acceleration to gas percentage for pedal
@@ -106,23 +86,13 @@ class CarController():
       self.delayed_output = 0
       self.delayed_derivative = 0
 
-    data_sample = {'apply_accel': apply_accel, 'enabled': enabled, 'a_ego': CS.out.aEgo, 'v_ego': CS.out.vEgo}
-
-    RC = interp(CS.out.vEgo, [0, 5, 35], [self.op_params.get('accel_time_constant_0_mph'), self.op_params.get('accel_time_constant_10_mph'), self.op_params.get('accel_time_constant_80_mph')])
+    RC = interp(CS.out.vEgo, [0, 5, 35], [0.05, 0.1, 1.0])
     alpha = 1. - DT_CTRL / (RC + DT_CTRL)
     self.delayed_output = self.delayed_output * alpha + apply_accel * (1. - alpha)
     derivative = apply_accel - self.delayed_output
     self.delayed_derivative = self.delayed_derivative * alpha + derivative * (1. - alpha)
 
     apply_accel = apply_accel + (derivative - self.delayed_derivative) * self.op_params.get('accel_eagerness')
-
-    data_sample['RC'] = RC
-    data_sample['delayed_output'] = self.delayed_output
-    data_sample['eager_accel'] = apply_accel
-    data_sample['eagerness'] = self.op_params.get('accel_eagerness')
-
-    with open('/data/eager.txt', 'a') as f:
-      f.write('{}\n'.format(data_sample))
 
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 

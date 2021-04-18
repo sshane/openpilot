@@ -99,6 +99,10 @@ class opParams:
 
     self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
                         'dynamic_follow': Param('auto', str, static=True, hidden=True),
+                        'eager_accel': Param(False, [bool, int], 'This experimental feature combats hysteresis in the cruise control system, braking and accelerating sooner to eliminate overshoot and jerking\n'
+                                                                 'Set the param to `1` to use the first method: using the difference in the delayed desired acceleration and current des. accel\n'
+                                                                 'Setting the param to `2` uses the smoothened jerk of acceleration to more tightly modify acceleration\n'
+                                                                 'Try out both and see which is smoother. False disables this feature', live=True),
                         'accel_time_constant_0_mph': Param(0.01, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
                         'accel_time_constant_10_mph': Param(0.1, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),
                         'accel_time_constant_80_mph': Param(1.0, NUMBER, 'Time constant for eager accel (Approaching 0 is no change)', live=True),

@@ -3,6 +3,7 @@ import os
 import numpy as np
 import json
 import ast
+from selfdrive.config import Conversions as CV
 
 from common.numpy_fast import clip
 
@@ -33,72 +34,97 @@ print('Sequences: {}'.format(len(sequences)))
 
 # 34, 35, 36  these sequences have eager accel disabled
 
+def get_alpha_jerk(speed):
+  RC = np.interp(speed * CV.MS_TO_MPH, [0, 10, 80], [.01, .1, 1])
+  return 1. - DT_CTRL / (RC + DT_CTRL)
+
+def get_alpha_eager(speed):
+  RC = np.interp(speed * CV.MS_TO_MPH, [0, 10, 80], [.01, .1, 1])
+  return 1. - DT_CTRL / (RC + DT_CTRL)
+
+
 def plot_seq(idx=33, title=''):
   seq = sequences[idx]
   apply_accel, eager_accel, a_ego, v_ego = zip(*[(l['apply_accel'], l['eager_accel'], l['a_ego'], l['v_ego']) for l in seq])
 
-  RC_orig = 0.5
-  alpha_orig = 1. - DT_CTRL / (RC_orig + DT_CTRL)
+  # RC_jerk = 0.5
+  # alpha_jerk = 1. - DT_CTRL / (RC_jerk + DT_CTRL)
+  # RC_eager = 0.5
+  # alpha_eager = 1. - DT_CTRL / (RC_eager + DT_CTRL)
 
-  RC_1 = 0.5  # fast average
-  alpha_1 = 1. - DT_CTRL / (RC_1 + DT_CTRL)
+  # Variables for new eager accel (using jerk)
+  _delayed_output_jerk = 0
+  _delayed_derivative_jerk = 0
 
-  # Variables for new eager accel
-  _delayed_output = 0
-  _delayed_derivative = 0
+  # For original eager accel
+  _delayed_output_eager = 0
 
   # Variables to visualize (not required in practice)
-  _delayed_outputs = []
-  _new_accels = []
+  # _delayed_outputs_jerk = []
+  _new_accels_jerk = []
+
+  # For original eager accel
+  # _delayed_outputs_eager = []
+  _eager_accels = []
 
 
-  eags = [0]
-  accel_with_deriv = []
-  accel_with_sorta_smooth_jerk = []
-  derivatives = []
-  jerks = []
-  sorta_smooth_jerks = []
-  less_smooth_derivative_2 = []
-  jerk_TC = round(0.25 * 100)
+  # eags = [0]
+  # accel_with_deriv = []
+  # accel_with_sorta_smooth_jerk = []
+  # derivatives = []
+  # jerks = []
+  # sorta_smooth_jerks = []
+  # less_smooth_derivative_2 = []
+  # original_eager_accel = []
+  # jerk_TC = round(0.25 * 100)
   for idx, line in enumerate(seq):  # todo: left off at trying to plot derivative of accel (jerk)
-    _delayed_output = _delayed_output * alpha_orig + line['apply_accel'] * (1. - alpha_orig)
-    _derivative = line['apply_accel'] - _delayed_output
-    _delayed_derivative = _delayed_derivative * alpha_orig + _derivative * (1. - alpha_orig)
+    alpha_jerk = get_alpha_jerk(line['v_ego'])
+    _delayed_output_jerk = _delayed_output_jerk * alpha_jerk + line['apply_accel'] * (1. - alpha_jerk)
+    alpha_eager = get_alpha_eager(line['v_ego'])
+    _delayed_output_eager = _delayed_output_eager * alpha_eager + line['apply_accel'] * (1. - alpha_eager)
 
-    _new_accels.append(line['apply_accel'] + (_derivative - _delayed_derivative))
+    _derivative_jerk = line['apply_accel'] - _delayed_output_jerk
+    _delayed_derivative_jerk = _delayed_derivative_jerk * alpha_jerk + _derivative_jerk * (1. - alpha_jerk)
 
     # Visualize
-    _delayed_outputs.append(_delayed_output)
+    _new_accels_jerk.append(line['apply_accel'] + (_derivative_jerk - _delayed_derivative_jerk))
+    _eager_accels.append(line['apply_accel'] - (_delayed_output_eager - line['apply_accel']))
 
-
-    # todo: edit: accel_with_sorta_smooth_jerk seems promising
-    eags.append(eags[-1] * alpha_1 + line['apply_accel'] * (1. - alpha_1))
-
-    less_smooth_derivative_2.append((line['apply_accel'] - eags[-1]))  # todo: ideally use two delayed output variables
-    if idx > jerk_TC:
-      derivatives.append((line['apply_accel'] - seq[idx - jerk_TC]['apply_accel']))
-      jerks.append(derivatives[-1] - derivatives[idx - jerk_TC])
-      sorta_smooth_jerks.append(less_smooth_derivative_2[-1] - less_smooth_derivative_2[idx - jerk_TC])
-    else:
-      jerks.append(0)
-      derivatives.append(0)
-      sorta_smooth_jerks.append(0)
-    accel_with_deriv.append(line['apply_accel'] + derivatives[-1] / 10)
-    accel_with_sorta_smooth_jerk.append(line['apply_accel'] + sorta_smooth_jerks[-1] / 2)
-    # calc_eager_accels.append(line['apply_accel'] - (eag - line['apply_accel']) * 0.5)
+    # # _delayed_outputs_jerk.append(_delayed_output_jerk)
+    #
+    # original_eager_accel.append(line['apply_accel'] - (_delayed_output - line['apply_accel']))
+    #
+    #
+    # # todo: edit: accel_with_sorta_smooth_jerk seems promising
+    # eags.append(eags[-1] * alpha_1 + line['apply_accel'] * (1. - alpha_1))
+    #
+    # less_smooth_derivative_2.append((line['apply_accel'] - eags[-1]))  # todo: ideally use two delayed output variables
+    # if idx > jerk_TC:
+    #   derivatives.append((line['apply_accel'] - seq[idx - jerk_TC]['apply_accel']))
+    #   jerks.append(derivatives[-1] - derivatives[idx - jerk_TC])
+    #   sorta_smooth_jerks.append(less_smooth_derivative_2[-1] - less_smooth_derivative_2[idx - jerk_TC])
+    # else:
+    #   jerks.append(0)
+    #   derivatives.append(0)
+    #   sorta_smooth_jerks.append(0)
+    # accel_with_deriv.append(line['apply_accel'] + derivatives[-1] / 10)
+    # accel_with_sorta_smooth_jerk.append(line['apply_accel'] + sorta_smooth_jerks[-1] / 2)
+    # # calc_eager_accels.append(line['apply_accel'] - (eag - line['apply_accel']) * 0.5)
 
   plt.figure()
   plt.plot(apply_accel, label='original desired accel')
   # plt.plot(a_ego, label='a_ego')
-  # plt.plot(_new_accels, label='new_accels')
+  plt.plot(_new_accels_jerk, label='new_accels')
   # plt.plot(eager_accel, label='current eager accel')
-  plt.legend()
-  plt.title(title)
   # plt.plot(eags, label='exp. average')
   # plt.plot(derivatives, label='reg derivative')
   # plt.plot(jerks, label='jerk of reg deriv')
   # plt.plot(accel_with_sorta_smooth_jerk, label='acc with sorta smooth jerk')
+  plt.plot(_eager_accels, label='original eager accel')
   # plt.plot(accel_with_deriv, label='acc with true derivative')
+
+  plt.legend()
+  plt.title(title)
 
   # plt.figure()
   # plt.plot(v_ego, label='v_ego')
