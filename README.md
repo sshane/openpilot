@@ -12,14 +12,14 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ### Behavior Changes
 * [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles) - 3 + auto profiles to control distance
   * [**`auto-df` model for automatic distance profile switching**](#Automatic-DF-profile-switching)
-* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/ShaneSmiskol/openpilot/blob/stock_additions/SA_RELEASES.md#stock-additions-v066---2020-02-27-082)
+* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/ShaneSmiskol/openpilot/blob/stock_additions/SA_RELEASES.md#stock-additions-v066---2021-02-27-082)
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**NEW❗ Eager acceleration**](#eager-acceleration--experimental-feature) - using the jerk of desired accel to respond quicker to braking and acceleration
+* [**NEW❗ Eager acceleration**](#new-eager-acceleration-experimental-feature) - using the jerk of desired accel to respond quicker to braking and acceleration
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -37,7 +37,6 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ---
 ## Behavior changes
 
----
 ### Dynamic follow (3 profiles)
 Dynamic follow aims to provide the stock (Toyota) experience of having three different distance settings. Dynamic follow works by dynamically changing the distance in seconds which is sent to the long MPC to predict a speed to travel at. Basically, if the lead is decelerating or might soon, increase distance to prepare. And if the lead is accelerating, reduce distance to get up to speed quicker.
 
@@ -117,7 +116,6 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 ---
 ## General Features
 
----
 ### NEW❗ Eager acceleration *(experimental feature)*
 For some Toyota cars (primarily on older TSS1's like the '17 Corolla), there seems to exist some hysteresis in the ACC (adaptive cruise control) system. This can be most noticed when openpilot requests some brake shortly after accelerating, it's quite delayed causing integral to wind up and jerking to ensue when the lead comes to a stop, even if they're rather smooth about it.
 
@@ -205,7 +203,6 @@ Feel free to reach out to me on [Discord](#stock-additions-v066-082) if you're h
 ---
 ## Documentation
 
----
 ### Quick Installation
 To install Stock Additions, just run the following on your EON/C2 (make sure to press enter after each line):
 
