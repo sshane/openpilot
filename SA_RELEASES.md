@@ -1,3 +1,8 @@
+Stock Additions Update 2 - 2021-04-21 (0.8.2)
+===
+ * 
+ * 
+
 Stock Additions v0.6.6 - 2021-02-27 (0.8.2)
 ===
  * Continued grey panda support (white panda not guaranteed)

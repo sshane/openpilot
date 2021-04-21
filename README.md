@@ -19,6 +19,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
+* [**NEW❗ Eager acceleration**](#eager-acceleration)
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -34,6 +35,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Videos**](#Videos)
 
 ---
+## Behavior changes
 
 ### Dynamic follow (3 profiles)
 Dynamic follow aims to provide the stock (Toyota) experience of having three different distance settings. Dynamic follow works by dynamically changing the distance in seconds which is sent to the long MPC to predict a speed to travel at. Basically, if the lead is decelerating or might soon, increase distance to prepare. And if the lead is accelerating, reduce distance to get up to speed quicker.
@@ -111,12 +113,21 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
   Long derivative is disabled by default due to only one tune for all cars, but can be enabled by using [opEdit](#Customize-this-fork-opEdit) and setting the `enable_long_derivative` parameter to `True`. It works well on my '17 Corolla with pedal.
 
 ---
-### ZSS Support
-If you have a Prius with a ZSS ([Zorrobyte](https://github.com/zorrobyte) Steer Sensor), you can use this fork to take full advantage of your high-precision angle sensor! Added support for ZSS with [PR #198](https://github.com/ShaneSmiskol/openpilot/pull/198), there's nothing you need to do. Special thanks to [Trae](https://github.com/d412k5t412) for helping testing the addition!
+## General Features
 
-If you have a ZSS but not a Prius, let me know and I can add support for your car.
+### Eager acceleration *(🆕 experimental feature)*
+For some Toyota cars (primarily on older TSS1's like the '17 Corolla), there seems to exist some hysteresis in the ACC (adaptive cruise control) system. This can be most noticed when openpilot requests some brake shortly after accelerating, it's quite delayed causing integral to wind up and jerking to ensue when the lead comes to a stop, even if they're rather smooth about it.
 
----
+This feature aims to try and combat that by modifying the final acceleration sent to the car, it sums the regular desired acceleration, and the jerk of the desired acceleration (the derivative of the derivative).
+
+To try it, edit the `eager_accel` param with opEdit to set it to the integer `2`. There's also another method that uses the derivative of the desired acceleration, but it's not ideal since it can pretty severely change the desired acceleration value when it's changing linearly, and not changing direction. The jerk method is probably going to be the one I keep around once this feature is out of beta.
+
+Here's a quick graph how the two methods compare, you can see how the derivative method warps the acceleration much further than jerk.
+
+<p align="center">
+  <img src=".media/eager_accel.png?raw=true">
+</p>
+
 ### Customize this fork (opEdit)
 This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
 ```python
@@ -171,6 +182,12 @@ When a new update is available on GitHub for Stock Additions, your EON/C2 will p
 Therefore, if your device sees an update while you're driving it will reboot approximately 5 to 10 minutes after you finish your drive, it resets the timer if you start driving again before the time is up.
 
 ---
+### ZSS Support
+If you have a Prius with a ZSS ([Zorrobyte](https://github.com/zorrobyte) Steer Sensor), you can use this fork to take full advantage of your high-precision angle sensor! Added support for ZSS with [PR #198](https://github.com/ShaneSmiskol/openpilot/pull/198), there's nothing you need to do. Special thanks to [Trae](https://github.com/d412k5t412) for helping testing the addition!
+
+If you have a ZSS but not a Prius, let me know and I can add support for your car.
+
+---
 ### Offline crash logging
 If you experience a crash or exception while driving with this fork, and you're not on internet for the error to be uploaded to Sentry, you should be able to check out the directory `/data/community/crashes` to see any and all logs of exceptions caught in openpilot. Simply view the logs with `ls -lah` and then `cat` the file you wish to view by date. This does not catch all errors, for example scons compilation errors or some Python syntax errors will not be caught, `tmux a` is usually best to view these (if openpilot didn't start).
 
@@ -194,6 +211,8 @@ reboot
 The `--depth 1` flag shallow clones the fork, it ends up being about 90 Mb so you can get the fork up and running quickly. Once you install Stock Additions, [automatic updating](#Automatic-updates) should always keep openpilot up to date with the latest from my fork!
 
 *Or use the [emu CLI](https://github.com/emu-sh/.oh-my-comma) to easily switch to this fork's default branch: `emu fork switch ShaneSmiskol`. The initial setup may take longer than the above command, but you gain the ability to switch to any fork you want.*
+
+*Or (last or, I promise!) you can use my handy fork installation link during NEOS setup after a factory reset: **https://smiskol.com/fork/shane***
 
 ### Branches
 Most of the branches on this fork are development branches I use as various openpilot tests. The few that more permanent are the following:
