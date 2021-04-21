@@ -137,6 +137,8 @@ class Controls:
     self.state = State.disabled
     self.enabled = False
     self.active = False
+    self.door_open = False
+    self.seatbelt_unlatched = False
     self.can_rcv_error = False
     self.soft_disable_timer = 0
     self.v_cruise_kph = 255
@@ -431,6 +433,10 @@ class Controls:
     # Check if openpilot is engaged
     self.enabled = self.active or self.state == State.preEnabled
 
+    if self.state == State.preEnabled:
+      self.door_open = False
+      self.seatbelt_unlatched = False
+
   def state_control(self, CS):
     """Given the state, this function returns an actuators packet"""
 
@@ -546,8 +552,11 @@ class Controls:
       can_sends = self.CI.apply(CC)
       self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
+    self.door_open |= CS.doorOpen  # don't leave decel state until disengage
+    self.seatbelt_unlatched |= CS.seatbeltUnlatched
+
     force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0. or
-                   self.state == State.softDisabling or CS.seatbeltUnlatched or CS.doorOpen)
+                   self.state == State.softDisabling or self.seatbelt_unlatched or self.door_open)
 
     steer_angle_rad = (CS.steeringAngleDeg - self.sm['lateralPlan'].angleOffsetDeg) * CV.DEG_TO_RAD
 
