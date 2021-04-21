@@ -151,7 +151,7 @@ class DriverStatus():
       self.threshold_pre = _AWARENESS_PRE_TIME_TILL_TERMINAL / _AWARENESS_TIME
       self.threshold_prompt = _AWARENESS_PROMPT_TIME_TILL_TERMINAL / _AWARENESS_TIME
       self.step_change = DT_DMON / _AWARENESS_TIME
-      self.active_monitoring_mode = False
+      # self.active_monitoring_mode = False
 
   def _is_driver_distracted(self, pose, blink):
     if not self.pose_calibrated:
@@ -247,6 +247,7 @@ class DriverStatus():
       self.awareness = max(self.awareness - self.step_change, -0.1)
 
     alert = None
+    print(self.awareness)
     if self.awareness <= 0.:
       # terminal red alert: disengagement required
       alert = EventName.driverDistracted if self.active_monitoring_mode else EventName.driverUnresponsive
