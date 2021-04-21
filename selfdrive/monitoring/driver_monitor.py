@@ -249,6 +249,7 @@ class DriverStatus():
     alert = None
     print(self.awareness)
     if self.awareness <= 0.:
+      print('adding red alert')
       # terminal red alert: disengagement required
       alert = EventName.driverDistracted if self.active_monitoring_mode else EventName.driverUnresponsive
       self.hi_std_alert_enabled = True
@@ -257,9 +258,11 @@ class DriverStatus():
         self.terminal_alert_cnt += 1
     elif self.awareness <= self.threshold_prompt:
       # prompt orange alert
+      print('adding orange alert')
       alert = EventName.promptDriverDistracted if self.active_monitoring_mode else EventName.promptDriverUnresponsive
     elif self.awareness <= self.threshold_pre:
       # pre green alert
+      print('adding green alert')
       alert = EventName.preDriverDistracted if self.active_monitoring_mode else EventName.preDriverUnresponsive
 
     if alert is not None:
