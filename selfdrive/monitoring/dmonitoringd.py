@@ -19,7 +19,7 @@ def dmonitoringd_thread(sm=None, pm=None):
   sm['liveCalibration'].calStatus = Calibration.INVALID
   sm['liveCalibration'].rpyCalib = [0, 0, 0]
   sm['carState'].buttonEvents = []
-  False = True
+  sm['carState'].standstill = True
 
   v_cruise_last = 0
   driver_engaged = False
