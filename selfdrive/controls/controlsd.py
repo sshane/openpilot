@@ -433,6 +433,7 @@ class Controls:
     # Check if openpilot is engaged
     self.enabled = self.active or self.state == State.preEnabled
 
+    print(self.state)
     if self.state == State.preEnabled:
       self.door_open = False
       self.seatbelt_unlatched = False
