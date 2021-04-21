@@ -370,9 +370,8 @@ class Controls:
     self.soft_disable_timer = max(0, self.soft_disable_timer - 1)
 
     self.current_alert_types = [ET.PERMANENT]
-    self.state = State.enabled
-    self.active = True
-    self.enabled = True
+    # self.state = State.enabled
+    # self.active = True
 
     # ENABLED, PRE ENABLING, SOFT DISABLING
     if self.state != State.disabled:
@@ -428,8 +427,8 @@ class Controls:
 
     # Check if actuators are enabled
     self.active = self.state == State.enabled or self.state == State.softDisabling
-    if self.active:
-      self.current_alert_types.append(ET.WARNING)
+    # if self.active:
+    self.current_alert_types.append(ET.WARNING)
 
     # Check if openpilot is engaged
     self.enabled = self.active or self.state == State.preEnabled
