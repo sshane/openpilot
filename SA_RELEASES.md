@@ -5,11 +5,11 @@ Stock Additions Update 2 - 2021-04-21 (0.8.2)
  * Offroad apk with color correction option from ihsakashi
  * opParams and opEdit: Make more params live! Any param not marked `static` can be adjusted while onroad! The non-static non-live params update within 10 seconds.
  * New param to change at which speed lane changes become nudgeless above (`alca_no_nudge_speed`)
- * Experimental features: eager acceleration (read the README under general features)
+ * Experimental feature: eager acceleration (read the README under general features)
  * More accurate LDW warning
  * Features ported from 0.8.3:
    * The newest KL model, and a param to enable laneless
-   * (0.8.4) The MPC retune fix from Harald
+   * (0.8.4) The laneless MPC retune fix from Harald
    * A few car firmware updates
    * GPS malfunction fix
 
