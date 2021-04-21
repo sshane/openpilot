@@ -123,7 +123,7 @@ This feature aims to try and combat that by modifying the final acceleration sen
 
 To try it, edit the `eager_accel` param with opEdit to set it to the integer `2`. There's also another method that uses the derivative of the desired acceleration, but it's not ideal since it can pretty severely change the desired acceleration value when it's changing linearly, and not changing direction. The jerk method is probably going to be the one I keep around once this feature is out of beta.
 
-To adjust the tuning for this feature, you can change the `accel_eagerness` parameter, this is simply a multiplier for the modification. (`apply_accel += eager_mod * accel_eagerness`)
+To adjust the tuning for this feature, you can change the `accel_eagerness` parameter, this is simply a multiplier for the modification (`apply_accel += eager_mod * accel_eagerness`).
 
 Here's a quick graph how the two methods compare, you can see how the derivative method warps the acceleration much further than jerk.
 
