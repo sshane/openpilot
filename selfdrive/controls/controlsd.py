@@ -370,6 +370,7 @@ class Controls:
     self.soft_disable_timer = max(0, self.soft_disable_timer - 1)
 
     self.current_alert_types = [ET.PERMANENT]
+    self.state = State.enabled
 
     # ENABLED, PRE ENABLING, SOFT DISABLING
     if self.state != State.disabled:
@@ -424,8 +425,7 @@ class Controls:
           self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
 
     # Check if actuators are enabled
-    self.state = State.enabled
-    self.active = True  # self.state == State.enabled or self.state == State.softDisabling
+    self.active = self.state == State.enabled or self.state == State.softDisabling
     if self.active:
       self.current_alert_types.append(ET.WARNING)
 
