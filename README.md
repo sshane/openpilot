@@ -19,7 +19,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**NEW❗ Eager acceleration**](#eager-acceleration)
+* [**NEW❗ Eager acceleration**](#eager-acceleration--experimental-feature)
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -37,6 +37,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ---
 ## Behavior changes
 
+---
 ### Dynamic follow (3 profiles)
 Dynamic follow aims to provide the stock (Toyota) experience of having three different distance settings. Dynamic follow works by dynamically changing the distance in seconds which is sent to the long MPC to predict a speed to travel at. Basically, if the lead is decelerating or might soon, increase distance to prepare. And if the lead is accelerating, reduce distance to get up to speed quicker.
 
@@ -52,6 +53,7 @@ Just use the button on the button right of the screen while driving to change be
   <img src=".media/df_profiles.jpg?raw=true">
 </p>
 
+---
 ### Automatic DF profile switching
 I've trained a custom model with Keras that takes in the past 35 seconds of your speed, the lead's speed and the lead's distance. With these inputs, it tries to correctly predict which profile is the best for your current situation.
 
@@ -115,10 +117,11 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 ---
 ## General Features
 
-### Eager acceleration *(🆕 experimental feature)*
+---
+### NEW❗ Eager acceleration *(experimental feature)*
 For some Toyota cars (primarily on older TSS1's like the '17 Corolla), there seems to exist some hysteresis in the ACC (adaptive cruise control) system. This can be most noticed when openpilot requests some brake shortly after accelerating, it's quite delayed causing integral to wind up and jerking to ensue when the lead comes to a stop, even if they're rather smooth about it.
 
-This feature aims to try and combat that by modifying the final acceleration sent to the car, it sums the regular desired acceleration, and the jerk of the desired acceleration (the derivative of the derivative).
+This feature aims to try and combat that by modifying the final acceleration sent to the car, it sums the regular desired acceleration, and the jerk of the desired acceleration (the derivative of the derivative) so that we can react quicker to changes in direction of acceleration.
 
 To try it, edit the `eager_accel` param with opEdit to set it to the integer `2`. There's also another method that uses the derivative of the desired acceleration, but it's not ideal since it can pretty severely change the desired acceleration value when it's changing linearly, and not changing direction. The jerk method is probably going to be the one I keep around once this feature is out of beta.
 
@@ -128,6 +131,7 @@ Here's a quick graph how the two methods compare, you can see how the derivative
   <img src=".media/eager_accel.png?raw=true">
 </p>
 
+---
 ### Customize this fork (opEdit)
 This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
 ```python
@@ -170,6 +174,7 @@ An archive of opParams [lives here.](https://github.com/ShaneSmiskol/op_params)
 
 Parameters are stored at `/data/op_params.json`
 
+---
 ### opEdit Demo
 <img src=".media/op_edit.gif?raw=true" width="1000">
 
@@ -198,6 +203,7 @@ Feel free to reach out to me on [Discord](#stock-additions-v066-082) if you're h
 ---
 ## Documentation
 
+---
 ### Quick Installation
 To install Stock Additions, just run the following on your EON/C2 (make sure to press enter after each line):
 
@@ -214,11 +220,13 @@ The `--depth 1` flag shallow clones the fork, it ends up being about 90 Mb so yo
 
 *Or (last or, I promise!) you can use my handy fork installation link during NEOS setup after a factory reset: **https://smiskol.com/fork/shane***
 
+---
 ### Branches
 Most of the branches on this fork are development branches I use as various openpilot tests. The few that more permanent are the following:
   * [`stock_additions`](https://github.com/ShaneSmiskol/openpilot/tree/stock_additions): This is similar to stock openpilot's release branch. Will receive occasional and tested updates to Stock Additions.
   * `stock_additions-devel` or `SA-staging`: My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommendeded as a daily driver.
 
+---
 ### Archive Stock Additions branches
 * [Stock Additions 0.7](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-07)
 * [Stock Additions 0.7.1](https://github.com/ShaneSmiskol/openpilot-archive/tree/stock_additions-071)
