@@ -371,6 +371,8 @@ class Controls:
 
     self.current_alert_types = [ET.PERMANENT]
     self.state = State.enabled
+    self.active = True
+    self.enabled = True
 
     # ENABLED, PRE ENABLING, SOFT DISABLING
     if self.state != State.disabled:
