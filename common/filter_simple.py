@@ -7,9 +7,3 @@ class FirstOrderFilter():
   def update(self, x):
     self.x = (1. - self.k) * self.x + self.k * x
     return self.x
-
-
-DT_DMON = 0.1
-_DISTRACTED_FILTER_TS = 0.25  # 0.6Hz
-filter = FirstOrderFilter(0., _DISTRACTED_FILTER_TS, DT_DMON)
-

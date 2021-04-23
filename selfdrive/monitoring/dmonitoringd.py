@@ -39,7 +39,7 @@ def dmonitoringd_thread(sm=None, pm=None):
                         sm['carState'].steeringPressed or \
                         sm['carState'].gasPressed
       if driver_engaged:
-        driver_status.update(Events(), True, True, False)
+        driver_status.update(Events(), True, sm['controlsState'].enabled, sm['carState'].standstill)
       v_cruise_last = v_cruise
 
     if sm.updated['modelV2']:
@@ -47,7 +47,7 @@ def dmonitoringd_thread(sm=None, pm=None):
 
     # Get data from dmonitoringmodeld
     events = Events()
-    driver_status.get_pose(sm['driverState'], sm['liveCalibration'].rpyCalib, sm['carState'].vEgo, True)
+    driver_status.get_pose(sm['driverState'], sm['liveCalibration'].rpyCalib, sm['carState'].vEgo, sm['controlsState'].enabled)
 
     # Block engaging after max number of distrations
     if driver_status.terminal_alert_cnt >= MAX_TERMINAL_ALERTS or driver_status.terminal_time >= MAX_TERMINAL_DURATION:
