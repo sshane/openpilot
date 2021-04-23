@@ -32,8 +32,10 @@ class LanePlanner:
 
     self.op_params = opParams()
     # todo: start from where we left off
-    self.camera_offset = STANDARD_CAMERA_OFFSET  # self.op_params.get('camera_offset')
-    self.offset_filter = FirstOrderFilter(STANDARD_CAMERA_OFFSET, 10, DT_MDL)  # 15 second time constant
+    # self.camera_offset = STANDARD_CAMERA_OFFSET  # self.op_params.get('camera_offset')
+    self.camera_offset = -0.06  # self.op_params.get('camera_offset')
+    # self.offset_filter = FirstOrderFilter(STANDARD_CAMERA_OFFSET, 10, DT_MDL)  # 15 second time constant
+    self.offset_filter = FirstOrderFilter(-0.06, 10, DT_MDL)  # 15 second time constant
 
     self.speed = 0.
 
