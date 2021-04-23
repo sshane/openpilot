@@ -151,6 +151,8 @@ from common.params import Params
 from selfdrive.registration import register
 from selfdrive.launcher import launcher
 
+ThermalStatus = log.DeviceState.ThermalStatus
+
 
 # comment out anything you don't want to run
 managed_processes = {
@@ -472,7 +474,7 @@ def manager_thread():
   while 1:
     msg = messaging.recv_sock(device_state_sock, wait=True)
 
-    if msg.deviceState.freeSpacePercent < 5:
+    if msg.deviceState.freeSpacePercent < 5 or msg.deviceState.thermalStatus >= ThermalStatus.red:
       logger_dead = True
 
     run_all = False
