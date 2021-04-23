@@ -1,8 +1,12 @@
 from common.numpy_fast import interp
 import numpy as np
+
+from common.realtime import DT_MDL
 from selfdrive.hardware import EON, TICI
 from cereal import log
 from common.op_params import opParams
+from common.filter_simple import FirstOrderFilter
+
 
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
@@ -25,8 +29,13 @@ class LanePlanner:
     self.lane_width_estimate = 3.7
     self.lane_width_certainty = 1.0
     self.lane_width = 3.7
+
     self.op_params = opParams()
-    self.camera_offset = self.op_params.get('camera_offset')
+    # todo: start from where we left off
+    self.camera_offset = STANDARD_CAMERA_OFFSET  # self.op_params.get('camera_offset')
+    self.offset_filter = FirstOrderFilter(STANDARD_CAMERA_OFFSET, 10, DT_MDL)  # 15 second time constant
+
+    self.speed = 0.
 
     self.lll_prob = 0.
     self.rll_prob = 0.
@@ -38,6 +47,28 @@ class LanePlanner:
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
 
+  def get_camera_offset(self, model):
+    # NOTES: with the new model, left is negative and right is positive (switched from before)
+
+    can_learn = self.lll_prob > 0.5
+    can_learn &= self.rll_prob > 0.5
+    can_learn &= self.lane_width_certainty > 0.5  # wait until we have lanelines for some period of time
+    can_learn &= self.speed > 5
+    # if the road is straight (or maybe not, for centering while in curves)
+    # fixme: for now ignore curvature of path
+
+    if can_learn:
+      lll_y = model.laneLines[1].y
+      rll_y = model.laneLines[2].y
+
+      left_lane_pos = lll_y[0] + self.lane_width / 2.0
+      right_lane_pos = rll_y[0] - self.lane_width / 2.0
+      ll_center_pos = (left_lane_pos + right_lane_pos) / 2.0
+      path_pos = model.position.y[0]
+      camera_offset_estimate = ll_center_pos - path_pos
+
+      self.camera_offset = self.offset_filter.update(camera_offset_estimate)
+      print('learning offset: {}'.format(round(self.camera_offset, 4)))
 
   def parse_model(self, md):
     if len(md.laneLines) == 4 and len(md.laneLines[0].t) == TRAJECTORY_SIZE:
@@ -45,7 +76,8 @@ class LanePlanner:
       # left and right ll x is the same
       self.ll_x = md.laneLines[1].x
       # only offset left and right lane lines; offsetting path does not make sense
-      self.camera_offset = self.op_params.get('camera_offset')  # update camera offset
+      # self.camera_offset = self.op_params.get('camera_offset')  # update camera offset
+      self.get_camera_offset(md)
       self.lll_y = np.array(md.laneLines[1].y) - self.camera_offset
       self.rll_y = np.array(md.laneLines[2].y) - self.camera_offset
       self.lll_prob = md.laneLineProbs[1]
@@ -58,6 +90,7 @@ class LanePlanner:
       self.r_lane_change_prob = md.meta.desireState[log.LateralPlan.Desire.laneChangeRight]
 
   def get_d_path(self, v_ego, path_t, path_xyz):
+    self.speed = v_ego
     # Reduce reliance on lanelines that are too far apart or
     # will be in a few seconds
     path_xyz[:, 1] -= self.camera_offset - STANDARD_CAMERA_OFFSET  # offset path
