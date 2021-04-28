@@ -25,6 +25,7 @@ def acc_feedforward(angle, speed):
 def convert_torque_corolla(speed):
   """Returns a multiplier to convert universal torque to vehicle-specific torque"""
   # todo: can we fit a function that outputs this without calculating both feedforwards?
+  speed = np.array([max(s, 5 * CV.MPH_TO_MS) for s in speed])
   mult = acc_feedforward(1, speed) / std_feedforward(1, speed)
   return mult
 
