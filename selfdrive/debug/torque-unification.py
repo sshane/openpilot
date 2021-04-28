@@ -60,7 +60,7 @@ print(f'Took {t} seconds to execute fitted function')
 
 plt.title('output of torque conversion function')
 plt.plot(spds * CV.MS_TO_MPH, mults, label='torque multiplier')
-plt.plot(spds * CV.MS_TO_MPH, mults_fitted, label='torque multiplier (fitted)')
+# plt.plot(spds * CV.MS_TO_MPH, mults_fitted, label='torque multiplier (fitted)')
 plt.xlabel('speed (mph)')
 plt.legend()
 
@@ -71,6 +71,9 @@ deg = 10
 plt.title(f'torque response at {deg} degrees')
 torques = std_feedforward(deg, spds)
 plt.plot(spds * CV.MS_TO_MPH, torques, label='standard feedforward (~lateral accel)')
+
+torques = std_feedforward(deg, spds) * convert_torque_corolla(spds)
+plt.plot(spds * CV.MS_TO_MPH, torques, label='standard feedforward converted')
 
 torques = acc_feedforward(deg, spds)
 plt.plot(spds * CV.MS_TO_MPH, torques, label='custom-fit \'17 Corolla feedforward')
