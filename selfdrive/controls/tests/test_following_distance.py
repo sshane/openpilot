@@ -70,7 +70,7 @@ def run_following_distance_simulation(v_lead, t_end=200.0):
     if v_cruise < mpc.v_mpc:
       v_ego, a_ego = v_cruise, a_cruise
     else:
-      v_ego, a_ego = mpc.v_mpc, mpc.a_mpc
+      v_ego, a_ego = mpc.v_mpc, mpc.mpc_solution[0].a_ego[1]
 
     # Update state
     x_lead += v_lead * dt

@@ -105,7 +105,7 @@ class Planner():
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
 
-    self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
+    self.v_acc_future = min([self.mpc1.mpc_solution[0].v_ego[10], self.mpc2.mpc_solution[0].v_ego[10], v_cruise_setpoint])
 
   def update(self, sm, CP):
     """Gets called when new radarState is available"""
