@@ -403,7 +403,8 @@ class Controls:
     dt = min(long_plan_age, LON_MPC_STEP + DT_CTRL) + DT_CTRL
 
     a_acc_sol = long_plan.aStart + (dt / LON_MPC_STEP) * (long_plan.aTarget - long_plan.aStart)
-    v_acc_sol = long_plan.vStart + dt * (a_acc_sol + long_plan.aStart) / 2.0
+    # v_acc_sol = long_plan.vStart + dt * (a_acc_sol + long_plan.aStart) / 2.0
+    v_acc_sol = long_plan.vStart + (dt / LON_MPC_STEP) * (long_plan.vTarget - long_plan.vStart)
 
     # Gas/Brake PID loop
     actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP)
