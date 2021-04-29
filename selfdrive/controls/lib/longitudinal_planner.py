@@ -97,10 +97,10 @@ class Planner():
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
         self.v_acc = self.mpc1.mpc_solution[0].v_ego[1]
-        self.a_acc = self.mpc1.a_mpc
+        self.a_acc = self.mpc1.mpc_solution[0].a_ego[1]
       elif slowest == 'mpc2':
         self.v_acc = self.mpc2.mpc_solution[0].v_ego[1]
-        self.a_acc = self.mpc2.a_mpc
+        self.a_acc = self.mpc2.mpc_solution[0].a_ego[1]
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
