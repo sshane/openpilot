@@ -2,6 +2,8 @@ import os
 import math
 
 import cereal.messaging as messaging
+
+from common.numpy_fast import interp
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
 from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
@@ -16,7 +18,7 @@ class LongitudinalMpc():
     self.mpc_id = mpc_id
 
     self.setup_mpc()
-    self.v_mpc = 0.0
+    # self.v_mpc = 0.0
     self.v_cruise = 0.0
     self.prev_lead_status = False
     self.prev_lead_x = 0.0
@@ -75,7 +77,8 @@ class LongitudinalMpc():
       self.a_lead_tau = lead.aLeadTau
       self.new_lead = False
       if not self.prev_lead_status or abs(x_lead - self.prev_lead_x) > 2.5:
-        self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
+        v_mpc = interp(0.15, [0, 0.2], self.mpc_solution[0].v_ego[0:2])
+        self.libmpc.init_with_simulation(v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
         self.new_lead = True
 
       self.prev_lead_status = True
@@ -96,7 +99,7 @@ class LongitudinalMpc():
     self.duration = int((sec_since_boot() - t) * 1e9)
 
     # Get solution. MPC timestep is 0.2 s, so interpolation to 0.05 s is needed
-    self.v_mpc = self.mpc_solution[0].v_ego[1]
+    # self.v_mpc = self.mpc_solution[0].v_ego[1]
 
     # Reset if NaN or goes through lead car
     crashing = any(lead - ego < -50 for (lead, ego) in zip(self.mpc_solution[0].x_l, self.mpc_solution[0].x_ego))
@@ -113,6 +116,7 @@ class LongitudinalMpc():
                        MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.cur_state[0].v_ego = v_ego
       self.cur_state[0].a_ego = 0.0
-      self.v_mpc = v_ego
+      # self.v_mpc = v_ego
+      self.mpc_solution[0].v_ego[0] = v_ego
       self.mpc_solution[0].v_ego[1] = v_ego
       self.prev_lead_status = False
