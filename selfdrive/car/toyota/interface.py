@@ -12,6 +12,19 @@ EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
+  def compute_torque(torque, speed):
+    def std_feedforward(_angle, _speed):
+      return _speed ** 2 * _angle
+
+    def acc_feedforward(_angle, _speed):
+      _c1, _c2, _c3 = 0.35189607550172824, 7.506201251644202, 69.226826411091
+      return (_c1 * _speed ** 2 + _c2 * _speed + _c3) * _angle
+
+    speed = max(speed, 20 * CV.MPH_TO_MS)  # avoids zero div and too high of multipliers as std approaches 0
+    mult = acc_feedforward(1, speed) / std_feedforward(1, speed)
+    return float(torque) * mult
+
+  @staticmethod
   def compute_gb(accel, speed):
     return float(accel) / CarControllerParams.ACCEL_SCALE
 
@@ -112,9 +125,9 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[20, 31], [0.05, 0.12]]  # 45 to 70 mph
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [[20, 31], [0.001, 0.01]]
       ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[20, 31], [0.0, 0.0]]
-      # ret.lateralTuning.pid.kf = 0.00003  # full torque for 20 deg at 80mph means 0.00007818594
-      ret.lateralTuning.pid.kf = 0.000055  # full torque for 20 deg at 80mph means 0.00007818594
-      ret.lateralTuning.pid.newKfTuned = True
+      ret.lateralTuning.pid.kf = 0.00003 * 1.833  # full torque for 20 deg at 80mph means 0.00007818594
+      # ret.lateralTuning.pid.kf = 0.000055  # full torque for 20 deg at 80mph means 0.00007818594
+      # ret.lateralTuning.pid.newKfTuned = True
 
     elif candidate == CAR.LEXUS_RX:
       stop_and_go = True

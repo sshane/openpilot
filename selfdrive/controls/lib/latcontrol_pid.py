@@ -5,11 +5,12 @@ from cereal import log
 
 
 class LatControlPID():
-  def __init__(self, CP):
+  def __init__(self, CP, compute_torque):
     self.pid = LatPIDController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
                                 (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
                                 (CP.lateralTuning.pid.kdBP, CP.lateralTuning.pid.kdV),
-                                k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, sat_limit=CP.steerLimitTimer)
+                                k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, sat_limit=CP.steerLimitTimer,
+                                convert=compute_torque)
     self.new_kf_tuned = CP.lateralTuning.pid.newKfTuned
     self.angle_steers_des = 0.
 

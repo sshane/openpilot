@@ -43,6 +43,10 @@ class CarInterfaceBase():
     return 1.
 
   @staticmethod
+  def compute_torque(torque, speed):  # no behavior change for cars without custom fit torque function
+    return float(torque)
+
+  @staticmethod
   def compute_gb(accel, speed):
     raise NotImplementedError
 
