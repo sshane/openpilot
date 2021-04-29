@@ -141,6 +141,8 @@ class Planner():
       self.longitudinalPlanSource = slowest
 
       future_start_ts = round(0.4 / LON_MPC_STEP)  # we start at 0.4 seconds and aTarget always is +0.2 seconds (0.6)
+      # we're sending controlsd aStart at 0.4 sec and aTarget at 0.6 sec, but controlsd only
+      # interpolates to 0.05 unless there is significant lag from planner. so we're sending the car 0.4 to 0.45 seconds future accel
 
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
