@@ -87,19 +87,19 @@ class Planner():
     if enabled:
       solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status:
-        solutions['mpc1'] = self.mpc1.v_mpc
+        solutions['mpc1'] = self.mpc1.mpc_solution[0].v_ego[1]
       if self.mpc2.prev_lead_status:
-        solutions['mpc2'] = self.mpc2.v_mpc
+        solutions['mpc2'] = self.mpc2.mpc_solution[0].v_ego[1]
 
       slowest = min(solutions, key=solutions.get)
 
       self.longitudinalPlanSource = slowest
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
-        self.v_acc = self.mpc1.v_mpc
+        self.v_acc = self.mpc1.mpc_solution[0].v_ego[1]
         self.a_acc = self.mpc1.a_mpc
       elif slowest == 'mpc2':
-        self.v_acc = self.mpc2.v_mpc
+        self.v_acc = self.mpc2.mpc_solution[0].v_ego[1]
         self.a_acc = self.mpc2.a_mpc
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
