@@ -87,6 +87,12 @@ class ModelMpcHelper:
     return distances, speeds, accelerations
 
 
+class Solution:  # this is temporary to not change velocity sol. interpolation
+  def __init__(self, a_acc, a_acc_start):
+    self.a_acc = a_acc
+    self.a_acc_start = a_acc_start
+
+
 class Planner():
   def __init__(self, CP):
     self.CP = CP
@@ -107,6 +113,7 @@ class Planner():
     self.a_acc = 0.0
     self.v_cruise = 0.0
     self.a_cruise = 0.0
+    self.solution = Solution(0., 0.)
 
     self.longitudinalPlanSource = 'cruise'
     self.fcw_checker = FCWChecker()
@@ -132,19 +139,26 @@ class Planner():
       slowest = min(solutions, key=solutions.get)
 
       self.longitudinalPlanSource = slowest
+
+      future_start_ts = round(0.4 / LON_MPC_STEP)  # we start at 0.4 seconds and aTarget always is +0.2 seconds (0.6)
+
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
         self.v_acc = self.mpc1.v_mpc
         self.a_acc = self.mpc1.a_mpc
+        self.solution = Solution(self.mpc1.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc1.mpc_solution[0].a_ego[future_start_ts])
       elif slowest == 'mpc2':
         self.v_acc = self.mpc2.v_mpc
         self.a_acc = self.mpc2.a_mpc
+        self.solution = Solution(self.mpc2.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc2.mpc_solution[0].a_ego[future_start_ts])
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
+        self.solution = Solution(self.a_cruise, self.a_cruise)  # cruise doesn't matter
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
+        self.solution = Solution(self.mpc_model.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc_model.mpc_solution[0].a_ego[future_start_ts])
     # print('{} mph, {} mph/s'.format(round(self.mpc_model.v_mpc * 2.23694, 2), round(self.mpc_model.a_mpc * 2.23694, 2)))
 
     self.v_acc_future = min(possible_futures)
@@ -253,9 +267,9 @@ class Planner():
     longitudinalPlan.vCruise = float(self.v_cruise)
     longitudinalPlan.aCruise = float(self.a_cruise)
     longitudinalPlan.vStart = float(self.v_acc_start)
-    longitudinalPlan.aStart = float(self.a_acc_start)
+    longitudinalPlan.aStart = float(self.solution.a_acc_start)
     longitudinalPlan.vTarget = float(self.v_acc)
-    longitudinalPlan.aTarget = float(self.a_acc)
+    longitudinalPlan.aTarget = float(self.solution.a_acc)
     longitudinalPlan.vTargetFuture = float(self.v_acc_future)
     longitudinalPlan.hasLead = self.mpc1.prev_lead_status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
