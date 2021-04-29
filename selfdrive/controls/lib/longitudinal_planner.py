@@ -183,7 +183,8 @@ class Planner():
 
     # Interpolate 0.05 seconds and save as starting point for next iteration
     a_acc_sol = self.a_acc_start + (CP.radarTimeStep / LON_MPC_STEP) * (self.a_acc - self.a_acc_start)
-    v_acc_sol = self.v_acc_start + CP.radarTimeStep * (a_acc_sol + self.a_acc_start) / 2.0
+    v_acc_sol = self.v_acc_start + (CP.radarTimeStep / LON_MPC_STEP) * (self.v_acc - self.v_acc_start)
+    # v_acc_sol = self.v_acc_start + CP.radarTimeStep * (a_acc_sol + self.a_acc_start) / 2.0
     self.v_acc_next = v_acc_sol
     self.a_acc_next = a_acc_sol
 
