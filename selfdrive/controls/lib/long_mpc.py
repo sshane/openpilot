@@ -113,5 +113,5 @@ class LongitudinalMpc():
                        MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
       self.cur_state[0].v_ego = v_ego
       self.cur_state[0].a_ego = 0.0
-      self.v_mpc = v_ego
+      # self.v_mpc = v_ego
       self.prev_lead_status = False
