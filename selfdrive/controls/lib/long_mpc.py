@@ -114,4 +114,5 @@ class LongitudinalMpc():
       self.cur_state[0].v_ego = v_ego
       self.cur_state[0].a_ego = 0.0
       self.v_mpc = v_ego
+      self.mpc_solution[0].v_ego[1] = v_ego
       self.prev_lead_status = False
