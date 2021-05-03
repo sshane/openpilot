@@ -1,6 +1,5 @@
 from cereal import car
 from common.numpy_fast import clip, interp
-from common.realtime import DT_CTRL
 from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, make_can_msg
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
@@ -48,10 +47,7 @@ class CarController():
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
-
-    self.op_params = opParams()
-    self.standstill_hack = self.op_params.get('standstill_hack')
-    self.reset_eager()
+    self.standstill_hack = opParams().get('standstill_hack')
 
     self.steer_rate_limited = False
 
@@ -62,10 +58,6 @@ class CarController():
       self.fake_ecus.add(Ecu.dsu)
 
     self.packer = CANPacker(dbc_name)
-
-  def reset_eager(self):
-    self.delayed_accel = 0.
-    self.delayed_derivative = 0.
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
@@ -81,25 +73,7 @@ class CarController():
       # +0.06 offset to reduce ABS pump usage when applying very small gas
       if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
         apply_gas = clip(compute_gb_pedal(apply_accel * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
-
-
-    eager_accel_method = self.op_params.get('eager_accel')
-    if eager_accel_method in [1, 2]:
-      if not enabled:  # reset states
-        self.reset_eager()
-
-      y = [self.op_params.get(p) for p in ['accel_time_constant_0_mph', 'accel_time_constant_10_mph', 'accel_time_constant_80_mph']]
-      RC = interp(CS.out.vEgo, [0, 5, 35], y)
-      alpha = 1. - DT_CTRL / (RC + DT_CTRL)
-      self.delayed_accel = self.delayed_accel * alpha + apply_accel * (1. - alpha)
-
-      eagerness = self.op_params.get('accel_eagerness')
-      if eager_accel_method == 1:  # new accel is simply accel - change in accel over exponential time (time constant varies with speed)
-        apply_accel = apply_accel - (self.delayed_accel - apply_accel) * eagerness
-      else:  # subtracting difference in smoothened accel derivative and current derivative (jerk, takes one more variable to keep track of derivative over time but control is more tight)
-        derivative = apply_accel - self.delayed_accel  # store change in accel over some time constant (using exponential moving avg.)
-        self.delayed_derivative = self.delayed_derivative * alpha + derivative * (1. - alpha)  # calc exp. moving average for derivative
-        apply_accel = apply_accel - (self.delayed_derivative - derivative) * eagerness  # then modify accel using jerk of accel
+      apply_accel = 0.06 - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
     apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
