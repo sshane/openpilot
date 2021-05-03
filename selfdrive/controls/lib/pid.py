@@ -185,9 +185,7 @@ class LongPIDController:
               not freeze_integrator:
         self.id = i
 
-    enable_deriv = self.op_params.get('enable_long_derivative')
-    using_eager_accel = self.op_params.get('eager_accel') in [1, 2]
-    if enable_deriv and not using_eager_accel:
+    if self.op_params.get('enable_long_derivative'):
       if abs(setpoint - self.last_setpoint) / self.rate < self.max_accel_d:  # if setpoint isn't changing much
         d = self.k_d * (error - self.last_error)
         if (self.id > 0 and self.id + d >= 0) or (self.id < 0 and self.id + d <= 0):  # if changing integral doesn't make it cross zero
