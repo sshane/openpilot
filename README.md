@@ -19,7 +19,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**NEW❗ Eager acceleration**](#new-eager-acceleration-experimental-feature) - using the jerk of desired accel to respond quicker to braking and acceleration
+* [**NEW❗ Smoother long control using delay**](#new-eager-acceleration-experimental-feature) - using an accel delay, just like for lateral
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -116,20 +116,8 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 ---
 ## General Features
 
-### NEW❗ Eager acceleration *(experimental feature)*
-For some Toyota cars (primarily on older TSS1's like the '17 Corolla), there seems to exist some hysteresis in the ACC (adaptive cruise control) system. This can be most noticed when openpilot requests some brake shortly after accelerating, it's quite delayed causing integral to wind up and jerking to ensue when the lead comes to a stop, even if they're rather smooth about it.
-
-This feature aims to try and combat that by modifying the final acceleration sent to the car, it sums the regular desired acceleration, and the jerk of the desired acceleration (the derivative of the derivative) so that we can react quicker to changes in direction of acceleration.
-
-To try it, edit the `eager_accel` param with opEdit to set it to the integer `2`. There's also another method that uses the derivative of the desired acceleration, but it's not ideal since it can pretty severely change the desired acceleration value when it's changing linearly, and not changing direction. The jerk method is probably going to be the one I keep around once this feature is out of beta.
-
-To adjust the tuning for this feature, you can change the `accel_eagerness` parameter, this is simply a multiplier for the modification (`apply_accel += eager_mod * accel_eagerness`).
-
-Here's a quick graph how the two methods compare, you can see how the derivative method warps the acceleration much further than jerk.
-
-<p align="center">
-  <img src=".media/eager_accel.png?raw=true">
-</p>
+### NEW❗ Compensate for longitudinal delay for earlier braking
+This just simply uses desired future acceleration for feedforward rather than current desired acceleration. openpilot already compensates for steering delay, but not longitudinal. This adds that, replacing the previous ***experimental*** feature called eager accel which tried to fix the same issues; jerky and late braking. Now we more correctly compensate for delay. It assumes a 0.4 second delay from sending acceleration to seeing it realized, which is not tunable at this time, but may be added in the future.
 
 ---
 ### Customize this fork (opEdit)
