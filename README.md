@@ -19,7 +19,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**NEW❗ Smoother long control using delay**](#new-eager-acceleration-experimental-feature) - using an accel delay, just like for lateral
+* [**NEW❗ Smoother long control using delay**](#new-compensate-for-longitudinal-delay-for-earlier-braking - using an accel delay, just like for lateral
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
