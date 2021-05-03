@@ -146,6 +146,8 @@ class Planner():
       # # we're sending controlsd aStart at 0.4 sec and aTarget at 0.6 sec, but controlsd only
       # # interpolates to +0.05 unless there is significant lag from planner. so we're sending the car 0.4 to 0.45 seconds future accel
 
+      accel_delay = max(accel_delay, 1.8)  # precaution if user tries a high value, cur and fut would be equal otherwise
+
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
         self.v_acc = self.mpc1.v_mpc
