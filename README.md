@@ -117,7 +117,9 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 ## General Features
 
 ### NEW❗ Compensate for longitudinal delay for earlier braking
-This just simply uses desired future acceleration for feedforward rather than current desired acceleration. openpilot already compensates for steering delay, but not longitudinal. This adds that, replacing the previous ***experimental*** feature called eager accel which tried to fix the same issues; jerky and late braking. Now we more correctly compensate for delay. It assumes a 0.4 second delay from sending acceleration to seeing it realized, which is not tunable at this time, but may be added in the future.
+This just simply uses desired future acceleration for feedforward rather than current desired acceleration. openpilot already compensates for steering delay, but not longitudinal. This adds that, replacing the previous ***experimental*** feature called eager accel which tried to fix the same issues; jerky and late braking. Now we more correctly compensate for delay.
+
+By default, we assume a 0.4 second delay from sending acceleration to seeing it realized, which is tunable with the opEdit param `long_accel_delay`. Raise if braking too late, lower if braking too early. Stock openpilot is 0.0 (no delay).
 
 ---
 ### Customize this fork (opEdit)

@@ -142,7 +142,7 @@ class Planner():
 
       self.longitudinalPlanSource = slowest
 
-      accel_delay = min(accel_delay, 1.8)  # precaution if user tries a high value, cur and fut would be equal otherwise
+      accel_delay = min(self.op_params.get('long_accel_delay'), 1.8)  # precaution if user tries a high value, cur and fut would be equal otherwise
 
       # Some notes: a_acc_start should always be current timestep (or delayed)
       # a_acc should be a_acc_start but +0.2 seconds so controlsd interps properly (a_acc_start to a_acc_start+0.05sec)
