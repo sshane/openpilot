@@ -38,6 +38,8 @@ _A_TOTAL_MAX_V = [1.7, 3.2]
 # _A_TOTAL_MAX_V = [2.2, 4.15]
 _A_TOTAL_MAX_BP = [20., 40.]
 
+MPC_TIMESTEPS = [i / 5 for i in range(11)]
+
 
 def calc_cruise_accel_limits(v_ego, following):
   a_cruise_min = interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
@@ -88,9 +90,9 @@ class ModelMpcHelper:
 
 
 class Solution:  # this is temporary to not change velocity sol. interpolation
-  def __init__(self, a_acc, a_acc_start):
-    self.a_acc = a_acc
+  def __init__(self, a_acc_start, a_acc):
     self.a_acc_start = a_acc_start
+    self.a_acc = a_acc
 
 
 class Planner():
@@ -124,7 +126,7 @@ class Planner():
     self.params = Params()
     self.first_loop = True
 
-  def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
+  def choose_solution(self, v_cruise_setpoint, enabled, model_enabled, accel_delay):
     possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
     if enabled:
       solutions = {'cruise': self.v_cruise}
@@ -140,28 +142,30 @@ class Planner():
 
       self.longitudinalPlanSource = slowest
 
-      future_start_ts = round(0.4 / LON_MPC_STEP)  # we start at 0.4 seconds and aTarget always is +0.2 seconds (0.6)
-      # we're sending controlsd aStart at 0.4 sec and aTarget at 0.6 sec, but controlsd only
-      # interpolates to +0.05 unless there is significant lag from planner. so we're sending the car 0.4 to 0.45 seconds future accel
+      # future_start_ts = round(0.4 / LON_MPC_STEP)  # we start at 0.4 seconds and aTarget always is +0.2 seconds (0.6)
+      # # we're sending controlsd aStart at 0.4 sec and aTarget at 0.6 sec, but controlsd only
+      # # interpolates to +0.05 unless there is significant lag from planner. so we're sending the car 0.4 to 0.45 seconds future accel
 
       # Choose lowest of MPC and cruise
       if slowest == 'mpc1':
         self.v_acc = self.mpc1.v_mpc
         self.a_acc = self.mpc1.a_mpc
-        self.solution = Solution(self.mpc1.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc1.mpc_solution[0].a_ego[future_start_ts])
+        cur, fut = interp([accel_delay, accel_delay + 0.2], MPC_TIMESTEPS, self.mpc1.mpc_solution[0].a_ego)
+        self.solution = Solution(a_acc_start=cur, a_acc=fut)
       elif slowest == 'mpc2':
         self.v_acc = self.mpc2.v_mpc
         self.a_acc = self.mpc2.a_mpc
-        self.solution = Solution(self.mpc2.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc2.mpc_solution[0].a_ego[future_start_ts])
+        cur, fut = interp([accel_delay, accel_delay + 0.2], MPC_TIMESTEPS, self.mpc2.mpc_solution[0].a_ego)
+        self.solution = Solution(a_acc_start=cur, a_acc=fut)
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
-        self.solution = Solution(self.a_cruise, self.a_cruise)  # cruise doesn't matter
+        self.solution = Solution(a_acc_start=self.a_cruise, a_acc=self.a_cruise)  # cruise doesn't matter
       elif slowest == 'model':
         self.v_acc = self.mpc_model.v_mpc
         self.a_acc = self.mpc_model.a_mpc
-        self.solution = Solution(self.mpc_model.mpc_solution[0].a_ego[future_start_ts + 1], self.mpc_model.mpc_solution[0].a_ego[future_start_ts])
-    # print('{} mph, {} mph/s'.format(round(self.mpc_model.v_mpc * 2.23694, 2), round(self.mpc_model.a_mpc * 2.23694, 2)))
+        cur, fut = interp([accel_delay, accel_delay + 0.2], MPC_TIMESTEPS, self.mpc_model.mpc_solution[0].a_ego)
+        self.solution = Solution(a_acc_start=cur, a_acc=fut)
 
     self.v_acc_future = min(possible_futures)
 
@@ -230,7 +234,7 @@ class Planner():
                           speeds,
                           accelerations)
 
-    self.choose_solution(v_cruise_setpoint, enabled, sm['modelLongButton'].enabled)
+    self.choose_solution(v_cruise_setpoint, enabled, sm['modelLongButton'].enabled, self.CP.longAccelDelay)
 
     # determine fcw
     if self.mpc1.new_lead:

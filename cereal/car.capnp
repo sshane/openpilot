@@ -406,6 +406,7 @@ struct CarParams {
   startingBrakeRate @53 :Float32; # brake_travel/s while releasing on restart
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
+  longAccelDelay @39 :Float32; # Acceleration delay in seconds
   openpilotLongitudinalControl @37 :Bool; # is openpilot doing the longitudinal control?
   carVin @38 :Text; # VIN number queried during fingerprinting
   dashcamOnly @41: Bool;
