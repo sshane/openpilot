@@ -99,8 +99,8 @@ class opParams:
 
     self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
                         'dynamic_follow': Param('auto', str, static=True, hidden=True),
-                        'long_accel_delay': Param(0.4, NUMBER, 'The delay in seconds from requesting acceleration to seeing it\n'
-                                                               'Raise if braking late, lower if braking early. Stock openpilot uses 0.0', live=True),
+                        'accel_lag_compensation': Param(True, NUMBER, 'Enabling this compensates for lag when braking and accelerating, just like for lateral control\n'
+                                                                      'This should have the car responding sooner. Disable if experiencing weird behavior', live=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'
                                                             'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
