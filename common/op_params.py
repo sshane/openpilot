@@ -136,7 +136,7 @@ class opParams:
                         'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
                         'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True)}
 
-    self._to_delete = ['alca_min_speed', 'alca_nudge_required']  # a list of unused params you want to delete from users' params file
+    self._to_delete = ['long_accel_delay']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
