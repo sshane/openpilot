@@ -142,7 +142,6 @@ class Planner():
 
       self.longitudinalPlanSource = slowest
 
-      # accel_delay = min(self.op_params.get('long_accel_delay'), 1.8)  # precaution if user tries a high value, cur and fut would be equal otherwise
       if self.op_params.get('accel_lag_compensation'):
         accel_delay = interp(speed * CV.MS_TO_MPH, [10, 80], [0.2, 0.4])
       else:
