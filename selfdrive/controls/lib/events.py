@@ -347,7 +347,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.startupZss: {
     ET.PERMANENT: Alert(
-      "ZSS connected",
+      "Using Zorro steering sensor",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
