@@ -69,7 +69,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   primeWidget->setObjectName("primeWidget");
   QVBoxLayout *primeLayout = new QVBoxLayout(primeWidget);
   primeLayout->setMargin(0);
-  primeWidget->setContentsMargins(60, 50, 60, 50);
+  primeWidget->setContentsMargins(60, 50, 60, 60);
 
   subscribed = new QLabel("✓ SUBSCRIBED");
   subscribed->setProperty("prime", true);
@@ -117,6 +117,18 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   pointsLayout->addWidget(points, 0, Qt::AlignTop);
 
   mainLayout->addWidget(pointsWidget);
+
+  QWidget *thirdWidget = new QWidget;
+  thirdWidget->setObjectName("primeWidget");
+  QVBoxLayout *thirdLayout = new QVBoxLayout(thirdWidget);
+  thirdLayout->setMargin(0);
+  thirdWidget->setContentsMargins(60, 50, 60, 50);
+
+  QLabel* thirdLabel = new QLabel("Stock...with Additions!");
+  thirdLabel->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
+  thirdLayout->addWidget(thirdLabel, 0, Qt::AlignTop);
+
+  mainLayout->addWidget(thirdWidget);
 
   mainLayout->addStretch();
 
