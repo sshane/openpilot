@@ -24,7 +24,7 @@ class PrimeUserWidget : public QWidget {
   Q_OBJECT
 public:
   explicit PrimeUserWidget(QWidget* parent = 0);
-  void setPrime(bool has_prime);
+  void setNoPrime();
 
 private:
   QVBoxLayout* mainLayout;
@@ -40,6 +40,8 @@ class PrimeAdWidget : public QFrame {
   Q_OBJECT
 public:
   explicit PrimeAdWidget(QWidget* parent = 0);
+signals:
+  void showPrimeWidget(bool hasPrime);
 };
 
 class SetupWidget : public QFrame {
@@ -58,4 +60,5 @@ private slots:
   void parseError(const QString &response);
   void replyFinished(const QString &response);
   void showQrCode();
+  void showPrimeWidget(bool hasPrime);
 };

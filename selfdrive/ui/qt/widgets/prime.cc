@@ -117,7 +117,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   }
 }
 
-void PrimeUserWidget::setPrime(bool has_prime) {
+void PrimeUserWidget::setNoPrime() {
   subscribed->setText("✕ NOT SUBSCRIBED");
   subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #ff4e4e;");
   commaPrime->setText("got prime?");
@@ -136,13 +136,13 @@ void PrimeUserWidget::replyFinished(const QString &response) {
 
 PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
   QVBoxLayout* main_layout = new QVBoxLayout(this);
-  main_layout->setContentsMargins(80, 90, 80, 60);
+  main_layout->setContentsMargins(70, 40, 80, 40);
   main_layout->setSpacing(0);
 
   QLabel *upgrade = new QLabel("Upgrade Now");
   upgrade->setStyleSheet("font-size: 75px; font-weight: bold;");
   main_layout->addWidget(upgrade, 0, Qt::AlignTop);
-  main_layout->addSpacing(50);
+  main_layout->addSpacing(35);
 
   QLabel *description = new QLabel("Become a comma prime member at connect.comma.ai");
   description->setStyleSheet("font-size: 60px; font-weight: light; color: white;");
@@ -154,7 +154,7 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
   QLabel *features = new QLabel("PRIME FEATURES:");
   features->setStyleSheet("font-size: 41px; font-weight: bold; color: #E5E5E5;");
   main_layout->addWidget(features, 0, Qt::AlignBottom);
-  main_layout->addSpacing(30);
+  main_layout->addSpacing(20);
 
   QVector<QString> bullets = {"Remote access", "14 days of storage", "Developer perks"};
   for (auto &b: bullets) {
@@ -164,6 +164,26 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
     l->setStyleSheet("font-size: 50px; margin-bottom: 15px;");
     main_layout->addWidget(l, 0, Qt::AlignBottom);
   }
+
+  QPushButton *dismiss = new QPushButton("Dismiss");
+  dismiss->setFixedHeight(110);
+  dismiss->setStyleSheet(R"(
+    QPushButton {
+      font-size: 55px;
+      font-weight: 400;
+      border-radius: 10px;
+      background-color: #465BEA;
+    }
+    QPushButton:pressed {
+      background-color: #3049F4;
+    }
+  )");
+  QObject::connect(dismiss, &QPushButton::clicked, this, [=]() {
+    Params().putBool("PrimeAdDismissed", true);
+    emit showPrimeWidget(false);  // dismiss with no prime
+  });
+  main_layout->addSpacing(20);
+  main_layout->addWidget(dismiss);
 
   setStyleSheet(R"(
     PrimeAdWidget {
@@ -240,6 +260,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   mainLayout->addWidget(q);
 
   primeAd = new PrimeAdWidget;
+  QObject::connect(primeAd, &PrimeAdWidget::showPrimeWidget, this, &SetupWidget::showPrimeWidget);
   mainLayout->addWidget(primeAd);
 
   primeUser = new PrimeUserWidget;
@@ -296,12 +317,17 @@ void SetupWidget::replyFinished(const QString &response) {
   QJsonObject json = doc.object();
   if (!json["is_paired"].toBool()) {
     mainLayout->setCurrentIndex(showQr);
-//  } else if (!json["prime"].toBool()) {  // always show points, but remind the user of prime...always
-//    showQr = false;
-//    mainLayout->setCurrentWidget(primeAd);
-  } else {
+  } else if (!json["prime"].toBool() && !Params().getBool("PrimeAdDismissed")) {  // always show points, but remind the user of prime...always
     showQr = false;
-    primeUser->setPrime(json["prime"].toBool());
-    mainLayout->setCurrentWidget(primeUser);
+    mainLayout->setCurrentWidget(primeAd);
+  } else {
+    showPrimeWidget(json["prime"].toBool());
   }
+}
+
+void SetupWidget::showPrimeWidget(bool hasPrime) {
+  showQr = false;
+  if (!hasPrime)
+    primeUser->setNoPrime();
+  mainLayout->setCurrentWidget(primeUser);
 }
