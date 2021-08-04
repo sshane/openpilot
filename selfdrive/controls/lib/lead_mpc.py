@@ -89,7 +89,7 @@ class LeadMpc():
       a_lead = 0.0
       self.a_lead_tau = _LEAD_ACCEL_TAU
 
-    if not test:
+    if not self.test:
       TR = self.dynamic_follow.update(CS, self.libmpc)  # update dynamic follow
     else:
       TR = 1.8
