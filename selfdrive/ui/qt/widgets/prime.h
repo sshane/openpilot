@@ -24,10 +24,13 @@ class PrimeUserWidget : public QWidget {
   Q_OBJECT
 public:
   explicit PrimeUserWidget(QWidget* parent = 0);
+  void setPrime(bool has_prime);
 
 private:
   QVBoxLayout* mainLayout;
   QLabel* points;
+  QLabel* subscribed;
+  QLabel* commaPrime;
 
 private slots:
   void replyFinished(const QString &response);

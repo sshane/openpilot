@@ -71,13 +71,13 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   primeLayout->setMargin(0);
   primeWidget->setContentsMargins(60, 50, 60, 50);
 
-  QLabel* subscribed = new QLabel("✓ SUBSCRIBED");
+  subscribed = new QLabel("✓ SUBSCRIBED");
   subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #86FF4E;");
   primeLayout->addWidget(subscribed, 0, Qt::AlignTop);
 
   primeLayout->addSpacing(60);
 
-  QLabel* commaPrime = new QLabel("comma prime");
+  commaPrime = new QLabel("comma prime");
   commaPrime->setStyleSheet("font-size: 75px; font-weight: bold;");
   primeLayout->addWidget(commaPrime, 0, Qt::AlignTop);
 
@@ -115,6 +115,12 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
     RequestRepeater *repeater = new RequestRepeater(this, QString::fromStdString(url), "ApiCache_Owner", 6);
     QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &PrimeUserWidget::replyFinished);
   }
+}
+
+void PrimeUserWidget::setPrime(bool has_prime) {
+  subscribed->setText("✕ NOT SUBSCRIBED");
+  subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #ff4e4e;");
+  commaPrime->setText("got prime?");
 }
 
 void PrimeUserWidget::replyFinished(const QString &response) {
@@ -290,11 +296,12 @@ void SetupWidget::replyFinished(const QString &response) {
   QJsonObject json = doc.object();
   if (!json["is_paired"].toBool()) {
     mainLayout->setCurrentIndex(showQr);
-  } else if (!json["prime"].toBool()) {
-    showQr = false;
-    mainLayout->setCurrentWidget(primeAd);
+//  } else if (!json["prime"].toBool()) {  // always show points, but remind the user of prime...always
+//    showQr = false;
+//    mainLayout->setCurrentWidget(primeAd);
   } else {
     showQr = false;
+    primeUser->setPrime(json["prime"].toBool());
     mainLayout->setCurrentWidget(primeUser);
   }
 }
