@@ -74,7 +74,7 @@ class CarController():
       if self.use_interceptor and enabled:
         # only send negative accel when using interceptor. gas handles acceleration
         # +0.06 offset to reduce ABS pump usage when OP is engaged
-        if apply_accel * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
+        if pcm_accel_cmd * CarControllerParams.ACCEL_SCALE > coast_accel(CS.out.vEgo):
           interceptor_gas_cmd = clip(compute_gb_pedal(pcm_accel_cmd * CarControllerParams.ACCEL_SCALE, CS.out.vEgo), 0., 1.)
         pcm_accel_cmd = 0.06 - actuators.brake
 
