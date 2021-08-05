@@ -36,7 +36,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    dfStatus++;
+    dfStatus = dfStatus < 3 ? dfStatus + 1 : 0; // wrap back around
     dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
   });
   dfButton->setFixedWidth(200);
