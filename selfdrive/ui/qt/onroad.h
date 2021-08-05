@@ -54,6 +54,9 @@ class ButtonsWindow : public QWidget {
 public:
   ButtonsWindow(QWidget* parent = 0);
 //  newButton(const QString *text, Qt::Alignment alignment);
+private:
+  int dfStatus = 0;
+  const QStringList dfButtonColors = {"#044389", "#24a8bc", "#fcff4b", "#37b868"};
 };
 
 // container for all onroad widgets

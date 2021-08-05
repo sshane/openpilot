@@ -33,10 +33,11 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
   QPushButton *dfButton = new QPushButton("DF\nprofile");
-  dfButton->setStyleSheet("text-align: center; font-size: 45px; border-radius: 100px;");
+  dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    dfButton->setStyleSheet("text-align: center; font-size: 45px; border-radius: 100px; border-color: #eb4034;");
+    dfStatus++;
+    dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
   });
   dfButton->setFixedWidth(200);
   dfButton->setFixedHeight(200);
