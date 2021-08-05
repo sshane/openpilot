@@ -10,6 +10,13 @@
 #include "selfdrive/ui/ui.h"
 
 
+class ButtonsWindow : public QWidget {
+  Q_OBJECT
+
+public:
+  ButtonsWindow(QWidget* parent = 0);
+};
+
 // ***** onroad widgets *****
 
 class OnroadAlerts : public QWidget {
@@ -61,6 +68,7 @@ private:
 
   OnroadAlerts *alerts;
   NvgWindow *nvg;
+  ButtonsWindow *buttons;
   QColor bg = bg_colors[STATUS_DISENGAGED];
   QHBoxLayout* split;
 

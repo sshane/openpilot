@@ -12,6 +12,15 @@
 #include "selfdrive/ui/qt/maps/map.h"
 #endif
 
+ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
+  QVBoxLayout *main_layout  = new QVBoxLayout(this);
+
+  QPushButton *btn = new QPushButton("Test Button");
+  btn->setFixedHeight(200);
+  btn->setFixedWidth(200);
+  main_layout->addWidget(btn, 0, Qt::AlignBottom);
+}
+
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
   main_layout->setMargin(bdr_s);
@@ -35,14 +44,12 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   stacked_layout->addWidget(alerts);
 
-  QPushButton *btn = new QPushButton("Test Button");
-  btn->setFixedHeight(200);
-  btn->setFixedWidth(200);
-  stacked_layout->addWidget(btn);
+  buttons = new ButtonsWindow(this);
+  stacked_layout->addWidget(buttons);
 
   // setup stacking order
 //  alerts->raise();
-  btn->raise();
+  buttons->raise();
 
   setAttribute(Qt::WA_OpaquePaintEvent);
   QObject::connect(this, &OnroadWindow::updateStateSignal, this, &OnroadWindow::updateState);
