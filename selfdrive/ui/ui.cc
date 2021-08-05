@@ -18,6 +18,8 @@
 #define BACKLIGHT_TS 10.00
 #define BACKLIGHT_OFFROAD 75
 
+std::map<std::string, int> LS_TO_IDX = {{"off", 0}, {"audible", 1}, {"silent", 2}};
+std::map<std::string, int> DF_TO_IDX = {{"traffic", 0}, {"relaxed", 1}, {"stock", 2}, {"auto", 3}};
 
 // Projects a point in car to space to the corresponding point in full frame
 // image space.
@@ -276,6 +278,7 @@ QUIState::QUIState(QObject *parent) : QObject(parent) {
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "roadCameraState",
     "pandaState", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
   });
+  ui_state.sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
 
   ui_state.fb_w = vwp_w;
   ui_state.fb_h = vwp_h;
