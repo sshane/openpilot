@@ -22,32 +22,32 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
   QPushButton *mlButton = new QPushButton("Toggle Model Long");
-  mlButton->setStyleSheet("border-radius: 100px;");
+  mlButton->setStyleSheet("font-size: 45px; border-radius: 25px;");
   QObject::connect(mlButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    mlButton->setStyleSheet("border-radius: 25px; border-color: #eb4034;");
+    mlButton->setStyleSheet("font-size: 45px; border-radius: 25px; border-color: #eb4034;");
   });
   mlButton->setFixedWidth(475);
   mlButton->setFixedHeight(130);
+  btns_layout->addStretch();
   btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
-
   QPushButton *dfButton = new QPushButton("DF\nprofile");
-  dfButton->setStyleSheet("border-radius: 100px;");
+  dfButton->setStyleSheet("text-align: top; padding-top: 10px; font-size: 35px; border-radius: 75px;");
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    dfButton->setStyleSheet("border-radius: 100px; border-color: #eb4034;");
+    dfButton->setStyleSheet("text-align: top; font-size: 35px; border-radius: 100px; border-color: #eb4034;");
   });
-  dfButton->setFixedWidth(200);
-  dfButton->setFixedHeight(200);
+  dfButton->setFixedWidth(150);
+  dfButton->setFixedHeight(150);
+  btns_layout->addStretch();
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
-
 
   setStyleSheet(R"(
     QPushButton {
       color: white;
-      font-size: 45px;
-      border-width: 6px;
+      padding: 0px;
+      border-width: 12px;
       border-style: solid;
       background-color: transparent;
     }
