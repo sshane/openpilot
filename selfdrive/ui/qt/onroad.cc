@@ -137,6 +137,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   setStyleSheet(R"(
     QPushButton {
       color: white;
+      text-align: center;
       padding: 0px;
       border-width: 12px;
       border-style: solid;
@@ -153,7 +154,7 @@ void ButtonsWindow::updateState(const UIState &s) {
 void ButtonsWindow::updateDfButton(int status) {
   if (dfStatus != status) {  // updates (resets) on car start, or on button press
     dfStatus = status;
-    dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
+    dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
     MessageBuilder msg;
     auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
