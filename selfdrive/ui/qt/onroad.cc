@@ -22,24 +22,24 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
   QPushButton *mlButton = new QPushButton("Toggle Model Long");
-  mlButton->setStyleSheet("font-size: 45px; border-radius: 25px;");
+  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px;");
   QObject::connect(mlButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    mlButton->setStyleSheet("font-size: 45px; border-radius: 25px; border-color: #eb4034;");
+    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #eb4034;");
   });
-  mlButton->setFixedWidth(475);
-  mlButton->setFixedHeight(130);
+  mlButton->setFixedWidth(500);
+  mlButton->setFixedHeight(150);
   btns_layout->addStretch();
   btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
   QPushButton *dfButton = new QPushButton("DF\nprofile");
-  dfButton->setStyleSheet("text-align: top; padding-top: 10px; font-size: 35px; border-radius: 75px;");
+  dfButton->setStyleSheet("text-align: center; font-size: 45px; border-radius: 100px;");
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    dfButton->setStyleSheet("text-align: top; font-size: 35px; border-radius: 100px; border-color: #eb4034;");
+    dfButton->setStyleSheet("text-align: center; font-size: 45px; border-radius: 100px; border-color: #eb4034;");
   });
-  dfButton->setFixedWidth(150);
-  dfButton->setFixedHeight(150);
+  dfButton->setFixedWidth(200);
+  dfButton->setFixedHeight(200);
   btns_layout->addStretch();
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
