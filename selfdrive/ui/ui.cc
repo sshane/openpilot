@@ -297,7 +297,7 @@ QUIState::QUIState(QObject *parent) : QObject(parent) {
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "roadCameraState",
     "pandaState", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
   });
-  ui_state.sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
+  ui_state.pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
 
   ui_state.fb_w = vwp_w;
   ui_state.fb_h = vwp_h;
