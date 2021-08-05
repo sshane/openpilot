@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <QDebug>
-#include <QPushButton>
 
 #include "selfdrive/common/swaglog.h"
 #include "selfdrive/common/timing.h"
@@ -21,27 +20,23 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
-  QPushButton *mlButton = new QPushButton("Toggle Model Long");
-  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #b83737;");
-  QObject::connect(mlButton, &QPushButton::clicked, [=]() {
-    qDebug() << "Clicked!";
-    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #37b868;");
-  });
-  mlButton->setFixedWidth(525);
-  mlButton->setFixedHeight(150);
-  btns_layout->addStretch();
-  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
+//  mlButton = new QPushButton("Toggle Model Long");
+//  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #b83737;");
+//  QObject::connect(mlButton, &QPushButton::clicked, [=]() {
+//    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #37b868;");
+//  });
+//  mlButton->setFixedWidth(525);
+//  mlButton->setFixedHeight(150);
+//  btns_layout->addStretch();
+//  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
-  QPushButton *dfButton = new QPushButton("DF\nprofile");
-  dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
+  dfButton = new QPushButton("DF\nprofile");
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
-    qDebug() << "Clicked!";
-    dfStatus = dfStatus < 3 ? dfStatus + 1 : 0; // wrap back around
-    dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
+    QUIState::ui_state.scene.dfButtonStatus = dfStatus < 3 ? dfStatus + 1 : 0;  // wrap back around
   });
   dfButton->setFixedWidth(200);
   dfButton->setFixedHeight(200);
-  btns_layout->addStretch();
+//  btns_layout->addStretch();
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
   setStyleSheet(R"(
@@ -55,14 +50,22 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   )");
 }
 
-//ButtonsWindow::newButton(const QString *text, Qt::Alignment alignment) {
-//  QPushButton *btn = new QPushButton(text);
-//  QObject::connect(btn, &QPushButton::clicked, [=]() {
-//    qDebug() << "Clicked!";
-//    btn->setStyleSheet("border-color: #eb4034;");
-//  });
-//
-//}
+void ButtonsWindow::updateState(const UIState &s) {
+  updateDfButton(s.scene.dfButtonStatus);  // update dynamic follow profile button
+//  updateMlButton(s.scene.dfButtonStatus);  // update model longitudinal button  // TODO: add model long back first
+}
+
+void ButtonsWindow::updateDfButton(int status) {
+  if (dfStatus != status) {  // updates (resets) on car start, or on button press
+    dfStatus = status;
+    dfButton->setStyleSheet(QString("text-align: center; font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
+
+    MessageBuilder msg;
+    auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
+    dfButtonStatus.setStatus(dfStatus);
+    QUIState::ui_state.pm->send("dynamicFollowButton", msg);
+  }
+}
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
@@ -100,6 +103,8 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 }
 
 void OnroadWindow::updateState(const UIState &s) {
+  buttons->updateState(s);
+
   SubMaster &sm = *(s.sm);
   QColor bgColor = bg_colors[s.status];
   if (sm.updated("controlsState")) {

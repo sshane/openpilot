@@ -4,6 +4,7 @@
 #include <QOpenGLWidget>
 #include <QStackedLayout>
 #include <QWidget>
+#include <QPushButton>
 
 #include "cereal/gen/cpp/log.capnp.h"
 #include "selfdrive/ui/qt/qt_window.h"
@@ -53,10 +54,15 @@ class ButtonsWindow : public QWidget {
 
 public:
   ButtonsWindow(QWidget* parent = 0);
-//  newButton(const QString *text, Qt::Alignment alignment);
+  void updateState(const UIState &s);
+
 private:
-  int dfStatus = 0;
+  QPushButton *dfButton;
+//  QPushButton *mlButton;
+
+  int dfStatus = -1;  // always initialize style sheet and send msg
   const QStringList dfButtonColors = {"#044389", "#24a8bc", "#fcff4b", "#37b868"};
+  void updateDfButton(int status);
 };
 
 // container for all onroad widgets
