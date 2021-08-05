@@ -15,7 +15,9 @@
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
   QPushButton *btn = new QPushButton("Test Button");
-  main_layout->addWidget(btn);
+  btn->setFixedHeight(400);
+  btn->setFixedWidth(400);
+  main_layout->addWidget(btn, 0, Qt::AlignBottom | Qt::AlignRight);
   main_layout->setMargin(bdr_s);
   QStackedLayout *stacked_layout = new QStackedLayout;
   stacked_layout->setStackingMode(QStackedLayout::StackAll);
