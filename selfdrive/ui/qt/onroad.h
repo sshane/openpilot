@@ -53,6 +53,7 @@ class ButtonsWindow : public QWidget {
 
 public:
   ButtonsWindow(QWidget* parent = 0);
+//  newButton(const QString *text, Qt::Alignment alignment);
 };
 
 // container for all onroad widgets

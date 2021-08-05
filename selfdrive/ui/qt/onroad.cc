@@ -17,26 +17,51 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 
   QWidget *btns_wrapper = new QWidget;
   QHBoxLayout *btns_layout  = new QHBoxLayout(btns_wrapper);
+  btns_layout->setSpacing(0);
+
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
-  QPushButton *btn = new QPushButton("DF\nprofile");
-  btn->setFixedHeight(200);
-  btn->setFixedWidth(200);
-  btns_layout->addWidget(btn, 0, Qt::AlignRight);
+  QPushButton *mlButton = new QPushButton("Toggle Model Long");
+  mlButton->setStyleSheet("border-radius: 100px;");
+  QObject::connect(mlButton, &QPushButton::clicked, [=]() {
+    qDebug() << "Clicked!";
+    mlButton->setStyleSheet("border-radius: 25px; border-color: #eb4034;");
+  });
+  mlButton->setFixedWidth(475);
+  mlButton->setFixedHeight(130);
+  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
+
+
+  QPushButton *dfButton = new QPushButton("DF\nprofile");
+  dfButton->setStyleSheet("border-radius: 100px;");
+  QObject::connect(dfButton, &QPushButton::clicked, [=]() {
+    qDebug() << "Clicked!";
+    dfButton->setStyleSheet("border-radius: 100px; border-color: #eb4034;");
+  });
+  dfButton->setFixedWidth(200);
+  dfButton->setFixedHeight(200);
+  btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
 
   setStyleSheet(R"(
     QPushButton {
       color: white;
-      font-size: 50px;
-      border-radius: 200px;
-      background-color: #393939;
-    }
-    QPushButton:pressed {
-      background-color: #4a4a4a;
+      font-size: 45px;
+      border-width: 6px;
+      border-style: solid;
+      background-color: transparent;
     }
   )");
 }
+
+//ButtonsWindow::newButton(const QString *text, Qt::Alignment alignment) {
+//  QPushButton *btn = new QPushButton(text);
+//  QObject::connect(btn, &QPushButton::clicked, [=]() {
+//    qDebug() << "Clicked!";
+//    btn->setStyleSheet("border-color: #eb4034;");
+//  });
+//
+//}
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
