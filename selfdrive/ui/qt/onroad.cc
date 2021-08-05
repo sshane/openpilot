@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <QDebug>
+#include <QPushButton>
 
 #include "selfdrive/common/swaglog.h"
 #include "selfdrive/common/timing.h"
@@ -13,6 +14,8 @@
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
+  QPushButton *btn = new QPushButton("Test Button");
+  main_layout->addWidget(btn);
   main_layout->setMargin(bdr_s);
   QStackedLayout *stacked_layout = new QStackedLayout;
   stacked_layout->setStackingMode(QStackedLayout::StackAll);
