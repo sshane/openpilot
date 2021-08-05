@@ -72,7 +72,19 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   primeWidget->setContentsMargins(60, 50, 60, 50);
 
   subscribed = new QLabel("✓ SUBSCRIBED");
-  subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #86FF4E;");
+  subscribed->setProperty("prime", true);
+  subscribed->setStyleSheet(R"(
+    QLabel {
+      font-size: 41px;
+      font-weight: bold;
+    }
+    QLabel[prime=true] {
+      color: #86FF4E;
+    }
+    QLabel[prime=false] {
+      color: #ff4e4e;
+    }
+  )");
   primeLayout->addWidget(subscribed, 0, Qt::AlignTop);
 
   primeLayout->addSpacing(60);
@@ -117,10 +129,10 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   }
 }
 
-void PrimeUserWidget::setNoPrime() {
-  subscribed->setText("✕ NOT SUBSCRIBED");
-  subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #ff4e4e;");
-  commaPrime->setText("got prime?");
+void PrimeUserWidget::setPrime(bool hasPrime) {
+  subscribed->setText(hasPrime ? "✓ SUBSCRIBED" : "✕ NOT SUBSCRIBED");
+  subscribed->setProperty("prime", hasPrime);
+  commaPrime->setText(hasPrime ? "comma prime" : "got prime?");
 }
 
 void PrimeUserWidget::replyFinished(const QString &response) {
@@ -260,7 +272,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   mainLayout->addWidget(q);
 
   primeAd = new PrimeAdWidget;
-  QObject::connect(primeAd, &PrimeAdWidget::showPrimeWidget, this, &SetupWidget::showPrimeWidget);
+  QObject::connect(primeAd, &PrimeAdWidget::showPrimeWidget, this, &SetupWidget::showPrimeWidget);  // for dismiss button
   mainLayout->addWidget(primeAd);
 
   primeUser = new PrimeUserWidget;
@@ -327,7 +339,6 @@ void SetupWidget::replyFinished(const QString &response) {
 
 void SetupWidget::showPrimeWidget(bool hasPrime) {
   showQr = false;
-  if (!hasPrime)
-    primeUser->setNoPrime();
+  primeUser->setPrime(hasPrime);
   mainLayout->setCurrentWidget(primeUser);
 }

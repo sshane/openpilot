@@ -24,7 +24,7 @@ class PrimeUserWidget : public QWidget {
   Q_OBJECT
 public:
   explicit PrimeUserWidget(QWidget* parent = 0);
-  void setNoPrime();
+  void setPrime(bool hasPrime);
 
 private:
   QVBoxLayout* mainLayout;
