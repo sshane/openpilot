@@ -15,10 +15,26 @@
 ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
 
+  QWidget *btns_wrapper = new QWidget;
+  QHBoxLayout *btns_layout  = new QHBoxLayout(btns_wrapper);
+  main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
+
   QPushButton *btn = new QPushButton("Test Button");
   btn->setFixedHeight(200);
   btn->setFixedWidth(200);
-  main_layout->addWidget(btn, 0, Qt::AlignBottom);
+  btns_layout->addWidget(btn, 0, Qt::AlignRight);
+
+
+  setStyleSheet(R"(
+    QPushButton {
+      font-size: 50px;
+      border-radius: 10px;
+      background-color: #393939;
+    }
+    QPushButton:pressed {
+      background-color: #4a4a4a;
+    }
+  )");
 }
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {

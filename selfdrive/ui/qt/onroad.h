@@ -10,13 +10,6 @@
 #include "selfdrive/ui/ui.h"
 
 
-class ButtonsWindow : public QWidget {
-  Q_OBJECT
-
-public:
-  ButtonsWindow(QWidget* parent = 0);
-};
-
 // ***** onroad widgets *****
 
 class OnroadAlerts : public QWidget {
@@ -53,6 +46,13 @@ private:
 
 public slots:
   void updateState(const UIState &s);
+};
+
+class ButtonsWindow : public QWidget {
+  Q_OBJECT
+
+public:
+  ButtonsWindow(QWidget* parent = 0);
 };
 
 // container for all onroad widgets
