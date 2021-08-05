@@ -180,6 +180,7 @@ private slots:
 private:
   QTimer *timer;
   bool started_prev = true;
+  void saInit(const UIState &s);
 };
 
 

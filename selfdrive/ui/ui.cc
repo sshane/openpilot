@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <QDebug>
 
 #include "selfdrive/common/swaglog.h"
 #include "selfdrive/common/util.h"
@@ -20,6 +21,23 @@
 
 std::map<std::string, int> LS_TO_IDX = {{"off", 0}, {"audible", 1}, {"silent", 2}};
 std::map<std::string, int> DF_TO_IDX = {{"traffic", 0}, {"relaxed", 1}, {"stock", 2}, {"auto", 3}};
+
+void saInit(UIState *s) {
+  s->scene.mlButtonEnabled = false;  // reset on ignition
+
+  std::string dynamic_follow = util::read_file("/data/community/params/dynamic_follow");
+  if (dynamic_follow != "") {
+    dynamic_follow = dynamic_follow.substr(1, dynamic_follow.find_last_of('"') - 1);
+    qDebug() << "set dfButtonStatus to" << QString::fromStdString(dynamic_follow);
+    s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
+  }
+//  std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
+//  if (lane_speed_alerts != "") {
+//    lane_speed_alerts = lane_speed_alerts.substr(1, lane_speed_alerts.find_last_of('"') - 1);
+//    qDebug() << "Set lsButtonStatus to " << lane_speed_alerts;
+//    s->scene.lsButtonStatus = DF_TO_IDX[lane_speed_alerts];
+//  }
+}
 
 // Projects a point in car to space to the corresponding point in full frame
 // image space.
@@ -248,6 +266,7 @@ static void update_status(UIState *s) {
   static bool started_prev = false;
   if (s->scene.started != started_prev) {
     if (s->scene.started) {
+      saInit(s);
       s->status = STATUS_DISENGAGED;
       s->scene.started_frame = s->sm->frame;
 
