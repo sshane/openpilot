@@ -13,6 +13,22 @@
 
 // ***** onroad widgets *****
 
+class ButtonsWindow : public QWidget {
+  Q_OBJECT
+
+public:
+  ButtonsWindow(QWidget* parent = 0);
+  void updateState(const UIState &s);
+
+private:
+  QPushButton *dfButton;
+//  QPushButton *mlButton;
+
+  int dfStatus = -1;  // always initialize style sheet and send msg
+  const QStringList dfButtonColors = {"#044389", "#24a8bc", "#fcff4b", "#37b868"};
+  void updateDfButton(int status);
+};
+
 class OnroadAlerts : public QWidget {
   Q_OBJECT
 
@@ -47,22 +63,6 @@ private:
 
 public slots:
   void updateState(const UIState &s);
-};
-
-class ButtonsWindow : public QWidget {
-  Q_OBJECT
-
-public:
-  ButtonsWindow(QWidget* parent = 0);
-  void updateState(const UIState &s);
-
-private:
-  QPushButton *dfButton;
-//  QPushButton *mlButton;
-
-  int dfStatus = -1;  // always initialize style sheet and send msg
-  const QStringList dfButtonColors = {"#044389", "#24a8bc", "#fcff4b", "#37b868"};
-  void updateDfButton(int status);
 };
 
 // container for all onroad widgets
