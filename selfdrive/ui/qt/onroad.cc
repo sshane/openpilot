@@ -19,7 +19,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   QHBoxLayout *btns_layout  = new QHBoxLayout(btns_wrapper);
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
-  QPushButton *btn = new QPushButton("Test Button");
+  QPushButton *btn = new QPushButton("DF\nprofile");
   btn->setFixedHeight(200);
   btn->setFixedWidth(200);
   btns_layout->addWidget(btn, 0, Qt::AlignRight);
@@ -27,8 +27,9 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 
   setStyleSheet(R"(
     QPushButton {
+      color: white;
       font-size: 50px;
-      border-radius: 10px;
+      border-radius: 200px;
       background-color: #393939;
     }
     QPushButton:pressed {
