@@ -14,10 +14,6 @@
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
-  QPushButton *btn = new QPushButton("Test Button");
-  btn->setFixedHeight(400);
-  btn->setFixedWidth(400);
-  main_layout->addWidget(btn, 0, Qt::AlignBottom | Qt::AlignRight);
   main_layout->setMargin(bdr_s);
   QStackedLayout *stacked_layout = new QStackedLayout;
   stacked_layout->setStackingMode(QStackedLayout::StackAll);
@@ -39,8 +35,14 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   stacked_layout->addWidget(alerts);
 
+  QPushButton *btn = new QPushButton("Test Button");
+  btn->setFixedHeight(200);
+  btn->setFixedWidth(200);
+  stacked_layout->addWidget(btn);
+
   // setup stacking order
-  alerts->raise();
+//  alerts->raise();
+  btn->raise();
 
   setAttribute(Qt::WA_OpaquePaintEvent);
   QObject::connect(this, &OnroadWindow::updateStateSignal, this, &OnroadWindow::updateState);
