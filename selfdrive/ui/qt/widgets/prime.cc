@@ -69,7 +69,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   primeWidget->setObjectName("primeWidget");
   QVBoxLayout *primeLayout = new QVBoxLayout(primeWidget);
   primeLayout->setMargin(0);
-  primeWidget->setContentsMargins(60, 50, 60, 60);
+  primeWidget->setContentsMargins(60, 50, 60, 50);
 
   subscribed = new QLabel("✓ SUBSCRIBED");
   subscribed->setProperty("prime", true);
@@ -126,11 +126,9 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
 
   QLabel* thirdLabel = new QLabel("Stock...with Additions!");
   thirdLabel->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
-  thirdLayout->addWidget(thirdLabel, 0, Qt::AlignTop);
+  thirdLayout->addWidget(thirdLabel, 0, Qt::AlignVCenter);
 
   mainLayout->addWidget(thirdWidget);
-
-  mainLayout->addStretch();
 
   // set up API requests
   std::string dongleId = Params().get("DongleId");
