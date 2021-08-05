@@ -22,10 +22,10 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
   QPushButton *mlButton = new QPushButton("Toggle Model Long");
-  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px;");
+  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #b83737;");
   QObject::connect(mlButton, &QPushButton::clicked, [=]() {
     qDebug() << "Clicked!";
-    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #eb4034;");
+    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #37b868;");
   });
   mlButton->setFixedWidth(525);
   mlButton->setFixedHeight(150);
