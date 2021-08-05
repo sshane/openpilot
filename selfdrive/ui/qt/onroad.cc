@@ -27,7 +27,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
     qDebug() << "Clicked!";
     mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #eb4034;");
   });
-  mlButton->setFixedWidth(500);
+  mlButton->setFixedWidth(525);
   mlButton->setFixedHeight(150);
   btns_layout->addStretch();
   btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
