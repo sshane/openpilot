@@ -29,7 +29,6 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   split->addWidget(nvg);
 
   buttons = new ButtonsWindow(this);
-  buttons->setFixedWidth(width() / 2 - bdr_s);
 //  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   QObject::connect(this, &OnroadWindow::updateStateSignal, buttons, &ButtonsWindow::updateState);
   stacked_layout->addWidget(buttons);
@@ -76,6 +75,8 @@ void OnroadWindow::updateState(const UIState &s) {
 }
 
 void OnroadWindow::offroadTransition(bool offroad) {
+  buttons->setFixedWidth(width() / 2 - bdr_s);
+
 #ifdef ENABLE_MAPS
   if (!offroad) {
     QString token = QString::fromStdString(Params().get("MapboxToken"));
