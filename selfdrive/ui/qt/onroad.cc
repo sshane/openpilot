@@ -29,6 +29,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   split->addWidget(nvg);
 
   buttons = new ButtonsWindow(this);
+  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   stacked_layout->addWidget(buttons);
 
   stacked_layout->addWidget(split_wrapper);
