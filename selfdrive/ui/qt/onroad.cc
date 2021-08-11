@@ -29,6 +29,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   split->addWidget(nvg);
 
   buttons = new ButtonsWindow(this);
+  QObject::connect(this, &OnroadWindow::updateStateSignal, buttons, &ButtonsWindow::updateState);
   buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   stacked_layout->addWidget(buttons);
 
@@ -47,8 +48,6 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 }
 
 void OnroadWindow::updateState(const UIState &s) {
-  buttons->updateState(s);
-
   SubMaster &sm = *(s.sm);
   QColor bgColor = bg_colors[s.status];
   if (sm.updated("controlsState")) {
