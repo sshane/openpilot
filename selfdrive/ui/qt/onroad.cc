@@ -28,11 +28,11 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   split->setSpacing(0);
   split->addWidget(nvg);
 
+  stacked_layout->addWidget(split_wrapper);
+
   buttons = new ButtonsWindow(this);
   QObject::connect(this, &OnroadWindow::updateStateSignal, buttons, &ButtonsWindow::updateState);
   stacked_layout->addWidget(buttons);
-
-  stacked_layout->addWidget(split_wrapper);
 
   alerts = new OnroadAlerts(this);
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -166,11 +166,12 @@ void ButtonsWindow::updateDfButton(int status) {
 
 bool ButtonsWindow::event(QEvent *event) {
   if (event->type() == QEvent::MouseButtonPress ||
-      event->type() == QEvent::MouseButtonRelease ||
-      event->type() == QEvent::MouseButtonRelease)
+      event->type() == QEvent::MouseButtonRelease) {
+    qDebug() << "HERE";
     return false;
-  else
+  } else {
     return QWidget::event(event);
+  }
 }
 
 void OnroadAlerts::updateAlert(const Alert &a, const QColor &color) {
