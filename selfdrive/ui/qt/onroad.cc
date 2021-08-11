@@ -105,7 +105,7 @@ void OnroadWindow::paintEvent(QPaintEvent *event) {
 // ***** onroad widgets *****
 
 ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
-  setAttribute(Qt::WA_TransparentForMouseEvents, true);
+//  setAttribute(Qt::WA_TransparentForMouseEvents, true);
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
 
   QWidget *btns_wrapper = new QWidget;
@@ -126,7 +126,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 //  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
   dfButton = new QPushButton("DF\nprofile");
-  dfButtons->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+//  dfButtons->setAttribute(Qt::WA_TransparentForMouseEvents, false);
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     QUIState::ui_state.scene.dfButtonStatus = dfStatus < 3 ? dfStatus + 1 : 0;  // wrap back around
   });
@@ -162,6 +162,15 @@ void ButtonsWindow::updateDfButton(int status) {
     dfButtonStatus.setStatus(dfStatus);
     QUIState::ui_state.pm->send("dynamicFollowButton", msg);
   }
+}
+
+bool ButtonsWindow::event(QEvent *event) {
+  if (event->type() == QEvent::MouseButtonPress ||
+      event->type() == QEvent::MouseButtonRelease ||
+      event->type() == QEvent::MouseButtonRelease)
+    return false;
+  else
+    return QWidget::event(event);
 }
 
 void OnroadAlerts::updateAlert(const Alert &a, const QColor &color) {
