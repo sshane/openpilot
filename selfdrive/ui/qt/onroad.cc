@@ -28,11 +28,12 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   split->setSpacing(0);
   split->addWidget(nvg);
 
-  stacked_layout->addWidget(split_wrapper);
-
   buttons = new ButtonsWindow(this);
+  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, false);
   QObject::connect(this, &OnroadWindow::updateStateSignal, buttons, &ButtonsWindow::updateState);
   stacked_layout->addWidget(buttons);
+
+  stacked_layout->addWidget(split_wrapper);
 
   alerts = new OnroadAlerts(this);
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -126,7 +127,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 //  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
   dfButton = new QPushButton("DF\nprofile");
-//  dfButtons->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+//  dfButton->setAttribute(Qt::WA_TransparentForMouseEvents, false);
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     QUIState::ui_state.scene.dfButtonStatus = dfStatus < 3 ? dfStatus + 1 : 0;  // wrap back around
   });
