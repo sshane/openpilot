@@ -22,22 +22,17 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   nvg = new NvgWindow(this);
   QObject::connect(this, &OnroadWindow::updateStateSignal, nvg, &NvgWindow::updateState);
 
-  QStackedLayout *stacked_nvg_layout = new QStackedLayout;
-  stacked_nvg_layout->setStackingMode(QStackedLayout::StackAll);
-
-  buttons = new ButtonsWindow(this);
-//  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-  stacked_nvg_layout->addWidget(buttons);
-
   QWidget * split_wrapper = new QWidget;
   split = new QHBoxLayout(split_wrapper);
   split->setContentsMargins(0, 0, 0, 0);
   split->setSpacing(0);
   split->addWidget(nvg);
 
-  stacked_nvg_layout->addWidget(split_wrapper);
-//  buttons->raise();
-  stacked_layout->addLayout(stacked_nvg_layout);
+  buttons = new ButtonsWindow(this);
+  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+  stacked_layout->addWidget(buttons);
+
+  stacked_layout->addWidget(split_wrapper);
 
   alerts = new OnroadAlerts(this);
   alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
