@@ -30,7 +30,6 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 
   buttons = new ButtonsWindow(this);
   QObject::connect(this, &OnroadWindow::updateStateSignal, buttons, &ButtonsWindow::updateState);
-  buttons->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   stacked_layout->addWidget(buttons);
 
   stacked_layout->addWidget(split_wrapper);
@@ -106,6 +105,7 @@ void OnroadWindow::paintEvent(QPaintEvent *event) {
 // ***** onroad widgets *****
 
 ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
+  setAttribute(Qt::WA_TransparentForMouseEvents, true);
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
 
   QWidget *btns_wrapper = new QWidget;
@@ -126,6 +126,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 //  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
 
   dfButton = new QPushButton("DF\nprofile");
+  dfButtons->setAttribute(Qt::WA_TransparentForMouseEvents, false);
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
     QUIState::ui_state.scene.dfButtonStatus = dfStatus < 3 ? dfStatus + 1 : 0;  // wrap back around
   });
