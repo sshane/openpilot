@@ -20,6 +20,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 
   // old UI on bottom
   nvg = new NvgWindow(this);
+  QObject::connect(nvg, &NvgWindow::resizeSignal, [=](int w, int h){ qDebug() << "Resize signal:" << w << h; });
   QObject::connect(this, &OnroadWindow::updateStateSignal, nvg, &NvgWindow::updateState);
 
   QWidget * split_wrapper = new QWidget;
@@ -270,8 +271,8 @@ void NvgWindow::updateState(const UIState &s) {
 
 void NvgWindow::resizeGL(int w, int h) {
   qDebug() << "Resizing to w:" << w << "h:" << h;
+  emit resizeSignal(w, h);  // for ButtonsWindow
   ui_resize(&QUIState::ui_state, w, h);
-  buttons->setFixedWidth(w, h);
 }
 
 void NvgWindow::paintGL() {

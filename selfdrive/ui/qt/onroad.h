@@ -67,6 +67,9 @@ private:
 
 public slots:
   void updateState(const UIState &s);
+
+signals:
+  resizeSignal(int w, int h);
 };
 
 // container for all onroad widgets
