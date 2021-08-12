@@ -21,7 +21,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   // old UI on bottom
   nvg = new NvgWindow(this);
   QObject::connect(nvg, &NvgWindow::resizeSignal, [=](int w, int h){
-    buttons->setFixedWidth(w, h);
+    buttons->setFixedWidth(w);
   });
   QObject::connect(this, &OnroadWindow::updateStateSignal, nvg, &NvgWindow::updateState);
 
