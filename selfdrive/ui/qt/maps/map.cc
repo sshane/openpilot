@@ -73,6 +73,16 @@ MapWindow::~MapWindow() {
   makeCurrent();
 }
 
+void MapWindow::hideEvent(QHideEvent *event) {
+  emit mapVisibilitySignal(false);
+  QOpenGLWidget::hideEvent(event);
+}
+
+void MapWindow::showEvent(QHideEvent *event) {
+  emit mapVisibilitySignal(true);
+  QOpenGLWidget::showEvent(event);
+}
+
 void MapWindow::initLayers() {
   // This doesn't work from initializeGL
   if (!m_map->layerExists("modelPathLayer")) {

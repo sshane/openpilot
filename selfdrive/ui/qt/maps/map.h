@@ -80,6 +80,9 @@ private:
   void paintGL() final;
   void resizeGL(int w, int h) override;
 
+  void hideEvent(QHideEvent *event);
+  void showEvent(QHideEvent *event);
+
   QMapboxGLSettings m_settings;
   QScopedPointer<QMapboxGL> m_map;
 
@@ -144,5 +147,6 @@ signals:
   void distanceChanged(float distance);
   void instructionsChanged(QMap<QString, QVariant> banner, bool full);
   void ETAChanged(float seconds, float seconds_typical, float distance);
+  void mapVisibilitySignal(bool visible);
 };
 
