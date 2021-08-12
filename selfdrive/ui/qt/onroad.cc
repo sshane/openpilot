@@ -271,6 +271,7 @@ void NvgWindow::updateState(const UIState &s) {
 void NvgWindow::resizeGL(int w, int h) {
   qDebug() << "Resizing to w:" << w << "h:" << h;
   ui_resize(&QUIState::ui_state, w, h);
+  buttons->setFixedWidth(w, h);
 }
 
 void NvgWindow::paintGL() {
