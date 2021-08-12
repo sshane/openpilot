@@ -27,8 +27,6 @@ private:
   const QStringList dfButtonColors = {"#044389", "#24a8bc", "#fcff4b", "#37b868"};
   void updateDfButton(int status);
 
-  bool event(QEvent *event);
-
 public slots:
   void updateState(const UIState &s);
 };
