@@ -75,6 +75,8 @@ void OnroadWindow::updateState(const UIState &s) {
 }
 
 void OnroadWindow::offroadTransition(bool offroad) {
+  buttons->setFixedWidth(width() / 2 - bdr_s);
+
 #ifdef ENABLE_MAPS
   if (!offroad) {
     QString token = QString::fromStdString(Params().get("MapboxToken"));
@@ -91,7 +93,6 @@ void OnroadWindow::offroadTransition(bool offroad) {
       QObject::connect(this, &OnroadWindow::offroadTransitionSignal, m, &MapWindow::offroadTransition);
       split->addWidget(m, 0, Qt::AlignRight);
       map = m;
-      QObject::connect(map, &MapWindow::mapVisibilitySignal, buttons, &ButtonsWindow::mapVisibilityChanged)
     }
   }
 #endif
@@ -152,15 +153,6 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 void ButtonsWindow::updateState(const UIState &s) {
   updateDfButton(s.scene.dfButtonStatus);  // update dynamic follow profile button
 //  updateMlButton(s.scene.dfButtonStatus);  // update model longitudinal button  // TODO: add model long back first
-}
-
-void ButtonsWindow::mapVisibilityChanged(bool visible) {
-  qDebug() << "Map visible:" << visible << "setting width to:" << width;
-  if (visible) {
-    buttons->setFixedWidth(width() / 2 - bdr_s);
-  } else {
-    buttons->setFixedWidth(width() / 2 - bdr_s);
-  }
 }
 
 void ButtonsWindow::updateDfButton(int status) {

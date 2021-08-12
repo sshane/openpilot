@@ -31,7 +31,6 @@ private:
 
 public slots:
   void updateState(const UIState &s);
-  void mapVisibilityChanged(bool visible);
 };
 
 class OnroadAlerts : public QWidget {
