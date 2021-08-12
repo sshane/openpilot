@@ -155,11 +155,11 @@ void ButtonsWindow::updateState(const UIState &s) {
 }
 
 void ButtonsWindow::mapVisibilityChanged(bool visible) {
-  qDebug() << "Map visible:" << visible << "setting width to:" << width;
+  qDebug() << "Map visible:" << visible << "setting width to:" << width();
   if (visible) {
-    buttons->setFixedWidth(width() / 2 - bdr_s);
+    setFixedWidth(width() / 2 - bdr_s);
   } else {
-    buttons->setFixedWidth(width() / 2 - bdr_s);
+    setFixedWidth(width() / 2 - bdr_s);
   }
 }
 

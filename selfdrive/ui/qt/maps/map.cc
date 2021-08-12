@@ -78,7 +78,7 @@ void MapWindow::hideEvent(QHideEvent *event) {
   QOpenGLWidget::hideEvent(event);
 }
 
-void MapWindow::showEvent(QHideEvent *event) {
+void MapWindow::showEvent(QShowEvent *event) {
   emit mapVisibilitySignal(true);
   QOpenGLWidget::showEvent(event);
 }

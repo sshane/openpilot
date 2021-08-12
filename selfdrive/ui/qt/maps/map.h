@@ -81,7 +81,7 @@ private:
   void resizeGL(int w, int h) override;
 
   void hideEvent(QHideEvent *event);
-  void showEvent(QHideEvent *event);
+  void showEvent(QShowEvent *event);
 
   QMapboxGLSettings m_settings;
   QScopedPointer<QMapboxGL> m_map;
