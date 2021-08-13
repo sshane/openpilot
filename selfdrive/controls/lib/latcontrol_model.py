@@ -60,6 +60,9 @@ class LatControlModel:
 
       steering_rate_des = VM.get_steer_from_curvature(-desired_curvature_rate, CS.vEgo)
 
+      # TODO: Can be sluggish when model is given rates, the issue is probably with the training data,
+      # specifically the disturbances/perturbations fed into the model to recover from large errors
+      # Basically, figure out a better way to train the model to recover without random samples and using a PF controller as the output
       rate_des = steering_rate_des if self.use_rates else 0
       rate = CS.steeringRateDeg if self.use_rates else 0
       model_input = [angle_steers_des, CS.steeringAngleDeg, rate_des, rate, CS.vEgo]
