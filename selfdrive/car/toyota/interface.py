@@ -34,7 +34,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.stoppingControl = False # Toyota starts braking more when it thinks you want to stop
 
-    CARS_NOT_PID = [CAR.RAV4, CAR.RAV4H]
+    CARS_NOT_PID = [CAR.RAV4, CAR.RAV4H, CAR.COROLLA]
     if not prius_use_pid:
       CARS_NOT_PID.append(CAR.PRIUS)
 
@@ -90,12 +90,9 @@ class CarInterface(CarInterfaceBase):
       ret.minSpeedCan = 0.1 * CV.KPH_TO_MS
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kpV = [[20, 31], [0.06, 0.12]]  # 45 to 70 mph
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kiV = [[20, 31], [0.001, 0.02]]
-      ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[20, 31], [0.1, 0.2]]
-      # ret.lateralTuning.pid.kf = 0.00003  # full torque for 20 deg at 80mph means 0.00007818594
-      ret.lateralTuning.pid.kf = 0.00006908923778520113  # full torque for 20 deg at 80mph means 0.00007818594
-      ret.lateralTuning.pid.newKfTuned = True
+
+      ret.lateralTuning.init('model')
+      ret.lateralTuning.model.useRates = False  # TODO: makes model sluggish, see comments in latcontrol_model.py
 
     elif candidate == CAR.LEXUS_RX:
       stop_and_go = True
