@@ -10,8 +10,8 @@ from common.realtime import DT_CTRL
 class LatControlModel:
   def __init__(self, CP):
     # Model generated using Konverter: https://github.com/ShaneSmiskol/Konverter
-    wb = np.load(f'{BASEDIR}/torque_model/models/fifth_model_weights.npz', allow_pickle=True)
-    self.w, self.b = wb['wb']
+    model_weights_file = f'{BASEDIR}/torque_model/models/{CP.lateralTuning.model.name}_weights.npz'
+    self.w, self.b = np.load(model_weights_file, allow_pickle=True)['wb']
 
     self.use_rates = CP.lateralTuning.model.useRates
 

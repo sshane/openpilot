@@ -92,6 +92,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
 
       ret.lateralTuning.init('model')
+      ret.lateralTuning.model.name = "corolla_model_v5"
       ret.lateralTuning.model.useRates = False  # TODO: makes model sluggish, see comments in latcontrol_model.py
 
     elif candidate == CAR.LEXUS_RX:
