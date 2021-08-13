@@ -20,6 +20,7 @@ class CarInterface(CarInterfaceBase):
 
     op_params = opParams()
     use_lqr = op_params.get('use_lqr')
+    use_steering_model = op_params.get('use_steering_model')
     prius_use_pid = op_params.get('prius_use_pid')
     corollaTSS2_use_indi = op_params.get('corollaTSS2_use_indi')
     rav4TSS2_use_indi = op_params.get('rav4TSS2_use_indi')
@@ -38,7 +39,7 @@ class CarInterface(CarInterfaceBase):
     if not prius_use_pid:
       CARS_NOT_PID.append(CAR.PRIUS)
 
-    if candidate not in CARS_NOT_PID and not use_lqr:  # These cars use LQR/INDI
+    if candidate not in CARS_NOT_PID and not use_lqr and not use_steering_model:  # These cars use LQR/INDI
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
 
@@ -347,6 +348,11 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.lqr.k = [-110.73572306, 451.22718255]
       ret.lateralTuning.lqr.l = [0.3233671, 0.3185757]
       ret.lateralTuning.lqr.dcGain = 0.002237852961363602
+
+    elif use_steering_model:
+      ret.lateralTuning.init('model')
+      ret.lateralTuning.model.name = "corolla_model_v5"
+      ret.lateralTuning.model.useRates = False
 
     ret.centerToFront = ret.wheelbase * 0.44
 
