@@ -14,13 +14,13 @@ class LongitudinalMpc():
     self.last_cloudlog_t = 0.0
     self.ts = list(range(10))
     self.status = True
-    self.min_a = -1.2
+    self.min_a = -3.5
     self.max_a = 1.2
 
 
   def reset_mpc(self):
     self.libmpc = libmpc_py.libmpc
-    self.libmpc.init(0.0, 1.0, 0.0, 50.0, 10000.0)
+    self.libmpc.init(1.0, 1.0, 0.0, 5.0, 10000.0)
 
     self.mpc_solution = libmpc_py.ffi.new("log_t *")
     self.cur_state = libmpc_py.ffi.new("state_t *")
@@ -45,11 +45,14 @@ class LongitudinalMpc():
     self.cur_state[0].v_ego = v_safe
     self.cur_state[0].a_ego = a_safe
 
-  def update(self, carstate, radarstate, v_cruise):
+  def update(self, carstate, radarstate, modelstate, v_cruise):
     v_cruise_clipped = np.clip(v_cruise, self.cur_state[0].v_ego - 10., self.cur_state[0].v_ego + 10.0)
-    poss = v_cruise_clipped * np.array(T_IDXS[:LON_MPC_N+1])
-    speeds = v_cruise_clipped * np.ones(LON_MPC_N+1)
-    accels = np.zeros(LON_MPC_N+1)
+    # poss = v_cruise_clipped * np.array(T_IDXS[:LON_MPC_N+1])
+    # speeds = v_cruise_clipped * np.ones(LON_MPC_N+1)
+    # accels = np.zeros(LON_MPC_N+1)
+    poss = np.minimum(np.array(modelstate.position.x)[:LON_MPC_N+1], v_cruise_clipped * np.array(T_IDXS[:LON_MPC_N+1]))
+    speeds = np.minimum(np.array(modelstate.velocity.x)[:LON_MPC_N+1], v_cruise_clipped)
+    accels = np.zeros(LON_MPC_N + 1)
     self.update_with_xva(poss, speeds, accels)
 
   def update_with_xva(self, poss, speeds, accels):
