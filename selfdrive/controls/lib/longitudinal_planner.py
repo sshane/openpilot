@@ -77,8 +77,8 @@ class Planner():
     self.mpcs = {}
     self.mpcs['lead0'] = LeadMpc(0)
     self.mpcs['lead1'] = LeadMpc(1)
-    self.mpcs['cruise'] = LongitudinalMpc()
-    # self.mpcs['model'] = LongitudinalMpcModel()
+    self.mpcs['cruise'] = LongitudinalMpc(0)
+    self.mpcs['model'] = LongitudinalMpc(1)
 
     self.fcw = False
     self.fcw_checker = FCWChecker()
@@ -136,7 +136,8 @@ class Planner():
       self.mpcs[key].set_cur_state(self.v_desired, self.a_desired)
       # TODO: handle model long enabled check
       self.mpcs[key].update(sm['carState'], sm['radarState'], sm['modelV2'], v_cruise)
-      if self.mpcs[key].status and self.mpcs[key].a_solution[5] < next_a:  # picks slowest solution from accel in ~0.2 seconds
+      if (self.mpcs[key].status and self.mpcs[key].a_solution[5] < next_a and  # picks slowest solution from accel in ~0.2 seconds
+              ((key == 'model' and sm['modelLongButton'].enabled) or key != 'model')):
         self.longitudinalPlanSource = key
         self.v_desired_trajectory = self.mpcs[key].v_solution[:CONTROL_N]
         self.a_desired_trajectory = self.mpcs[key].a_solution[:CONTROL_N]
