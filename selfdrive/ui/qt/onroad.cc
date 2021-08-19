@@ -149,13 +149,8 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
 }
 
 void ButtonsWindow::updateState(const UIState &s) {
-  updateDfButton(s.scene.dfButtonStatus);  // update dynamic follow profile button
-  updateMlButton(s.scene.mlButtonEnabled);  // update model longitudinal button
-}
-
-void ButtonsWindow::updateDfButton(int status) {
-  if (dfStatus != status) {  // updates (resets) on car start, or on button press
-    dfStatus = status;
+  if (dfStatus != s.scene.dfButtonStatus) {  // update dynamic follow profile button
+    dfStatus = s.scene.dfButtonStatus;
     dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
     MessageBuilder msg;
@@ -163,11 +158,9 @@ void ButtonsWindow::updateDfButton(int status) {
     dfButtonStatus.setStatus(dfStatus);
     QUIState::ui_state.pm->send("dynamicFollowButton", msg);
   }
-}
 
-void ButtonsWindow::updateMlButton(bool enabled) {
-  if (mlEnabled != enabled) {  // updates (resets) on car start, or on button press
-    mlEnabled = enabled;
+  if (mlEnabled != s.scene.mlButtonEnabled) {  // update model longitudinal button
+    mlEnabled = s.scene.mlButtonEnabled;
     mlButton->setStyleSheet(QString("font-size: 45px; border-radius: 25px; border-color: %1").arg(mlButtonColors.at(mlEnabled)));
 
     MessageBuilder msg;
