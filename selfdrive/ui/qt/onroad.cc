@@ -113,20 +113,19 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   QWidget *btns_wrapper = new QWidget;
   QHBoxLayout *btns_layout  = new QHBoxLayout(btns_wrapper);
   btns_layout->setSpacing(0);
-  btns_layout->setContentsMargins(0, 0, 30, 30);
+  btns_layout->setContentsMargins(30, 0, 30, 30);
 
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
   mlButton = new QPushButton("Model Cruise Control");
-//  mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #b83737;");
   QObject::connect(mlButton, &QPushButton::clicked, [=]() {
     QUIState::ui_state.scene.mlButtonEnabled = !mlEnabled;
-//    mlButton->setStyleSheet("font-size: 50px; border-radius: 25px; border-color: #37b868;");
   });
-  mlButton->setFixedWidth(525);
-  mlButton->setFixedHeight(200);
-  btns_layout->addStretch();
-  btns_layout->addWidget(mlButton, 0, Qt::AlignCenter);
+  mlButton->setFixedWidth(575);
+  mlButton->setFixedHeight(150);
+  btns_layout->addStretch(4);
+  btns_layout->addWidget(mlButton, 0, Qt::AlignHCenter | Qt::AlignBottom);
+  btns_layout->addStretch(3);
 
   dfButton = new QPushButton("DF\nprofile");
   QObject::connect(dfButton, &QPushButton::clicked, [=]() {
@@ -161,7 +160,7 @@ void ButtonsWindow::updateState(const UIState &s) {
 
   if (mlEnabled != s.scene.mlButtonEnabled) {  // update model longitudinal button
     mlEnabled = s.scene.mlButtonEnabled;
-    mlButton->setStyleSheet(QString("font-size: 45px; border-radius: 25px; border-color: %1").arg(mlButtonColors.at(mlEnabled)));
+    mlButton->setStyleSheet(QString("font-size: 50px; border-radius: 25px; border-color: %1").arg(mlButtonColors.at(mlEnabled)));
 
     MessageBuilder msg;
     auto mlButtonEnabled = msg.initEvent().initModelLongButton();
