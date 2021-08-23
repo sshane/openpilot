@@ -392,14 +392,24 @@ class CarInterface(CarInterfaceBase):
     # intercepting the DSU is a community feature since it requires unofficial hardware
     ret.communityFeature = ret.enableGasInterceptor or ret.enableDsu or smartDsu
 
+    # if ret.enableGasInterceptor:
+    #   # Transitions from original pedal tuning at MIN_ACC_SPEED to default tuning at MIN_ACC_SPEED + hysteresis gap
+    #   ret.gasMaxBP = [0., MIN_ACC_SPEED]
+    #   ret.gasMaxV = [0.2, 0.5]
+    #   ret.longitudinalTuning.kpBP = [0., 5., MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_HYST_GAP, 35.]
+    #   ret.longitudinalTuning.kpV = [1.2, 0.8, 0.765, 2.255, 1.5]
+    #   ret.longitudinalTuning.kiBP = [0., MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_HYST_GAP, 35.]
+    #   ret.longitudinalTuning.kiV = [0.18, 0.165, 0.489, 0.36]
     if ret.enableGasInterceptor:
-      # Transitions from original pedal tuning at MIN_ACC_SPEED to default tuning at MIN_ACC_SPEED + hysteresis gap
-      ret.gasMaxBP = [0., MIN_ACC_SPEED]
-      ret.gasMaxV = [0.2, 0.5]
-      ret.longitudinalTuning.kpBP = [0., 5., MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_HYST_GAP, 35.]
-      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.765, 2.255, 1.5]
-      ret.longitudinalTuning.kiBP = [0., MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_HYST_GAP, 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.165, 0.489, 0.36]
+      # Default longitudinal tune with tweaks
+      ret.longitudinalTuning.deadzoneBP = [0., 9.]
+      ret.longitudinalTuning.deadzoneV = [0., .15]
+      ret.longitudinalTuning.kpBP = [0., 5., 35.]
+      ret.longitudinalTuning.kiBP = [0., 35.]
+      ret.longitudinalTuning.kdBP = [0., 5., 35.]
+      ret.longitudinalTuning.kpV = [3.6 * 0.9, 2.4 * 0.9, 1.5 * 0.9]
+      ret.longitudinalTuning.kiV = [0.54 * 0.8, 0.36 * 0.8]
+      ret.longitudinalTuning.kdV = [0.05, 0.1, 0.3]
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.RAV4_TSS2, CAR.RAV4H_TSS2, CAR.LEXUS_NX_TSS2]:
       # Improved longitudinal tune
       ret.longitudinalTuning.deadzoneBP = [0., 8.05]
