@@ -1,5 +1,8 @@
+import importlib
 import math
 
+from common.filter_simple import FirstOrderFilter
+from common.realtime import DT_CTRL
 from selfdrive.controls.lib.pid import LatPIDController
 from selfdrive.controls.lib.drive_helpers import get_steer_max
 from cereal import log
@@ -11,7 +14,12 @@ class LatControlPID():
                                 (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
                                 (CP.lateralTuning.pid.kdBP, CP.lateralTuning.pid.kdV),
                                 k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, sat_limit=CP.steerLimitTimer)
-    self.new_kf_tuned = CP.lateralTuning.pid.newKfTuned
+    self.new_kf_tuned = True  # CP.lateralTuning.pid.newKfTuned
+    self.kf_filter = FirstOrderFilter(CP.lateralTuning.pid.kf, 10, DT_CTRL)
+
+    self.CarControllerParams = importlib.import_module('selfdrive.car.{}.values'.format(CP.carName)).CarControllerParams
+    assert self.CarControllerParams, 'Missing CarControllerParams!'
+    assert self.CarControllerParams.STEER_MAX != 0, 'Can\'t be 0'
 
   def reset(self):
     self.pid.reset()
@@ -28,6 +36,13 @@ class LatControlPID():
       output_steer = 0.0
       pid_log.active = False
       self.pid.reset()
+
+      if abs(CS.steeringRateDeg) < 20 and 5 < abs(CS.steeringAngleDeg) < 90 and CS.vEgo > 5:
+        torque = CS.steeringTorqueEps / self.CarControllerParams.STEER_MAX
+        predicted_kf = torque / (CS.steeringAngleDeg * CS.vEgo ** 2)
+        self.pid.k_f = self.kf_filter.update(predicted_kf)
+
+        print('PREDICTED KF: {}'.format(self.kf_filter.x))
     else:
       steers_max = get_steer_max(CP, CS.vEgo)
       self.pid.pos_limit = steers_max
