@@ -194,7 +194,9 @@ Feel free to reach out to me on [Discord](#stock-additions-v066-082) if you're h
 ### Quick Installation
 To install Stock Additions, just enter the following URL on the setup screen for "Custom Software" after you factory reset:
 
+```
 https://smiskol.com/fork/sshane
+```
 
 *Or run the following commands in an ssh terminal on your device:*
 
