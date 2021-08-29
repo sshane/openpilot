@@ -12,14 +12,14 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 ### Behavior Changes
 * [**Dynamic follow (now with profiles!)**](#dynamic-follow-3-profiles) - 3 + auto profiles to control distance
   * [**`auto-df` model for automatic distance profile switching**](#Automatic-DF-profile-switching)
-* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/sshane/openpilot/blob/stock_additions/SA_RELEASES.md#stock-additions-v066---2021-02-27-082)
+* **Lane Speed**  [***❗ALL LANE SPEED FEATURES REMOVED TEMPORARILY❗***](https://github.com/sshane/openpilot-archive/blob/stock_additions-082/SA_RELEASES.md#stock-additions-v066---2021-02-27-082)
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**Dynamic camera offsetting**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**Dynamic gas**](#dynamic-gas) - smoother gas control
 * [**Adding derivative to PI for better control**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**Smoother long control using delay**](#new-compensate-for-longitudinal-delay-for-earlier-braking) - using an accel delay, just like for lateral
+* [**Smoother long control using delay**](#compensate-for-longitudinal-delay-for-earlier-braking) - using an accel delay, just like for lateral
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -62,7 +62,7 @@ If you're annoyed by the silent alerts that show when the model has changed the 
 
 Resources:
 - [The auto-df repo.](https://github.com/sshane/auto-df)
-- [The model file.](https://github.com/sshane/openpilot/blob/stock_additions/selfdrive/controls/lib/dynamic_follow/auto_df.py)
+- [The model file.](https://github.com/sshane/openpilot/blob/SA-master/selfdrive/controls/lib/dynamic_follow/auto_df.py)
 - I converted the Keras model to be able to run with pure NumPy using [Konverter](https://github.com/sshane/Konverter).
 
 ---
@@ -210,8 +210,8 @@ sudo reboot
 ---
 ### Branches
 Most of the branches on this fork are development branches I use as various openpilot tests. The few that more permanent are the following:
-  * [`stock_additions`](https://github.com/sshane/openpilot/tree/stock_additions): This is similar to stock openpilot's release branch. Will receive occasional and tested updates to Stock Additions.
-  * `stock_additions-devel` or `SA-staging`: My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommendeded as a daily driver.
+  * [`SA-master`](https://github.com/sshane/openpilot/tree/SA-master): My development branch of Stock Additions I use to test new features or changes; similar to the master branch. Not recommended as a daily driver.
+  * [`SA-release`](https://github.com/sshane/openpilot/tree/SA-release): This is similar to stock openpilot's release branch. Will receive occasional and tested updates to Stock Additions.
 
 ---
 ### Archive Stock Additions branches
