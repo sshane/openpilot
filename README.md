@@ -198,9 +198,9 @@ To install Stock Additions, just enter the following URL on the setup screen for
 https://smiskol.com/fork/sshane
 ```
 
-*Or use the [emu CLI](https://github.com/emu-sh/.oh-my-comma) to easily switch to this fork's default branch: `emu fork switch sshane`. The initial setup may take longer than the above method, but you gain the ability to quickly switch to any fork you want.*
+***Or use the [emu CLI](https://github.com/emu-sh/.oh-my-comma) to easily switch to this fork's default branch: `emu fork switch sshane`. The initial setup may take longer than the above method, but you gain the ability to quickly switch to any fork you want.***
 
-*Or run the following commands in an ssh terminal on your device:*
+***Or run the following commands in an ssh terminal on your device:***
 
 ```
 cd /data/
