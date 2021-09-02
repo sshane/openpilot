@@ -100,6 +100,7 @@ class opParams:
 
     self.fork_params = {'camera_offset': Param(-0.04 if TICI else 0.06, NUMBER, 'Your camera offset to use in lane_planner.py\n'
                                                                                 'If you have a comma three, note that the default camera offset is -0.04!', live=True),
+                        'long_kd': Param(0.5, NUMBER, live=True),
                         'dynamic_follow': Param('stock', str, static=True, hidden=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'
