@@ -62,15 +62,12 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 class LongControl():
   def __init__(self, CP):
     self.long_control_state = LongCtrlState.off  # initialized to off
-    # kdBP = [0., 16., 35.]
-    # kdV = [0.08, 1.215, 2.51]
-
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                              (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                             ([0], [0]),
+                             (CP.longitudinalTuning.kdBP, CP.longitudinalTuning.kdV),
                              rate=RATE,
                              sat_limit=0.8,
-                             derivative_period=1.)
+                             derivative_period=0.5)
     self.v_pid = 0.0
     self.last_output_accel = 0.0
 
