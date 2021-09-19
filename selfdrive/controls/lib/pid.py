@@ -15,7 +15,8 @@ def apply_deadzone(error, deadzone):
     error = 0.
   return error
 
-class PIController():
+
+class PIDController:
   def __init__(self, k_p=0., k_i=0., k_d=0., k_f=1., pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, derivative_period=1.):
     self.op_params = opParams()
     self._k_p = k_p  # proportional gain

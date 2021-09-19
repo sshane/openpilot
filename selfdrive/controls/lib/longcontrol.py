@@ -2,7 +2,7 @@ from cereal import car
 from common.numpy_fast import clip, interp
 from selfdrive.controls.lib.drive_helpers import CONTROL_N
 from selfdrive.modeld.constants import T_IDXS
-from selfdrive.controls.lib.pid import PIController
+from selfdrive.controls.lib.pid import PIDController
 from selfdrive.controls.lib.dynamic_gas import DynamicGas
 from common.op_params import opParams
 
@@ -65,12 +65,12 @@ class LongControl():
     # kdBP = [0., 16., 35.]
     # kdV = [0.08, 1.215, 2.51]
 
-    self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
-                            (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                            ([0], [0]),
-                            rate=RATE,
-                            sat_limit=0.8,
-                            derivative_period=1.)
+    self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
+                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
+                             ([0], [0]),
+                             rate=RATE,
+                             sat_limit=0.8,
+                             derivative_period=1.)
     self.v_pid = 0.0
     self.last_output_accel = 0.0
 
