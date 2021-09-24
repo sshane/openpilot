@@ -12,7 +12,7 @@ from common.op_params import opParams
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
 if EON:
-  STANDARD_CAMERA_OFFSET = 0.06  # do NOT change this. edit with opEdit
+  STANDARD_CAMERA_OFFSET = 0.07  # do NOT change this. edit with opEdit
   STANDARD_PATH_OFFSET = 0.0  # do NOT change this. edit with opEdit
   # CAMERA_OFFSET = 0.06
   # PATH_OFFSET = 0.0
