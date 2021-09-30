@@ -87,6 +87,7 @@ static void update_line_data(const UIState *s, const cereal::ModelDataV2::XYZTDa
 
 static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   UIScene &scene = s->scene;
+  scene.model = model;
   auto model_position = model.getPosition();
   float max_distance = std::clamp(model_position.getX()[TRAJECTORY_SIZE - 1],
                                   MIN_DRAW_DISTANCE, MAX_DRAW_DISTANCE);

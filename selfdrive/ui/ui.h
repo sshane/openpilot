@@ -103,7 +103,7 @@ typedef struct UIScene {
   bool world_objects_visible;
 
   cereal::PandaState::PandaType pandaType;
-
+  cereal::ModelDataV2::Reader model;
   // modelV2
   float lane_line_probs[4];
   float road_edge_stds[2];
