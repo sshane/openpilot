@@ -112,7 +112,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
       NVGcolor color;
       if (i == 1 || i == 2) {
-        const cereal::ModelDataV2::XYZTData::Reader &line = (*s->sm)["controlsState"].getLaneLines()[i];
+        const cereal::ModelDataV2::XYZTData::Reader &line = (*s->sm)["modelV2"].getLaneLines()[i];
         const float default_pos = 1.4;  // when lane poly isn't available
         const float lane_pos = line.getY().size() > 0 ? std::abs(line.getY()[5]) : default_pos;  // get redder when line is closer to car
         float hue = 332.5 * lane_pos - 332.5;  // equivalent to {1.4, 1.0}: {133, 0} (green to red)
@@ -132,16 +132,19 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   }
 
 	// paint path
-	const cereal::ModelDataV2::XYZTData::Reader &pos = (*s->sm)["controlsState"].getPosition();
+	const cereal::ModelDataV2::XYZTData::Reader &pos = (*s->sm)["modelV2"].getPosition();
 	const float lat_pos = pos.getY().size() > 0 ? std::abs(pos.getY()[14] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
 	const float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
 	NVGpaint track_bg;
 	if ((*s->sm)["controlsState"].getControlsState().getEnabled()) {
 		track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
 									nvgHSLA(hue / 360., .94, .51, 255), nvgHSLA(hue / 360., .73, .49, 100));
-	} else {
+	} else if (!scene.end_to_end) {
 		track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
-									COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+                                          COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+  } else {
+    track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
+                                          COLOR_RED, COLOR_RED_ALPHA(0));
 	}
 
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
