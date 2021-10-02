@@ -129,7 +129,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
 
 void PrimeUserWidget::setPrime(bool hasPrime) {
   subscribed->setText(hasPrime ? "✓ SUBSCRIBED" : "✕ NOT SUBSCRIBED");
-  subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: %1;".arg(hasPrime ? "#86FF4E" : "#ff4e4e"));
+  subscribed->setStyleSheet(QString("font-size: 41px; font-weight: bold; color: %1;").arg(hasPrime ? "#86FF4E" : "#ff4e4e"));
   commaPrime->setText(hasPrime ? "comma prime" : "got prime?");
 }
 
