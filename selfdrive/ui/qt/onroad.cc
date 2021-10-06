@@ -2,6 +2,7 @@
 
 #include <QDebug>
 
+#include "selfdrive/common/util.h"
 #include "selfdrive/common/timing.h"
 #include "selfdrive/ui/paint.h"
 #include "selfdrive/ui/qt/util.h"
@@ -146,6 +147,11 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   dfButton->setFixedHeight(200);
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
+  std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
+  if (toyota_distance_btn == "true"){
+    dfButton->hide();
+  }
+
   setStyleSheet(R"(
     QPushButton {
       color: white;
@@ -163,10 +169,13 @@ void ButtonsWindow::updateState(const UIState &s) {
     dfStatus = s.scene.dfButtonStatus;
     dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
-    MessageBuilder msg;
-    auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
-    dfButtonStatus.setStatus(dfStatus);
-    QUIState::ui_state.pm->send("dynamicFollowButton", msg);
+    std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
+    if(toyota_distance_btn != "true"){
+      MessageBuilder msg;
+      auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
+      dfButtonStatus.setStatus(dfStatus);
+      QUIState::ui_state.pm->send("dynamicFollowButton", msg);
+    }
   }
 
   if (mlEnabled != s.scene.mlButtonEnabled) {  // update model longitudinal button
