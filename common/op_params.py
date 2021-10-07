@@ -121,8 +121,8 @@ class opParams:
                         'df_button_alerts': Param('audible', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                                   'How you want to be alerted when you change your dynamic following profile.\n'
                                                                   ' - \'audible\' generates a visible alert with an audible sound, ideal for the on screen\n'
-                                                                  'button that lacks any tactile feedback'
-                                                                  ' - \'silent\' generates a visible alert with no sound'
+                                                                  'button that lacks any tactile feedback\n'
+                                                                  ' - \'silent\' generates a visible alert with no sound\n'
                                                                   ' - \'off\' no alert or sound. Likely only of value on vehicles that provide feedback\n'
                                                                   'on the df profile through other means, such as with \'toyota_distance_btn\' enabled.'),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df', static=True),
