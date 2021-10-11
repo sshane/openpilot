@@ -169,7 +169,7 @@ void ButtonsWindow::updateState(const UIState &s) {
     dfStatus = s.scene.dfButtonStatus;
     dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
-    if(!s.scene.use_toyota_btn){
+    if(!QUIState::ui_state.use_toyota_btn){
       MessageBuilder msg;
       auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
       dfButtonStatus.setStatus(dfStatus);

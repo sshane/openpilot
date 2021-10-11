@@ -98,7 +98,6 @@ typedef struct UIScene {
   int dfButtonStatus = 0;
   int lsButtonStatus = 0;
   bool mlButtonEnabled = false;
-  bool use_toyota_btn = false;
 
   mat3 view_from_calib;
   bool world_objects_visible;
@@ -136,6 +135,8 @@ typedef struct UIState {
   UIScene scene = {};
 
   bool awake;
+
+  bool use_toyota_btn = false;
 
   float car_space_transform[6];
   bool wide_camera;
