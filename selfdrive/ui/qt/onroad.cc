@@ -147,8 +147,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   dfButton->setFixedHeight(200);
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
-  std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
-  if (toyota_distance_btn == "true"){
+  if (QUIState::ui_state.use_toyota_btn){
     dfButton->hide();
   }
 
