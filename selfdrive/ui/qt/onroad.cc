@@ -169,8 +169,7 @@ void ButtonsWindow::updateState(const UIState &s) {
     dfStatus = s.scene.dfButtonStatus;
     dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
-    std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
-    if(toyota_distance_btn != "true"){
+    if(!s.scene.use_toyota_btn){
       MessageBuilder msg;
       auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
       dfButtonStatus.setStatus(dfStatus);

@@ -27,6 +27,12 @@ void saInit(UIState *s) {
     qDebug() << "set dfButtonStatus to" << QString::fromStdString(dynamic_follow);
     s->scene.dfButtonStatus = DF_TO_IDX[dynamic_follow];
   }
+
+  s->scene.use_toyota_btn = false;
+  std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
+  if(toyota_distance_btn == "true"){
+    s->scene.use_toyota_btn = true;
+  }
 //  std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
 //  if (lane_speed_alerts != "") {
 //    lane_speed_alerts = lane_speed_alerts.substr(1, lane_speed_alerts.find_last_of('"') - 1);
