@@ -30,10 +30,10 @@ class CarState(CarStateBase):
 
     # Toyota Distance Button
     op_params = opParams()
-    self.param_toyota_distance_btn = op_params.get('toyota_distance_btn')
+    self.enable_distance_btn = op_params.get('toyota_distance_btn')
     self.distance_btn = 0
     self.distance_lines = 0
-    if self.param_toyota_distance_btn:
+    if self.enable_distance_btn:
       # Previously was publishing from UI
       self.pm = messaging.PubMaster(['dynamicFollowButton'])
 
@@ -102,7 +102,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in TSS2_CAR:
       self.acc_type = cp_cam.vl["ACC_CONTROL"]["ACC_TYPE"]
-      if self.param_toyota_distance_btn:
+      if self.enable_distance_btn:
         self.distance_btn = 1 if cp_cam.vl["ACC_CONTROL"]["DISTANCE"] == 1 else 0
         distance_lines = cp.vl["PCM_CRUISE_SM"]["DISTANCE_LINES"] - 1
         if distance_lines in range(3) and distance_lines != self.distance_lines:
