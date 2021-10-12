@@ -240,11 +240,10 @@ QUIState::QUIState(QObject *parent) : QObject(parent) {
     "pandaState", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
   });
   std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
-  if(toyota_distance_btn == "true"){
+  if (toyota_distance_btn == "true") {
     ui_state.use_toyota_btn = true;
     ui_state.pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"laneSpeedButton", "modelLongButton"});
-  }
-  else {
+  } else {
     ui_state.use_toyota_btn = false;
     ui_state.pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"laneSpeedButton", "dynamicFollowButton", "modelLongButton"});
   }

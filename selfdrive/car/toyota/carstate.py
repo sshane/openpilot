@@ -34,7 +34,7 @@ class CarState(CarStateBase):
     self.distance_btn = 0
     self.distance_lines = 0
     if self.param_toyota_distance_btn:
-      # Do publishing here
+      # Previously was publishing from UI
       self.pm = messaging.PubMaster(['dynamicFollowButton'])
 
   def update(self, cp, cp_cam):
@@ -104,13 +104,10 @@ class CarState(CarStateBase):
       self.acc_type = cp_cam.vl["ACC_CONTROL"]["ACC_TYPE"]
       if self.param_toyota_distance_btn:
         self.distance_btn = 1 if cp_cam.vl["ACC_CONTROL"]["DISTANCE"] == 1 else 0
-        distance_lines = cp.vl["PCM_CRUISE_SM"]["DISTANCE_LINES"]
-        # ignore distance_line of 0 which is used when cruise is off or disengaged
-        if distance_lines in [1, 2, 3] and distance_lines != self.distance_lines:
+        distance_lines = cp.vl["PCM_CRUISE_SM"]["DISTANCE_LINES"] - 1
+        if distance_lines in range(3) and distance_lines != self.distance_lines:
           dat = messaging.new_message('dynamicFollowButton')
-          # dynamicFollow uses 0: traffic, 1: relaxed, 2: stock
-          # toyota uses 1: close, 2: middle, 3: far
-          dat.dynamicFollowButton.status = distance_lines - 1
+          dat.dynamicFollowButton.status = distance_lines
           self.pm.send('dynamicFollowButton', dat)
           self.distance_lines = distance_lines
 

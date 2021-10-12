@@ -21,7 +21,7 @@ class dfManager:
     self.sm = messaging.SubMaster(['dynamicFollowButton', 'dynamicFollowData'])
     self.button_updated = False
 
-    if(self.op_params.get('toyota_distance_btn')):
+    if self.op_params.get('toyota_distance_btn'):
       # Toyota always resets to stock on car ignition
       self.cur_user_profile = "stock"
     else:

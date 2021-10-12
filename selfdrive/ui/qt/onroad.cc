@@ -147,7 +147,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   dfButton->setFixedHeight(200);
   btns_layout->addWidget(dfButton, 0, Qt::AlignRight);
 
-  if (QUIState::ui_state.use_toyota_btn){
+  if (QUIState::ui_state.use_toyota_btn) {
     dfButton->hide();
   }
 
@@ -168,7 +168,7 @@ void ButtonsWindow::updateState(const UIState &s) {
     dfStatus = s.scene.dfButtonStatus;
     dfButton->setStyleSheet(QString("font-size: 45px; border-radius: 100px; border-color: %1").arg(dfButtonColors.at(dfStatus)));
 
-    if(!QUIState::ui_state.use_toyota_btn){
+    if (!QUIState::ui_state.use_toyota_btn) {
       MessageBuilder msg;
       auto dfButtonStatus = msg.initEvent().initDynamicFollowButton();
       dfButtonStatus.setStatus(dfStatus);
