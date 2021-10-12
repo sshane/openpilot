@@ -290,10 +290,6 @@ class DynamicFollow:
     v_rel_dist_factor = self.dmc_v_rel.update(self.lead_data.v_lead - self.car_data.v_ego)
     a_lead_dist_factor = self.dmc_a_rel.update(self.lead_data.a_lead - self.car_data.a_ego)
 
-    TR = interp(self.car_data.v_ego, x_vel, y_dist)
-    TR *= v_rel_dist_factor
-    TR *= a_lead_dist_factor
-
     if self.car_data.v_ego > self.sng_speed:  # keep sng distance until we're above sng speed again
       self.sng = False
 
@@ -305,6 +301,9 @@ class DynamicFollow:
       x = [self.sng_speed * 0.7, self.sng_speed]  # decrease TR between 12.6 and 18 mph from 1.8s to defined TR above at 18mph while accelerating
       y = [self.sng_TR, interp(self.sng_speed, x_vel, y_dist)]
       TR = interp(self.car_data.v_ego, x, y)
+
+    TR *= v_rel_dist_factor
+    TR *= a_lead_dist_factor
 
     return float(clip(TR, self.min_TR, 2.7))
 
