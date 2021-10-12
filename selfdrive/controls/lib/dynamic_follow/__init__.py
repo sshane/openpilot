@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import cereal.messaging as messaging
-from common.realtime import sec_since_boot
+from common.realtime import sec_since_boot, DT_MDL
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
 from common.numpy_fast import interp, clip, mean
@@ -17,8 +17,6 @@ travis = False
 
 class DistanceModController:
   def __init__(self, k_i, k_d, x_clip, mods):
-    self._rate = 1 / 20.
-
     self._k_i = k_i
     self._k_d = k_d
     self._to_clip = x_clip  # reaches this with v_rel=3.5 mph for 4 seconds
@@ -36,7 +34,7 @@ class DistanceModController:
     if (d := self._k_d * (error - self.last_error)) < 0:  # only add if it will add distance
       self.i += d
 
-    self.i += error * self._rate * self._k_i
+    self.i += error * DT_MDL * self._k_i
     self.i = clip(self.i, self._to_clip[0], self._to_clip[-1])  # clip to reasonable range
     self._slow_reset()  # slowly reset from max to 0
 
@@ -50,7 +48,7 @@ class DistanceModController:
     if abs(self.i) > 0.01:  # oscillation starts around 0.006
       reset_time = 15  # in x seconds i goes from max to 0
       sign = 1 if self.i > 0 else -1
-      self.i -= sign * max(self._to_clip) / (reset_time / self._rate)
+      self.i -= sign * max(self._to_clip) / (reset_time / DT_MDL)
 
 
 class DynamicFollow:
@@ -68,11 +66,10 @@ class DynamicFollow:
       self.pm = None
 
     # Model variables
-    mpc_rate = 1 / 20.
     self.model_scales = {'v_ego': [-0.06112159043550491, 37.96522521972656], 'a_lead': [-3.109330892562866, 3.3612186908721924], 'v_lead': [0.0, 35.27671432495117], 'x_lead': [2.4600000381469727, 141.44000244140625]}
     self.predict_rate = 1 / 4.
-    self.skip_every = round(0.25 / mpc_rate)
-    self.model_input_len = round(45 / mpc_rate)
+    self.skip_every = round(0.25 / DT_MDL)
+    self.model_input_len = round(45 / DT_MDL)
 
     # Dynamic follow variables
     self.default_TR = 1.8
