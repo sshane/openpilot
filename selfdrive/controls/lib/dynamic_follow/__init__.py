@@ -307,38 +307,38 @@ class DynamicFollow:
 
     return float(clip(TR, self.min_TR, 2.7))
 
-    TR_mods = []
-    # Dynamic follow modifications (the secret sauce)
-    x = [-26, -15.6464, -9.8422, -6.0, -4.0, -2.68, -2.3, -1.8, -1.26, -0.61, 0, 0.61, 1.26, 2.1, 2.68, 4.4704]  # relative velocity values
-    y = [1.76, 1.504, 1.34, 1.29, 1.25, 1.22, 1.19, 1.13, 1.053, 1.017, 1.0, 0.985, 0.958, 0.87, 0.81, 0.685]  # multiplier values
-    y = np.array(y) - 1  # converts back to original abs mod
-    y *= 1.1  # multiplier for how much to mod
-    y = y / TR + 1  # converts back to multipliers
-    TR_mods.append(interp(self.lead_data.v_lead - self.car_data.v_ego, x, y))
-
-    x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
-    y = [1.16, 1.1067, 1.0613, 1.0343, 1.0203, 1.0147, 1.0, 0.9898, 0.972, 0.9647, 0.9607]  # multiplier values
-    converted_with_TR = 1.5  # todo: do without numpy and simplify by converting with TR of 1, so only subtract
-    absolute_y_TR_mod = np.array(y) * converted_with_TR - converted_with_TR  # converts back to original abs mod
-    absolute_y_TR_mod *= 1.2  # multiplier for how much to mod
-    y = absolute_y_TR_mod / TR + 1  # converts back to multipliers with accel mod of 1.4 taking current TR into account
-    TR_mods.append(interp(self.get_rel_accel(), x, y))  # todo: make this over more than 1 sec
-
-    # deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph  # todo: tune pedal to react similarly to without before adding/testing this
-    # if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
-    #   TR_mods.append(self._relative_accel_mod())
-
-    # x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
-    # y = [1.0, 1.05]
-
-    TR *= mean(TR_mods)  # with mods as multipliers, profile mods shouldn't be needed
-
-    # if (self.car_data.left_blinker or self.car_data.right_blinker) and df_profile != self.df_profiles.traffic:
-    #   x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
-    #   y = [1.0, .75, .65]
-    #   TR *= interp(self.car_data.v_ego, x, y)  # reduce TR when changing lanes
-
-    return float(clip(TR, self.min_TR, 2.7))
+    # TR_mods = []
+    # # Dynamic follow modifications (the secret sauce)
+    # x = [-26, -15.6464, -9.8422, -6.0, -4.0, -2.68, -2.3, -1.8, -1.26, -0.61, 0, 0.61, 1.26, 2.1, 2.68, 4.4704]  # relative velocity values
+    # y = [1.76, 1.504, 1.34, 1.29, 1.25, 1.22, 1.19, 1.13, 1.053, 1.017, 1.0, 0.985, 0.958, 0.87, 0.81, 0.685]  # multiplier values
+    # y = np.array(y) - 1  # converts back to original abs mod
+    # y *= 1.1  # multiplier for how much to mod
+    # y = y / TR + 1  # converts back to multipliers
+    # TR_mods.append(interp(self.lead_data.v_lead - self.car_data.v_ego, x, y))
+    #
+    # x = [-4.4795, -2.8122, -1.5727, -1.1129, -0.6611, -0.2692, 0.0, 0.1466, 0.5144, 0.6903, 0.9302]  # lead acceleration values
+    # y = [1.16, 1.1067, 1.0613, 1.0343, 1.0203, 1.0147, 1.0, 0.9898, 0.972, 0.9647, 0.9607]  # multiplier values
+    # converted_with_TR = 1.5  # todo: do without numpy and simplify by converting with TR of 1, so only subtract
+    # absolute_y_TR_mod = np.array(y) * converted_with_TR - converted_with_TR  # converts back to original abs mod
+    # absolute_y_TR_mod *= 1.2  # multiplier for how much to mod
+    # y = absolute_y_TR_mod / TR + 1  # converts back to multipliers with accel mod of 1.4 taking current TR into account
+    # TR_mods.append(interp(self.get_rel_accel(), x, y))  # todo: make this over more than 1 sec
+    #
+    # # deadzone = self.car_data.v_ego / 3  # 10 mph at 30 mph  # todo: tune pedal to react similarly to without before adding/testing this
+    # # if self.lead_data.v_lead - deadzone > self.car_data.v_ego:
+    # #   TR_mods.append(self._relative_accel_mod())
+    #
+    # # x = [self.sng_speed, self.sng_speed / 5.0]  # as we approach 0, apply x% more distance
+    # # y = [1.0, 1.05]
+    #
+    # TR *= mean(TR_mods)  # with mods as multipliers, profile mods shouldn't be needed
+    #
+    # # if (self.car_data.left_blinker or self.car_data.right_blinker) and df_profile != self.df_profiles.traffic:
+    # #   x = [8.9408, 22.352, 31.2928]  # 20, 50, 70 mph
+    # #   y = [1.0, .75, .65]
+    # #   TR *= interp(self.car_data.v_ego, x, y)  # reduce TR when changing lanes
+    #
+    # return float(clip(TR, self.min_TR, 2.7))
 
   def update_lead(self, v_lead=None, a_lead=None, x_lead=None, status=False, new_lead=False):
     self.lead_data.v_lead = v_lead
