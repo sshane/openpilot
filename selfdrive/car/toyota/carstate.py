@@ -2,13 +2,13 @@ import cereal.messaging as messaging
 from cereal import car
 from common.numpy_fast import mean
 from common.filter_simple import FirstOrderFilter
+from common.op_params import opParams
 from common.realtime import DT_CTRL
 from opendbc.can.can_define import CANDefine
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
 from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, TSS2_CAR
-from common.op_params import opParams
 
 
 class CarState(CarStateBase):
