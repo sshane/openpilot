@@ -106,7 +106,7 @@ class CarState(CarStateBase):
     if self.enable_distance_btn:
       if self.CP.carFingerprint in TSS2_CAR:
         self.distance_btn = 1 if cp_cam.vl["ACC_CONTROL"]["DISTANCE"] == 1 else 0
-      elif self.CP.hasSmartDSU:
+      elif self.CP.smartDsu:
         self.distance_btn = 1 if cp.vl["SDSU"]["FD_BUTTON"] == 1 else 0
 
       distance_lines = cp.vl["PCM_CRUISE_SM"]["DISTANCE_LINES"] - 1
@@ -227,7 +227,7 @@ class CarState(CarStateBase):
         ("BSM", 1)
       ]
 
-    if CP.hasSmartDSU:
+    if CP.smartDsu:
       signals.append(("FD_BUTTON", "SDSU", 0))
       checks.append(("SDSU", 33))
 
