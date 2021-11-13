@@ -25,7 +25,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.stoppingControl = False # Toyota starts braking more when it thinks you want to stop
 
-    if candidate not in [CAR.PRIUS, CAR.RAV4, CAR.RAV4H]:  # These cars use LQR/INDI
+    if candidate not in [CAR.PRIUS, CAR.RAV4, CAR.RAV4H, CAR.CAMRYH_TSS2]:  # These cars use LQR/INDI
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
 
@@ -134,8 +134,18 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.7
       tire_stiffness_factor = 0.7933
       ret.mass = 3400. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
-      ret.lateralTuning.pid.kf = 0.00006
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGainBP = [20, 24, 30]
+      ret.lateralTuning.indi.innerLoopGainV = [7.25, 7.5, 9]
+      ret.lateralTuning.indi.outerLoopGainBP = [20, 24, 30]
+      ret.lateralTuning.indi.outerLoopGainV = [6, 7.25, 6]
+      ret.lateralTuning.indi.timeConstantBP = [20, 24]
+      ret.lateralTuning.indi.timeConstantV = [2.0, 2.2]
+      ret.lateralTuning.indi.actuatorEffectivenessBP = [20, 24]
+      ret.lateralTuning.indi.actuatorEffectivenessV = [2, 3]
+      ret.steerActuatorDelay = 0.3
+      ret.steerRateCost = 1.25
+      ret.steerLimitTimer = 0.5
 
     elif candidate in [CAR.HIGHLANDER_TSS2, CAR.HIGHLANDERH_TSS2]:
       stop_and_go = True

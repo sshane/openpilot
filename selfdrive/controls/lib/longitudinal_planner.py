@@ -12,6 +12,7 @@ from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N
 from selfdrive.swaglog import cloudlog
+from common.op_params import opParams
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
@@ -45,6 +46,7 @@ class Planner():
   def __init__(self, CP, init_v=0.0, init_a=0.0):
     self.CP = CP
     self.mpc = LongitudinalMpc()
+    self.op_params = opParams()
 
     self.fcw = False
 
@@ -88,6 +90,7 @@ class Planner():
     accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired - 0.05)
     self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired, self.a_desired)
+    self.mpc.set_desired_TR(self.op_params.get('TR'))
     self.mpc.update(sm['carState'], sm['radarState'], v_cruise)
     self.v_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.a_solution)
