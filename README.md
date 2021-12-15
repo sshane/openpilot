@@ -1,7 +1,7 @@
 # Stock Additions [Update 1](/SA_RELEASES.md) (0.8.10)
 
 Stock Additions is a fork of openpilot designed to be minimal in design while boasting various feature additions and behavior improvements over stock. I have a 2017 Toyota Corolla with comma pedal, so most of my changes are designed to improve the longitudinal performance.
-
+g
 Want to request a feature or create a bug report? [Open an issue here!](https://github.com/sshane/openpilot/issues/new/choose) Want to reach me to debug an issue or have a question? `Shane#6175` on Discord!
 
 [View Stock Additions Changelog](/SA_RELEASES.md)
