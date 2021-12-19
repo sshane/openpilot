@@ -28,6 +28,8 @@ MAX_STEER_ANGLE = 90  # max supported steering angle
 EXTRA_WAIT_TIME = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
 MIN_TRACK_SPEED = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
+T_IDXS = np.array(T_IDXS)
+
 
 def get_d_path_x(v_ego):
   # The x values for dPathPoints given speed
