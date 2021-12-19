@@ -1,15 +1,19 @@
 from common.op_params import opParams
 from common.realtime import set_core_affinity
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.lane_planner import eval_poly
+from selfdrive.modeld.constants import T_IDXS
+from selfdrive.controls.lib.drive_helpers import LAT_MPC_N
+# from selfdrive.controls.lib.lane_planner import eval_poly
 from common.numpy_fast import interp
 import numpy as np
 import time
+
 try:
   from common.realtime import sec_since_boot
   import cereal.messaging as messaging
 except:
   pass
+
 
 # try:
 #   from common.realtime import sec_since_boot
@@ -36,6 +40,7 @@ class LaneSpeedState:
   to_state = {off: 'off', audible: 'audible', silent: 'silent'}
   to_idx = {v: k for k, v in to_state.items()}
 
+
 class Lane:
   def __init__(self, name, pos):
     self.name = name
@@ -54,6 +59,7 @@ class Lane:
 
 LANE_SPEED_RATE = 1 / 5.
 
+
 class LaneSpeed:
   def __init__(self):
     set_core_affinity(1)  # use up to 1 core?
@@ -71,6 +77,11 @@ class LaneSpeed:
     self.last_fastest_lane = 'none'
     self._setup()
 
+  @property
+  def _d_path_x(self):
+    # The x values for dPathPoints given speed
+    return self.v_ego * T_IDXS[:LAT_MPC_N + 1]
+
   def _setup(self):
     self.button_updated = False
     self.ls_state = self.op_params.get('lane_speed_alerts').strip().lower()
@@ -82,7 +93,7 @@ class LaneSpeed:
     self.last_ls_state = self.ls_state
 
     self.lane_width = 3.7  # in meters, just a starting point
-    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'pathPlan', 'laneSpeedButton', 'controlsState'])
+    self.sm = messaging.SubMaster(['carState', 'liveTracks', 'lateralPlan', 'laneSpeedButton', 'controlsState'])
     self.pm = messaging.PubMaster(['laneSpeed'])
 
     lane_positions = {'left': self.lane_width, 'middle': 0, 'right': -self.lane_width}  # lateral position in meters from center of car to center of lane
@@ -102,7 +113,9 @@ class LaneSpeed:
 
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
-      self.d_poly = np.array(list(self.sm['pathPlan'].dPoly))
+      # TODO: REMOVE
+      # self.d_poly = np.array(list(self.sm['lateralPlan'].dPoly))
+      self.d_path_points = np.array(list(self.sm['lateralPlan'].dPathPoints))
       self.live_tracks = self.sm['liveTracks']
 
       self.update_lane_bounds()
@@ -121,7 +134,7 @@ class LaneSpeed:
       self.ls_state = self.sm['laneSpeedButton'].status
 
     # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
-    if len(self.d_poly) and not np.isnan(self.d_poly[0]):
+    if len(self.d_path_points) and not np.isnan(self.d_path_points[0]):
       # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
       self.group_tracks()
       self.find_oncoming_lanes()
@@ -131,7 +144,8 @@ class LaneSpeed:
 
   def update_lane_bounds(self):  # todo: run this at half the rate of lane_speed
     # todo 2: add dPoly offsetting to lane bounds here as well, from group_tracks
-    lane_width = self.sm['pathPlan'].laneWidth
+    # TODO: use adjacent lane lines from model
+    lane_width = self.sm['lateralPlan'].laneWidth
     if isinstance(lane_width, float) and lane_width > 1:
       self.lane_width = min(lane_width, 4.5)  # LanePlanner uses 4 as max width for dPoly calculation
 
@@ -154,7 +168,8 @@ class LaneSpeed:
 
   def group_tracks(self):
     """Groups tracks based on lateral position, dPoly offset, and lane width"""
-    offset_y_rels = [trk.yRel - eval_poly(self.d_poly, trk.dRel) for trk in self.live_tracks]  # eval_poly: 4109.0476 Hz vs np.polyval's 2483.2956 Hz
+    d_path_x = self._d_path_x
+    offset_y_rels = [trk.yRel - interp(trk.dRel, d_path_x, self.d_path_points) for trk in self.live_tracks]
     for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
       # it's not pretty, but this code is the fastest. even when looping through tracks and then lanes for each track
       # (and breaking when a lane has been found for the track)
