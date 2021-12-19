@@ -59,9 +59,9 @@ class Lane:
 LANE_SPEED_RATE = 1 / 5.
 TRACK_SPEED_MARGIN = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
 FASTER_THAN_MARGIN = 0.075  # avg of secondary lane has to be faster by X% to show alert
-MIN_ENABLE_SPEED = 35 * CV.MPH_TO_MS
+MIN_ENABLE_SPEED = 25 * CV.MPH_TO_MS
 MIN_FASTEST_TIME = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
-MAX_STEER_ANGLE = 100  # max supported steering angle
+MAX_STEER_ANGLE = 90  # max supported steering angle
 EXTRA_WAIT_TIME = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
 MIN_TRACK_SPEED = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
