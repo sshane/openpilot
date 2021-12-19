@@ -398,7 +398,17 @@ void NvgWindow::drawLaneLines(QPainter &painter, const UIScene &scene) {
   if (!scene.end_to_end) {
     // lanelines
     for (int i = 0; i < std::size(scene.lane_line_vertices); ++i) {
-      painter.setBrush(QColor::fromRgbF(1.0, 1.0, 1.0, scene.lane_line_probs[i]));
+      if (i == 1 || i == 2) {
+        // TODO: can we just use the projected vertices somehow?
+        const cereal::ModelDataV2::XYZTData::Reader &line = (*s->sm)["modelV2"].getModelV2().getLaneLines()[i];
+        const float default_pos = 1.4;  // when lane poly isn't available
+        const float lane_pos = line.getY().size() > 0 ? std::abs(line.getY()[5]) : default_pos;  // get redder when line is closer to car
+        float hue = 332.5 * lane_pos - 332.5;  // equivalent to {1.4, 1.0}: {133, 0} (green to red)
+        hue = fmin(133, fmax(0, hue)) / 360.;  // clip and normalize
+        painter.setBrush(QColor::fromHslF(hue, 0.73, 0.64, scene.lane_line_probs[i]));
+      } else {
+        painter.setBrush(QColor::fromRgbF(1.0, 1.0, 1.0, scene.lane_line_probs[i]));
+      }
       painter.drawPolygon(scene.lane_line_vertices[i].v, scene.lane_line_vertices[i].cnt);
     }
     // road edges
@@ -407,10 +417,22 @@ void NvgWindow::drawLaneLines(QPainter &painter, const UIScene &scene) {
       painter.drawPolygon(scene.road_edge_vertices[i].v, scene.road_edge_vertices[i].cnt);
     }
   }
+
   // paint path
   QLinearGradient bg(0, height(), 0, height() / 4);
-  bg.setColorAt(0, scene.end_to_end ? redColor() : QColor(255, 255, 255));
-  bg.setColorAt(1, scene.end_to_end ? redColor(0) : QColor(255, 255, 255, 0));
+
+  const cereal::ModelDataV2::XYZTData::Reader &pos = (*s->sm)["modelV2"].getModelV2().getPosition();
+  const float lat_pos = pos.getY().size() > 0 ? std::abs(pos.getY()[14] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
+  const float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
+  NVGpaint track_bg;
+  if ((*s->sm)["controlsState"].getControlsState().getEnabled()) {
+    bg.setColorAt(0, QColor::fromHslF(hue / 360., .94, .51, 1.));
+    bg.setColorAt(1, QColor::fromHslF(hue / 360., .73, .49, 100./255.));
+  } else if (scene.end_to_end) {
+    bg.setColorAt(0, redColor());
+    bg.setColorAt(1, redColor(0));
+  }
+
   painter.setBrush(bg);
   painter.drawPolygon(scene.track_vertices.v, scene.track_vertices.cnt);
 }
