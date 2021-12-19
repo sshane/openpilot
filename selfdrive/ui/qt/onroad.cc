@@ -394,7 +394,8 @@ void NvgWindow::updateFrameMat(int w, int h) {
       .translate(-intrinsic_matrix.v[2], -intrinsic_matrix.v[5]);
 }
 
-void NvgWindow::drawLaneLines(QPainter &painter, const UIScene &scene) {
+void NvgWindow::drawLaneLines(QPainter &painter, UIState *s) {
+  UIScene &scene = s->scene;
   if (!scene.end_to_end) {
     // lanelines
     for (int i = 0; i < std::size(scene.lane_line_vertices); ++i) {
@@ -424,7 +425,6 @@ void NvgWindow::drawLaneLines(QPainter &painter, const UIScene &scene) {
   const cereal::ModelDataV2::XYZTData::Reader &pos = (*s->sm)["modelV2"].getModelV2().getPosition();
   const float lat_pos = pos.getY().size() > 0 ? std::abs(pos.getY()[14] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
   const float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
-  NVGpaint track_bg;
   if ((*s->sm)["controlsState"].getControlsState().getEnabled()) {
     bg.setColorAt(0, QColor::fromHslF(hue / 360., .94, .51, 1.));
     bg.setColorAt(1, QColor::fromHslF(hue / 360., .73, .49, 100./255.));
@@ -484,7 +484,7 @@ void NvgWindow::paintGL() {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
 
-    drawLaneLines(painter, s->scene);
+    drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {
       auto leads = (*s->sm)["modelV2"].getModelV2().getLeadsV3();
