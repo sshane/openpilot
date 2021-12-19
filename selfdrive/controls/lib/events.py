@@ -254,7 +254,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Using profile: ",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1.5),
+      Priority.LOW, VisualAlert.none, AudibleAlert.promptSingle, 1.5),
   },
 
   'lsButtonAlert': {
@@ -262,7 +262,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Lane Speed set to: ",
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1.5),
+      Priority.LOW, VisualAlert.none, AudibleAlert.promptSingle, 1.5),
   },
 
   'dfButtonAlertSilent': {
@@ -278,7 +278,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "",
       "",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.promptSingle, .1),
   },
 
   'laneSpeedAlertSilent': {
