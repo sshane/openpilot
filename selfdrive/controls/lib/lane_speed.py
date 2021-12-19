@@ -108,7 +108,7 @@ class LaneSpeed:
         self.button_updated = True
 
       self.v_ego = self.sm['carState'].vEgo
-      self.steer_angle = self.sm['carState'].steeringAngle
+      self.steer_angle = self.sm['carState'].steeringAngleDeg
       self.d_path_points = np.array(list(self.sm['lateralPlan'].dPathPoints))
       self.live_tracks = self.sm['liveTracks']
 
