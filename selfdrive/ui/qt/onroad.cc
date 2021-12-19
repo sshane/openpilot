@@ -133,6 +133,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   lsButton->setFixedWidth(200);
   lsButton->setFixedHeight(200);
   btns_layout->addWidget(lsButton, 0, Qt::AlignRight);
+  btns_layout->addSpacing(35);
 
   // Dynamic follow button
   dfButton = new QPushButton("DF\nprofile");
