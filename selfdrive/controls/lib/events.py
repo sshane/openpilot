@@ -246,7 +246,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Model longitudinal ",
       "Remain alert",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1.5),
+      Priority.LOW, VisualAlert.none, AudibleAlert.promptSingle, 1.5),
   },
 
   'dfButtonAlert': {
