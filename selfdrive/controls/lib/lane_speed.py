@@ -3,7 +3,6 @@ from common.realtime import set_core_affinity
 from selfdrive.config import Conversions as CV
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.controls.lib.drive_helpers import LAT_MPC_N
-# from selfdrive.controls.lib.lane_planner import eval_poly
 from common.numpy_fast import interp
 import numpy as np
 import time
@@ -58,20 +57,19 @@ class Lane:
 
 
 LANE_SPEED_RATE = 1 / 5.
+TRACK_SPEED_MARGIN = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
+FASTER_THAN_MARGIN = 0.075  # avg of secondary lane has to be faster by X% to show alert
+MIN_ENABLE_SPEED = 35 * CV.MPH_TO_MS
+MIN_FASTEST_TIME = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
+MAX_STEER_ANGLE = 100  # max supported steering angle
+EXTRA_WAIT_TIME = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
+MIN_TRACK_SPEED = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
 
 class LaneSpeed:
   def __init__(self):
     set_core_affinity(1)  # use up to 1 core?
     self.op_params = opParams()
-
-    self._track_speed_margin = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
-    self._faster_than_margin = 0.075  # avg of secondary lane has to be faster by X% to show alert
-    self._min_enable_speed = 35 * CV.MPH_TO_MS
-    self._min_fastest_time = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
-    self._max_steer_angle = 100  # max supported steering angle
-    self._extra_wait_time = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
-    self._min_track_speed = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
 
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
@@ -113,8 +111,6 @@ class LaneSpeed:
 
       self.v_ego = self.sm['carState'].vEgo
       self.steer_angle = self.sm['carState'].steeringAngle
-      # TODO: REMOVE
-      # self.d_poly = np.array(list(self.sm['lateralPlan'].dPoly))
       self.d_path_points = np.array(list(self.sm['lateralPlan'].dPathPoints))
       self.live_tracks = self.sm['liveTracks']
 
@@ -133,7 +129,7 @@ class LaneSpeed:
     if self.button_updated:  # only update when button is first pressed
       self.ls_state = self.sm['laneSpeedButton'].status
 
-    # checks that we have dPoly, dPoly is not NaNs, and steer angle is less than max allowed
+    # checks that we have dPathPoints, dPathPoints is not NaNs, and steer angle is less than max allowed
     if len(self.d_path_points) and not np.isnan(self.d_path_points[0]):
       # self.filter_tracks()  # todo: will remove tracks very close to other tracks to make averaging more robust
       self.group_tracks()
@@ -167,7 +163,7 @@ class LaneSpeed:
   #   # print(c)
 
   def group_tracks(self):
-    """Groups tracks based on lateral position, dPoly offset, and lane width"""
+    """Groups tracks based on lateral position, dPathPoints offset, and lane width"""
     d_path_x = self._d_path_x
     offset_y_rels = [trk.yRel - interp(trk.dRel, d_path_x, self.d_path_points) for trk in self.live_tracks]
     for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
@@ -176,21 +172,21 @@ class LaneSpeed:
       # this is also faster than having the speed if check first
       track_vel = track.vRel + self.v_ego
       if self.lanes['left'].bounds[0] >= offset_y_rel >= self.lanes['left'].bounds[1]:
-        if track_vel >= self._min_track_speed:  # ongoing track
+        if track_vel >= MIN_TRACK_SPEED:  # ongoing track
           self.lanes['left'].tracks.append(track)
-        elif track_vel <= -self._min_track_speed:  # oncoming track
+        elif track_vel <= -MIN_TRACK_SPEED:  # oncoming track
           self.lanes['left'].oncoming_tracks.append(track)
 
       elif self.lanes['middle'].bounds[0] >= offset_y_rel >= self.lanes['middle'].bounds[1]:
-        if track_vel >= self._min_track_speed:
+        if track_vel >= MIN_TRACK_SPEED:
           self.lanes['middle'].tracks.append(track)
-        elif track_vel <= -self._min_track_speed:
+        elif track_vel <= -MIN_TRACK_SPEED:
           self.lanes['middle'].oncoming_tracks.append(track)
 
       elif self.lanes['right'].bounds[0] >= offset_y_rel >= self.lanes['right'].bounds[1]:
-        if track_vel >= self._min_track_speed:
+        if track_vel >= MIN_TRACK_SPEED:
           self.lanes['right'].tracks.append(track)
-        elif track_vel <= -self._min_track_speed:
+        elif track_vel <= -MIN_TRACK_SPEED:
           self.lanes['right'].oncoming_tracks.append(track)
 
   def find_oncoming_lanes(self):
@@ -213,7 +209,7 @@ class LaneSpeed:
     for lane_name in self.lanes:
       lane = self.lanes[lane_name]
       track_speeds = [track.vRel + self.v_ego for track in lane.tracks]
-      track_speeds = [speed for speed in track_speeds if self.v_ego * self._track_speed_margin < speed <= v_cruise_setpoint]
+      track_speeds = [speed for speed in track_speeds if self.v_ego * TRACK_SPEED_MARGIN < speed <= v_cruise_setpoint]
       if len(track_speeds):  # filters out very slow tracks
         # np.mean was much slower than sum() / len()
         lane.avg_speed = sum(track_speeds) / len(track_speeds)  # todo: something with std?
@@ -228,7 +224,7 @@ class LaneSpeed:
     if fastest_lane.name == 'middle':  # already in fastest lane
       self.reset(reset_fastest=True)
       return
-    if (fastest_lane.avg_speed / self.lanes['middle'].avg_speed) - 1 < self._faster_than_margin:  # fastest lane is not above margin, ignore
+    if (fastest_lane.avg_speed / self.lanes['middle'].avg_speed) - 1 < FASTER_THAN_MARGIN:  # fastest lane is not above margin, ignore
       # todo: could remove since we wait for a lane to be faster for a bit
       return
 
@@ -239,11 +235,11 @@ class LaneSpeed:
     _f_time_x = [1, 4, 12]  # change the minimum time for fastest based on how many tracks are in fastest lane
     _f_time_y = [1.5, 1, 0.5]  # this is multiplied by base fastest time todo: probably need to tune this
     min_fastest_time = interp(len(fastest_lane.tracks), _f_time_x, _f_time_y)  # get multiplier
-    min_fastest_time = int(min_fastest_time * self._min_fastest_time)  # now get final min_fastest_time
+    min_fastest_time = int(min_fastest_time * MIN_FASTEST_TIME)  # now get final min_fastest_time
 
     if fastest_lane.fastest_count < min_fastest_time:
       return  # fastest lane hasn't been fastest long enough
-    if sec_since_boot() - self.last_alert_end_time < self._extra_wait_time:
+    if sec_since_boot() - self.last_alert_end_time < EXTRA_WAIT_TIME:
       return  # don't reset fastest lane count or show alert until last alert has gone
 
     # if here, we've found a lane faster than our lane by a margin and it's been faster for long enough
@@ -269,7 +265,7 @@ class LaneSpeed:
     fastest_lane = self.fastest_lane
     if self.ls_state == LaneSpeedState.silent:
       new_fastest = False  # be silent
-    if self.v_ego < self._min_enable_speed or abs(self.steer_angle) > self._max_steer_angle:  # keep sending updates, but not fastestLane
+    if self.v_ego < MIN_ENABLE_SPEED or abs(self.steer_angle) > MAX_STEER_ANGLE:  # keep sending updates, but not fastestLane
       fastest_lane = 'none'
 
     ls_send = messaging.new_message('laneSpeed')
