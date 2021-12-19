@@ -21,6 +21,7 @@ def parse_markdown(text: str, tab_length: int = 2) -> str:
 
   for i, line in enumerate(lines):
     if (i + 1 < len(lines) and lines[i + 1].startswith("===")) or line.startswith("#"):  # heading
+      list_level = end_outstanding_lists(list_level, 0)
       if line.startswith("#"):
         heading_size = len(line) - len(line.lstrip("#"))
         line = line.lstrip("#").lstrip(" ")
