@@ -30,7 +30,7 @@ void saInit(UIState *s) {
   std::string lane_speed_alerts = util::read_file("/data/community/params/lane_speed_alerts");
   if (lane_speed_alerts != "") {
     lane_speed_alerts = lane_speed_alerts.substr(1, lane_speed_alerts.find_last_of('"') - 1);
-    qDebug() << "Set lsButtonStatus to " << lane_speed_alerts;
+    qDebug() << "Set lsButtonStatus to " << QString::fromStdString(lane_speed_alerts);
     s->scene.lsButtonStatus = LS_TO_IDX[lane_speed_alerts];
   }
 }
