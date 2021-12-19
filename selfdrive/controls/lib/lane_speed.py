@@ -6,13 +6,11 @@ from selfdrive.controls.lib.drive_helpers import LAT_MPC_N
 from common.numpy_fast import interp
 import numpy as np
 import time
-
 try:
   from common.realtime import sec_since_boot
   import cereal.messaging as messaging
 except:
   pass
-
 
 # try:
 #   from common.realtime import sec_since_boot
@@ -20,6 +18,21 @@ except:
 #   import matplotlib.pyplot as plt
 #   import time
 #   sec_since_boot = time.time
+
+LANE_SPEED_RATE = 1 / 5.
+TRACK_SPEED_MARGIN = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
+FASTER_THAN_MARGIN = 0.075  # avg of secondary lane has to be faster by X% to show alert
+MIN_ENABLE_SPEED = 25 * CV.MPH_TO_MS
+MIN_FASTEST_TIME = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
+MAX_STEER_ANGLE = 90  # max supported steering angle
+EXTRA_WAIT_TIME = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
+MIN_TRACK_SPEED = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
+
+
+def get_d_path_x(v_ego):
+  # The x values for dPathPoints given speed
+  return v_ego * T_IDXS[:LAT_MPC_N + 1]
+
 
 def cluster(data, maxgap):
   data.sort(key=lambda _trk: _trk.dRel)
@@ -56,16 +69,6 @@ class Lane:
     self.fastest_count += 1
 
 
-LANE_SPEED_RATE = 1 / 5.
-TRACK_SPEED_MARGIN = 0.05  # track has to be above X% of v_ego (excludes oncoming and stopped)
-FASTER_THAN_MARGIN = 0.075  # avg of secondary lane has to be faster by X% to show alert
-MIN_ENABLE_SPEED = 25 * CV.MPH_TO_MS
-MIN_FASTEST_TIME = 3 / LANE_SPEED_RATE  # how long should we wait for a specific lane to be faster than middle before alerting
-MAX_STEER_ANGLE = 90  # max supported steering angle
-EXTRA_WAIT_TIME = 5  # in seconds, how long to wait after last alert finished before allowed to show next alert
-MIN_TRACK_SPEED = 5 * CV.MPH_TO_MS  # tracks must be traveling faster than this speed to be added to a lane (- or +)
-
-
 class LaneSpeed:
   def __init__(self):
     set_core_affinity(1)  # use up to 1 core?
@@ -74,11 +77,6 @@ class LaneSpeed:
     self.fastest_lane = 'none'  # always will be either left, right, or none as a string, never middle or NoneType
     self.last_fastest_lane = 'none'
     self._setup()
-
-  @property
-  def _d_path_x(self):
-    # The x values for dPathPoints given speed
-    return self.v_ego * T_IDXS[:LAT_MPC_N + 1]
 
   def _setup(self):
     self.button_updated = False
@@ -164,7 +162,7 @@ class LaneSpeed:
 
   def group_tracks(self):
     """Groups tracks based on lateral position, dPathPoints offset, and lane width"""
-    d_path_x = self._d_path_x
+    d_path_x = get_d_path_x(self.v_ego)
     offset_y_rels = [trk.yRel - interp(trk.dRel, d_path_x, self.d_path_points) for trk in self.live_tracks]
     for track, offset_y_rel in zip(self.live_tracks, offset_y_rels):
       # it's not pretty, but this code is the fastest. even when looping through tracks and then lanes for each track
