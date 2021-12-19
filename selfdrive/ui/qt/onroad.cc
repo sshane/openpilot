@@ -428,9 +428,9 @@ void NvgWindow::drawLaneLines(QPainter &painter, UIState *s) {
   if ((*s->sm)["controlsState"].getControlsState().getEnabled()) {
     bg.setColorAt(0, QColor::fromHslF(hue / 360., .94, .51, 1.));
     bg.setColorAt(1, QColor::fromHslF(hue / 360., .73, .49, 100./255.));
-  } else if (scene.end_to_end) {
-    bg.setColorAt(0, redColor());
-    bg.setColorAt(1, redColor(0));
+  } else {
+    bg.setColorAt(0, scene.end_to_end ? redColor() : QColor(255, 255, 255));
+    bg.setColorAt(1, scene.end_to_end ? redColor(0) : QColor(255, 255, 255, 0));
   }
 
   painter.setBrush(bg);
