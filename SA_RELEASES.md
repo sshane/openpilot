@@ -1,5 +1,6 @@
-Stock Additions - 2021-12-19 (0.8.12)
+Stock Additions 0.8.12
 ===
+## 2021-12-19 Notes
  * Update to 0.8.12 with new MPC tuning, smoothing out stopping control
    * Removing "SA Update x" — Starting now, any new fork changes will just be appended to the latest release notes and only will be reset when SA is updated to a new version of openpilot
  * Custom TSS2 stop and go tuning
@@ -7,6 +8,8 @@ Stock Additions - 2021-12-19 (0.8.12)
  * New dynamic follow profile configuration: (same) traffic, 1.45sec (stock), 1.8sec (prev stock)
  * New improved lead model (exit model soon)
  * Temporarily removed Model Long Button
+## 2021-12-15
+ * Some older notes
 
 Stock Additions Update 2 - 2021-11-14 (0.8.11)
 ===
