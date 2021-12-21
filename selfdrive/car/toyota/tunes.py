@@ -186,6 +186,7 @@ def set_lat_tune(tune, params, name):
     # use kf from PID to calculate torque multiplier
     # TODO: feed this into the model so it can extrapolate accurately
     if tune.which() == 'pid':
-      COROLLA_KF = 0.00006908923778520113  # close enough to TSS2 Camry
+      # TSSP Corolla is actually 0.000069 but other cars are using stock tuning, so use stock 0.00003 for extrapolation
+      MODEL_CAR_KF = 0.00006 if params.TSS2 else 0.00003
       if not np.isclose(tune.pid.kf, 0.):
-        tune.model.multiplier = tune.pid.kf / COROLLA_KF
+        tune.model.multiplier = tune.pid.kf / MODEL_CAR_KF
