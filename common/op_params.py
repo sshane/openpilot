@@ -98,9 +98,7 @@ class opParams:
     """
 
     self.fork_params = {
-      'camera_offset': Param(-0.04 if TICI else 0.06, NUMBER, 'Your camera offset to use in lane_planner.py\n'
-                                                              'If you have a comma three, note that the default camera offset is -0.04!', live=True),
-      'dynamic_follow': Param('stock', str, static=True, hidden=True),
+      'camera_offset': Param(-0.04 if TICI else 0.06, NUMBER, 'Your camera offset to use in lane_planner.py\n', live=True),
       'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                           'Smaller values will get you closer, larger will get you farther\n'
                                           'This is multiplied by any profile that\'s active. Set to 1. to disable', live=True),
@@ -109,8 +107,6 @@ class opParams:
       'alca_no_nudge_speed': Param(90., NUMBER, 'Above this speed (mph), lane changes initiate IMMEDIATELY. Behavior is stock under'),
       'steer_ratio': Param(None, NONE_OR_NUMBER, '(Can be: None, or a float) If you enter None, openpilot will use the learned sR.\n'
                                                  'If you use a float/int, openpilot will use that steer ratio instead', live=True),
-      'lane_speed_alerts': Param('silent', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
-                                                'Whether you want openpilot to alert you of faster-traveling adjacent lanes'),
       'upload_on_hotspot': Param(False, bool, 'If False, openpilot will not upload driving data while connected to your phone\'s hotspot'),
       'disengage_on_gas': Param(False, bool, 'Whether you want openpilot to disengage on gas input or not'),
       'update_behavior': Param('alert', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
@@ -138,7 +134,10 @@ class opParams:
       'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
       'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True),
       'toyota_distance_btn': Param(False, bool, 'Set to True to use the steering wheel distance button to control the dynamic follow profile.\n'
-                                                'Works on TSS2 vehicles and on TSS1 vehicles with an sDSU with a Sep. 2020 firmware or newer.', static=True)
+                                                'Works on TSS2 vehicles and on TSS1 vehicles with an sDSU with a Sep. 2020 firmware or newer.', static=True),
+
+      'dynamic_follow': Param('stock', str, static=True, hidden=True),
+      'lane_speed_alerts': Param('silent', str, hidden=True),
     }
 
     self._to_delete = ['enable_long_derivative']  # a list of unused params you want to delete from users' params file
