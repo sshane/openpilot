@@ -155,6 +155,7 @@ Here are the main parameters you can change with this fork:
     - [`dynamic_camera_offset_time`](#Dynamic-camera-offset-based-on-oncoming-traffic): How long to keep the offset after losing the oncoming lane/radar track in seconds
   - `dynamic_follow`: *Deprecated, use the on-screen button to change profiles*
 - **Experimental params**:
+  - `use_steering_model`: A couple of regression models (for TSSP Corolla and TSS2 Camry) were trained to predict torque based on human driving data. By enabling this it tries to extrapolate the model to your PIDF tune using one of the available models. May oscillate on straights.
   - [`prius_use_pid`](#pi---pid-controller-for-long-and-lat): This enables the PID lateral controller with new a experimental derivative tune
   - `corollaTSS2_use_indi`: Enable this to use INDI for lat with your TSS2 Corolla *(can be enabled for all years by request)*
   - `standstill_hack`: Some cars support stop and go, you just need to enable this
