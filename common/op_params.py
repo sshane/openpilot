@@ -116,7 +116,7 @@ class opParams:
       'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
       'df_button_alerts': Param('audible', str, 'Can be: (\'off\', \'silent\', \'audible\')\n'
                                                 'How you want to be alerted when you change your dynamic following profile'),
-      'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df', static=True),
+      # 'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df', static=True),
       # 'dynamic_camera_offset': Param(False, bool, 'Whether to automatically keep away from oncoming traffic.\n'
       #                                             'Works from 35 to ~60 mph (requires radar)'),
       # 'dynamic_camera_offset_time': Param(3.5, NUMBER, 'How long to keep away from oncoming traffic in seconds after losing lead'),
