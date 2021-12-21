@@ -27,7 +27,7 @@ UPLOAD_ATTR_VALUE = b'1'
 allow_sleep = bool(os.getenv("UPLOADER_SLEEP", "1"))
 force_wifi = os.getenv("FORCEWIFI") is not None
 fake_upload = os.getenv("FAKEUPLOAD") is not None
-upload_on_hotspot = opParams().get("upload_on_hotspot")
+upload_onroad = opParams().get("upload_onroad")
 
 
 def get_directory_sort(d):
@@ -251,6 +251,8 @@ def uploader_fn(exit_event):
     sm.update(0)
     offroad = params.get_bool("IsOffroad")
     network_type = sm['deviceState'].networkType if not force_wifi else NetworkType.wifi
+    if not offroad and not upload_onroad:
+      network_type = NetworkType.none
     if network_type == NetworkType.none:
       if allow_sleep:
         time.sleep(60 if offroad else 5)
