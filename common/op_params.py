@@ -138,7 +138,7 @@ class opParams:
       'lane_speed_alerts': Param('silent', str, static=True, hidden=True),
     }
 
-    self._to_delete = ['enable_long_derivative']  # a list of unused params you want to delete from users' params file
+    self._to_delete = []  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
