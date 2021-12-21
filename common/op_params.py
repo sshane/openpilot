@@ -137,7 +137,7 @@ class opParams:
                                                 'Works on TSS2 vehicles and on TSS1 vehicles with an sDSU with a Sep. 2020 firmware or newer.', static=True),
 
       'dynamic_follow': Param('stock', str, static=True, hidden=True),
-      'lane_speed_alerts': Param('silent', str, hidden=True),
+      'lane_speed_alerts': Param('silent', str, static=True, hidden=True),
     }
 
     self._to_delete = ['enable_long_derivative']  # a list of unused params you want to delete from users' params file
