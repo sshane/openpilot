@@ -28,6 +28,14 @@ class CarController():
   def update(self, enabled, active, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart, initialized):
 
+    can_sends = []
+    # *** static msgs ***
+    for (addr, cars, bus, fr_step, vl) in STATIC_DSU_MSGS:
+      if frame % fr_step == 0 and CS.CP.enableDsu and CS.CP.carFingerprint in cars:
+        can_sends.append(make_can_msg(addr, vl, bus))
+    if not initialized:  # send only static DSU messages until we're fully initialized
+      return actuators.copy(), can_sends
+
     # gas and brake
     if CS.CP.enableGasInterceptor and enabled:
       MAX_INTERCEPTOR_GAS = 0.5
@@ -72,8 +80,6 @@ class CarController():
 
     self.last_steer = apply_steer
     self.last_standstill = CS.out.standstill
-
-    can_sends = []
 
     #*** control msgs ***
     #print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
@@ -129,11 +135,6 @@ class CarController():
 
     if frame % 100 == 0 and CS.CP.enableDsu:
       can_sends.append(create_fcw_command(self.packer, fcw_alert))
-
-    # *** static msgs ***
-    for (addr, cars, bus, fr_step, vl) in STATIC_DSU_MSGS:
-      if frame % fr_step == 0 and CS.CP.enableDsu and CS.CP.carFingerprint in cars:
-        can_sends.append(make_can_msg(addr, vl, bus))
 
     new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
