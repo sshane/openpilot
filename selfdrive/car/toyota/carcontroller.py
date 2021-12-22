@@ -26,7 +26,7 @@ class CarController():
     self.accel = 0
 
   def update(self, enabled, active, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
-             left_line, right_line, lead, left_lane_depart, right_lane_depart):
+             left_line, right_line, lead, left_lane_depart, right_lane_depart, initialized):
 
     # gas and brake
     if CS.CP.enableGasInterceptor and enabled:
