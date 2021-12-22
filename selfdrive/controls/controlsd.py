@@ -150,6 +150,7 @@ class Controls:
     cp_bytes = self.CP.to_bytes()
     params.put("CarParams", cp_bytes)
     put_nonblocking("CarParamsCache", cp_bytes)
+    Params().put_bool("ControlsReady", True)
 
     self.CC = car.CarControl.new_message()
     self.AM = AlertManager()
@@ -453,7 +454,6 @@ class Controls:
       if not self.read_only:
         self.CI.init(self.CP, self.can_sock, self.pm.sock['sendcan'])
       self.initialized = True
-      Params().put_bool("ControlsReady", True)
 
     # Check for CAN timeout
     if not can_strs:
