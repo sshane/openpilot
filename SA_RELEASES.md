@@ -1,5 +1,7 @@
 Stock Additions 0.8.13
 ===
+## - 2021-12-23, 2:35am MST Notes
+ * Initialize controls immediately to send required ACC messages to resolve some Toyota cruise faults
 ## - 2021-12-21, 2:46am MST Notes
  * When param `use_steering_model` is True and if car is Toyota TSS2, we now use a TSS2 trained steering model instead of the TSSP Corolla
  * New param (`upload_onroad`) to control when openpilot uploads qlogs
