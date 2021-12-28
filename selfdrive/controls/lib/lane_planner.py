@@ -11,11 +11,11 @@ from common.op_params import opParams
 
 TRAJECTORY_SIZE = 33
 # model path is 0.06 m left of car center
-MODEL_PATH_OFFSET = -0.06
+MODEL_PATH_OFFSET = 0.06
 if EON:
-  CAMERA_OFFSET = -0.06
+  CAMERA_OFFSET = 0.06
 elif TICI:
-  CAMERA_OFFSET = 0.04
+  CAMERA_OFFSET = -0.04
 else:
   CAMERA_OFFSET = 0.0
 
