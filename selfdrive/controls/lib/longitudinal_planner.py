@@ -51,7 +51,7 @@ class Planner:
     self.v_desired = init_v
     self.a_desired = init_a
     self.alpha = np.exp(-DT_MDL / 2.0)
-    self.alpha_a = np.exp(-DT_MDL / 1.0)
+    self.alpha_a = np.exp(-DT_MDL / 0.5)
 
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
