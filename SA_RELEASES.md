@@ -1,5 +1,7 @@
 Stock Additions 0.8.13
 ===
+## - 2022-01-01
+ * Improve lateral performance by interpolating lateral plan to 100hz (from 20hz)
 ## - 2021-12-31, 5:00pm MST Notes
  * A few controls improvements related to right after engaging:
    * Car no longer brakes for a second after engaging at low speeds if there's no lead
