@@ -56,8 +56,11 @@ class Planner:
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
     self.j_desired_trajectory = np.zeros(CONTROL_N)
+    self.i = -1
 
   def update(self, sm):
+    self.i += 1
+    print(self.i)
     v_ego = sm['carState'].vEgo
     a_ego = sm['carState'].aEgo
 
@@ -70,10 +73,14 @@ class Planner:
 
     prev_accel_constraint = True
     active = long_control_state != LongCtrlState.off and not sm['carState'].gasPressed
+    active = self.i > 150
+    if active:
+      v_cruise = 20
+    print(active, v_cruise)
     if not active:
       self.v_desired = v_ego
       self.a_desired = a_ego
-    if not active or (active and not self.last_activeand):
+    if not active or (active and not self.last_active):
       # Smoothly changing between accel trajectory is only relevant when OP is driving
       prev_accel_constraint = False
     self.last_active = active
