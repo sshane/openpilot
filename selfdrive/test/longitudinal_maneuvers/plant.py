@@ -97,8 +97,8 @@ class Plant():
           'carState': car_state.carState,
           'controlsState': control.controlsState}
     self.planner.update(sm)
-    self.speed = self.planner.v_desired
-    self.acceleration = self.planner.a_desired
+    self.speed = self.planner.v_desired.x
+    self.acceleration = self.planner.a_desired.x
     fcw = self.planner.fcw
     self.distance_lead = self.distance_lead + v_lead * self.ts
 
