@@ -1,6 +1,5 @@
 import numpy as np
 from selfdrive.test.longitudinal_maneuvers.plant import Plant
-import matplotlib.pyplot as plt
 
 
 class Maneuver():
@@ -52,13 +51,6 @@ class Maneuver():
       if d_rel < .4 and (self.only_radar or prob > 0.5):
         print("Crashed!!!!")
         valid = False
-
-    plt.plot([log[3] for log in logs], label='speed')
-    plt.legend()
-    plt.figure()
-    plt.plot([log[-1] for log in logs], label='accel')
-    plt.pause(0.01)
-    input()
 
     print("maneuver end", valid)
     return valid, np.array(logs)
