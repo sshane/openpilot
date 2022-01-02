@@ -189,6 +189,7 @@ class Controls:
     self.logged_comm_issue = False
     self.button_timers = {ButtonEvent.Type.decelCruise: 0, ButtonEvent.Type.accelCruise: 0}
     self.last_actuators = car.CarControl.Actuators.new_message()
+    self.lat_delay_offset = 0.0
 
     # TODO: no longer necessary, aside from process replay
     self.sm['liveParameters'].valid = True
@@ -587,12 +588,18 @@ class Controls:
       pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS)
       actuators.accel = self.LoC.update(self.active, CS, self.CP, long_plan, pid_accel_limits, extras_loc)
 
+      # interpolate lat plan to 100hz
+      self.lat_delay_offset += DT_CTRL
+      if self.sm.updated['lateralPlan']:
+        self.lat_delay_offset = 0.
+
       # Steering PID loop and lateral MPC
       lat_active = self.active and not CS.steerWarning and not CS.steerError and CS.vEgo > self.CP.minSteerSpeed
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
                                                                              lat_plan.curvatures,
-                                                                             lat_plan.curvatureRates)
+                                                                             lat_plan.curvatureRates,
+                                                                             self.lat_delay_offset)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(lat_active, CS, self.CP, self.VM, params, self.last_actuators,
                                                                              desired_curvature, desired_curvature_rate)
     else:
