@@ -10,14 +10,22 @@ from common.op_params import opParams
 
 
 TRAJECTORY_SIZE = 33
-# model path is 0.06 m left of car center
-MODEL_PATH_OFFSET = 0.06
+# camera offset is meters from center car to camera
 if EON:
-  CAMERA_OFFSET = 0.06
+  STANDARD_CAMERA_OFFSET = 0.06  # do NOT change this. edit with opEdit
+  STANDARD_PATH_OFFSET = 0.0  # do NOT change this. edit with opEdit
+  # CAMERA_OFFSET = 0.06
+  # PATH_OFFSET = 0.0
 elif TICI:
-  CAMERA_OFFSET = -0.04
+  STANDARD_CAMERA_OFFSET = -0.04  # do NOT change this. edit with opEdit
+  STANDARD_PATH_OFFSET = -0.04  # do NOT change this. edit with opEdit
+  # CAMERA_OFFSET = -0.04
+  # PATH_OFFSET = -0.04
 else:
-  CAMERA_OFFSET = 0.0
+  STANDARD_CAMERA_OFFSET = 0.0  # do NOT change this. edit with opEdit
+  STANDARD_PATH_OFFSET = 0.0  # do NOT change this. edit with opEdit
+  # CAMERA_OFFSET = 0.0
+  # PATH_OFFSET = 0.0
 
 
 class LanePlanner:
@@ -42,13 +50,15 @@ class LanePlanner:
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
 
-    self.camera_offset = -CAMERA_OFFSET if wide_camera else CAMERA_OFFSET
-    self.path_offset = self.camera_offset - MODEL_PATH_OFFSET
+    # self.camera_offset = -STANDARD_CAMERA_OFFSET if wide_camera else STANDARD_CAMERA_OFFSET
+    if TICI:
+      self.path_offset = -STANDARD_PATH_OFFSET if wide_camera else STANDARD_PATH_OFFSET
 
   def parse_model(self, md):
     if len(md.laneLines) == 4 and len(md.laneLines[0].t) == TRAJECTORY_SIZE:
-      self.camera_offset = clip(self.op_params.get('camera_offset'), -0.5, 0.5)  # update camera offset
-      self.path_offset = self.camera_offset - MODEL_PATH_OFFSET
+      self.camera_offset = clip(self.op_params.get('camera_offset'), -0.3, 0.3)  # update camera offset
+      if not TICI:  # TODO: make sure this is correct
+        self.path_offset = self.camera_offset - STANDARD_CAMERA_OFFSET + STANDARD_PATH_OFFSET  # offset path
 
       self.ll_t = (np.array(md.laneLines[1].t) + np.array(md.laneLines[2].t))/2
       # left and right ll x is the same
