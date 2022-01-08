@@ -585,7 +585,7 @@ class Controls:
                     'live_tracks': self.sm_smiskol['liveTracks'], 'has_lead': long_plan.hasLead}
 
       # accel PID loop
-      pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS)
+      pid_accel_limits = list(self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS))
       actuators.accel = self.LoC.update(self.active, CS, self.CP, long_plan, pid_accel_limits, extras_loc)
 
       # interpolate lat plan to 100hz

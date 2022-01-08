@@ -16,6 +16,7 @@ LatParams = namedtuple('LatParams', ['use_steering_model', 'use_lqr', 'prius_use
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
+    # as well as here (pid output is clipped to this)
     return CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX
 
   @staticmethod

@@ -10,7 +10,7 @@ PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
 
 
 class CarControllerParams:
-  ACCEL_MAX = 1.6  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
+  ACCEL_MAX = 1.0  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
   ACCEL_MIN = -3.5  # m/s2
 
   STEER_MAX = 1500
@@ -1644,6 +1644,7 @@ TSS2_CAR = {CAR.RAV4_TSS2, CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.LEXUS_ES_TSS
                 CAR.MIRAI, CAR.LEXUS_NX_TSS2, CAR.ALPHARD_TSS2}
 
 NO_DSU_CAR = TSS2_CAR | {CAR.CHR, CAR.CHRH, CAR.CAMRY, CAR.CAMRYH}
+SPORT_ECO_CAR = TSS2_CAR | {CAR.CHR, CAR.CHRH, CAR.CAMRY}  # CamryH for some reason has special dbc
 
 # no resume button press required
 NO_STOP_TIMER_CAR = TSS2_CAR | {CAR.RAV4H, CAR.HIGHLANDERH, CAR.HIGHLANDER, CAR.SIENNA, CAR.LEXUS_ESH}
