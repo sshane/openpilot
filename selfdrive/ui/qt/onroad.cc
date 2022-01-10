@@ -431,7 +431,6 @@ void NvgWindow::drawLaneLines(QPainter &painter, UIState *s) {
     const float lat_pos = pos.getY().size() > 0 ? std::abs(pos.getY()[14] - pos.getY()[0]) : 0;  // 14 is 1.91406 (subtract initial pos to not consider offset)
     float hue = lat_pos * -39.46 + 148;  // interp from {0, 4.5} -> {148, 0}
     hue = (hue - 360. * floor(hue / 360.)) / 360.;  // scale and wrap around
-    qDebug() << hue;
     bg.setColorAt(0, QColor::fromHslF(hue, .94, .51, 1.));
     bg.setColorAt(1, QColor::fromHslF(hue, .73, .49, 100./255.));
   } else {
