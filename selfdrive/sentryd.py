@@ -3,8 +3,11 @@ import time
 import numpy as np
 
 from common.realtime import sec_since_boot, DT_CTRL
-from cereal import log, messaging
+from cereal import messaging
 from common.filter_simple import FirstOrderFilter
+
+MAX_TIME_ONROAD = 5 * 60.
+MOVEMENT_TIME = 1 * 60.  # any movement resets one-minute timer
 
 
 class SentryMode:
@@ -17,6 +20,7 @@ class SentryMode:
     self.started = False
     self.prev_started = False
     self.started_ts = 0.
+    self.movement_ts = 0.
     self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
   def update(self):
@@ -44,9 +48,13 @@ class SentryMode:
     offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > 5.  # needs to be offroad for 30 sec
 
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
+    if movement:
+      self.movement_ts = float(now_ts)
     print([a_filter.x for a_filter in self.accel_filters])
 
-    onroad_long_enough = now_ts - self.started_ts > 60.
+    # Maximum allowed time onroad without movement is 1 minute. Any movement resets time allowed, maximum time is 5 minutes
+    # TODO: can we remove started_ts?
+    onroad_long_enough = (now_ts - self.started_ts > MOVEMENT_TIME and now_ts - self.movement_ts > MOVEMENT_TIME) or now_ts - self.started_ts > MAX_TIME_ONROAD
 
     started = False
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
