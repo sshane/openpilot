@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import time
+import numpy as np
 
 from common.realtime import sec_since_boot, DT_CTRL
 from cereal import log, messaging
@@ -10,16 +11,20 @@ class SentryMode:
   def __init__(self):
     self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
 
-    self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(2)]
+    self.prev_accel = np.zeros(3)
+    self.initialized = False
+    self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
   def update(self):
     for sensor in self.sm['sensorEvents']:
       if sensor.which() == 'acceleration':
         accels = sensor.acceleration.v
-        for idx, v in enumerate(accels):  # sometimes is empty, in that case don't update
-          if idx > 1:
-            continue
-          self.accel_filters[idx].update(accels[idx])
+        if len(accels) == 3:  # sometimes is empty, in that case don't update
+          if self.initialized:
+            for idx, v in enumerate(accels):
+              self.accel_filters[idx].update(accels[idx] - self.prev_accel[idx])
+          self.initialized = True
+          self.prev_accel = list(accels)
     self.started
 
   @property
