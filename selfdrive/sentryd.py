@@ -46,14 +46,15 @@ class SentryMode:
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     print([a_filter.x for a_filter in self.accel_filters])
 
-    onroad_long_enough = self.started and (now_ts - self.started_ts) > 5.
+    onroad_long_enough = now_ts - self.started_ts > 5.
 
     started = False
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
     print(f"{onroad_long_enough=}")
+    print(f"{now_ts - self.started_ts=}")
     if offroad and offroad_long_enough and movement:
       started = True
-    elif not onroad_long_enough:
+    elif self.started and not onroad_long_enough:
       started = True
 
     return started
@@ -68,6 +69,7 @@ class SentryMode:
     while 1:
       self.sm.update()
       self.update()
+      self.publish()
 
 
 def main():
