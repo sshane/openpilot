@@ -41,7 +41,7 @@ class SentryMode:
   def get_started(self):
     now_ts = sec_since_boot()
     offroad = not self.sm['deviceState'].started
-    offroad_long_enough = now_ts - self.sm['deviceState'].offMonoTime > 5.  # needs to be offroad for 30 sec
+    offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > 5.  # needs to be offroad for 30 sec
     print(now_ts - self.sm['deviceState'].offMonoTime, now_ts, self.sm['deviceState'].offMonoTime)
 
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
