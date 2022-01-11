@@ -46,7 +46,7 @@ class SentryMode:
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     print([a_filter.x for a_filter in self.accel_filters])
 
-    onroad_long_enough = now_ts - self.started_ts > 5.
+    onroad_long_enough = now_ts - self.started_ts > 60.
 
     started = False
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
