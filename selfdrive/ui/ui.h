@@ -134,7 +134,7 @@ struct Alert {
       // Handle controls timeout
       if (started_sentry) {
         return {"SENTRY MODE", "RECORDING 360° VIDEO",
-                "controlsWaiting", cereal::ControlsState::AlertSize::MID,
+                "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                 AudibleAlert::WARNING_IMMEDIATE};
       } else if (sm.rcv_frame("controlsState") < started_frame) {
         // car is started, but controlsState hasn't been seen at all
