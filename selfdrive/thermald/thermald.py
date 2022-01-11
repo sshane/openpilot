@@ -152,6 +152,9 @@ def set_offroad_alert_if_changed(offroad_alert: str, show_alert: bool, extra_tex
   set_offroad_alert(offroad_alert, show_alert, extra_text)
 
 
+
+
+
 def thermald_thread() -> NoReturn:
 
   pm = messaging.PubMaster(['deviceState'])
@@ -227,6 +230,7 @@ def thermald_thread() -> NoReturn:
       else:
         no_panda_cnt = 0
         onroad_conditions["ignition"] = pandaState.ignitionLine or pandaState.ignitionCan
+        onroad_conditions["sentry"] = False  # some logic to use accelerometer sensors
 
       in_car = pandaState.harnessStatus != log.PandaState.HarnessStatus.notConnected
       usb_power = peripheralState.usbPowerMode != log.PeripheralState.UsbPowerMode.client
@@ -395,6 +399,7 @@ def thermald_thread() -> NoReturn:
     msg.deviceState.chargingError = current_filter.x > 0. and msg.deviceState.batteryPercent < 90  # if current is positive, then battery is being discharged
     msg.deviceState.started = started_ts is not None
     msg.deviceState.startedMonoTime = int(1e9*(started_ts or 0))
+    msg.deviceState.offMonoTime = int(1e9*(off_ts or 0))
 
     last_ping = params.get("LastAthenaPingTime")
     if last_ping is not None:
