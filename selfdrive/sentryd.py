@@ -18,7 +18,7 @@ class SentryMode:
 
     self.params = Params()
     self.sentry_enabled = self.params.get("SentryMode")
-    self.last_read = sec_since_boot()
+    self.last_read_ts = sec_since_boot()
 
     self.prev_accel = np.zeros(3)
     self.initialized = False
@@ -33,7 +33,7 @@ class SentryMode:
     now_ts = sec_since_boot()
     if now_ts - self.last_read_ts > 30.:
       self.sentry_enabled = self.params.get("SentryMode")
-      self.last_read = float(now_ts)
+      self.last_read_ts = float(now_ts)
 
     for sensor in self.sm['sensorEvents']:
       if sensor.which() == 'acceleration':
