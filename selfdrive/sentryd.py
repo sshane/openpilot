@@ -17,7 +17,7 @@ class SentryMode:
     self.pm = messaging.PubMaster(['sentryState'])
 
     self.params = Params()
-    self.sentry_enabled = self.params.get("SentryMode")
+    self.sentry_enabled = self.params.get_bool("SentryMode")
     self.last_read_ts = sec_since_boot()
 
     self.prev_accel = np.zeros(3)
@@ -32,7 +32,7 @@ class SentryMode:
     # Update parameter
     now_ts = sec_since_boot()
     if now_ts - self.last_read_ts > 30.:
-      self.sentry_enabled = self.params.get("SentryMode")
+      self.sentry_enabled = self.params.get_bool("SentryMode")
       self.last_read_ts = float(now_ts)
 
     for sensor in self.sm['sensorEvents']:
