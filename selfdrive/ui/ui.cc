@@ -158,7 +158,7 @@ static void update_state(UIState *s) {
       scene.pandaType = pandaStates[0].getPandaType();
 
       if (scene.pandaType != cereal::PandaState::PandaType::UNKNOWN) {
-        scene.ignition = false;
+        scene.ignition = sm["sentryState"].getSentryState().getStarted();
         for (const auto& pandaState : pandaStates) {
           scene.ignition |= pandaState.getIgnitionLine() || pandaState.getIgnitionCan();
         }
@@ -167,13 +167,10 @@ static void update_state(UIState *s) {
   } else if ((s->sm->frame - s->sm->rcv_frame("pandaStates")) > 5*UI_FREQ) {
     scene.pandaType = cereal::PandaState::PandaType::UNKNOWN;
   }
-  if (sm.updated("sentryState")) {
-    scene.ignition = sm["sentryState"].getSentryState().getStarted();
-  }
   if (sm.updated("carParams")) {
     scene.longitudinal_control = sm["carParams"].getCarParams().getOpenpilotLongitudinalControl();
   }
-  if (!scene.started && sm.updated("sensorEvents")) {
+  if (!(scene.started || scene.started_sentry) && sm.updated("sensorEvents")) {
     for (auto sensor : sm["sensorEvents"].getSensorEvents()) {
       if (sensor.which() == cereal::SensorEventData::ACCELERATION) {
         auto accel = sensor.getAcceleration().getV();
@@ -203,8 +200,8 @@ static void update_state(UIState *s) {
 
     scene.light_sensor = std::clamp<float>(1.0 - (ev / max_ev), 0.0, 1.0);
   }
-  bool sentryStarted = sm["sentryState"].getSentryState().getStarted();
   scene.started = (sm["deviceState"].getDeviceState().getStarted() && scene.ignition) || sentryStarted;
+  scene.started_sentry = sm["sentryState"].getSentryState().getStarted();
 }
 
 void ui_update_params(UIState *s) {
@@ -212,7 +209,7 @@ void ui_update_params(UIState *s) {
 }
 
 void UIState::updateStatus() {
-  if (scene.started && sm->updated("controlsState")) {
+  if ((scene.started || scene.started_sentry) && sm->updated("controlsState")) {
     auto controls_state = (*sm)["controlsState"].getControlsState();
     auto alert_status = controls_state.getAlertStatus();
     if (alert_status == cereal::ControlsState::AlertStatus::USER_PROMPT) {
@@ -225,17 +222,17 @@ void UIState::updateStatus() {
   }
 
   // Handle onroad/offroad transition
-  if (scene.started != started_prev) {
+  if ((scene.started || scene.started_sentry) != started_prev) {
     if (scene.started) {
       status = STATUS_DISENGAGED;
       scene.started_frame = sm->frame;
       scene.end_to_end = Params().getBool("EndToEndToggle");
       wide_camera = Hardware::TICI() ? Params().getBool("EnableWideCamera") : false;
     }
-    started_prev = scene.started;
-    emit offroadTransition(!scene.started);
+    started_prev = scene.started || scene.started_sentry;
+    emit offroadTransition(!(scene.started || scene.started_sentry));
   } else if (sm->frame == 1) {
-    emit offroadTransition(!scene.started);
+    emit offroadTransition(!(scene.started || scene.started_sentry));
   }
 }
 
@@ -304,7 +301,7 @@ void Device::resetInteractiveTimout() {
 
 void Device::updateBrightness(const UIState &s) {
   float clipped_brightness = BACKLIGHT_OFFROAD;
-  if (s.scene.started) {
+  if (s.scene.started || scene.started_sentry) {
     // Scale to 0% to 100%
     clipped_brightness = 100.0 * s.scene.light_sensor;
 
