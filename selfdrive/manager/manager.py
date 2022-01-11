@@ -135,7 +135,7 @@ def manager_thread() -> None:
   ensure_running(managed_processes.values(), started=False, not_run=ignore)
 
   started_prev = False
-  sm = messaging.SubMaster(['deviceState'])
+  sm = messaging.SubMaster(['deviceState', 'sentryState'])
   pm = messaging.PubMaster(['managerState'])
 
   while True:
@@ -145,7 +145,7 @@ def manager_thread() -> None:
     if sm['deviceState'].freeSpacePercent < 5:
       not_run.append("loggerd")
 
-    started = sm['deviceState'].started
+    started = sm['deviceState'].started or sm['sentryState'].started
     driverview = params.get_bool("IsDriverViewEnabled")
     ensure_running(managed_processes.values(), started, driverview, not_run)
 
