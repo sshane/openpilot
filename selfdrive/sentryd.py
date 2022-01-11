@@ -4,8 +4,6 @@ from common.realtime import sec_since_boot, DT_CTRL
 from cereal import log, messaging
 from common.filter_simple import FirstOrderFilter
 
-ACCEL_SENSOR = log.SensorEventData.ACCELERATION
-
 
 class SentryMode:
   def __init__(self):
@@ -15,7 +13,7 @@ class SentryMode:
 
   def update(self):
     for sensor in self.sm['sensorEvents']:
-      if sensor.which() == ACCEL_SENSOR:
+      if sensor.which() == 'acceleration':
         accels = sensor.acceleration.v
         for idx, v in enumerate(accels):  # sometimes is empty, in that case don't update
           self.accel_filters[idx].update(accels[idx])
@@ -32,7 +30,6 @@ class SentryMode:
     started = started and movement
 
     return started
-
 
   def start(self):
     self.sm.update()
