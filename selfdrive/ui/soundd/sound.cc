@@ -58,7 +58,7 @@ void Sound::update() {
     }
   }
 
-  setAlert(Alert::get(sm, started_frame, true));
+  setAlert(Alert::get(sm, started_frame, false));
 }
 
 void Sound::setAlert(const Alert &alert) {
