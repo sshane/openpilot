@@ -16,7 +16,9 @@ class SentryMode:
     for sensor in self.sm['sensorEvents']:
       if sensor.which() == 'acceleration':
         accels = sensor.acceleration.v
-        for idx, v in enumerate(accels)[:2]:  # sometimes is empty, in that case don't update
+        for idx, v in enumerate(accels):  # sometimes is empty, in that case don't update
+          if idx > 1:
+            continue
           self.accel_filters[idx].update(accels[idx])
     self.started
 
