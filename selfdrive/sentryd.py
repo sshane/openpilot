@@ -36,6 +36,10 @@ class SentryMode:
     self.update()
 
 
-if __name__ == "__main__":
+def main():
   sentry_mode = SentryMode()
   sentry_mode.start()
+
+
+if __name__ == "__main__":
+  main()
