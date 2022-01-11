@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 
 from common.realtime import sec_since_boot, DT_CTRL
@@ -32,8 +33,9 @@ class SentryMode:
     return started
 
   def start(self):
-    self.sm.update()
-    self.update()
+    while 1:
+      self.sm.update()
+      self.update()
 
 
 def main():
