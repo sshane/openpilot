@@ -55,6 +55,7 @@ class SentryMode:
 
   def get_started(self, now_ts):
     offroad = not self.sm['deviceState'].started
+    print(f"{offroad=}")
     offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > 5.  # needs to be offroad for 30 sec
 
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
@@ -67,9 +68,9 @@ class SentryMode:
     onroad_long_enough = (now_ts - self.started_ts > MOVEMENT_TIME and now_ts - self.movement_ts > MOVEMENT_TIME) or now_ts - self.started_ts > MAX_TIME_ONROAD
 
     started = False
-    print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
-    print(f"{onroad_long_enough=}")
-    print(f"{now_ts - self.started_ts=}")
+    # print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
+    # print(f"{onroad_long_enough=}")
+    # print(f"{now_ts - self.started_ts=}")
     if offroad and self.sentry_enabled:  # car's ignitions needs to be off (not started by user)
       if offroad_long_enough and movement:
         started = True
