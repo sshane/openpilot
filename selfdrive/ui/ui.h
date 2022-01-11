@@ -121,7 +121,7 @@ struct Alert {
     return text1 == a2.text1 && text2 == a2.text2 && type == a2.type && sound == a2.sound;
   }
 
-  static Alert get(const SubMaster &sm, uint64_t started_frame, const UIState &s) {
+  static Alert get(const SubMaster &sm, uint64_t started_frame, bool started_sentry) {
     const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState();
     if (sm.updated("controlsState")) {
       return {cs.getAlertText1().cStr(), cs.getAlertText2().cStr(),
@@ -132,7 +132,7 @@ struct Alert {
       const int controls_missing = (nanos_since_boot() - sm.rcv_time("controlsState")) / 1e9;
 
       // Handle controls timeout
-      if (s.scene.started_sentry) {
+      if (started_sentry) {
         return {"SENTRY MODE", "RECORDING 360° VIDEO",
                 "controlsWaiting", cereal::ControlsState::AlertSize::MID,
                 AudibleAlert::WARNING_IMMEDIATE};
