@@ -163,8 +163,17 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
 //  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
-  ParamControl* thirdLabel = new ParamControl("SentryMode", "Enable Sentry Mode", "", "", this);
-//  thirdLabel->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
+  auto thirdLabel = new ParamControl("SentryMode", "Enable Sentry Mode", "", "");
+//  thirdLabel->setStyleSheet("font-size: 410px; font-family: Inter SemiBold;");
+  thirdLabel->setStyleSheet(R"(
+    QPushButton {
+      background-color: none;
+      font-size: 30px;
+      font-family: Inter SemiBold;
+      font-weight: 200;
+      border-radius: 10px;
+    }
+  )");
   thirdLayout->addWidget(thirdLabel, 0, Qt::AlignVCenter);
 
   mainLayout->addWidget(thirdWidget);
@@ -175,6 +184,12 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
     RequestRepeater *repeater = new RequestRepeater(this, url, "ApiCache_Owner", 6);
     QObject::connect(repeater, &RequestRepeater::requestDone, this, &PrimeUserWidget::replyFinished);
   }
+//  setStyleSheet(R"(
+//    * {
+//      background-color: none;
+//      font-size: 50px;
+//    }
+//  )");
 }
 
 void PrimeUserWidget::setPrime(bool hasPrime) {
@@ -332,7 +347,8 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
     QObject::connect(repeater, &RequestRepeater::requestDone, this, &SetupWidget::replyFinished);
   }
-  hide(); // Only show when first request comes back
+  // Only show when first request comes back if not PC
+  if (!Hardware::PC()) hide();
 }
 
 void SetupWidget::replyFinished(const QString &response, bool success) {
