@@ -200,7 +200,7 @@ static void update_state(UIState *s) {
 
     scene.light_sensor = std::clamp<float>(1.0 - (ev / max_ev), 0.0, 1.0);
   }
-  scene.started = (sm["deviceState"].getDeviceState().getStarted() && scene.ignition) || sentryStarted;
+  scene.started = sm["deviceState"].getDeviceState().getStarted() && scene.ignition;
   scene.started_sentry = sm["sentryState"].getSentryState().getStarted();
 }
 
@@ -301,7 +301,7 @@ void Device::resetInteractiveTimout() {
 
 void Device::updateBrightness(const UIState &s) {
   float clipped_brightness = BACKLIGHT_OFFROAD;
-  if (s.scene.started || scene.started_sentry) {
+  if (s.scene.started || s.scene.started_sentry) {
     // Scale to 0% to 100%
     clipped_brightness = 100.0 * s.scene.light_sensor;
 
