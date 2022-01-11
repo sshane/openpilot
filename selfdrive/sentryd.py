@@ -34,7 +34,7 @@ class SentryMode:
     started = started and (now_ts - self.sm['deviceState'].offMonoTime) > 30.
     started = started or self.sm['deviceState'].startedSentry
 
-    movement = any([abs(a_filter.x) > 2. for a_filter in self.accel_filters])
+    movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     print(movement)
     print([a_filter.x for a_filter in self.accel_filters])
     started = started and movement
