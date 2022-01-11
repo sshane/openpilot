@@ -14,6 +14,7 @@
 #include "selfdrive/ui/qt/request_repeater.h"
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
+#include "selfdrive/ui/qt/widgets/controls.h"
 
 using qrcodegen::QrCode;
 
@@ -161,8 +162,9 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdLayout->setMargin(0);
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
-  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
-  thirdLabel->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
+//  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
+  ParamControl* thirdLabel = new ParamControl("SentryMode", "Enable Sentry Mode", "", "", this);
+//  thirdLabel->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
   thirdLayout->addWidget(thirdLabel, 0, Qt::AlignVCenter);
 
   mainLayout->addWidget(thirdWidget);
