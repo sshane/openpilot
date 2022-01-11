@@ -31,6 +31,7 @@ class SentryMode:
           self.prev_accel = list(accels)
 
     self.started = self.get_started()
+    print(self.started)
 
     if self.started and not self.prev_started:
       self.started_ts = sec_since_boot()
