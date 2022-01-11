@@ -164,7 +164,6 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
 
 //  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
   auto thirdLabel = new ParamControl("SentryMode", "Enable Sentry Mode", "", "");
-//  thirdLabel->setStyleSheet("font-size: 410px; font-family: Inter SemiBold;");
   thirdLabel->setStyleSheet(R"(
     QPushButton {
       background-color: none;

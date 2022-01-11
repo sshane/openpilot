@@ -5,6 +5,7 @@ import numpy as np
 from common.realtime import sec_since_boot, DT_CTRL
 from cereal import messaging
 from common.filter_simple import FirstOrderFilter
+from common.params import Params
 
 MAX_TIME_ONROAD = 5 * 60.
 MOVEMENT_TIME = 1 * 60.  # normal time allowed is one minute
@@ -15,6 +16,10 @@ class SentryMode:
     self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
     self.pm = messaging.PubMaster(['sentryState'])
 
+    self.params = Params()
+    self.sentry_enabled = self.params.get("SentryMode")
+    self.last_read = sec_since_boot()
+
     self.prev_accel = np.zeros(3)
     self.initialized = False
     self.started = False
@@ -24,6 +29,12 @@ class SentryMode:
     self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
   def update(self):
+    # Update parameter
+    now_ts = sec_since_boot()
+    if now_ts - self.last_read_ts > 30.:
+      self.sentry_enabled = self.params.get("SentryMode")
+      self.last_read = float(now_ts)
+
     for sensor in self.sm['sensorEvents']:
       if sensor.which() == 'acceleration':
         accels = sensor.acceleration.v
@@ -34,7 +45,7 @@ class SentryMode:
           self.initialized = True
           self.prev_accel = list(accels)
 
-    self.started = self.get_started()
+    self.started = self.get_started(now_ts)
     print(self.started)
 
     if self.started and not self.prev_started:
@@ -42,8 +53,7 @@ class SentryMode:
 
     self.prev_started = self.started
 
-  def get_started(self):
-    now_ts = sec_since_boot()
+  def get_started(self, now_ts):
     offroad = not self.sm['deviceState'].started
     offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > 5.  # needs to be offroad for 30 sec
 
@@ -60,7 +70,7 @@ class SentryMode:
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
     print(f"{onroad_long_enough=}")
     print(f"{now_ts - self.started_ts=}")
-    if offroad:  # car's ignitions needs to be off (not started by user)
+    if offroad and self.sentry_enabled:  # car's ignitions needs to be off (not started by user)
       if offroad_long_enough and movement:
         started = True
       elif self.started and not onroad_long_enough:
