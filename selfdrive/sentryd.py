@@ -7,7 +7,8 @@ from cereal import messaging
 from common.filter_simple import FirstOrderFilter
 
 MAX_TIME_ONROAD = 5 * 60.
-MOVEMENT_TIME = 1 * 60.  # any movement resets one-minute timer
+ONROAD_TIME = 1 * 60.  # normal time allowed is one minute
+MOVEMENT_TIME = 1 * 30.  # any movement adds additional 30 seconds
 
 
 class SentryMode:
@@ -53,8 +54,7 @@ class SentryMode:
     print([a_filter.x for a_filter in self.accel_filters])
 
     # Maximum allowed time onroad without movement is 1 minute. Any movement resets time allowed, maximum time is 5 minutes
-    # TODO: can we remove started_ts?
-    onroad_long_enough = (now_ts - self.started_ts > MOVEMENT_TIME and now_ts - self.movement_ts > MOVEMENT_TIME) or now_ts - self.started_ts > MAX_TIME_ONROAD
+    onroad_long_enough = (now_ts - self.started_ts > ONROAD_TIME and now_ts - self.movement_ts > MOVEMENT_TIME) or now_ts - self.started_ts > MAX_TIME_ONROAD
 
     started = False
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
