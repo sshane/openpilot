@@ -44,12 +44,13 @@ class SentryMode:
     offroad_long_enough = now_ts - self.sm['deviceState'].offMonoTime > 30.  # needs to be offroad for 30 sec
 
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
-    print(movement)
     print([a_filter.x for a_filter in self.accel_filters])
 
     onroad_long_enough = self.started and (now_ts - self.started_ts)
 
     started = False
+    print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
+    print(f"{onroad_long_enough=}")
     if offroad and offroad_long_enough and movement:
       started = True
     elif self.started and not onroad_long_enough:
