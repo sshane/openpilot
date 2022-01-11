@@ -63,7 +63,7 @@ class SentryMode:
     sentry_state = messaging.new_message('sentryState')
     sentry_state.sentryState.started = self.started
 
-    self.pm.send('lateralPlan', sentry_state)
+    self.pm.send('sentryState', sentry_state)
 
   def start(self):
     while 1:
