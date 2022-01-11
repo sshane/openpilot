@@ -60,7 +60,7 @@ class SentryMode:
     print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
     print(f"{onroad_long_enough=}")
     print(f"{now_ts - self.started_ts=}")
-    if offroad:
+    if offroad:  # car's ignitions needs to be off (not started by user)
       if offroad_long_enough and movement:
         started = True
       elif self.started and not onroad_long_enough:
