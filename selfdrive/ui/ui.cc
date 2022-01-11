@@ -168,7 +168,7 @@ static void update_state(UIState *s) {
     scene.pandaType = cereal::PandaState::PandaType::UNKNOWN;
   }
   if (sm.updated("sentryState")) {
-    scene.ignition = sm["sentryState"].getDeviceState().getStarted();
+    scene.ignition = sm["sentryState"].getSentryState().getStarted();
   }
   if (sm.updated("carParams")) {
     scene.longitudinal_control = sm["carParams"].getCarParams().getOpenpilotLongitudinalControl();
@@ -203,7 +203,7 @@ static void update_state(UIState *s) {
 
     scene.light_sensor = std::clamp<float>(1.0 - (ev / max_ev), 0.0, 1.0);
   }
-  bool sentryStarted = sm["sentryState"].getDeviceState().getStarted();
+  bool sentryStarted = sm["sentryState"].getSentryState().getStarted();
   scene.started = (sm["deviceState"].getDeviceState().getStarted() && scene.ignition) || sentryStarted;
 }
 
