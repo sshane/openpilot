@@ -8,7 +8,8 @@ from common.filter_simple import FirstOrderFilter
 from common.params import Params
 
 MAX_TIME_ONROAD = 5 * 60.
-MOVEMENT_TIME = 5.  # normal time allowed is one minute
+MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
+OFFROAD_TIME = 1. * 30  # needs to be offroad for this time before sentry mode is active
 
 
 class SentryMode:
@@ -55,7 +56,7 @@ class SentryMode:
 
   def get_started(self, now_ts):
     offroad = not self.sm['deviceState'].started
-    offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > 5.  # needs to be offroad for 30 sec
+    offroad_long_enough = now_ts - (self.sm['deviceState'].offMonoTime / 1e9) > OFFROAD_TIME  # needs to be offroad for 30 sec
 
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     if movement:
