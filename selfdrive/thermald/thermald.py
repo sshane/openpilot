@@ -152,9 +152,6 @@ def set_offroad_alert_if_changed(offroad_alert: str, show_alert: bool, extra_tex
   set_offroad_alert(offroad_alert, show_alert, extra_text)
 
 
-
-
-
 def thermald_thread() -> NoReturn:
 
   pm = messaging.PubMaster(['deviceState'])
@@ -230,7 +227,6 @@ def thermald_thread() -> NoReturn:
       else:
         no_panda_cnt = 0
         onroad_conditions["ignition"] = pandaState.ignitionLine or pandaState.ignitionCan
-        onroad_conditions["sentry"] = False  # some logic to use accelerometer sensors
 
       in_car = pandaState.harnessStatus != log.PandaState.HarnessStatus.notConnected
       usb_power = peripheralState.usbPowerMode != log.PeripheralState.UsbPowerMode.client
