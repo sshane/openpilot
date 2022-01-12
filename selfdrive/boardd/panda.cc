@@ -305,6 +305,10 @@ uint16_t Panda::get_fan_speed() {
   return fan_speed_rpm;
 }
 
+void Panda::set_led(uint8_t clr) {
+  usb_write(0xf8, clr, 0);
+}
+
 void Panda::set_ir_pwr(uint16_t ir_pwr) {
   usb_write(0xb0, ir_pwr, 0);
 }

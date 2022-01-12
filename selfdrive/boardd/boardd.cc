@@ -411,7 +411,7 @@ void panda_state_thread(PubMaster *pm, std::vector<Panda *> pandas, bool spoofin
   util::set_thread_name("boardd_panda_state");
 
   Params params;
-  SubMaster sm({"controlsState"});
+  SubMaster sm({"controlsState", "sentryState"});
 
   Panda *peripheral_panda = pandas[0];
   bool ignition_last = false;
@@ -452,6 +452,9 @@ void panda_state_thread(PubMaster *pm, std::vector<Panda *> pandas, bool spoofin
 
     for (const auto &panda : pandas) {
       panda->send_heartbeat(engaged);
+      if (sm["sentryState"].getSentryState().getStarted()) {
+        panda->set_led(1);  // 1: green, 2: blue
+      }
     }
     util::sleep_for(500);
   }
