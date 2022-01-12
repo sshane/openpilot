@@ -8,7 +8,7 @@ from common.filter_simple import FirstOrderFilter
 from common.params import Params
 
 MAX_TIME_ONROAD = 5 * 60.
-MOVEMENT_TIME = 1 * 60.  # normal time allowed is one minute
+MOVEMENT_TIME = 5.  # normal time allowed is one minute
 
 
 class SentryMode:
