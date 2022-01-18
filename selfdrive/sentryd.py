@@ -6,6 +6,7 @@ from common.realtime import sec_since_boot, DT_CTRL
 from cereal import messaging
 from common.filter_simple import FirstOrderFilter
 from common.params import Params
+from opendbc.can.parser import CANParser
 
 MAX_TIME_ONROAD = 5 * 60.
 MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
@@ -14,8 +15,14 @@ OFFROAD_TIME = 1. * 30  # needs to be offroad for this time before sentry mode i
 
 class SentryMode:
   def __init__(self):
-    self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
+    self.sm = messaging.SubMaster(['deviceState', 'sensorEvents', 'can'], poll=['sensorEvents'])
     self.pm = messaging.PubMaster(['sentryState'])
+
+    signals = [
+      ("KEYFOBNEARBY", "NEW_MSG_1", 1),
+    ]
+    self.cp = CANParser("toyota_nodsu_hybrid_pt_generated", signals, bus=0, enforce_checks=False)
+    self.can_sock = messaging.sub_sock('can', timeout=100)
 
     self.params = Params()
     self.sentry_enabled = self.params.get_bool("SentryMode")
@@ -30,6 +37,14 @@ class SentryMode:
     self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
   def update(self):
+    can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
+    self.cp.update_strings(can_strs)
+
+    print('KEY FOB NEARBY: {}'.format(bool(self.cp.vl["NEW_MSG_1"]["KEYFOBNEARBY"])))
+
+
+    return
+
     # Update parameter
     now_ts = sec_since_boot()
     if now_ts - self.last_read_ts > 30.:
