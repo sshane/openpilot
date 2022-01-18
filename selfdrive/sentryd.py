@@ -46,8 +46,8 @@ class SentryMode:
           self.initialized = True
           self.prev_accel = list(accels)
 
-    self.started = self.get_started(now_ts)
-    print(self.started)
+    self.started = True  # self.get_started(now_ts)
+    print(f"{self.started=}")
 
     if self.started and not self.prev_started:
       self.started_ts = sec_since_boot()
@@ -61,16 +61,16 @@ class SentryMode:
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     if movement:
       self.movement_ts = float(now_ts)
-    print([a_filter.x for a_filter in self.accel_filters])
+    # print([a_filter.x for a_filter in self.accel_filters])
 
     # Maximum allowed time onroad without movement is 1 minute. Any movement resets time allowed, maximum time is 5 minutes
     # TODO: can remove started_ts if time is the same
     onroad_long_enough = (now_ts - self.started_ts > MOVEMENT_TIME and now_ts - self.movement_ts > MOVEMENT_TIME) or now_ts - self.started_ts > MAX_TIME_ONROAD
 
     started = False
-    # print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
-    # print(f"{onroad_long_enough=}")
-    # print(f"{now_ts - self.started_ts=}")
+    print(f"{offroad=}, {offroad_long_enough=}, {movement=}")
+    print(f"{onroad_long_enough=}")
+    print(f"{now_ts - self.started_ts=}")
     if offroad and self.sentry_enabled:  # car's ignitions needs to be off (not started by user)
       if offroad_long_enough and movement:
         started = True
