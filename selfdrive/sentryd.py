@@ -44,10 +44,11 @@ class SentryMode:
     # Update CAN
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
     self.cp.update_strings(can_strs)
+    print("LOCK LIGHT 1: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
 
     # Update parameter
     now_ts = sec_since_boot()
-    if now_ts - self.last_read_ts > 30.:
+    if now_ts - self.last_read_ts > 15.:
       self.sentry_enabled = self.params.get_bool("SentryMode")
       self.last_read_ts = float(now_ts)
 
@@ -71,7 +72,7 @@ class SentryMode:
     car_active = self.sm['deviceState'].started
     # FIXME: why doesn't this work anymore?
     car_active = car_active or bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])
-    print("LOCK LIGHT: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
+    print("LOCK LIGHT 2: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
     if car_active:
       self.car_active_ts = float(now_ts)
 
