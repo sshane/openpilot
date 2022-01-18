@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import time
 import numpy as np
 
 from common.realtime import sec_since_boot, DT_CTRL
@@ -17,7 +16,7 @@ INTERACTION_TIME = 1. * 30  # car needs to be inactive for this time before sent
 # Enabled: parameter is set allowing operation
 # Armed: watching for car movement
 # Tripped: movement tripped sentry mode, recording and alarming
-# Car active: any action that signifies a user is present and interactiving with their car
+# Car active: any action that signifies a user is present and interacting with their car
 
 
 class SentryMode:
@@ -36,7 +35,6 @@ class SentryMode:
     self.last_read_ts = sec_since_boot()
 
     self.sentry_tripped = False
-    self.prev_sentry_tripped = False
     self.sentry_tripped_ts = 0.
     self.car_active_ts = sec_since_boot()  # start at active
     self.movement_ts = 0.
@@ -64,13 +62,8 @@ class SentryMode:
           self.initialized = True
           self.prev_accel = list(accels)
 
-    self.sentry_tripped = self.is_sentry_tripped(now_ts)
+    self.update_sentry_tripped(now_ts)
     print(f"{self.sentry_tripped=}")
-
-    if self.sentry_tripped and not self.prev_sentry_tripped:
-      self.sentry_tripped_ts = sec_since_boot()
-
-    self.prev_sentry_tripped = self.sentry_tripped
 
   def is_sentry_armed(self, now_ts):
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
@@ -83,18 +76,17 @@ class SentryMode:
     car_inactive_long_enough = now_ts - self.car_active_ts > INTERACTION_TIME  # needs to be inactive for long enough
     return car_inactive_long_enough
 
-  def is_sentry_tripped(self, now_ts):
+  def update_sentry_tripped(self, now_ts):
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
     if movement:
       self.movement_ts = float(now_ts)
 
     # Maximum allowed time onroad without movement is 1 minute. Any movement resets time allowed, maximum time is 5 minutes
-    # TODO: can remove started_ts if time is the same
-    tripped_long_enough = (now_ts - self.sentry_tripped_ts > MOVEMENT_TIME and now_ts - self.movement_ts > MOVEMENT_TIME)
+    tripped_long_enough = now_ts - self.movement_ts > MOVEMENT_TIME
     tripped_long_enough = tripped_long_enough or now_ts - self.sentry_tripped_ts > MAX_TIME_ONROAD  # or total time reached
 
     sentry_tripped = False
-    sentry_armed = self.is_sentry_armed()
+    sentry_armed = self.is_sentry_armed(now_ts)
     print(f"{sentry_armed=}, {sentry_armed=}, {movement=}")
     print(f"{tripped_long_enough=}")
     print(f"{now_ts - self.sentry_tripped_ts=}")
@@ -104,7 +96,10 @@ class SentryMode:
       elif self.sentry_tripped and not tripped_long_enough:  # trip for long enough
         sentry_tripped = True
 
-    return sentry_tripped
+    # set when we first tripped
+    if sentry_tripped and not self.sentry_tripped:
+      self.sentry_tripped_ts = sec_since_boot()
+    self.sentry_tripped = sentry_tripped
 
   def publish(self):
     sentry_state = messaging.new_message('sentryState')
