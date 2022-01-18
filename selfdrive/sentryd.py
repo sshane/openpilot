@@ -69,8 +69,8 @@ class SentryMode:
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
-    car_active = car_active or self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"]
-    print("LOCK LIGHT: {}".format(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"]))
+    car_active = car_active or bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])
+    print("LOCK LIGHT: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
     if car_active:
       self.car_active_ts = float(now_ts)
 
