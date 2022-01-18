@@ -15,11 +15,9 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * **Lane Speed**
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**~~Dynamic camera offsetting~~ (removed temporarily)**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
-* [**~~Dynamic gas~~** (no longer needed)](#dynamic-gas) - smoother gas control
 * [**~~Adding derivative to PI for better control~~**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
 
 ### General Features
-* [**~~Smoother long control using delay~~ (stock added this!)**](#compensate-for-longitudinal-delay-for-earlier-braking) - using an accel delay, just like for lateral
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
 * [**Automatic updates**](#Automatic-updates)
 * [**ZSS Support**](#ZSS-support) - takes advantage of your high-precision Zorrobyte Steering Sensor
@@ -80,23 +78,6 @@ This feature automatically adjusts your position in the lane if an adjacent lane
 **This feature is available from 35 to ~60 mph due to a limitation with the Toyota radar**. It may not recognize oncoming traffic above 60 mph or so. To enable or disable this feature, use `opEdit` and change this parameter: `dynamic_camera_offset`.
 
 ---
-### Dynamic gas
-Dynamic gas aims to provide a smoother driving experience in stop and go traffic (under 20 mph) by reducing the maximum gas that can be applied based on your current velocity, the relative velocity of the lead, the acceleration of the lead, and the distance of the lead. This usually results in quicker and smoother acceleration from a standstill without the jerking you get in stock openpilot with comma pedal (ex. taking off from a traffic light). It tries to coast if the lead is just inching up, it doesn’t use maximum gas as soon as the lead inches forward. When you are above 20 mph, relative velocity and the current following distance in seconds is taken into consideration.
-
-All cars that have a comma pedal are supported! However to get the smoothest acceleration, I've custom tuned gas curve profiles for the following cars:
-
-pedal cars:
-  * 2017 Toyota Corolla (non-TSS2)
-  * Toyota RAV4 (non-TSS2)
-  * 2017 Honda Civic
-  * 2019 Honda Pilot
-
-non-pedal cars:
-  * None yet
-
-If you have a car without a pedal, or you do have one but I haven't created a profile for you yet, please let me know and we can develop one for your car to test.
-
----
 ### PI -> PID Controller for Long and Lat
 (long: longitudinal, speed control. lat: latitudinal, steering control)
 
@@ -116,10 +97,6 @@ If you have a car without a pedal, or you do have one but I haven't created a pr
 ---
 ## General Features
 
-### Compensate for longitudinal delay for earlier braking
-This feature mod was so good it was added to stock openpilot! The only change now on here is that it's adjusted a bit based on speed, and a uses different delay for desired acceleration vs. speed.
-
----
 ### Customize this fork (opEdit)
 This is a handy tool to change your `opParams` parameters without diving into any json files or code. You can specify parameters to be used in any fork's operation that supports `opParams`. First, ssh in to your comma device and make sure you're in `/data/openpilot`, then start `opEdit`:
 ```python
@@ -184,7 +161,7 @@ If you have a Prius with a ZSS ([Zorrobyte](https://github.com/zorrobyte) Steer 
 If you have a ZSS but not a Prius, let me know and I can add support for your car.
 
 ---
-### Offline crash logging
+### Offline crash logging(removed temporarily)
 If you experience a crash or exception while driving with this fork, and you're not on internet for the error to be uploaded to Sentry, you should be able to check out the directory `/data/community/crashes` to see any and all logs of exceptions caught in openpilot. Simply view the logs with `ls -lah` and then `cat` the file you wish to view by date. This does not catch all errors, for example scons compilation errors or some Python syntax errors will not be caught, `tmux a` is usually best to view these (if openpilot didn't start).
 
 ❗***Quickly view the latest crash:*** `cat /data/community/crashes/latest.log`
