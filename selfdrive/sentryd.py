@@ -70,6 +70,7 @@ class SentryMode:
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
     car_active = car_active or self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"]
+    print("LOCK LIGHT: {}".format(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"]))
     if car_active:
       self.car_active_ts = float(now_ts)
 
@@ -87,7 +88,7 @@ class SentryMode:
 
     sentry_tripped = False
     sentry_armed = self.is_sentry_armed(now_ts)
-    print(f"{sentry_armed=}, {sentry_armed=}, {movement=}")
+    print(f"{sentry_armed=}, {movement=}")
     print(f"{tripped_long_enough=}")
     print(f"{now_ts - self.sentry_tripped_ts=}")
     if sentry_armed and self.sentry_enabled:
