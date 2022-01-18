@@ -15,13 +15,15 @@ OFFROAD_TIME = 1. * 30  # needs to be offroad for this time before sentry mode i
 
 class SentryMode:
   def __init__(self):
-    self.sm = messaging.SubMaster(['deviceState', 'sensorEvents', 'can'], poll=['sensorEvents'])
+    self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
     self.pm = messaging.PubMaster(['sentryState'])
 
     signals = [
-      ("KEYFOBNEARBY", "NEW_MSG_1", 1),
+      ("DOOR_LOCK_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+      ("KEYFOB_LOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+      ("KEYFOB_UNLOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
     ]
-    self.cp = CANParser("toyota_nodsu_hybrid_pt_generated", signals, bus=0, enforce_checks=False)
+    self.cp = CANParser("toyota_nodsu_pt_generated", signals, bus=0, enforce_checks=False)
     self.can_sock = messaging.sub_sock('can', timeout=100)
 
     self.params = Params()
@@ -40,7 +42,9 @@ class SentryMode:
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
     self.cp.update_strings(can_strs)
 
-    print('KEY FOB NEARBY: {}'.format(bool(self.cp.vl["NEW_MSG_1"]["KEYFOBNEARBY"])))
+    print('DOOR_LOCK_FEEDBACK_LIGHT: {}'.format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
+    print('KEYFOB_LOCKING_FEEDBACK_LIGHT: {}'.format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"])))
+    print('KEYFOB_UNLOCKING_FEEDBACK_LIGHT: {}\n---'.format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_UNLOCKING_FEEDBACK_LIGHT"])))
 
 
     return
