@@ -354,6 +354,7 @@ def thermald_thread() -> NoReturn:
     if should_start != should_start_prev or (count == 0):
       params.put_bool("IsOnroad", should_start)
       params.put_bool("IsOffroad", not should_start)
+      # FIXME: Something about this is lagging camerad/loggerd (recording), even when started normally while sentry is tripped
       HARDWARE.set_power_save(not should_start)
 
     if should_start:
