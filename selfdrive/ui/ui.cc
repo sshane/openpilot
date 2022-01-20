@@ -158,7 +158,7 @@ static void update_state(UIState *s) {
       scene.pandaType = pandaStates[0].getPandaType();
 
       if (scene.pandaType != cereal::PandaState::PandaType::UNKNOWN) {
-        scene.ignition = sm["sentryState"].getSentryState().getStarted();
+        scene.ignition = sm["deviceState"].getDeviceState().getStartedSentry();
         for (const auto& pandaState : pandaStates) {
           scene.ignition |= pandaState.getIgnitionLine() || pandaState.getIgnitionCan();
         }
@@ -201,7 +201,7 @@ static void update_state(UIState *s) {
     scene.light_sensor = std::clamp<float>(1.0 - (ev / max_ev), 0.0, 1.0);
   }
   scene.started = sm["deviceState"].getDeviceState().getStarted() && scene.ignition;
-  scene.started_sentry = sm["sentryState"].getSentryState().getStarted();
+  scene.started_sentry = sm["deviceState"].getDeviceState().getStartedSentry();
 }
 
 void ui_update_params(UIState *s) {
@@ -239,7 +239,7 @@ void UIState::updateStatus() {
 UIState::UIState(QObject *parent) : QObject(parent) {
   sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "roadCameraState",
-    "pandaStates", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman", "sentryState"
+    "pandaStates", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
   });
   std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
   if (toyota_distance_btn == "true") {

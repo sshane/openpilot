@@ -347,12 +347,11 @@ def thermald_thread() -> NoReturn:
       set_offroad_alert_if_changed("Offroad_StorageMissing", (not Path("/data/media").is_mount()))
 
     # Handle offroad/onroad transition
-    should_start = all(onroad_conditions.values())
+    should_start = all(onroad_conditions.values()) or sm["sentryState"].started
     if started_ts is None:
       should_start = should_start and all(startup_conditions.values())
 
-    # for now, sentryd sets power save and params when it starts.
-    # TODO: clean up so thermald and sentryd work together nicer
+    # tie sentry started in with ignition started, differentiate when we publish
     if (should_start != should_start_prev or (count == 0)) and not sm["sentryState"].started:
       params.put_bool("IsOnroad", should_start)
       params.put_bool("IsOffroad", not should_start)
@@ -395,9 +394,9 @@ def thermald_thread() -> NoReturn:
     ui_running_prev = ui_running
 
     msg.deviceState.chargingError = current_filter.x > 0. and msg.deviceState.batteryPercent < 90  # if current is positive, then battery is being discharged
-    msg.deviceState.started = started_ts is not None
+    msg.deviceState.started = started_ts is not None and onroad_conditions["ignition"]
+    msg.deviceState.startedSentry = started_ts is not None and not onroad_conditions["ignition"]
     msg.deviceState.startedMonoTime = int(1e9*(started_ts or 0))
-    msg.deviceState.offMonoTime = int(1e9*(off_ts or 0))
 
     last_ping = params.get("LastAthenaPingTime")
     if last_ping is not None:

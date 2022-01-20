@@ -12,7 +12,7 @@
 // TODO: detect when we can't play sounds
 // TODO: detect when we can't display the UI
 
-Sound::Sound(QObject *parent) : sm({"carState", "controlsState", "deviceState", "sentryState"}) {
+Sound::Sound(QObject *parent) : sm({"carState", "controlsState", "deviceState"}) {
   qInfo() << "default audio device: " << QAudioDeviceInfo::defaultOutputDevice().deviceName();
 
   for (auto &[alert, fn, loops] : sound_list) {
@@ -31,7 +31,7 @@ Sound::Sound(QObject *parent) : sm({"carState", "controlsState", "deviceState", 
 };
 
 void Sound::update() {
-  const bool started_sentry = sm["sentryState"].getSentryState().getStarted();
+  const bool started_sentry = sm["deviceState"].getDeviceState().getStartedSentry();
   const bool started_prev = (sm["deviceState"].getDeviceState().getStarted() || started_sentry);
   sm.update(0);
 
