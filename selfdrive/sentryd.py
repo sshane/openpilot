@@ -25,6 +25,8 @@ signals = [
   ("DOOR_LOCK_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
   ("KEYFOB_LOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
   ("KEYFOB_UNLOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+  ("LOCK_BUTTON", "DOOR_LOCKS", 0),
+  ("TEST_SIGNAL", "DOOR_LOCKS", 0),
 ]
 
 
@@ -58,12 +60,14 @@ class SentryMode:
 
     # Update car locked status
     # TODO: These are only on rising edge of lock/unlock, find a locked status signal
+    print("LOCK BUTTON: {}".format(self.cp.vl["DOOR_LOCKS"]["LOCK_BUTTON"]))
+    print("TEST SIGNAL: {}".format(self.cp.vl["DOOR_LOCKS"]["TEST_SIGNAL"]))
     if 1571 in updated:
       if self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
         self.car_locked = True
       elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
         self.car_locked = False
-      print(self.car_locked)
+      # print(self.car_locked)
 
     # Update parameter
     now_ts = sec_since_boot()
@@ -83,7 +87,7 @@ class SentryMode:
           self.prev_accel = list(accels)
 
     self.update_sentry_tripped(now_ts)
-    print(f"{self.sentry_tripped=}")
+    # print(f"{self.sentry_tripped=}")
 
   def is_sentry_armed(self, now_ts):
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
@@ -94,7 +98,7 @@ class SentryMode:
       self.car_active_ts = float(now_ts)
 
     car_inactive_long_enough = now_ts - self.car_active_ts > INACTIVE_TIME
-    return car_inactive_long_enough or self.car_locked
+    return self.sentry_enabled and (car_inactive_long_enough or self.car_locked)
 
   def update_sentry_tripped(self, now_ts):
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
@@ -107,10 +111,10 @@ class SentryMode:
 
     sentry_tripped = False
     sentry_armed = self.is_sentry_armed(now_ts)
-    print(f"{sentry_armed=}, {movement=}")
-    print(f"{tripped_long_enough=}")
-    print(f"{now_ts - self.sentry_tripped_ts=}")
-    if sentry_armed and self.sentry_enabled:
+    # print(f"{sentry_armed=}, {movement=}")
+    # print(f"{tripped_long_enough=}")
+    # print(f"{now_ts - self.sentry_tripped_ts=}")
+    if sentry_armed:
       if movement:  # trip if armed, enabled, and there's movement
         sentry_tripped = True
       elif self.sentry_tripped and not tripped_long_enough:  # trip for long enough
