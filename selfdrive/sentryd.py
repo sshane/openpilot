@@ -14,12 +14,15 @@ from opendbc.can.parser import CANParser
 # Car active: any action that signifies a user is present and interacting with their car
 
 # ****** Sentry mode behavior ******
-# When car is locked, sentry becomes armed immediately regardless of time last active time
-# If car is unlocked (or falsely detected so), sentry becomes armed after INACTIVE_TIME
+# Sentry arms immediately when car is locked with keyfob
+# - Normal inactive timeout proceeds if driver locks car internally
+# If car is left unlocked (or falsely detected so), sentry becomes armed after INACTIVE_TIME
+# Locking, unlocking, or starting your car will disarm sentry mode and reset timer
 
-MAX_TIME_ONROAD = 5 * 60.
-MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
-INACTIVE_TIME = 1. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+
+MAX_TIME_ONROAD = 5 * 60.  # after this is reached, car stops recording, disregarding movement
+MOVEMENT_TIME = 65.  # each movement resets onroad timer to this
+INACTIVE_TIME = 2. * 60.  # car needs to be inactive for this time before sentry mode is enabled
 
 signals = [
   ("LOCK_STATUS_CHANGED", "DOOR_LOCKS", 0),
@@ -95,7 +98,8 @@ class SentryMode:
       self.car_active_ts = float(now_ts)
 
     car_inactive_long_enough = now_ts - self.car_active_ts > INACTIVE_TIME
-    return self.sentry_enabled and (car_inactive_long_enough or self.car_locked)
+    car_locked_with_fob = self.car_locked and self.cp.vl["DOOR_LOCKS"]["LOCKED_VIA_KEYFOB"]
+    return self.sentry_enabled and (car_inactive_long_enough or car_locked_with_fob)
 
   def update_sentry_tripped(self, now_ts):
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
@@ -108,9 +112,8 @@ class SentryMode:
 
     sentry_tripped = False
     sentry_armed = self.is_sentry_armed(now_ts)
-    # print(f"{sentry_armed=}, {movement=}")
-    # print(f"{tripped_long_enough=}")
-    # print(f"{now_ts - self.sentry_tripped_ts=}")
+    self.sprint(f"{sentry_armed=}, {movement=}")
+    print(f"{now_ts - self.movement_ts=} > {MOVEMENT_TIME=}")
     if sentry_armed:
       if movement:  # trip if armed, enabled, and there's movement
         sentry_tripped = True
