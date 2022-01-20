@@ -51,6 +51,10 @@ class SentryMode:
     self.movement_ts = 0.
     self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
+  def sprint(self, *args, **kwargs):  # slow print
+    if self.sm.frame % (100 / 20.) == 0:  # 20 hz
+      print(*args, **kwargs)
+
   def update(self):
     # Update CAN
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
@@ -58,7 +62,7 @@ class SentryMode:
 
     # Update car locked status
     self.car_locked = self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS"] == 0
-    print("car locked: {}".format(self.car_locked))
+    self.sprint("car locked: {}".format(self.car_locked))
 
     # Update parameter
     now_ts = sec_since_boot()
@@ -85,7 +89,8 @@ class SentryMode:
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
     car_active = car_active or bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"])
-    print('lock status changed: {}'.format(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"]))
+    if bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"]):
+      print('lock status changed!')
     if car_active:
       self.car_active_ts = float(now_ts)
 
