@@ -163,8 +163,6 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
 //  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
-  auto sentryToggle = new ParamControl("SentryMode", "Sentry Mode", "", "");
-
   ToggleControl *sentryToggle = new ToggleControl("Sentry Mode", "");
   QObject::connect(sentryToggle, &ToggleControl::toggleFlipped, [=](bool enabling) {
     if (enabling && ConfirmationDialog::confirm("Sentry Mode (beta) records video and plays an alert when movement is detected. Currently only Toyota vehicles are supported and it may draw more power when enabled. Are you sure?", this)) {
@@ -172,9 +170,10 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
     } else {
       Params().putBool("SentryMode", false);
       if (enabling) {  // declined
-        sentryToggle.togglePosition();
+        sentryToggle->toggle.togglePosition();
       }
     }
+  });
 
   sentryToggle->setStyleSheet(R"(
     QPushButton {

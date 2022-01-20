@@ -101,13 +101,11 @@ public:
     QObject::connect(&toggle, &Toggle::stateChanged, this, &ToggleControl::toggleFlipped);
   }
 
+  Toggle toggle;
   void setEnabled(bool enabled) { toggle.setEnabled(enabled); }
 
 signals:
   void toggleFlipped(bool state);
-
-protected:
-  Toggle toggle;
 };
 
 // widget to toggle params
