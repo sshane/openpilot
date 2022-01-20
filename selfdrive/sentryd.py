@@ -7,16 +7,25 @@ from common.filter_simple import FirstOrderFilter
 from common.params import Params
 from opendbc.can.parser import CANParser
 
-MAX_TIME_ONROAD = 5 * 60.
-MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
-INTERACTION_TIME = 1. * 30  # car needs to be inactive for this time before sentry mode is enabled
-
-
-# Sentry mode state legend:
+# ****** Sentry mode states ******
 # Enabled: parameter is set allowing operation
 # Armed: watching for car movement
 # Tripped: movement tripped sentry mode, recording and alarming
 # Car active: any action that signifies a user is present and interacting with their car
+
+# ****** Sentry mode behavior ******
+# When car is locked, sentry becomes armed immediately regardless of time last active time
+# If car is unlocked (or falsely detected so), sentry becomes armed after INACTIVE_TIME
+
+MAX_TIME_ONROAD = 5 * 60.
+MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
+INACTIVE_TIME = 1. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+
+signals = [
+  ("DOOR_LOCK_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+  ("KEYFOB_LOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+  ("KEYFOB_UNLOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
+]
 
 
 class SentryMode:
@@ -24,7 +33,8 @@ class SentryMode:
     self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
     self.pm = messaging.PubMaster(['sentryState'])
 
-    self.cp = CANParser("toyota_nodsu_pt_generated", [("DOOR_LOCK_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0)], bus=0, enforce_checks=False)
+    # TODO: detect car type and switch DBC/signals
+    self.cp = CANParser("toyota_nodsu_pt_generated", signals, bus=0, enforce_checks=False)
     self.can_sock = messaging.sub_sock('can', timeout=100)
 
     self.prev_accel = np.zeros(3)
@@ -34,6 +44,7 @@ class SentryMode:
     self.sentry_enabled = self.params.get_bool("SentryMode")
     self.last_read_ts = sec_since_boot()
 
+    self.car_locked = False
     self.sentry_tripped = False
     self.sentry_tripped_ts = 0.
     self.car_active_ts = sec_since_boot()  # start at active
@@ -44,7 +55,13 @@ class SentryMode:
     # Update CAN
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
     self.cp.update_strings(can_strs)
-    print("LOCK LIGHT 1: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
+
+    # Update car locked status
+    # TODO: These are only on rising edge of lock/unlock, find a locked status signal
+    if self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
+      self.car_locked = True
+    elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
+      self.car_locked = False
 
     # Update parameter
     now_ts = sec_since_boot()
@@ -70,14 +87,12 @@ class SentryMode:
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
-    # FIXME: why doesn't this work anymore?
     car_active = car_active or bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])
-    print("LOCK LIGHT 2: {}".format(bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])))
     if car_active:
       self.car_active_ts = float(now_ts)
 
-    car_inactive_long_enough = now_ts - self.car_active_ts > INTERACTION_TIME  # needs to be inactive for long enough
-    return car_inactive_long_enough
+    car_inactive_long_enough = now_ts - self.car_active_ts > INACTIVE_TIME
+    return car_inactive_long_enough or self.car_locked
 
   def update_sentry_tripped(self, now_ts):
     movement = any([abs(a_filter.x) > .01 for a_filter in self.accel_filters])
