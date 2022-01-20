@@ -54,14 +54,15 @@ class SentryMode:
   def update(self):
     # Update CAN
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
-    self.cp.update_strings(can_strs)
+    updated = self.cp.update_strings(can_strs)
 
     # Update car locked status
     # TODO: These are only on rising edge of lock/unlock, find a locked status signal
-    if self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
-      self.car_locked = True
-    elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
-      self.car_locked = False
+    if 1571 in updated:
+      if self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
+        self.car_locked = True
+      elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
+        self.car_locked = False
 
     # Update parameter
     now_ts = sec_since_boot()
