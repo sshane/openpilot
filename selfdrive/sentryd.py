@@ -22,11 +22,9 @@ MOVEMENT_TIME = 1. * 60  # normal time allowed is one minute
 INACTIVE_TIME = 1. * 60.  # car needs to be inactive for this time before sentry mode is enabled
 
 signals = [
-  ("DOOR_LOCK_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
-  ("KEYFOB_LOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
-  ("KEYFOB_UNLOCKING_FEEDBACK_LIGHT", "CENTRAL_GATEWAY_UNIT", 0),
-  ("LOCK_BUTTON", "DOOR_LOCKS", 0),
-  ("TEST_SIGNAL", "DOOR_LOCKS", 0),
+  ("LOCK_STATUS_CHANGED", "DOOR_LOCKS", 0),
+  ("LOCK_STATUS", "DOOR_LOCKS", 1),  # 1 is unlocked
+  ("LOCKED_VIA_KEYFOB", "DOOR_LOCKS", 0),
 ]
 
 
@@ -56,18 +54,11 @@ class SentryMode:
   def update(self):
     # Update CAN
     can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
-    updated = self.cp.update_strings(can_strs)
+    self.cp.update_strings(can_strs)
 
     # Update car locked status
-    # TODO: These are only on rising edge of lock/unlock, find a locked status signal
-    print("LOCK BUTTON: {}".format(self.cp.vl["DOOR_LOCKS"]["LOCK_BUTTON"]))
-    print("TEST SIGNAL: {}".format(self.cp.vl["DOOR_LOCKS"]["TEST_SIGNAL"]))
-    if 1571 in updated:
-      if self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
-        self.car_locked = True
-      elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
-        self.car_locked = False
-      # print(self.car_locked)
+    self.car_locked = self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS"] == 0
+    print("car locked: {}".format(self.car_locked))
 
     # Update parameter
     now_ts = sec_since_boot()
@@ -93,7 +84,8 @@ class SentryMode:
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
-    car_active = car_active or bool(self.cp.vl["CENTRAL_GATEWAY_UNIT"]["DOOR_LOCK_FEEDBACK_LIGHT"])
+    car_active = car_active or bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"])
+    print('lock status changed: {}'.format(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"]))
     if car_active:
       self.car_active_ts = float(now_ts)
 
