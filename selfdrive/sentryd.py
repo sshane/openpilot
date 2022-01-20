@@ -63,6 +63,7 @@ class SentryMode:
         self.car_locked = True
       elif self.cp.vl["CENTRAL_GATEWAY_UNIT"]["KEYFOB_LOCKING_FEEDBACK_LIGHT"]:
         self.car_locked = False
+      print(self.car_locked)
 
     # Update parameter
     now_ts = sec_since_boot()
