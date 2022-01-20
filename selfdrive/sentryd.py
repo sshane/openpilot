@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import numpy as np
 
-from common.realtime import sec_since_boot, DT_CTRL
 from cereal import messaging
 from common.filter_simple import FirstOrderFilter
 from common.params import Params
+from common.realtime import sec_since_boot, DT_CTRL
 from opendbc.can.parser import CANParser
+from selfdrive.hardware import HARDWARE
 
 # ****** Sentry mode states ******
 # Enabled: parameter is set allowing operation
@@ -23,6 +24,8 @@ from opendbc.can.parser import CANParser
 MAX_TIME_ONROAD = 5 * 60.  # after this is reached, car stops recording, disregarding movement
 MOVEMENT_TIME = 65.  # each movement resets onroad timer to this
 INACTIVE_TIME = 2. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+
+HARDWARE.initialize_configuration()
 
 signals = [
   ("LOCK_STATUS_CHANGED", "DOOR_LOCKS", 0),
@@ -120,9 +123,14 @@ class SentryMode:
       elif self.sentry_tripped and not tripped_long_enough:  # trip for long enough
         sentry_tripped = True
 
-    # set when we first tripped
-    if sentry_tripped and not self.sentry_tripped:
-      self.sentry_tripped_ts = sec_since_boot()
+    # Operations on rising/falling edge
+    if sentry_tripped != self.sentry_tripped:
+      self.params.put_bool("IsOnroad", sentry_tripped)
+      self.params.put_bool("IsOffroad", not sentry_tripped)
+      HARDWARE.set_power_save(not sentry_tripped)
+
+      if sentry_tripped:  # set when we first tripped
+        self.sentry_tripped_ts = sec_since_boot()
     self.sentry_tripped = sentry_tripped
 
   def publish(self):

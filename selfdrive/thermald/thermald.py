@@ -158,7 +158,7 @@ def thermald_thread() -> NoReturn:
 
   pandaState_timeout = int(1000 * 2.5 * DT_TRML)  # 2.5x the expected pandaState frequency
   pandaState_sock = messaging.sub_sock('pandaStates', timeout=pandaState_timeout)
-  sm = messaging.SubMaster(["peripheralState", "gpsLocationExternal", "managerState"])
+  sm = messaging.SubMaster(["peripheralState", "gpsLocationExternal", "managerState", "sentryState"])
 
   fan_speed = 0
   count = 0
@@ -351,10 +351,11 @@ def thermald_thread() -> NoReturn:
     if started_ts is None:
       should_start = should_start and all(startup_conditions.values())
 
-    if should_start != should_start_prev or (count == 0):
+    # for now, sentryd sets power save and params when it starts.
+    # TODO: clean up so thermald and sentryd work together nicer
+    if (should_start != should_start_prev or (count == 0)) and not sm["sentryState"].started:
       params.put_bool("IsOnroad", should_start)
       params.put_bool("IsOffroad", not should_start)
-      # FIXME: Something about this is lagging camerad/loggerd (recording), even when started normally while sentry is tripped
       HARDWARE.set_power_save(not should_start)
 
     if should_start:
