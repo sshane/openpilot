@@ -50,7 +50,7 @@ struct Alert {
 
       // Handle controls timeout
       if (started_sentry) {
-        return {"SENTRY MODE", "RECORDING 360° VIDEO",
+        return {"RECORDING 360° VIDEO", "Press unlock to dis-arm",
                 "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                 AudibleAlert::WARNING_IMMEDIATE};
       } else if (sm.rcv_frame("controlsState") < started_frame) {
