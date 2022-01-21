@@ -14,6 +14,7 @@
 #include "selfdrive/ui/qt/request_repeater.h"
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
+#include "selfdrive/ui/qt/widgets/controls.h"
 
 using qrcodegen::QrCode;
 
@@ -161,7 +162,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdLayout->setMargin(0);
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
-  sentryToggle = new ToggleControl("Sentry Mode", "", "", Params().getBool("SentryMode"));
+  ToggleControl *sentryToggle = new ToggleControl("Sentry Mode", "", "", Params().getBool("SentryMode"));
   QObject::connect(sentryToggle, &ToggleControl::toggleFlipped, [=](bool enabling) {
     if (enabling && ConfirmationDialog::confirm("Sentry Mode (beta) records video and plays an alert when " \
                                                 "movement is detected. Currently only Toyota is supported and " \
