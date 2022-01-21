@@ -161,10 +161,11 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdLayout->setMargin(0);
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
-//  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
   sentryToggle = new ToggleControl("Sentry Mode", "", "", Params().getBool("SentryMode"));
   QObject::connect(sentryToggle, &ToggleControl::toggleFlipped, [=](bool enabling) {
-    if (enabling && ConfirmationDialog::confirm("Sentry Mode (beta) records video and plays an alert when movement is detected. Currently only Toyota vehicles are supported and it may draw more power when enabled. Are you sure?", this)) {
+    if (enabling && ConfirmationDialog::confirm("Sentry Mode (beta) records video and plays an alert when " \
+                                                "movement is detected. Currently only Toyota is supported and " \
+                                                "the device may draw more power when enabled. Are you sure?", this)) {
       Params().putBool("SentryMode", true);
     } else {
       Params().putBool("SentryMode", false);
@@ -177,7 +178,6 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   // Update toggle label with armed status
   QTimer *sentryArmedTimer = new QTimer(this);
   QObject::connect(sentryArmedTimer, &QTimer::timeout, this, [=]() {
-    qDebug() << uiState()->scene.sentry_armed;
     if (uiState()->scene.sentry_armed) {
       sentryToggle->setTitle("Sentry Armed");
     } else {
@@ -205,12 +205,6 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
     RequestRepeater *repeater = new RequestRepeater(this, url, "ApiCache_Owner", 6);
     QObject::connect(repeater, &RequestRepeater::requestDone, this, &PrimeUserWidget::replyFinished);
   }
-//  setStyleSheet(R"(
-//    * {
-//      background-color: none;
-//      font-size: 50px;
-//    }
-//  )");
 }
 
 void PrimeUserWidget::setPrime(bool hasPrime) {

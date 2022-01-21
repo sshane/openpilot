@@ -411,7 +411,7 @@ void panda_state_thread(PubMaster *pm, std::vector<Panda *> pandas, bool spoofin
   util::set_thread_name("boardd_panda_state");
 
   Params params;
-  SubMaster sm({"controlsState", "deviceState"});
+  SubMaster sm({"controlsState"});
 
   Panda *peripheral_panda = pandas[0];
   bool ignition_last = false;

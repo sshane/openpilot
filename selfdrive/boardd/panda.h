@@ -101,7 +101,6 @@ class Panda {
   struct tm get_rtc();
   void set_fan_speed(uint16_t fan_speed);
   uint16_t get_fan_speed();
-  void set_red_led(bool enabled);
   void set_ir_pwr(uint16_t ir_pwr);
   health_t get_state();
   void set_loopback(bool loopback);
