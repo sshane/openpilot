@@ -44,7 +44,7 @@ struct Alert {
       return {cs.getAlertText1().cStr(), cs.getAlertText2().cStr(),
               cs.getAlertType().cStr(), cs.getAlertSize(),
               cs.getAlertSound()};
-    } else if ((sm.frame - started_frame) > 5 * UI_FREQ) {
+    } else if ((sm.frame - started_frame) > 5 * UI_FREQ || started_sentry) {
       const int CONTROLS_TIMEOUT = 5;
       const int controls_missing = (nanos_since_boot() - sm.rcv_time("controlsState")) / 1e9;
 
