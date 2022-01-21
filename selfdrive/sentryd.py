@@ -101,7 +101,7 @@ class SentryMode:
       self.car_active_ts = float(now_ts)
 
     car_inactive_long_enough = now_ts - self.car_active_ts > INACTIVE_TIME
-    car_locked_with_fob = self.car_locked and self.cp.vl["DOOR_LOCKS"]["LOCKED_VIA_KEYFOB"]
+    car_locked_with_fob = self.car_locked and bool(self.cp.vl["DOOR_LOCKS"]["LOCKED_VIA_KEYFOB"])
     return self.sentry_enabled and (car_inactive_long_enough or car_locked_with_fob)
 
   def update_sentry_tripped(self, now_ts):
@@ -130,8 +130,8 @@ class SentryMode:
 
   def publish(self):
     sentry_state = messaging.new_message('sentryState')
-    sentry_state.sentryState.started = self.sentry_tripped
-    sentry_state.sentryState.armed = self.sentry_armed
+    sentry_state.sentryState.started = bool(self.sentry_tripped)
+    sentry_state.sentryState.armed = bool(self.sentry_armed)
 
     self.pm.send('sentryState', sentry_state)
 
