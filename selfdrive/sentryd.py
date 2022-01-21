@@ -23,6 +23,7 @@ from opendbc.can.parser import CANParser
 MAX_TIME_ONROAD = 5 * 60.  # after this is reached, car stops recording, disregarding movement
 MOVEMENT_TIME = 65.  # each movement resets onroad timer to this
 INACTIVE_TIME = 2. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+DEBUG = False
 
 signals = [
   ("LOCK_STATUS_CHANGED", "DOOR_LOCKS", 0),
@@ -36,7 +37,7 @@ class SentryMode:
     self.sm = messaging.SubMaster(['deviceState', 'sensorEvents'], poll=['sensorEvents'])
     self.pm = messaging.PubMaster(['sentryState'])
 
-    # TODO: detect car type and switch DBC/signals
+    # TODO: Only toyota supported for now. detect car type and switch DBC/signals
     self.cp = CANParser("toyota_nodsu_pt_generated", signals, bus=0, enforce_checks=False)
     self.can_sock = messaging.sub_sock('can', timeout=100)
 
@@ -49,14 +50,16 @@ class SentryMode:
 
     self.car_locked = False
     self.sentry_tripped = False
+    self.sentry_armed = False
     self.sentry_tripped_ts = 0.
     self.car_active_ts = sec_since_boot()  # start at active
     self.movement_ts = 0.
     self.accel_filters = [FirstOrderFilter(0, 0.5, DT_CTRL) for _ in range(3)]
 
   def sprint(self, *args, **kwargs):  # slow print
-    if self.sm.frame % (100 / 20.) == 0:  # 20 hz
-      print(*args, **kwargs)
+    if DEBUG:
+      if self.sm.frame % (100 / 20.) == 0:  # 20 hz
+        print(*args, **kwargs)
 
   def update(self):
     # Update CAN
@@ -85,7 +88,7 @@ class SentryMode:
           self.prev_accel = list(accels)
 
     self.update_sentry_tripped(now_ts)
-    # print(f"{self.sentry_tripped=}")
+    # self.sprint(f"{self.sentry_tripped=}")
 
   def is_sentry_armed(self, now_ts):
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
@@ -93,7 +96,7 @@ class SentryMode:
     car_active = self.sm['deviceState'].started
     car_active = car_active or bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"])
     if bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"]):
-      print('lock status changed!')
+      self.sprint('lock status changed!')
     if car_active:
       self.car_active_ts = float(now_ts)
 
@@ -111,10 +114,10 @@ class SentryMode:
     tripped_long_enough = tripped_long_enough or now_ts - self.sentry_tripped_ts > MAX_TIME_ONROAD  # or total time reached
 
     sentry_tripped = False
-    sentry_armed = self.is_sentry_armed(now_ts)
-    self.sprint(f"{sentry_armed=}, {movement=}")
-    print(f"{now_ts - self.movement_ts=} > {MOVEMENT_TIME=}")
-    if sentry_armed:
+    self.sentry_armed = self.is_sentry_armed(now_ts)
+    self.sprint(f"{self.sentry_armed=}, {movement=}")
+    self.sprint(f"{now_ts - self.movement_ts=} > {MOVEMENT_TIME=}")
+    if self.sentry_armed:
       if movement:  # trip if armed, enabled, and there's movement
         sentry_tripped = True
       elif self.sentry_tripped and not tripped_long_enough:  # trip for long enough
@@ -128,6 +131,7 @@ class SentryMode:
   def publish(self):
     sentry_state = messaging.new_message('sentryState')
     sentry_state.sentryState.started = self.sentry_tripped
+    sentry_state.sentryState.armed = self.sentry_tripped
 
     self.pm.send('sentryState', sentry_state)
 

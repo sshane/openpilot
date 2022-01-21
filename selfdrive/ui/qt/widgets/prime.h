@@ -6,6 +6,7 @@
 #include <QWidget>
 
 #include "selfdrive/ui/qt/widgets/input.h"
+#include "selfdrive/ui/qt/widgets/controls.h"
 
 // pairing QR code
 class PairingQRWidget : public QWidget {
@@ -44,6 +45,7 @@ private:
   QLabel* points;
   QLabel* subscribed;
   QLabel* commaPrime;
+  ToggleControl *sentryToggle;
 
 private slots:
   void replyFinished(const QString &response);

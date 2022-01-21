@@ -14,7 +14,6 @@
 #include "selfdrive/ui/qt/request_repeater.h"
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
-#include "selfdrive/ui/qt/widgets/controls.h"
 
 using qrcodegen::QrCode;
 
@@ -163,7 +162,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   thirdWidget->setContentsMargins(60, 50, 60, 50);
 
 //  QLabel* thirdLabel = new QLabel("Happy New Year! \U0001f389");
-  ToggleControl *sentryToggle = new ToggleControl("Sentry Mode", "", "", Params().getBool("SentryMode"));
+  sentryToggle = new ToggleControl("Sentry Mode", "", "", Params().getBool("SentryMode"));
   QObject::connect(sentryToggle, &ToggleControl::toggleFlipped, [=](bool enabling) {
     if (enabling && ConfirmationDialog::confirm("Sentry Mode (beta) records video and plays an alert when movement is detected. Currently only Toyota vehicles are supported and it may draw more power when enabled. Are you sure?", this)) {
       Params().putBool("SentryMode", true);
@@ -172,6 +171,15 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
       if (enabling) {  // declined
         sentryToggle->toggle.togglePosition();
       }
+    }
+  });
+
+  // Update toggle label with armed status
+  QTimer::singleShot(5 * 1000, [=]() {
+    if (uiState()->scene.sentry_armed) {
+      sentryToggle->setTitle("Sentry Armed");
+    } else {
+      sentryToggle->setTitle("Sentry Mode");
     }
   });
 

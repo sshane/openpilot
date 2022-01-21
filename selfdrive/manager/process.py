@@ -283,7 +283,7 @@ class DaemonProcess(ManagerProcess):
     pass
 
 
-def ensure_running(procs: ValuesView[ManagerProcess], started: bool, driverview: bool=False, sentry_started: bool=False, not_run: Optional[List[str]]=None) -> None:
+def ensure_running(procs: ValuesView[ManagerProcess], started: bool, driverview: bool=False, started_sentry: bool=False, not_run: Optional[List[str]]=None) -> None:
   if not_run is None:
     not_run = []
 
@@ -298,7 +298,7 @@ def ensure_running(procs: ValuesView[ManagerProcess], started: bool, driverview:
       # TODO: why is driverview an argument here? can this be done with the name?
       p.start()
     # stop processes normally only starting when onroad from starting if not a sentry process
-    elif not p.sentry and sentry_started:
+    elif not p.sentry and started_sentry:
       p.stop(block=False)
     elif started:
       p.start()

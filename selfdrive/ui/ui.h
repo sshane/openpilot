@@ -109,7 +109,7 @@ typedef struct UIScene {
   QPointF lead_vertices[2];
 
   float light_sensor, accel_sensor, gyro_sensor;
-  bool started_sentry, started, ignition, is_metric, longitudinal_control, end_to_end;
+  bool sentry_armed, started_sentry, started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
 
   // SA button statuses

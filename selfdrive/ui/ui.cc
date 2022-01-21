@@ -202,6 +202,7 @@ static void update_state(UIState *s) {
   }
   scene.started = sm["deviceState"].getDeviceState().getStarted() && scene.ignition;
   scene.started_sentry = sm["deviceState"].getDeviceState().getStartedSentry();
+  scene.sentry_armed = sm["sentryState"].getSentryState().getArmed();
 }
 
 void ui_update_params(UIState *s) {
@@ -239,7 +240,7 @@ void UIState::updateStatus() {
 UIState::UIState(QObject *parent) : QObject(parent) {
   sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "roadCameraState",
-    "pandaStates", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
+    "pandaStates", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman", "sentryState",
   });
   std::string toyota_distance_btn = util::read_file("/data/community/params/toyota_distance_btn");
   if (toyota_distance_btn == "true") {
