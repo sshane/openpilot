@@ -131,7 +131,7 @@ class SentryMode:
   def publish(self):
     sentry_state = messaging.new_message('sentryState')
     sentry_state.sentryState.started = self.sentry_tripped
-    sentry_state.sentryState.armed = self.sentry_tripped
+    sentry_state.sentryState.armed = self.sentry_armed
 
     self.pm.send('sentryState', sentry_state)
 
