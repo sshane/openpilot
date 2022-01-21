@@ -352,7 +352,7 @@ def thermald_thread() -> NoReturn:
       should_start = should_start and all(startup_conditions.values())
 
     # tie sentry started in with ignition started, differentiate when we publish
-    if (should_start != should_start_prev or (count == 0)) and not sm["sentryState"].started:
+    if should_start != should_start_prev or (count == 0):
       params.put_bool("IsOnroad", should_start)
       params.put_bool("IsOffroad", not should_start)
       HARDWARE.set_power_save(not should_start)
