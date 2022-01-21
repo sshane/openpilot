@@ -21,8 +21,10 @@ from opendbc.can.parser import CANParser
 
 
 MAX_TIME_ONROAD = 5 * 60.  # after this is reached, car stops recording, disregarding movement
-MOVEMENT_TIME = 65.  # each movement resets onroad timer to this
+MOVEMENT_TIME = 60.  # each movement resets onroad timer to this
+MIN_TIME_ONROAD = MOVEMENT_TIME + 5.
 INACTIVE_TIME = 2. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+
 DEBUG = False
 
 signals = [
@@ -94,7 +96,7 @@ class SentryMode:
     """Returns if sentry is actively monitoring for movements/can be alarmed"""
     # Handle car interaction, reset interaction timeout
     car_active = self.sm['deviceState'].started
-    car_active = car_active or bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"])
+    car_active |= bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"])
     if bool(self.cp.vl["DOOR_LOCKS"]["LOCK_STATUS_CHANGED"]):
       self.sprint('lock status changed!')
     if car_active:
@@ -109,16 +111,16 @@ class SentryMode:
     if movement:
       self.movement_ts = float(now_ts)
 
-    # Maximum allowed time onroad without movement is 1 minute. Any movement resets time allowed, maximum time is 5 minutes
+    # For as long as we see movement, extend timer by MOVEMENT_TIME.
     tripped_long_enough = now_ts - self.movement_ts > MOVEMENT_TIME
-    tripped_long_enough = tripped_long_enough or now_ts - self.sentry_tripped_ts > MAX_TIME_ONROAD  # or total time reached
+    tripped_long_enough &= now_ts - self.sentry_tripped_ts > MIN_TIME_ONROAD  # minimum of
+    tripped_long_enough |= now_ts - self.sentry_tripped_ts > MAX_TIME_ONROAD  # maximum of
 
     sentry_tripped = False
     self.sentry_armed = self.is_sentry_armed(now_ts)
-    self.sprint(f"{self.sentry_armed=}, {movement=}")
-    self.sprint(f"{now_ts - self.movement_ts=} > {MOVEMENT_TIME=}")
+    self.sprint(f"{now_ts - self.sentry_tripped_ts=} > {MIN_TIME_ONROAD=}")
     if self.sentry_armed:
-      if movement:  # trip if armed, enabled, and there's movement
+      if movement:  # trip if armed and there's movement
         sentry_tripped = True
       elif self.sentry_tripped and not tripped_long_enough:  # trip for long enough
         sentry_tripped = True
