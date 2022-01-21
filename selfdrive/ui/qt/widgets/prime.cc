@@ -175,13 +175,15 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   });
 
   // Update toggle label with armed status
-  QTimer::singleShot(5 * 1000, [=]() {
+  QTimer *sentryArmedTimer = new QTimer(this);
+  QObject::connect(sentryArmedTimer, &QTimer::timeout, this, [=]() {
     if (uiState()->scene.sentry_armed) {
       sentryToggle->setTitle("Sentry Armed");
     } else {
       sentryToggle->setTitle("Sentry Mode");
     }
   });
+  sentryArmedTimer->start(5 * 1000);
 
   sentryToggle->setStyleSheet(R"(
     QPushButton {
