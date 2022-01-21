@@ -224,7 +224,7 @@ void UIState::updateStatus() {
 
   // Handle onroad/offroad transition
   if ((scene.started || scene.started_sentry) != started_prev) {
-    if (scene.started) {
+    if (scene.started || scene.started_sentry) {
       status = STATUS_DISENGAGED;
       scene.started_frame = sm->frame;
       scene.end_to_end = Params().getBool("EndToEndToggle");
