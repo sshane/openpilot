@@ -78,7 +78,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 17.43
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 2860. * CV.LB_TO_KG + STD_CARGO_KG  # mean between normal and hybrid
-      set_lat_tune(ret.lateralTuning, LatTunes.STEER_MODEL_COROLLA, lat_params)
+      set_lat_tune(ret.lateralTuning, LatTunes.TORQUE, MAX_LAT_ACCEL=2.8, FRICTION=0.024)
 
     elif candidate in (CAR.LEXUS_RX, CAR.LEXUS_RXH, CAR.LEXUS_RX_TSS2, CAR.LEXUS_RXH_TSS2):
       stop_and_go = True
