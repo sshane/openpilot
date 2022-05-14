@@ -15,7 +15,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
 * **Lane Speed**
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**~~Dynamic camera offsetting~~ (removed temporarily)**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
-* [**~~Adding derivative to PI for better control~~**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
+* [**Adding derivative to PI for better control**](#pi---pid-controller-for-lat) - smoother control in turns
 
 ### General Features
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning
@@ -78,14 +78,14 @@ This feature automatically adjusts your position in the lane if an adjacent lane
 **This feature is available from 35 to ~60 mph due to a limitation with the Toyota radar**. It may not recognize oncoming traffic above 60 mph or so. To enable or disable this feature, use `opEdit` and change this parameter: `dynamic_camera_offset`.
 
 ---
-### PI -> PID Controller for Long and Lat
-(long: longitudinal, speed control. lat: latitudinal, steering control)
+### PI -> PID Controller for Lateral Control
 
 **Changes for lat control: (NEW❗)**
 - Adding the derivative component to lat control greatly improves the turning performance of openpilot, I've found it loses control much less frequently in both slight and sharp curves and smooths out steering in all situations. Basically it ramps down torque as your wheel approaches the desired angle, and ramps up torque quicky when your wheel is moving away from desired.
 
   ***Currently Supported Cars: (when param `use_lqr` is False)***
-  - 2017 Toyota Corolla
+  - All Camry variants (TSS2 get superior torque controller)
+  - RAV4_TSS2 and all variants
   - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from birdman!
   - All Prius years (when param `prius_use_pid` is True) - tune from [Trae](https://github.com/d412k5t412)!
 
