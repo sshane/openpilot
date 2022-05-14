@@ -86,7 +86,6 @@ This feature automatically adjusts your position in the lane if an adjacent lane
 
   ***Currently Supported Cars: (when param `use_lqr` is False)***
   - 2017 Toyota Corolla
-  - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from birdman!
   - All Prius years (when param `prius_use_pid` is True) - tune from [Trae](https://github.com/d412k5t412)!
 
 **Changes for long control:**
@@ -133,7 +132,6 @@ Here are the main parameters you can change with this fork:
 - **Experimental params**:
   - `use_steering_model`: A couple of regression models (for TSSP Corolla and TSS2 Camry) were trained to predict torque based on human driving data. By enabling this it tries to extrapolate the model to your PIDF tune using one of the available models. May oscillate on straights.
   - [`prius_use_pid`](#pi---pid-controller-for-long-and-lat): This enables the PID lateral controller with new a experimental derivative tune
-  - `corollaTSS2_use_indi`: Enable this to use INDI for lat with your TSS2 Corolla *(can be enabled for all years by request)*
   - `standstill_hack`: Some cars support stop and go, you just need to enable this
 
 A full list of parameters that you can modify are [located here](common/op_params.py#L101).

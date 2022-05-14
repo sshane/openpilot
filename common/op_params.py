@@ -126,7 +126,6 @@ class opParams:
       'use_steering_model': Param(False, bool, 'Enable this to use an experimental ML-based lateral controller trained on the TSSP Corolla\n'
                                                'This overrides all other tuning parameters\n'
                                                'Warning: the model may behave unexpectedly at any time, so always pay attention', static=True),
-      'corollaTSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 Corolla', static=True),
       'rav4TSS2_use_indi': Param(False, bool, 'Enable this to use INDI for lat with your TSS2 RAV4', static=True),
       'standstill_hack': Param(False, bool, 'Some cars support stop and go, you just need to enable this', static=True),
       'toyota_distance_btn': Param(False, bool, 'Set to True to use the steering wheel distance button to control the dynamic follow profile.\n'
@@ -136,7 +135,7 @@ class opParams:
       'lane_speed_alerts': Param('silent', str, static=True, hidden=True),
     }
 
-    self._to_delete = ['use_lqr', 'disengage_on_gas']  # a list of unused params you want to delete from users' params file
+    self._to_delete = ['use_lqr', 'disengage_on_gas', 'corollaTSS2_use_indi']  # a list of unused params you want to delete from users' params file
     self._to_reset = []  # a list of params you want reset to their default values
     self._run_init()  # restores, reads, and updates params
 
