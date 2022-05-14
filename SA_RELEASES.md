@@ -9,7 +9,9 @@ Stock Additions 0.8.14
    * Fixes for prime SIMs
  * Merge in upstream/toyota-steer-faults, Toyota steering faults are a thing of the past!
  * Merge in upstream/h90d, test out an experimental feature for Hyundai to raise your maximum steering angle
- * Change from PID control to torque control for Camry Hybrid
+ * Change from PID control to torque control for TSS2 Camry
+ * Change from PID control to torque control for TSS-P Corolla
+ * Toyota: smoother stopping under 0.5 mph
 
 Stock Additions 0.8.13
 ===
