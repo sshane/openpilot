@@ -1,3 +1,4 @@
+from collections import deque
 import math
 
 from cereal import log
@@ -5,6 +6,8 @@ from common.numpy_fast import interp
 from selfdrive.controls.lib.latcontrol import LatControl, MIN_STEER_SPEED
 from selfdrive.controls.lib.pid import PIDController
 from selfdrive.controls.lib.vehicle_model import ACCELERATION_DUE_TO_GRAVITY
+
+from common.op_params import opParams
 
 # At higher speeds (25+mph) we can assume:
 # Lateral acceleration achieved by a specific car correlates to
@@ -31,6 +34,8 @@ class LatControlTorque(LatControl):
     self.use_steering_angle = CP.lateralTuning.torque.useSteeringAngle
     self.friction = CP.lateralTuning.torque.friction
     self.kf = CP.lateralTuning.torque.kf
+    self.op_params = opParams()
+    self.errors = deque([0] * 10, maxlen=10)  # 10 frames
 
   def reset(self):
     super().reset()
@@ -55,19 +60,25 @@ class LatControlTorque(LatControl):
 
       setpoint = desired_lateral_accel + LOW_SPEED_FACTOR * desired_curvature
       measurement = actual_lateral_accel + LOW_SPEED_FACTOR * actual_curvature
+
       error = setpoint - measurement
-      pid_log.error = error
+      error_rate = (error - self.errors[0]) / len(self.errors)
+      self.errors.append(error)
+      # live tune for now
+      self.pid.k_d = self.op_params.get('torque_derivative')
 
       ff = desired_lateral_accel - params.roll * ACCELERATION_DUE_TO_GRAVITY
       # convert friction into lateral accel units for feedforward
       friction_compensation = interp(desired_lateral_jerk, [-JERK_THRESHOLD, JERK_THRESHOLD], [-self.friction, self.friction])
       ff += friction_compensation / self.kf
-      output_torque = self.pid.update(error,
+      output_torque = self.pid.update(error, error_rate=error_rate,
                                       override=CS.steeringPressed, feedforward=ff,
                                       speed=CS.vEgo,
                                       freeze_integrator=CS.steeringRateLimited)
 
       pid_log.active = True
+      pid_log.error = error
+      pid_log.errorRate = error_rate
       pid_log.p = self.pid.p
       pid_log.i = self.pid.i
       pid_log.d = self.pid.d
