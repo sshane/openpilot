@@ -194,9 +194,8 @@ def gen_long_ocp():
 
 
 class LongitudinalMpc:
-  def __init__(self, e2e=False, desired_TR=T_FOLLOW):
+  def __init__(self, desired_TR=T_FOLLOW):
     self.dynamic_follow = DynamicFollow()
-    self.e2e = e2e
     self.desired_TR = desired_TR
     self.v_ego = 0.
     self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
@@ -232,8 +231,8 @@ class LongitudinalMpc:
     self.x0 = np.zeros(X_DIM)
     self.set_weights()
 
-  def set_weights(self, prev_accel_constraint=True):
-    if self.e2e:
+  def set_weights(self, prev_accel_constraint=True, e2e=False):
+    if e2e:
       self.set_weights_for_xva_policy()
       self.params[:,0] = -10.
       self.params[:,1] = 10.
@@ -269,7 +268,7 @@ class LongitudinalMpc:
       self.solver.cost_set(i, 'Zl', Zl)
 
   def set_weights_for_xva_policy(self):
-    W = np.asfortranarray(np.diag([0., 10., 1., 10., 0.0, 1.]))
+    W = np.diag([0., 0., .0, 1., 0.0, 1.])
     for i in range(N):
       self.solver.cost_set(i, 'W', W)
     # Setting the slice without the copy make the array not contiguous,
@@ -368,7 +367,6 @@ class LongitudinalMpc:
     self.params[:,3] = np.copy(self.prev_a)
     self.params[:, 4] = self.desired_TR
 
-
     self.run()
     if (np.any(lead_xv_0[:,0] - self.x_sol[:,0] < CRASH_DISTANCE) and
             radarstate.leadOne.modelProb > 0.9):
@@ -376,7 +374,7 @@ class LongitudinalMpc:
     else:
       self.crash_cnt = 0
 
-  def update_with_xva(self, x, v, a):
+  def update_with_xva(self, carstate, radarstate, v_cruise, x, v, a):
     # v, and a are in local frame, but x is wrt the x[0] position
     # In >90degree turns, x goes to 0 (and may even be -ve)
     # So, we use integral(v) + x[0] to obtain the forward-distance
@@ -388,7 +386,32 @@ class LongitudinalMpc:
     for i in range(N):
       self.solver.cost_set(i, "yref", self.yref[i])
     self.solver.cost_set(N, "yref", self.yref[N][:COST_E_DIM])
+    # set accel limits in params
+    self.params[:, 0] = interp(float(self.status), [0.0, 1.0], [self.cruise_min_a, MIN_ACCEL])
+    self.params[:, 1] = self.cruise_max_a
+    self.params[:, 2] = 1e3
     self.params[:,3] = np.copy(self.prev_a)
+
+    lead_xv_0 = self.process_lead(radarstate.leadOne)
+    lead_xv_1 = self.process_lead(radarstate.leadTwo)
+
+    # To estimate a safe distance from a moving lead, we calculate how much stopping
+    # distance that lead needs as a minimum. We can add that to the current distance
+    # and then treat that as a stopped car/obstacle at this new distance.
+    lead_0_obstacle = lead_xv_0[:, 0] + get_stopped_equivalence_factor(lead_xv_0[:, 1])
+    lead_1_obstacle = lead_xv_1[:, 0] + get_stopped_equivalence_factor(lead_xv_1[:, 1])
+
+    cruise_target = T_IDXS * v_cruise + x[0]
+    x_targets = np.column_stack([x,
+                                 lead_0_obstacle - (3 / 4) * get_safe_obstacle_distance(v),
+                                 lead_1_obstacle - (3 / 4) * get_safe_obstacle_distance(v),
+                                 cruise_target])
+
+    self.yref[:, 1] = np.min(x_targets, axis=1)
+    for i in range(N):
+      self.solver.set(i, "yref", self.yref[i])
+    self.solver.set(N, "yref", self.yref[N][:COST_E_DIM])
+
     self.run()
 
   def run(self):

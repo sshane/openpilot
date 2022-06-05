@@ -122,7 +122,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   main_layout->addWidget(btns_wrapper, 0, Qt::AlignBottom);
 
   // Model long button
-  mlButton = new QPushButton("Model Cruise Control");
+  mlButton = new QPushButton("Toggle Model Long");
   QObject::connect(mlButton, &QPushButton::clicked, [=]() {
     uiState()->scene.mlButtonEnabled = !mlEnabled;
   });
@@ -132,7 +132,7 @@ ButtonsWindow::ButtonsWindow(QWidget *parent) : QWidget(parent) {
   btns_layout->addWidget(mlButton, 0, Qt::AlignHCenter | Qt::AlignBottom);
   btns_layout->addStretch(3);
 
-  std::string hide_model_long = "true";  // util::read_file("/data/community/params/hide_model_long");
+  std::string hide_model_long = util::read_file("/data/community/params/hide_model_long");
   if (hide_model_long == "true"){
     mlButton->hide();
   }
