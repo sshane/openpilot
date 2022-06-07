@@ -2,7 +2,6 @@ import math
 import numpy as np
 import cereal.messaging as messaging
 from common.realtime import sec_since_boot, DT_MDL
-from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.op_params import opParams
 from common.numpy_fast import interp, clip, mean
 from selfdrive.config import Conversions as CV
@@ -103,7 +102,6 @@ class DynamicFollow:
     self.lead_data = LeadData()
     self.df_data = dfData()  # dynamic follow data
 
-    self.last_cost = 0.0
     self.last_predict_time = 0.0
     self.auto_df_model_data = []
     self._get_live_params()  # so they're defined just in case

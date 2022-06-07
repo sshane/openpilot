@@ -55,14 +55,27 @@ T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
 STOP_DISTANCE = 6.0
 
-def get_stopped_equivalence_factor(v_lead):
-  return (v_lead**2) / (2 * COMFORT_BRAKE)
+def get_stopped_equivalence_factor(v_lead, v_ego):
+  # KRKeegan this offset rapidly decreases the following distance when the lead pulls
+  # away, resulting in an early demand for acceleration.  This is helpful because the
+  # MPC often stops ~4m behind the lead.  Meaning the lead has to move ~2m before the
+  # MPC even considers requesting acceleration.
+  # The offset is capped at half the total Stop_Distance, is linearly proportional to
+  # the speed differential between ego and lead, and tapers away to 0 at 10m/s, all
+  # for safety and comfort.
+  v_diff_offset = 0
+  if np.all(v_lead - v_ego > 0):
+    v_diff_offset = ((v_lead - v_ego) * 1.5)
+    v_diff_offset = np.clip(v_diff_offset, 0, STOP_DISTANCE / 2)
+    v_diff_offset = np.maximum(v_diff_offset * ((10 - v_ego)/10), 0)
+  distance = (v_lead**2) / (2 * COMFORT_BRAKE) + v_diff_offset
+  return distance
 
 def get_safe_obstacle_distance(v_ego, t_follow=T_FOLLOW):
   return (v_ego**2) / (2 * COMFORT_BRAKE) + t_follow * v_ego + STOP_DISTANCE
 
 def desired_follow_distance(v_ego, v_lead, t_follow=T_FOLLOW):
-  return get_safe_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead)
+  return get_safe_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead, v_ego)
 
 
 def gen_long_model():
@@ -241,14 +254,17 @@ class LongitudinalMpc:
     # 1.1 TR fails at 3+ m/s/s test
     # 1.2-1.8 TR succeeds at all tests with no FCW
 
-    # TRs = [1.2, 1.8, 2.7]
-    x_ego_obstacle_cost_multiplier = 1  # interp(self.desired_TR, TRs, [3., 1.0, 0.1])
-    j_ego_cost_multiplier = 1  # interp(self.desired_TR, TRs, [0.5, 1.0, 1.0])
-    d_zone_cost_multiplier = 1  # interp(self.desired_TR, TRs, [4., 1.0, 1.0])
+    TRs = [1.2, 1.6, 2.7]
+    x_ego_obstacle_cost_multiplier = interp(self.desired_TR, TRs, [3., 1.0, 0.1])
+    accel_cost_multiplier = interp(self.desired_TR, TRs, [0.75, 1.0, 1.25])
+    d_zone_cost_multiplier = interp(self.desired_TR, TRs, [4., 1.0, 1.0])
 
-    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST * x_ego_obstacle_cost_multiplier, X_EGO_COST, V_EGO_COST, A_EGO_COST, A_CHANGE_COST, J_EGO_COST * j_ego_cost_multiplier]))
+    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST * x_ego_obstacle_cost_multiplier,
+                                   X_EGO_COST, V_EGO_COST, A_EGO_COST,
+                                   A_CHANGE_COST * accel_cost_multiplier,
+                                   J_EGO_COST * accel_cost_multiplier]))
     for i in range(N):
-      W[4,4] = A_CHANGE_COST * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
+      W[4,4] = A_CHANGE_COST * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0]) * accel_cost_multiplier
       self.solver.cost_set(i, 'W', W)
     # Setting the slice without the copy make the array not contiguous,
     # causing issues with the C interface.
@@ -344,8 +360,8 @@ class LongitudinalMpc:
     # To estimate a safe distance from a moving lead, we calculate how much stopping
     # distance that lead needs as a minimum. We can add that to the current distance
     # and then treat that as a stopped car/obstacle at this new distance.
-    lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1])
-    lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1])
+    lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1], self.x_sol[:,1])
+    lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1], self.x_sol[:,1])
 
     # Fake an obstacle for cruise, this ensures smooth acceleration to set speed
     # when the leads are no factor.
