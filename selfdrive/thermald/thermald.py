@@ -407,9 +407,9 @@ def thermald_thread() -> NoReturn:
 
     if EON and not is_uno:
       set_offroad_alert_if_changed("Offroad_ChargeDisabled", (not usb_power))
-    if EON:
-      set_offroad_alert("Offroad_NoMoreUpdates", True)
-      params.put_bool("DisableUpdates", True)
+    # if EON:
+    #   set_offroad_alert("Offroad_NoMoreUpdates", True)
+    #   params.put_bool("DisableUpdates", True)
 
     should_start_prev = should_start
     startup_conditions_prev = startup_conditions.copy()
