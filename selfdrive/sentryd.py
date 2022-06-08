@@ -23,7 +23,7 @@ from opendbc.can.parser import CANParser
 MAX_TIME_ONROAD = 5 * 60.  # after this is reached, car stops recording, disregarding movement
 MOVEMENT_TIME = 60.  # each movement resets onroad timer to this
 MIN_TIME_ONROAD = MOVEMENT_TIME + 5.
-INACTIVE_TIME = 2. * 60.  # car needs to be inactive for this time before sentry mode is enabled
+INACTIVE_TIME = 4. * 60.  # car needs to be inactive for this time before sentry mode is enabled
 
 DEBUG = False
 
