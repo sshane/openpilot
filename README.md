@@ -86,7 +86,7 @@ This feature automatically adjusts your position in the lane if an adjacent lane
 
   ***Currently Supported Cars: (when param `use_lqr` is False)***
   - 2017 Toyota Corolla
-  - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from birdman!
+  - TSS2 Toyota Corolla (when param `corollaTSS2_use_indi` is False) - tune from AtL!
   - All Prius years (when param `prius_use_pid` is True) - tune from [Trae](https://github.com/d412k5t412)!
 
 **Changes for long control:**
