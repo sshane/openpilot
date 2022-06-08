@@ -16,6 +16,7 @@ Want to request a feature or create a bug report? [Open an issue here!](https://
   * [**Lane Speed Alerts**](#Lane-Speed-alerts) - alerts for when an adjacent lane is faster
   * [**~~Dynamic camera offsetting~~ (removed temporarily)**](#Dynamic-camera-offset-based-on-oncoming-traffic) - moves you over if adjacent lane has oncoming traffic
 * [**~~Adding derivative to PI for better control~~**](#pi---pid-controller-for-long-and-lat) - lat: smoother control in turns; long: fix for comma pedal overshoot
+* ***something about changing distance profiles using stock distance button***
 
 ### General Features
 * [**Customize this fork**](#Customize-this-fork-opEdit) - easily edit fork parameters with support for live tuning

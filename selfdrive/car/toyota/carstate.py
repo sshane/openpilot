@@ -36,6 +36,9 @@ class CarState(CarStateBase):
     if self.enable_distance_btn:
       # Previously was publishing from UI
       self.pm = messaging.PubMaster(['dynamicFollowButton'])
+    # set param to true for next restart
+    if self.CP.carFingerprint in TSS2_CAR:
+      op_params.put('toyota_distance_btn', True)
 
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
