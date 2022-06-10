@@ -5,12 +5,29 @@ from selfdrive.controls.lib.pid import PIDController
 from selfdrive.controls.lib.drive_helpers import CONTROL_N
 from selfdrive.modeld.constants import T_IDXS
 from common.op_params import opParams
+import numpy as np
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
 # As per ISO 15622:2018 for all speeds
 ACCEL_MIN_ISO = -3.5  # m/s^2
 ACCEL_MAX_ISO = 2.0  # m/s^2
+
+
+wb = np.load('/data/openpilot/accelnet/models/accelnetv7_weights.npz', allow_pickle=True)
+w, b = wb['wb']
+
+
+def accel_predict(x):
+  x = np.array(x, dtype=np.float32)
+  l0 = np.dot(x, w[0]) + b[0]
+  l0 = np.where(l0 > 0, l0, l0 * 0.3)
+  l1 = np.dot(l0, w[1]) + b[1]
+  l1 = np.where(l1 > 0, l1, l1 * 0.3)
+  l2 = np.dot(l1, w[2]) + b[2]
+  l2 = np.where(l2 > 0, l2, l2 * 0.3)
+  l3 = np.dot(l2, w[3]) + b[3]
+  return l3
 
 
 def long_control_state_trans(CP, active, long_control_state, v_ego, v_target_future,
@@ -64,12 +81,20 @@ class LongControl():
     # TODO estimate car specific lag, use .15s for now
     speeds = long_plan.speeds
     if len(speeds) == CONTROL_N:
-      v_target_lower = interp(CP.longitudinalActuatorDelayLowerBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_lower = 2 * (v_target_lower - speeds[0])/CP.longitudinalActuatorDelayLowerBound - long_plan.accels[0]
+      # v_target_lower = interp(CP.longitudinalActuatorDelayLowerBound, T_IDXS[:CONTROL_N], speeds)
+      # a_target_lower = 2 * (v_target_lower - speeds[0])/CP.longitudinalActuatorDelayLowerBound - long_plan.accels[0]
 
-      v_target_upper = interp(CP.longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_upper = 2 * (v_target_upper - speeds[0])/CP.longitudinalActuatorDelayUpperBound - long_plan.accels[0]
-      a_target = min(a_target_lower, a_target_upper)
+      # v_target_upper = interp(CP.longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], speeds)
+      # a_target_upper = 2 * (v_target_upper - speeds[0])/CP.longitudinalActuatorDelayUpperBound - long_plan.accels[0]
+      a_target_cur = long_plan.accels[0]
+      a_target_fut = interp(CP.longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], long_plan.accels)
+      # a_target = accel_predict([a_target_cur, a_target_fut])[0]
+
+      # Output is the acceleration requests that will accurately get us to the requested accelerations.
+      # Requested accel to accurate accel command is same time stamp, so offsetting output prediction is needed
+      # ie. predicted requested accel at idx 0 will get us to accels[0] (in 0.15s)
+      accel_pred = accel_predict([CS.vEgo, CS.aEgo, speeds[0]] + list(long_plan.accels))
+      a_target = float(interp(CP.longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], accel_pred))
 
       v_target = speeds[0]
       v_target_future = speeds[-1]
