@@ -55,14 +55,20 @@ T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
 STOP_DISTANCE = 6.0
 
-def get_stopped_equivalence_factor(v_lead):
-  return (v_lead**2) / (2 * COMFORT_BRAKE)
+def get_stopped_equivalence_factor(v_lead, v_ego):
+  # KRK add linear offset based on speed differential in attempt to
+  # rectify sluggish start issue
+  v_diff_offset = v_lead - v_ego  # Linear offset
+  v_diff_offset *= (10 - v_ego) / 10  # Offset tapers off ending at v_ego of 10m/s
+  v_diff_offset = min(max(v_diff_offset, 0), STOP_DISTANCE)  # Clip offset
+  distance = (v_lead ** 2) / (2 * COMFORT_BRAKE) + v_diff_offset
+  return distance
 
 def get_safe_obstacle_distance(v_ego, t_follow=T_FOLLOW):
   return (v_ego**2) / (2 * COMFORT_BRAKE) + t_follow * v_ego + STOP_DISTANCE
 
 def desired_follow_distance(v_ego, v_lead, t_follow=T_FOLLOW):
-  return get_safe_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead)
+  return get_safe_obstacle_distance(v_ego, t_follow) - get_stopped_equivalence_factor(v_lead, v_ego)
 
 
 def gen_long_model():
@@ -344,8 +350,8 @@ class LongitudinalMpc:
     # To estimate a safe distance from a moving lead, we calculate how much stopping
     # distance that lead needs as a minimum. We can add that to the current distance
     # and then treat that as a stopped car/obstacle at this new distance.
-    lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1])
-    lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1])
+    lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1], v_ego)
+    lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1], v_ego)
 
     # Fake an obstacle for cruise, this ensures smooth acceleration to set speed
     # when the leads are no factor.
