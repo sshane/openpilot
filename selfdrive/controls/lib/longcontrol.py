@@ -52,30 +52,48 @@ class LongControl():
                              derivative_period=0.5)
     self.v_pid = 0.0
     self.last_output_accel = 0.0
+    self.active_frames = 50
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
+    self.active_frames = 50
 
   def update(self, active, CS, CP, long_plan, accel_limits, extras):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Interp control trajectory
     # TODO estimate car specific lag, use .15s for now
     speeds = long_plan.speeds
+    v_target_future = 0.
     if len(speeds) == CONTROL_N:
-      v_target_lower = interp(CP.longitudinalActuatorDelayLowerBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_lower = 2 * (v_target_lower - speeds[0])/CP.longitudinalActuatorDelayLowerBound - long_plan.accels[0]
+      v_target_future = speeds[-1]
 
-      v_target_upper = interp(CP.longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_upper = 2 * (v_target_upper - speeds[0])/CP.longitudinalActuatorDelayUpperBound - long_plan.accels[0]
-      a_target = min(a_target_lower, a_target_upper)
+    # Update state machine
+    output_accel = self.last_output_accel
+    self.long_control_state = long_control_state_trans(CP, active, self.long_control_state, CS.vEgo,
+                                                       v_target_future, CS.brakePressed,
+                                                       CS.cruiseState.standstill)
+
+    if len(speeds) == CONTROL_N:
+      if self.long_control_state == LongCtrlState.pid:
+        self.active_frames = max(self.active_frames - 1, 0)
+      else:
+        # reset when gas pressed, not active, in other longctrlstates, etc.
+        self.active_frames = 50
+
+      actuator_delay = interp(self.active_frames, [50, 25, 0], [1.0, 1.0, CP.longitudinalActuatorDelayLowerBound])
+
+      v_target = interp(actuator_delay, T_IDXS[:CONTROL_N], speeds)
+      a_target = 2 * (v_target - speeds[0])/actuator_delay - long_plan.accels[0]
+
+      # v_target_upper = interp(actuator_delay, T_IDXS[:CONTROL_N], speeds)
+      # a_target_upper = 2 * (v_target_upper - speeds[0])/actuator_delay - long_plan.accels[0]
+      # a_target = min(a_target_lower, a_target_upper)
 
       v_target = speeds[0]
-      v_target_future = speeds[-1]
     else:
       v_target = 0.0
-      v_target_future = 0.0
       a_target = 0.0
 
     # TODO: This check is not complete and needs to be enforced by MPC
@@ -83,12 +101,6 @@ class LongControl():
 
     self.pid.neg_limit = accel_limits[0]
     self.pid.pos_limit = accel_limits[1]
-
-    # Update state machine
-    output_accel = self.last_output_accel
-    self.long_control_state = long_control_state_trans(CP, active, self.long_control_state, CS.vEgo,
-                                                       v_target_future, CS.brakePressed,
-                                                       CS.cruiseState.standstill)
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.reset(CS.vEgo)
