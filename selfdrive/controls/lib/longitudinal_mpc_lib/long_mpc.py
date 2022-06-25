@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import math
 import numpy as np
 
 from common.realtime import sec_since_boot
@@ -245,10 +246,12 @@ class LongitudinalMpc:
     x_ego_obstacle_cost_multiplier = 1  # interp(self.desired_TR, TRs, [3., 1.0, 0.1])
     j_ego_cost_multiplier = 1  # interp(self.desired_TR, TRs, [0.5, 1.0, 1.0])
     d_zone_cost_multiplier = 1  # interp(self.desired_TR, TRs, [4., 1.0, 1.0])
+    _J_EGO_COST = math.sqrt(max(self.v_ego - 2., 0.))  # reaches 5 at ~60 mph
+    _A_CHANGE_COST = math.sqrt(max(self.v_ego - 2., 0.)) * 0.2  # reaches 0.5 at ~60 mph
 
-    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST * x_ego_obstacle_cost_multiplier, X_EGO_COST, V_EGO_COST, A_EGO_COST, A_CHANGE_COST, J_EGO_COST * j_ego_cost_multiplier]))
+    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST * x_ego_obstacle_cost_multiplier, X_EGO_COST, V_EGO_COST, A_EGO_COST, _A_CHANGE_COST, _J_EGO_COST]))
     for i in range(N):
-      W[4,4] = A_CHANGE_COST * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
+      W[4,4] = _A_CHANGE_COST * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
       self.solver.cost_set(i, 'W', W)
     # Setting the slice without the copy make the array not contiguous,
     # causing issues with the C interface.
@@ -323,7 +326,6 @@ class LongitudinalMpc:
 
   def set_desired_TR(self, desired_TR):
     self.desired_TR = desired_TR
-    self.set_weights()
 
   def update(self, carstate, radarstate, v_cruise, prev_accel_constraint=False):
     self.v_ego = carstate.vEgo
@@ -336,6 +338,7 @@ class LongitudinalMpc:
 
     if not gh_actions:
       self.set_desired_TR(self.dynamic_follow.update(carstate))  # update dynamic follow and get desired TR
+      self.set_weights()
 
     # set accel limits in params
     self.params[:,0] = interp(float(self.status), [0.0, 1.0], [self.cruise_min_a, MIN_ACCEL])
