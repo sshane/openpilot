@@ -1,5 +1,5 @@
 from cereal import car
-from selfdrive.car.volkswagen.values import CAR, BUTTON_STATES, CANBUS, NetworkLocation, TransmissionType, GearShifter
+from selfdrive.car.volkswagen.values import CAR, CANBUS, NetworkLocation, TransmissionType, GearShifter
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 
@@ -9,8 +9,6 @@ EventName = car.CarEvent.EventName
 class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
     super().__init__(CP, CarController, CarState)
-
-    self.buttonStatesPrev = BUTTON_STATES.copy()
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
       self.ext_bus = CANBUS.pt
@@ -45,7 +43,6 @@ class CarInterface(CarInterfaceBase):
     # Global lateral tuning defaults, can be overridden per-vehicle
 
     ret.steerActuatorDelay = 0.1
-    ret.steerRateCost = 1.0
     ret.steerLimitTimer = 0.4
     ret.steerRatio = 15.6  # Let the params learner figure this out
     tire_stiffness_factor = 1.0  # Let the params learner figure this out
@@ -64,17 +61,14 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.ATLAS_MK1:
       ret.mass = 2011 + STD_CARGO_KG
       ret.wheelbase = 2.98
-      ret.maxLateralAccel = 1.4
 
     elif candidate == CAR.GOLF_MK7:
       ret.mass = 1397 + STD_CARGO_KG
       ret.wheelbase = 2.62
-      ret.maxLateralAccel = 1.5
 
     elif candidate == CAR.JETTA_MK7:
       ret.mass = 1328 + STD_CARGO_KG
       ret.wheelbase = 2.71
-      ret.maxLateralAccel = 1.2
 
     elif candidate == CAR.PASSAT_MK8:
       ret.mass = 1551 + STD_CARGO_KG
@@ -95,7 +89,6 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.TIGUAN_MK2:
       ret.mass = 1715 + STD_CARGO_KG
       ret.wheelbase = 2.74
-      ret.maxLateralAccel = 1.1
 
     elif candidate == CAR.TOURAN_MK2:
       ret.mass = 1516 + STD_CARGO_KG
@@ -113,7 +106,6 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.AUDI_A3_MK3:
       ret.mass = 1335 + STD_CARGO_KG
       ret.wheelbase = 2.61
-      ret.maxLateralAccel = 1.7
 
     elif candidate == CAR.AUDI_Q2_MK1:
       ret.mass = 1205 + STD_CARGO_KG
@@ -122,7 +114,6 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.AUDI_Q3_MK2:
       ret.mass = 1623 + STD_CARGO_KG
       ret.wheelbase = 2.68
-      ret.maxLateralAccel = 1.6
 
     elif candidate == CAR.SEAT_ATECA_MK1:
       ret.mass = 1900 + STD_CARGO_KG
@@ -167,19 +158,7 @@ class CarInterface(CarInterfaceBase):
 
   # returns a car.CarState
   def _update(self, c):
-    buttonEvents = []
-
     ret = self.CS.update(self.cp, self.cp_cam, self.cp_ext, self.CP.transmissionType)
-    ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
-
-    # Check for and process state-change events (button press or release) from
-    # the turn stalk switch or ACC steering wheel/control stalk buttons.
-    for button in self.CS.buttonStates:
-      if self.CS.buttonStates[button] != self.buttonStatesPrev[button]:
-        be = car.CarState.ButtonEvent.new_message()
-        be.type = button
-        be.pressed = self.CS.buttonStates[button]
-        buttonEvents.append(be)
 
     events = self.create_common_events(ret, extra_gears=[GearShifter.eco, GearShifter.sport, GearShifter.manumatic])
 
@@ -192,20 +171,8 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.belowSteerSpeed)
 
     ret.events = events.to_msg()
-    ret.buttonEvents = buttonEvents
-
-    # update previous car states
-    self.buttonStatesPrev = self.CS.buttonStates.copy()
 
     return ret
 
   def apply(self, c):
-    hud_control = c.hudControl
-    ret = self.CC.update(c, self.CS, self.frame, self.ext_bus, c.actuators,
-                         hud_control.visualAlert,
-                         hud_control.leftLaneVisible,
-                         hud_control.rightLaneVisible,
-                         hud_control.leftLaneDepart,
-                         hud_control.rightLaneDepart)
-    self.frame += 1
-    return ret
+    return self.CC.update(c, self.CS, self.ext_bus)

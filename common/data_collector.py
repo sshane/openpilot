@@ -1,5 +1,5 @@
 from common.travis_checker import travis
-from selfdrive.swaglog import cloudlog
+from system.swaglog import cloudlog
 from common.realtime import sec_since_boot
 from common.op_params import opParams
 import threading

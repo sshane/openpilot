@@ -17,11 +17,11 @@ import cereal.messaging as messaging
 from common.api import Api
 from common.params import Params
 from common.realtime import set_core_affinity
-from selfdrive.hardware import TICI
+from system.hardware import TICI
 from selfdrive.loggerd.xattr_cache import getxattr, setxattr
 from selfdrive.loggerd.config import ROOT
-from selfdrive.swaglog import cloudlog
 from common.op_params import opParams
+from system.swaglog import cloudlog
 
 NetworkType = log.DeviceState.NetworkType
 UPLOAD_ATTR_NAME = 'user.upload'

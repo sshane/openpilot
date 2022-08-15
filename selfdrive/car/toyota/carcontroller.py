@@ -25,7 +25,6 @@ class CarController:
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
-    self.steer_rate_limited = False
     self.standstill_hack = opParams().get('standstill_hack')
 
     self.rate_limit_counter = 0
@@ -60,7 +59,6 @@ class CarController:
     # steer torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, self.torque_rate_limits)
-    self.steer_rate_limited = new_steer != apply_steer
 
     # EPS_STATUS->LKA_STATE either goes to 21 or 25 on rising edge of a steering fault and
     # the value seems to describe how many frames the steering rate was above 100 deg/s, so
@@ -102,7 +100,7 @@ class CarController:
     # toyota can trace shows this message at 42Hz, with counter adding alternatively 1 and 2;
     # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
     # on consecutive messages
-    can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req, self.frame))
+    can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req))
     if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:
       can_sends.append(create_lta_steer_command(self.packer, 0, 0, self.frame // 2))
 
@@ -145,7 +143,7 @@ class CarController:
       # forcing the pcm to disengage causes a bad fault sound so play a good sound instead
       send_ui = True
 
-    if self.frame % 100 == 0 or send_ui:
+    if (self.frame % 100 == 0 or send_ui) and (self.CP.carFingerprint != CAR.PRIUS_V):
       can_sends.append(create_ui_command(self.packer, steer_alert, pcm_cancel_cmd, hud_control.leftLaneVisible,
                                          hud_control.rightLaneVisible, hud_control.leftLaneDepart,
                                          hud_control.rightLaneDepart, CC.enabled))

@@ -94,7 +94,7 @@ if arch == "larch64":
     "/usr/lib/aarch64-linux-gnu"
   ]
   cpppath += [
-    "#selfdrive/camerad/include",
+    "#system/camerad/include",
   ]
   cflags = ["-DQCOM2", "-mcpu=cortex-a57"]
   cxxflags = ["-DQCOM2", "-mcpu=cortex-a57"]
@@ -356,30 +356,38 @@ Export('cereal', 'messaging', 'visionipc')
 
 # Build rednose library and ekf models
 
+rednose_deps = [
+  "#selfdrive/locationd/models/constants.py",
+  "#selfdrive/locationd/models/gnss_helpers.py",
+]
+
 rednose_config = {
   'generated_folder': '#selfdrive/locationd/models/generated',
   'to_build': {
-    'live': ('#selfdrive/locationd/models/live_kf.py', True, ['live_kf_constants.h']),
-    'car': ('#selfdrive/locationd/models/car_kf.py', True, []),
+    'gnss': ('#selfdrive/locationd/models/gnss_kf.py', True, [], rednose_deps),
+    'live': ('#selfdrive/locationd/models/live_kf.py', True, ['live_kf_constants.h'], rednose_deps),
+    'car': ('#selfdrive/locationd/models/car_kf.py', True, [], rednose_deps),
   },
 }
 
 if arch != "larch64":
   rednose_config['to_build'].update({
-    'gnss': ('#selfdrive/locationd/models/gnss_kf.py', True, []),
-    'loc_4': ('#selfdrive/locationd/models/loc_kf.py', True, []),
-    'pos_computer_4': ('#rednose/helpers/lst_sq_computer.py', False, []),
-    'pos_computer_5': ('#rednose/helpers/lst_sq_computer.py', False, []),
-    'feature_handler_5': ('#rednose/helpers/feature_handler.py', False, []),
-    'lane': ('#xx/pipeline/lib/ekf/lane_kf.py', True, []),
+    'loc_4': ('#selfdrive/locationd/models/loc_kf.py', True, [], rednose_deps),
+    'pos_computer_4': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
+    'pos_computer_5': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
+    'feature_handler_5': ('#rednose/helpers/feature_handler.py', False, [], []),
+    'lane': ('#xx/pipeline/lib/ekf/lane_kf.py', True, [], rednose_deps),
   })
 
 Export('rednose_config')
 SConscript(['rednose/SConscript'])
 
 # Build system services
-
-SConscript(['system/proclogd/SConscript'])
+SConscript([
+  'system/camerad/SConscript',
+  'system/clocksd/SConscript',
+  'system/proclogd/SConscript',
+])
 if arch != "Darwin":
   SConscript(['system/logcatd/SConscript'])
 
@@ -394,7 +402,6 @@ SConscript(['third_party/SConscript'])
 SConscript(['common/kalman/SConscript'])
 SConscript(['common/transformations/SConscript'])
 
-SConscript(['selfdrive/camerad/SConscript'])
 SConscript(['selfdrive/modeld/SConscript'])
 
 SConscript(['selfdrive/controls/lib/cluster/SConscript'])
@@ -402,13 +409,15 @@ SConscript(['selfdrive/controls/lib/lateral_mpc_lib/SConscript'])
 SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
 
 SConscript(['selfdrive/boardd/SConscript'])
-SConscript(['selfdrive/clocksd/SConscript'])
 
 SConscript(['selfdrive/loggerd/SConscript'])
 
 SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/sensord/SConscript'])
 SConscript(['selfdrive/ui/SConscript'])
+SConscript(['selfdrive/navd/SConscript'])
+
+SConscript(['tools/replay/SConscript'])
 
 if GetOption('test'):
   SConscript('panda/tests/safety/SConscript')

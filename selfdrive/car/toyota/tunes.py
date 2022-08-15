@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
 from enum import Enum
-from selfdrive.controls.lib.latcontrol_torque import set_torque_tune
 
 class LongTunes(Enum):
   PEDAL = 0
@@ -25,9 +24,8 @@ class LatTunes(Enum):
   PID_L = 13
   PID_M = 14
   PID_N = 15
-  TORQUE = 16
-  STEER_MODEL_COROLLA = 17
-  STEER_MODEL_CAMRY = 18
+  STEER_MODEL_COROLLA = 16
+  STEER_MODEL_CAMRY = 17
 
 
 ###### LONG ######
@@ -52,11 +50,9 @@ def set_long_tune(tune, name):
     raise NotImplementedError('This longitudinal tune does not exist')
 
 
-def set_lat_tune(tune, name, params, MAX_LAT_ACCEL=2.5, FRICTION=0.01, use_steering_angle=True):
-  if name == LatTunes.TORQUE:
-    set_torque_tune(tune, MAX_LAT_ACCEL, FRICTION)
-
-  elif 'STEER_MODEL' in str(name):
+###### LAT ######
+def set_lat_tune(tune, name, params, MAX_LAT_ACCEL=2.5, FRICTION=0.01, steering_angle_deadzone_deg=0.0, use_steering_angle=True):
+  if 'STEER_MODEL' in str(name):
     tune.init('model')
     tune.model.useRates = False  # TODO: makes model sluggish, see comments in latcontrol_model.py
     tune.model.multiplier = 1.
