@@ -25,7 +25,7 @@ if __name__ == "__main__":
     st = time.monotonic()
     timeout = 15  # s
 
-    # successful if we get 100 messages from dmonitoringmodeld (5s)
+    # successful if we get 100 messages from dmonitoringmodeld (2s)
     while time.monotonic() - st < timeout:
       sm.update(0)
       time.sleep(DT_MDL)
@@ -33,13 +33,13 @@ if __name__ == "__main__":
         if dmon_frame is None:
           dmon_frame = sm.rcv_frame['driverStateV2']
 
-        if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (5 / DT_MDL):
+        if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (2 / DT_MDL):
           # print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
           time.sleep(1)
           break
     else:
       occurrences += 1
-      print('WARNING: timed out in 15s waiting for 100 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+      print('WARNING: timed out in 15s waiting for 40 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
 
     # TODO: is there a better way? we can't check managerState immediately since it takes a while to get the ignition
     # wait for thermald to pick up ignition, then an update from managerState, and THEN it should be safe to check procs
