@@ -21,7 +21,7 @@ if __name__ == "__main__":
     sm.update(0)
     dmon_frame = None
 
-    print('Waiting for driverStateV2')
+    # print('Waiting for driverStateV2')
     st = time.monotonic()
     timeout = 15  # s
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
           dmon_frame = sm.rcv_frame['driverStateV2']
 
         if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (5 / DT_MDL):
-          print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
+          # print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
           time.sleep(1)
           break
     else:
@@ -57,7 +57,7 @@ if __name__ == "__main__":
       sm.update(0)
       time.sleep(0.1)
       if all_dead(sm['managerState']):
-        print('all dead')
+        # print('all dead')
         break
     else:
       print('WARNING: timed out waiting for processes to die!')
