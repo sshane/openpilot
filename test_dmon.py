@@ -17,7 +17,7 @@ if __name__ == "__main__":
   while 1:
     params.put_bool("FakeIgnition", True)
     sm.update(0)
-    dmon_frame = 0  # sm.rcv_frame['driverStateV2']
+    dmon_frame = sm.rcv_frame['driverStateV2']
 
     print('Waiting for driverStateV2')
     st = time.monotonic()
