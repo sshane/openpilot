@@ -14,6 +14,7 @@ if __name__ == "__main__":
     params.put_bool("FakeIgnition", True)
     sm.update(0)
 
+    print('Waiting for driverStateV2')
     dmon_frame = sm.rcv_frame['driverStateV2']
     st = time.monotonic()
     timeout = 15  # s
@@ -22,6 +23,9 @@ if __name__ == "__main__":
       time.sleep(0.01)
     if sm.rcv_frame['driverStateV2'] == dmon_frame:
       print('WARNING: never saw frame from driverStateV2 in 15 seconds')
+    else:
+      print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
+      time.sleep(1)
 
     params.put_bool("FakeIgnition", False)
     time.sleep(5)
