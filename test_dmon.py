@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print('Waiting for driverStateV2')
     st = time.monotonic()
     timeout = 15  # s
-    while (sm.rcv_frame['driverStateV2'] - dmon_frame) > 5 * 20 and time.monotonic() - st < timeout:
+    while (sm.rcv_frame['driverStateV2'] - dmon_frame) < 5 * 20 and time.monotonic() - st < timeout:
       sm.update(0)
       time.sleep(0.05)
 
