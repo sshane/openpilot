@@ -35,7 +35,9 @@ if __name__ == "__main__":
     params.put_bool("FakeIgnition", False)
     st = time.monotonic()
     while not all_dead(sm['managerState']) and (time.monotonic() - st < 5):
+      time.sleep(0.1)
       sm.update(0)
+
     if not all_dead(sm['managerState']):
       print('WARNING: timed out waiting for processes to die')
       time.sleep(5)
