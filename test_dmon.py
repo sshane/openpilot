@@ -60,5 +60,5 @@ if __name__ == "__main__":
         # print('all dead')
         break
     else:
-      print('WARNING: timed out waiting for processes to die!')
+      print('WARNING: timed out waiting for processes to die!', time.monotonic() - st)
       time.sleep(5)
