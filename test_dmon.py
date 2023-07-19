@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
   sm = SubMaster(["driverStateV2", "managerState", "deviceState"])
   occurrences = 0
+  loops = 0
 
   while 1:
     params.put_bool("FakeIgnition", True)
@@ -40,6 +41,7 @@ if __name__ == "__main__":
     else:
       occurrences += 1
       print('WARNING: timed out in 15s waiting for 40 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+      print('CurrentRoute:', params.get('CurrentRoute'))
 
     # TODO: is there a better way? we can't check managerState immediately since it takes a while to get the ignition
     # wait for thermald to pick up ignition, then an update from managerState, and THEN it should be safe to check procs
@@ -62,3 +64,7 @@ if __name__ == "__main__":
     else:
       print('WARNING: timed out waiting for processes to die!', time.monotonic() - st)
       time.sleep(5)
+
+    loops += 1
+    if loops % 120 == 0:
+      print('Tries so far:', loops, 'occurrences:', occurrences)
