@@ -12,7 +12,7 @@ if __name__ == "__main__":
   params = Params()
   params.put_bool("FakeIgnition", False)
 
-  sm = SubMaster(["driverStateV2", "managerState"])
+  sm = SubMaster(["driverStateV2", "managerState", "deviceState"])
 
   while 1:
     params.put_bool("FakeIgnition", True)
@@ -33,10 +33,18 @@ if __name__ == "__main__":
       time.sleep(1)
 
     params.put_bool("FakeIgnition", False)
-    st = time.monotonic()
-    while not all_dead(sm['managerState']) and (time.monotonic() - st < 5):
-      time.sleep(0.1)
+    while sm['deviceState'].started:
       sm.update(0)
+      time.sleep(0.05)
+
+    while not sm.updated('managerState'):
+      sm.update(0)
+      time.sleep(0.05)
+
+    st = time.monotonic()
+    while not all_dead(sm['managerState']) and (time.monotonic() - st < timeout):
+      sm.update(0)
+      time.sleep(0.1)
 
     if not all_dead(sm['managerState']):
       print('WARNING: timed out waiting for processes to die')
