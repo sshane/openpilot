@@ -37,7 +37,7 @@ if __name__ == "__main__":
       sm.update(0)
       time.sleep(0.05)
 
-    while not sm.updated('managerState'):
+    while not sm.updated['managerState']:
       sm.update(0)
       time.sleep(0.05)
 
