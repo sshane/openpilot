@@ -25,6 +25,7 @@ if __name__ == "__main__":
     st = time.monotonic()
     timeout = 15  # s
 
+    # successful if we get 100 messages from dmonitoringmodeld (5s)
     while time.monotonic() - st < timeout:
       sm.update(0)
       time.sleep(DT_MDL)
@@ -39,19 +40,6 @@ if __name__ == "__main__":
     else:
       print('WARNING: timed out in 15s waiting for 100 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
       occurrences += 1
-
-    # while (dmon_frame is None or (sm.rcv_frame['driverStateV2'] - dmon_frame) < (5 * 20)) and (time.monotonic() - st < timeout):
-    #   sm.update(0)
-    #   time.sleep(0.05)
-    #   if dmon_frame is None:
-    #     dmon_frame = sm.rcv_frame['driverStateV2']
-    #
-    # if dmon_frame is None or sm.rcv_frame['driverStateV2'] == dmon_frame:
-    #   print('WARNING: never saw frame from driverStateV2 in 15 seconds, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
-    #   occurrences += 1
-    # else:
-    #   print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
-    #   time.sleep(1)
 
     params.put_bool("FakeIgnition", False)
     while sm['deviceState'].started:
