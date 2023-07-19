@@ -1,5 +1,6 @@
 import time
 from cereal.messaging import SubMaster
+from common.realtime import DT_MDL
 from common.params import Params
 
 
@@ -23,18 +24,34 @@ if __name__ == "__main__":
     print('Waiting for driverStateV2')
     st = time.monotonic()
     timeout = 15  # s
-    while (dmon_frame is None or (sm.rcv_frame['driverStateV2'] - dmon_frame) < (5 * 20)) and (time.monotonic() - st < timeout):
-      sm.update(0)
-      time.sleep(0.05)
-      if dmon_frame is None:
-        dmon_frame = sm.rcv_frame['driverStateV2']
 
-    if dmon_frame is None or sm.rcv_frame['driverStateV2'] == dmon_frame:
-      print('WARNING: never saw frame from driverStateV2 in 15 seconds, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
-      occurrences += 1
+    while time.monotonic() - st < timeout:
+      sm.update(0)
+      time.sleep(DT_MDL)
+      if sm.updated["driverStateV2"]:
+        if dmon_frame is None:
+          dmon_frame = sm.rcv_frame['driverStateV2']
+
+        if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (5 / DT_MDL):
+          print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
+          time.sleep(1)
+          break
     else:
-      print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
-      time.sleep(1)
+      print('WARNING: timed out in 15s waiting for 100 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+      occurrences += 1
+
+    # while (dmon_frame is None or (sm.rcv_frame['driverStateV2'] - dmon_frame) < (5 * 20)) and (time.monotonic() - st < timeout):
+    #   sm.update(0)
+    #   time.sleep(0.05)
+    #   if dmon_frame is None:
+    #     dmon_frame = sm.rcv_frame['driverStateV2']
+    #
+    # if dmon_frame is None or sm.rcv_frame['driverStateV2'] == dmon_frame:
+    #   print('WARNING: never saw frame from driverStateV2 in 15 seconds, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+    #   occurrences += 1
+    # else:
+    #   print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
+    #   time.sleep(1)
 
     params.put_bool("FakeIgnition", False)
     while sm['deviceState'].started:
