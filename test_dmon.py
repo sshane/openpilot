@@ -41,6 +41,8 @@ if __name__ == "__main__":
       print('WARNING: timed out in 15s waiting for 100 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
       occurrences += 1
 
+    # TODO: is there a better way? we can't check managerState immediately since it takes a while to get the ignition
+    # wait for thermald to pick up ignition, then an update from managerState, and THEN it should be safe to check procs
     params.put_bool("FakeIgnition", False)
     while sm['deviceState'].started:
       sm.update(0)
@@ -51,12 +53,12 @@ if __name__ == "__main__":
       time.sleep(0.05)
 
     st = time.monotonic()
-    while not all_dead(sm['managerState']) and (time.monotonic() - st < timeout):
+    while time.monotonic() - st < timeout:
       sm.update(0)
       time.sleep(0.1)
-
-    if not all_dead(sm['managerState']):
-      print('WARNING: timed out waiting for processes to die')
-      time.sleep(5)
+      if all_dead(sm['managerState']):
+        print('all dead')
+        break
     else:
-      print('all dead')
+      print('WARNING: timed out waiting for processes to die!')
+      time.sleep(5)
