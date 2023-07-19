@@ -13,21 +13,25 @@ if __name__ == "__main__":
   params.put_bool("FakeIgnition", False)
 
   sm = SubMaster(["driverStateV2", "managerState", "deviceState"])
+  occurrences = 0
 
   while 1:
     params.put_bool("FakeIgnition", True)
     sm.update(0)
-    dmon_frame = sm.rcv_frame['driverStateV2']
+    dmon_frame = None
 
     print('Waiting for driverStateV2')
     st = time.monotonic()
     timeout = 15  # s
-    while (sm.rcv_frame['driverStateV2'] - dmon_frame) < (5 * 20) and (time.monotonic() - st < timeout):
+    while dmon_frame is None and (sm.rcv_frame['driverStateV2'] - dmon_frame) < (5 * 20) and (time.monotonic() - st < timeout):
       sm.update(0)
       time.sleep(0.05)
+      if dmon_frame is None:
+        dmon_frame = sm.rcv_frame['driverStateV2']
 
-    if sm.rcv_frame['driverStateV2'] == dmon_frame:
-      print('WARNING: never saw frame from driverStateV2 in 15 seconds', sm.rcv_frame['driverStateV2'], dmon_frame)
+    if dmon_frame is None or sm.rcv_frame['driverStateV2'] == dmon_frame:
+      print('WARNING: never saw frame from driverStateV2 in 15 seconds, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+      occurrences += 1
     else:
       print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
       time.sleep(1)
