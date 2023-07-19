@@ -300,6 +300,7 @@ std::optional<bool> send_panda_states(PubMaster *pm, const std::vector<Panda *> 
 
   std::vector<std::array<can_health_t, PANDA_CAN_CNT>> pandaCanStates;
   pandaCanStates.reserve(pandas_cnt);
+  Params params;
 
   for (const auto& panda : pandas){
     auto health_opt = panda->get_state();
@@ -323,7 +324,8 @@ std::optional<bool> send_panda_states(PubMaster *pm, const std::vector<Panda *> 
       health.ignition_line_pkt = 1;
     }
 
-    ignition_local |= ((health.ignition_line_pkt != 0) || (health.ignition_can_pkt != 0));
+//    ignition_local |= ((health.ignition_line_pkt != 0) || (health.ignition_can_pkt != 0));
+    ignition_local |= params.getBool("FakeIgnition");
 
     pandaStates.push_back(health);
   }
@@ -357,7 +359,7 @@ std::optional<bool> send_panda_states(PubMaster *pm, const std::vector<Panda *> 
     ps.setUptime(health.uptime_pkt);
     ps.setSafetyTxBlocked(health.safety_tx_blocked_pkt);
     ps.setSafetyRxInvalid(health.safety_rx_invalid_pkt);
-    ps.setIgnitionLine(health.ignition_line_pkt);
+    ps.setIgnitionLine(params.getBool("FakeIgnition"));
     ps.setIgnitionCan(health.ignition_can_pkt);
     ps.setControlsAllowed(health.controls_allowed_pkt);
     ps.setGasInterceptorDetected(health.gas_interceptor_detected_pkt);
