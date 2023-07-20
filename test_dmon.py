@@ -43,6 +43,11 @@ if __name__ == "__main__":
       print('WARNING: timed out in 15s waiting for 40 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
       print('CurrentRoute:', params.get('CurrentRoute'))
 
+      # if third occurrence, hang so we can debug in the morning
+      if occurrences > 2:
+        while 1:
+          time.sleep(1)
+
     # TODO: is there a better way? we can't check managerState immediately since it takes a while to get the ignition
     # wait for thermald to pick up ignition, then an update from managerState, and THEN it should be safe to check procs
     params.put_bool("FakeIgnition", False)
