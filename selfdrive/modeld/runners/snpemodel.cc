@@ -38,6 +38,7 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
   // create model runner
   zdl::SNPE::SNPEBuilder snpe_builder(container.get());
   while (!snpe) {
+  LOGE("!snpe");
 #ifdef QCOM2
     snpe = snpe_builder.setOutputLayers({})
                        .setRuntimeProcessor(snpe_runtime)
