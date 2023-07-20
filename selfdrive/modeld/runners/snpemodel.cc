@@ -25,7 +25,7 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
   } else {
     snpe_runtime = zdl::DlSystem::Runtime_t::CPU;
   }
-  LOGW("got runtime");
+  LOGW("got runtime, %s", path.c_str());
   assert(zdl::SNPE::SNPEFactory::isRuntimeAvailable(snpe_runtime));
 #endif
   model_data = util::read_file(path);
@@ -34,13 +34,13 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
   // load model
   std::unique_ptr<zdl::DlContainer::IDlContainer> container = zdl::DlContainer::IDlContainer::open((uint8_t*)model_data.data(), model_data.size());
   if (!container) { PrintErrorStringAndExit(); }
-  LOGW("loaded model with size: %lu", model_data.size());
+  LOGW("loaded model with size: %lu, %s", model_data.size(), path.c_str());
 
   // create model runner
   zdl::SNPE::SNPEBuilder snpe_builder(container.get());
-  LOGW("snpe_builder");
+  LOGW("snpe_builder, %s", path.c_str());
   while (!snpe) {
-    LOGW("!snpe");
+    LOGW("!snpe, %s", path.c_str());
 #ifdef QCOM2
     snpe = snpe_builder.setOutputLayers({})
                        .setRuntimeProcessor(snpe_runtime)
@@ -57,32 +57,32 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
     if (!snpe) LOGE(zdl::DlSystem::getLastErrorString());
   }
 
-  LOGW("got snpe");
+  LOGW("got snpe, %s", path.c_str());
   // create output buffer
   zdl::DlSystem::UserBufferEncodingFloat ub_encoding_float;
   zdl::DlSystem::IUserBufferFactory &ub_factory = zdl::SNPE::SNPEFactory::getUserBufferFactory();
-  LOGW("created output buffer");
+  LOGW("created output buffer, %s", path.c_str());
 
   const auto &output_tensor_names_opt = snpe->getOutputTensorNames();
-  LOGW("debug print1");
+  LOGW("debug print1, %s", path.c_str());
   if (!output_tensor_names_opt) throw std::runtime_error("Error obtaining output tensor names");
   const auto &output_tensor_names = *output_tensor_names_opt;
   assert(output_tensor_names.size() == 1);
   const char *output_tensor_name = output_tensor_names.at(0);
-  LOGW("debug print2");
+  LOGW("debug print2, %s", path.c_str());
   const zdl::DlSystem::TensorShape &buffer_shape = snpe->getInputOutputBufferAttributes(output_tensor_name)->getDims();
-  LOGW("debug print3");
+  LOGW("debug print3, %s", path.c_str());
   if (output_size != 0) {
     assert(output_size == buffer_shape[1]);
   } else {
     output_size = buffer_shape[1];
   }
   std::vector<size_t> output_strides = {output_size * sizeof(float), sizeof(float)};
-  LOGW("debug print4");
+  LOGW("debug print4, %s", path.c_str());
   output_buffer = ub_factory.createUserBuffer(output, output_size * sizeof(float), output_strides, &ub_encoding_float);
-  LOGW("debug print5");
+  LOGW("debug print5, %s", path.c_str());
   output_map.add(output_tensor_name, output_buffer.get());
-  LOGW("debug print6");
+  LOGW("debug print6, %s", path.c_str());
 
 #ifdef USE_THNEED
   if (snpe_runtime == zdl::DlSystem::Runtime_t::GPU) {
@@ -94,21 +94,21 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
 void SNPEModel::addInput(const std::string name, float *buffer, int size) {
   const int idx = inputs.size();
   const auto &input_tensor_names_opt = snpe->getInputTensorNames();
-  LOGW("got input tensor names");
+  LOGW("got input tensor names, %s", name.c_str());
   if (!input_tensor_names_opt) throw std::runtime_error("Error obtaining input tensor names");
   const auto &input_tensor_names = *input_tensor_names_opt;
   const char *input_tensor_name = input_tensor_names.at(idx);
-  LOGW("got single tensor name");
+  LOGW("got single tensor name, %s", name.c_str());
   const bool input_tf8 = use_tf8 && strcmp(input_tensor_name, "input_img") == 0;  // TODO: This is a terrible hack, get rid of this name check both here and in onnx_runner.py
   LOGW("adding index %d: %s", idx, input_tensor_name);
 
   // Never got here online, shouldn't be the cause
-  LOGW("new debug print1");
+  LOGW("new debug print1, %s", name.c_str());
   zdl::DlSystem::UserBufferEncodingFloat ub_encoding_float;
   zdl::DlSystem::UserBufferEncodingTf8 ub_encoding_tf8(0, 1./255); // network takes 0-1
   zdl::DlSystem::IUserBufferFactory &ub_factory = zdl::SNPE::SNPEFactory::getUserBufferFactory();
   zdl::DlSystem::UserBufferEncoding *input_encoding = input_tf8 ? (zdl::DlSystem::UserBufferEncoding*)&ub_encoding_tf8 : (zdl::DlSystem::UserBufferEncoding*)&ub_encoding_float;
-  LOGW("new debug print2");
+  LOGW("new debug print2, %s", name.c_str());
 
   const auto &buffer_shape_opt = snpe->getInputDimensions(input_tensor_name);
   const zdl::DlSystem::TensorShape &buffer_shape = *buffer_shape_opt;
@@ -116,20 +116,20 @@ void SNPEModel::addInput(const std::string name, float *buffer, int size) {
   std::vector<size_t> strides(buffer_shape.rank());
   strides[strides.size() - 1] = size_of_input;
   size_t product = 1;
-  LOGW("new debug print3");
+  LOGW("new debug print3, %s", name.c_str());
   for (size_t i = 0; i < buffer_shape.rank(); i++) product *= buffer_shape[i];
   size_t stride = strides[strides.size() - 1];
   for (size_t i = buffer_shape.rank() - 1; i > 0; i--) {
     stride *= buffer_shape[i];
     strides[i-1] = stride;
   }
-  LOGW("new debug print4");
+  LOGW("new debug print4, %s", name.c_str());
 
   auto input_buffer = ub_factory.createUserBuffer(buffer, product*size_of_input, strides, input_encoding);
-  LOGW("new debug print5");
+  LOGW("new debug print5, %s", name.c_str());
   input_map.add(input_tensor_name, input_buffer.get());
   inputs.push_back(std::unique_ptr<SNPEModelInput>(new SNPEModelInput(name, buffer, size, std::move(input_buffer))));
-  LOGW("new debug print6");
+  LOGW("new debug print6, %s", name.c_str());
 }
 
 void SNPEModel::execute() {

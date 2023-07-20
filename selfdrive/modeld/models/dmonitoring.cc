@@ -22,12 +22,13 @@ static inline T *get_buffer(std::vector<T> &buf, const size_t size) {
 void dmonitoring_init(DMonitoringModelState* s) {
 
 #ifdef USE_ONNX_MODEL
+  LOGW("creating ONNXModel");
   s->m = new ONNXModel("models/dmonitoring_model.onnx", &s->output[0], OUTPUT_SIZE, USE_DSP_RUNTIME, true);
 #else
   LOGW("creating SNPEModel");
   s->m = new SNPEModel("models/dmonitoring_model_q.dlc", &s->output[0], OUTPUT_SIZE, USE_DSP_RUNTIME, true);
-  LOGW("done creating SNPEModel");
 #endif
+  LOGW("done creating model");
 
   s->m->addInput("input_imgs", NULL, 0);
   s->m->addInput("calib", s->calib, CALIB_LEN);
