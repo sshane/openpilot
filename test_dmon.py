@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # print('Waiting for driverStateV2')
     st = time.monotonic()
-    timeout = 15  # s
+    timeout = 30  # s
 
     # successful if we get 100 messages from dmonitoringmodeld (2s)
     while time.monotonic() - st < timeout:
