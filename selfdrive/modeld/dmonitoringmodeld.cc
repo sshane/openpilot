@@ -45,6 +45,17 @@ void run_model(DMonitoringModelState &model, VisionIpcClient &vipc_client) {
 int main(int argc, char **argv) {
   setpriority(PRIO_PROCESS, 0, -15);
 
+  std::thread thread1(init_model_test);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+//  util::sleep_for(20);
+
+  std::thread thread2(init_model_test);
+
+  thread1.join();
+  thread2.join();
+  return 0;
+
   // init the models
   DMonitoringModelState model;
   dmonitoring_init(&model);

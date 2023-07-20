@@ -36,6 +36,8 @@ typedef struct DMonitoringModelResult {
   float dsp_execution_time;
 } DMonitoringModelResult;
 
+void init_model_test();
+
 typedef struct DMonitoringModelState {
   RunModel *m;
   float output[OUTPUT_SIZE];

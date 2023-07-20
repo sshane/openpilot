@@ -19,6 +19,13 @@ static inline T *get_buffer(std::vector<T> &buf, const size_t size) {
   return buf.data();
 }
 
+void init_model_test() {
+  float output[OUTPUT_SIZE];
+  RunModel *m = new SNPEModel("models/dmonitoring_model_q.dlc", &output[0], OUTPUT_SIZE, USE_DSP_RUNTIME, true);
+  util::sleep_for(1000);
+  delete m;
+}
+
 void dmonitoring_init(DMonitoringModelState* s) {
 
 #ifdef USE_ONNX_MODEL
