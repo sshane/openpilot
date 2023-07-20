@@ -43,12 +43,15 @@ int main(int argc, char **argv) {
 
   // init the models
   NavModelState model;
-  while (1) {
+  for (int i = 0; i < 40; i++) {
     util::sleep_for(rand() % 21);
     navmodel_init(&model);
     LOGW("models loaded, navmodeld starting");
     navmodel_free(&model);
   }
+
+  navmodel_init(&model);
+  LOGW("models loaded, navmodeld starting");
 
   VisionIpcClient vipc_client = VisionIpcClient("navd", VISION_STREAM_MAP, true);
   while (!do_exit && !vipc_client.connect(false)) {

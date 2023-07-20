@@ -47,12 +47,14 @@ int main(int argc, char **argv) {
 
   // init the models
   DMonitoringModelState model;
-  while (1) {
+  for (int i = 0; i < 40; i++) {
     util::sleep_for(rand() % 21);
     dmonitoring_init(&model);
     LOGW("connecting to driver stream");
     dmonitoring_free(&model);
   }
+
+  dmonitoring_init(&model);
 
   LOGW("connecting to driver stream");
   VisionIpcClient vipc_client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, true);
