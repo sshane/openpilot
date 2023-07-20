@@ -47,7 +47,11 @@ int main(int argc, char **argv) {
 
   // init the models
   DMonitoringModelState model;
-  dmonitoring_init(&model);
+  while (1) {
+    dmonitoring_init(&model);
+    LOGW("connecting to driver stream");
+    dmonitoring_free(&model);
+  }
 
   LOGW("connecting to driver stream");
   VisionIpcClient vipc_client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, true);
