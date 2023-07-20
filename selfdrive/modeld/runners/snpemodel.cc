@@ -53,6 +53,7 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
                        .setPerformanceProfile(zdl::DlSystem::PerformanceProfile_t::HIGH_PERFORMANCE)
                        .build();
 #endif
+  LOGW("build, %s", path.c_str());
 //    if (!snpe) std::cerr << zdl::DlSystem::getLastErrorString() << std::endl;
     if (!snpe) LOGE(zdl::DlSystem::getLastErrorString());
   }
