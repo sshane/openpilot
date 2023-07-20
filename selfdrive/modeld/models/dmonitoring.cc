@@ -24,7 +24,9 @@ void dmonitoring_init(DMonitoringModelState* s) {
 #ifdef USE_ONNX_MODEL
   s->m = new ONNXModel("models/dmonitoring_model.onnx", &s->output[0], OUTPUT_SIZE, USE_DSP_RUNTIME, true);
 #else
+  LOGW("creating SNPEModel");
   s->m = new SNPEModel("models/dmonitoring_model_q.dlc", &s->output[0], OUTPUT_SIZE, USE_DSP_RUNTIME, true);
+  LOGW("done creating SNPEModel");
 #endif
 
   s->m->addInput("input_imgs", NULL, 0);
