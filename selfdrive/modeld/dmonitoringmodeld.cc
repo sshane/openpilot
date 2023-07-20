@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
   // init the models
   DMonitoringModelState model;
   while (1) {
+    util::sleep_for(rand() % 21);
     dmonitoring_init(&model);
     LOGW("connecting to driver stream");
     dmonitoring_free(&model);
