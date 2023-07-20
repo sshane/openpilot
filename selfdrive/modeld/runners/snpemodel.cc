@@ -52,6 +52,7 @@ SNPEModel::SNPEModel(const std::string path, float *_output, size_t _output_size
 #endif
     if (!snpe) std::cerr << zdl::DlSystem::getLastErrorString() << std::endl;
   }
+  LOGE("got snpe!");
 
   // create output buffer
   zdl::DlSystem::UserBufferEncodingFloat ub_encoding_float;
