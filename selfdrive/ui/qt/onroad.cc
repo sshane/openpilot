@@ -247,6 +247,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   // Handle older routes where vCruiseCluster is not set
   float v_cruise =  cs.getVCruiseCluster() == 0.0 ? cs.getVCruise() : cs.getVCruiseCluster();
   float set_speed = cs_alive ? v_cruise : SET_SPEED_NA;
+  set_speed = 43.4523;
   bool cruise_set = set_speed > 0 && (int)set_speed != SET_SPEED_NA;
   if (cruise_set && !s.scene.is_metric) {
     set_speed *= KM_TO_MILE;
@@ -260,11 +261,12 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
     v_ego = sm["carState"].getCarState().getVEgoCluster();
     v_ego_cluster_seen = true;
   }
+  v_ego = 12.0701;  // 27 mph
   float cur_speed = cs_alive ? std::max<float>(0.0, v_ego) : 0.0;
   cur_speed *= s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH;
 
   auto speed_limit_sign = sm["navInstruction"].getNavInstruction().getSpeedLimitSign();
-  float speed_limit = nav_alive ? sm["navInstruction"].getNavInstruction().getSpeedLimit() : 0.0;
+  float speed_limit = 13.4112;  // nav_alive ? sm["navInstruction"].getNavInstruction().getSpeedLimit() : 0.0;
   speed_limit *= (s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH);
 
   setProperty("speedLimit", speed_limit);
