@@ -44,7 +44,7 @@ if __name__ == "__main__":
         if navmodel_frame is None:
           navmodel_frame = sm.rcv_frame['navModel']
 
-          if (sm.rcv_frame['navModel'] - dmon_frame) > (2 / DT_MDL):
+          if (sm.rcv_frame['navModel'] - navmodel_frame) > (2 / DT_MDL):
             can_break['navModel'] = True
 
       # can break if both navmodeld and dmonitoringmodeld started with enough frames
