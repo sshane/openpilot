@@ -26,11 +26,11 @@ if __name__ == "__main__":
 
     # print('Waiting for driverStateV2')
     st = time.monotonic()
-    timeout = 30  # s
+    TIMEOUT = 30  # s
 
     # successful if we get 100 messages from dmonitoringmodeld (2s)
     can_break = {'driverStateV2': False, 'navModel': False}
-    while time.monotonic() - st < timeout:
+    while time.monotonic() - st < TIMEOUT:
       sm.update(0)
       time.sleep(DT_MDL)
       if sm.updated["driverStateV2"]:
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     else:
       occurrences += 1
-      print(f'WARNING: timed out in 15s waiting for 40 messages from both procs, occurrences: {occurrences}, '
+      print(f'WARNING: timed out in {TIMEOUT}s waiting for 40 messages from both procs, occurrences: {occurrences}, '
             f'got driverStateV2: {can_break["driverStateV2"]}, got navModel: {can_break["navModel"]}, '
             f'driverStateV2 frames: {(sm.rcv_frame["driverStateV2"], dmon_frame)}, navModel frames: {(sm.rcv_frame["navModel"], navmodel_frame)}')
       print('CurrentRoute:', params.get('CurrentRoute'))
@@ -78,7 +78,7 @@ if __name__ == "__main__":
       time.sleep(0.05)
 
     st = time.monotonic()
-    while time.monotonic() - st < timeout:
+    while time.monotonic() - st < TIMEOUT:
       sm.update(0)
       time.sleep(0.1)
       if all_dead(sm['managerState']):
