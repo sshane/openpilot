@@ -4,6 +4,10 @@ from cereal.messaging import SubMaster
 from common.realtime import DT_MDL
 from common.params import Params
 
+DT_NAV = 0.5
+MIN_TIME = 4
+TIMEOUT = 30
+
 
 def all_dead(managerState):
   # return if all processes that should be dead are dead
@@ -26,7 +30,6 @@ if __name__ == "__main__":
 
     # print('Waiting for driverStateV2')
     st = time.monotonic()
-    TIMEOUT = 30  # s
 
     # successful if we get 100 messages from dmonitoringmodeld (2s)
     can_break = {'driverStateV2': False, 'navModel': False}
@@ -37,14 +40,14 @@ if __name__ == "__main__":
         if dmon_frame is None:
           dmon_frame = sm.rcv_frame['driverStateV2']
 
-        if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (2 / DT_MDL):
+        if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (MIN_TIME / DT_MDL):
           can_break['driverStateV2'] = True
 
       if sm.updated["navModel"]:
         if navmodel_frame is None:
           navmodel_frame = sm.rcv_frame['navModel']
 
-        if (sm.rcv_frame['navModel'] - navmodel_frame) > (2 / DT_MDL):
+        if (sm.rcv_frame['navModel'] - navmodel_frame) > (MIN_TIME / DT_NAV):
           can_break['navModel'] = True
 
       # can break if both navmodeld and dmonitoringmodeld started with enough frames
@@ -56,7 +59,7 @@ if __name__ == "__main__":
 
     else:
       occurrences += 1
-      print(f'WARNING: timed out in {TIMEOUT}s waiting for 40 messages from both procs, occurrences: {occurrences}, '
+      print(f'WARNING: timed out in {TIMEOUT}s waiting for messages from both procs, occurrences: {occurrences}, '
             f'got driverStateV2: {can_break["driverStateV2"]}, got navModel: {can_break["navModel"]}, '
             f'driverStateV2 frames: {(sm.rcv_frame["driverStateV2"], dmon_frame)}, navModel frames: {(sm.rcv_frame["navModel"], navmodel_frame)}')
       print('CurrentRoute:', params.get('CurrentRoute'))
