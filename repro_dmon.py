@@ -24,7 +24,7 @@ if __name__ == "__main__":
     random.shuffle(procs)
     for proc in procs:
       managed_processes[proc].start()
-      time.sleep(random.uniform(0, 250) / 1000)  # 0 to 250 ms offset
+      time.sleep(random.uniform(0.0, 1.0))  # 0 to 1000 ms offset
 
     while time.monotonic() - st < 10:
       print('not alive')
