@@ -1,4 +1,5 @@
 import time
+import os
 from cereal.messaging import SubMaster
 from common.realtime import DT_MDL
 from common.params import Params
@@ -43,8 +44,8 @@ if __name__ == "__main__":
       print('WARNING: timed out in 15s waiting for 40 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
       print('CurrentRoute:', params.get('CurrentRoute'))
 
-      # if third occurrence, hang so we can debug in the morning
-      if occurrences > 2:
+      if os.path.exists('/data/hang_dmon'):
+        print('Hanging')
         while 1:
           time.sleep(1)
 
