@@ -42,13 +42,3 @@ if __name__ == "__main__":
     for proc in procs:
       print('Stopping', proc)
       managed_processes[proc].stop()
-
-
-
-
-
-
-
-
-
-
