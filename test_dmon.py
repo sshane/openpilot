@@ -52,8 +52,8 @@ if __name__ == "__main__":
 
       # can break if both navmodeld and dmonitoringmodeld started with enough frames
       if all(can_break.values()):
-        print('Got navModel and driverStateV2! Exiting', sm.rcv_frame['driverStateV2'],
-              dmon_frame, sm.rcv_frame['navModel'], navmodel_frame)
+        # print('Got navModel and driverStateV2! Exiting', sm.rcv_frame['driverStateV2'],
+        #       dmon_frame, sm.rcv_frame['navModel'], navmodel_frame)
         time.sleep(1)
         break
 
