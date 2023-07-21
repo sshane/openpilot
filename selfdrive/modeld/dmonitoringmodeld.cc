@@ -49,17 +49,20 @@ int main(int argc, char **argv) {
   DMonitoringModelState model;
   dmonitoring_init(&model);
 
-  LOGW("connecting to driver stream");
-  VisionIpcClient vipc_client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, true);
-  while (!do_exit && !vipc_client.connect(false)) {
-    util::sleep_for(100);
-  }
+  util::sleep_for(1000);
+  Params().putBool("DmModelInit", true);
 
-  // run the models
-  if (vipc_client.connected) {
-    LOGW("connected with buffer size: %d", vipc_client.buffers[0].len);
-    run_model(model, vipc_client);
-  }
+//  LOGW("connecting to driver stream");
+//  VisionIpcClient vipc_client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, true);
+//  while (!do_exit && !vipc_client.connect(false)) {
+//    util::sleep_for(100);
+//  }
+//
+//  // run the models
+//  if (vipc_client.connected) {
+//    LOGW("connected with buffer size: %d", vipc_client.buffers[0].len);
+//    run_model(model, vipc_client);
+//  }
 
   dmonitoring_free(&model);
   return 0;

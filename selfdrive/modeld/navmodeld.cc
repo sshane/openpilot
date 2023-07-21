@@ -7,6 +7,7 @@
 #include "cereal/visionipc/visionipc_client.h"
 #include "common/swaglog.h"
 #include "common/util.h"
+#include "common/params.h"
 #include "selfdrive/modeld/models/nav.h"
 
 ExitHandler do_exit;
@@ -44,18 +45,22 @@ int main(int argc, char **argv) {
   // init the models
   NavModelState model;
   navmodel_init(&model);
-  LOGW("models loaded, navmodeld starting");
 
-  VisionIpcClient vipc_client = VisionIpcClient("navd", VISION_STREAM_MAP, true);
-  while (!do_exit && !vipc_client.connect(false)) {
-    util::sleep_for(100);
-  }
+  util::sleep_for(1000);
+  Params().putBool("NavModelInit", true);
 
-  // run the models
-  if (vipc_client.connected) {
-    LOGW("connected with buffer size: %d", vipc_client.buffers[0].len);
-    run_model(model, vipc_client);
-  }
+//  LOGW("models loaded, navmodeld starting");
+//
+//  VisionIpcClient vipc_client = VisionIpcClient("navd", VISION_STREAM_MAP, true);
+//  while (!do_exit && !vipc_client.connect(false)) {
+//    util::sleep_for(100);
+//  }
+//
+//  // run the models
+//  if (vipc_client.connected) {
+//    LOGW("connected with buffer size: %d", vipc_client.buffers[0].len);
+//    run_model(model, vipc_client);
+//  }
 
   navmodel_free(&model);
   return 0;
