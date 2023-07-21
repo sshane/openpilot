@@ -14,7 +14,7 @@ if __name__ == "__main__":
   params = Params()
   params.put_bool("FakeIgnition", False)
 
-  sm = SubMaster(["driverStateV2", "managerState", "deviceState"])
+  sm = SubMaster(["driverStateV2", "managerState", "deviceState", "navModel"])
   occurrences = 0
   loops = 0
 
@@ -22,12 +22,14 @@ if __name__ == "__main__":
     params.put_bool("FakeIgnition", True)
     sm.update(0)
     dmon_frame = None
+    navmodel_frame = None
 
     # print('Waiting for driverStateV2')
     st = time.monotonic()
     timeout = 30  # s
 
     # successful if we get 100 messages from dmonitoringmodeld (2s)
+    can_break = {'driverStateV2': False, 'navModel': False}
     while time.monotonic() - st < timeout:
       sm.update(0)
       time.sleep(DT_MDL)
@@ -36,12 +38,27 @@ if __name__ == "__main__":
           dmon_frame = sm.rcv_frame['driverStateV2']
 
         if (sm.rcv_frame['driverStateV2'] - dmon_frame) > (2 / DT_MDL):
-          # print('Got driverStateV2! Exiting', sm.rcv_frame['driverStateV2'], dmon_frame)
-          time.sleep(1)
-          break
+          can_break['driverStateV2'] = True
+
+      if sm.updated["navModel"]:
+        if navmodel_frame is None:
+          navmodel_frame = sm.rcv_frame['navModel']
+
+          if (sm.rcv_frame['navModel'] - dmon_frame) > (2 / DT_MDL):
+            can_break['navModel'] = True
+
+      # can break if both navmodeld and dmonitoringmodeld started with enough frames
+      if all(can_break.values()):
+        print('Got navModel and driverStateV2! Exiting', sm.rcv_frame['driverStateV2'],
+              dmon_frame, sm.rcv_frame['navModel'], navmodel_frame)
+        time.sleep(1)
+        break
+
     else:
       occurrences += 1
-      print('WARNING: timed out in 15s waiting for 40 messages from dmonitoringmodeld, occurrences:', occurrences, sm.rcv_frame['driverStateV2'], dmon_frame)
+      print(f'WARNING: timed out in 15s waiting for 40 messages from both procs, occurrences: {occurrences}, '
+            f'got driverStateV2: {can_break["driverStateV2"]}, got navModel: {can_break["navModel"]}, '
+            f'driverStateV2 frames: {(sm.rcv_frame["driverStateV2"], dmon_frame)}, navModel frames: {(sm.rcv_frame["navModel"], navmodel_frame)}')
       print('CurrentRoute:', params.get('CurrentRoute'))
 
       if os.path.exists('/data/hang_dmon'):
