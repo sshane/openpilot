@@ -7,6 +7,7 @@
 #include "cereal/visionipc/visionipc_client.h"
 #include "common/swaglog.h"
 #include "common/util.h"
+#include "common/params.h"
 #include "selfdrive/modeld/models/dmonitoring.h"
 
 ExitHandler do_exit;
