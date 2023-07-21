@@ -31,10 +31,13 @@ if __name__ == "__main__":
       time.sleep(0.1)
       if all(get_init_params(params)):
         print('both done init')
+        time.sleep(1)
         break
     else:
       pd = dict(zip(INIT_PARAMS, get_init_params(params)))
       print('WARNING: timed out waiting for model procs to initialize!', pd)
+      while 1:
+        time.sleep(1)
 
     for proc in procs:
       print('Stopping', proc)
