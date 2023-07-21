@@ -3,6 +3,8 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
 
 #include "cereal/visionipc/visionipc_client.h"
 #include "common/swaglog.h"
@@ -51,7 +53,12 @@ int main(int argc, char **argv) {
   dmonitoring_init(&model);
 
   util::sleep_for(1000);
-  Params().putBool("DmModelInit", true);
+
+  std::string BASE_DIR = "/data/tmp/";
+  std::ofstream output(BASE_DIR + "DmModelInit" + getenv("PARAM_SUFFIX"));
+  std::cout << "dmonitoringmodeld: " << (BASE_DIR + "DmModelInit" + getenv("PARAM_SUFFIX")) << "\n";
+
+//  Params().putBool("DmModelInit", true);
 
 //  LOGW("connecting to driver stream");
 //  VisionIpcClient vipc_client = VisionIpcClient("camerad", VISION_STREAM_DRIVER, true);
