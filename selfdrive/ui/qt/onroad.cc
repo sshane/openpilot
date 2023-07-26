@@ -192,18 +192,22 @@ ExperimentalButton::ExperimentalButton(QWidget *parent) : experimental_mode(fals
 void ExperimentalButton::changeMode() {
   const auto cp = (*uiState()->sm)["carParams"].getCarParams();
   bool can_change = hasLongitudinalControl(cp) && params.getBool("ExperimentalModeConfirmed");
-  if (can_change) {
+  if (can_change || true) {
     params.putBool("ExperimentalMode", !experimental_mode);
+    experimental_mode = !experimental_mode;
+    update();
   }
 }
 
 void ExperimentalButton::updateState(const UIState &s) {
   const auto cs = (*s.sm)["controlsState"].getControlsState();
   bool eng = cs.getEngageable() || cs.getEnabled();
-  bool cs_exp_mode = true;  // cs.getExperimentalMode()
-  if ((cs_exp_mode != experimental_mode) || (eng != engageable)) {
+//  bool cs_exp_mode = true;  // cs.getExperimentalMode()
+//  bool cs_exp_mode = cs.getExperimentalMode();
+//  bool cs_exp_mode = params.getBool("ExperimentalMode");
+  if ((eng != engageable)) {
     engageable = eng;
-    experimental_mode = cs_exp_mode;
+//    experimental_mode = cs_exp_mode;
     update();
   }
 }
@@ -494,7 +498,9 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   // paint path
   QLinearGradient bg(0, height(), 0, 0);
-  if (true) {  // sm["controlsState"].getControlsState().getExperimentalMode();
+//  if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+//  if (true) {  // sm["controlsState"].getControlsState().getExperimentalMode();
+  if (Params().getBool("ExperimentalMode")) {  // sm["controlsState"].getControlsState().getExperimentalMode();
     // The first half of track_vertices are the points for the right side of the path
     // and the indices match the positions of accel from uiPlan
     const auto &acceleration = sm["uiPlan"].getUiPlan().getAccel();
@@ -643,7 +649,9 @@ void AnnotatedCameraWidget::paintGL() {
       } else if (v_ego > 15) {
         wide_cam_requested = false;
       }
-      wide_cam_requested = wide_cam_requested && true;  // sm["controlsState"].getControlsState().getExperimentalMode();
+//      wide_cam_requested = wide_cam_requested && true;  // sm["controlsState"].getControlsState().getExperimentalMode();
+//      wide_cam_requested = wide_cam_requested && sm["controlsState"].getControlsState().getExperimentalMode();
+      wide_cam_requested = wide_cam_requested && Params().getBool("ExperimentalMode");
       // for replay of old routes, never go to widecam
       wide_cam_requested = wide_cam_requested && s->scene.calibration_wide_valid;
     }
