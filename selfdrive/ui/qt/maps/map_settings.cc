@@ -289,7 +289,8 @@ NavigationRequest *NavigationRequest::instance() {
 }
 
 NavigationRequest::NavigationRequest(QObject *parent) : QObject(parent) {
-  if (auto dongle_id = getDongleId()) {
+  auto dongle_id = getDongleId();
+  if (dongle_id || true) {
     {
       // Fetch favorite and recent locations
       QString url = CommaApi::BASE_URL + "/v1/navigation/" + *dongle_id + "/locations";
