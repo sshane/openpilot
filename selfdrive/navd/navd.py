@@ -36,7 +36,7 @@ class RouteEngine:
     self.params.put("ApiCache_NavDestinations",
                     b'[{"id": "1", "dongle_id": "", "place_name": "Taco Bell", "place_details": "3195 Market St, San Diego, CA 92102", "latitude": 32.7113562, "longitude": -117.1255347, "save_type": "favorite", "label": "home"},'
                     b'{"id": "2", "dongle_id": "", "place_name": "Little Italy", "place_details": "1441 State St, San Diego, CA 92101", "latitude": 32.7204628, "longitude": -117.1660896, "save_type": "favorite", "label": "work"},'
-                    b'{"id": "3", "dongle_id": "", "place_name": "Point Loma Tide Pools", "place_details": "Lands End Road, San Diego, CA 92106", "latitude": 32.669812, "longitude": -117.243713, "save_type": "recent"},'
+                    b'{"id": "3", "dongle_id": "", "place_name": "Point Loma Tide Pools", "place_details": "Lands End Road, San Diego, CA 92106", "latitude": 32.669095, "longitude": -117.243637, "save_type": "recent"},'
                     b'{"id": "4", "dongle_id": "", "place_name": "Cabrillo National Monument", "place_details": "1800 Cabrillo Memorial Dr, San Diego, CA 92106", "latitude": 32.672296, "longitude": -117.241610, "save_type": "recent"},'
                     b'{"id": "5", "dongle_id": "", "place_name": "SeaWorld San Diego", "place_details": "500 Sea World Dr., San Diego, CA 92109", "latitude": 32.763993, "longitude": -117.226262, "save_type": "recent"}'
                     b']')
