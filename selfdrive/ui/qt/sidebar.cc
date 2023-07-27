@@ -81,10 +81,10 @@ void Sidebar::updateState(const UIState &s) {
 
   ItemStatus connectStatus;
   auto last_ping = deviceState.getLastAthenaPingTime();
-  if (last_ping == 0) {
+  if (last_ping == 0 && false) {
     connectStatus = ItemStatus{{tr("CONNECT"), tr("OFFLINE")}, warning_color};
   } else {
-    connectStatus = nanos_since_boot() - last_ping < 80e9 ? ItemStatus{{tr("CONNECT"), tr("ONLINE")}, good_color} : ItemStatus{{tr("CONNECT"), tr("ERROR")}, danger_color};
+    connectStatus = nanos_since_boot() - last_ping < 80e9 || true ? ItemStatus{{tr("CONNECT"), tr("ONLINE")}, good_color} : ItemStatus{{tr("CONNECT"), tr("ERROR")}, danger_color};
   }
   setProperty("connectStatus", QVariant::fromValue(connectStatus));
 
@@ -98,11 +98,11 @@ void Sidebar::updateState(const UIState &s) {
   setProperty("tempStatus", QVariant::fromValue(tempStatus));
 
   ItemStatus pandaStatus = {{tr("VEHICLE"), tr("ONLINE")}, good_color};
-  if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
-    pandaStatus = {{tr("NO"), tr("PANDA")}, danger_color};
-  } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
-    pandaStatus = {{tr("GPS"), tr("SEARCH")}, warning_color};
-  }
+//  if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
+//    pandaStatus = {{tr("NO"), tr("PANDA")}, danger_color};
+//  } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
+//    pandaStatus = {{tr("GPS"), tr("SEARCH")}, warning_color};
+//  }
   setProperty("pandaStatus", QVariant::fromValue(pandaStatus));
 }
 

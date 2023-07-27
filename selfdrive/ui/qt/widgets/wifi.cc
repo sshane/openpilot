@@ -98,6 +98,6 @@ void WiFiPromptWidget::updateState(const UIState &s) {
 
   auto network_type = sm["deviceState"].getDeviceState().getNetworkType();
   auto uploading = network_type == cereal::DeviceState::NetworkType::WIFI ||
-      network_type == cereal::DeviceState::NetworkType::ETHERNET;
+      network_type == cereal::DeviceState::NetworkType::ETHERNET || true;
   stack->setCurrentIndex(uploading ? 1 : 0);
 }
