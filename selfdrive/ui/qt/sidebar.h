@@ -36,7 +36,7 @@ protected:
   QPixmap home_img, flag_img, settings_img;
   bool onroad, flag_pressed, settings_pressed;
   const QMap<cereal::DeviceState::NetworkType, QString> network_type = {
-    {cereal::DeviceState::NetworkType::NONE, tr("--")},
+    {cereal::DeviceState::NetworkType::NONE, tr("Wi-Fi")},
     {cereal::DeviceState::NetworkType::WIFI, tr("Wi-Fi")},
     {cereal::DeviceState::NetworkType::ETHERNET, tr("ETH")},
     {cereal::DeviceState::NetworkType::CELL2_G, tr("2G")},
