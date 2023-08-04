@@ -94,6 +94,10 @@ NISSAN_DEFAULT_DIAGNOSTIC_SESSION_TYPE = 0xc0
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
+    Request(
+      [NISSAN_VERSION_REQUEST_KWP],
+      [NISSAN_VERSION_RESPONSE_KWP],
+    ),
     *[
       Request(
         [NISSAN_DIAGNOSTIC_REQUEST_KWP + bytes([subfunction]), NISSAN_VERSION_REQUEST_KWP],
