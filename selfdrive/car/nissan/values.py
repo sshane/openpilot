@@ -89,7 +89,7 @@ NISSAN_RX_OFFSET = 0x20
 
 # Try diagnostic sessions: default, standby, extended, Nissan-specific
 # NISSAN_DIAGNOSTIC_SESSION_TYPES = (0x80, 0x81, 0x89, 0x92, 0xc0)
-NISSAN_DIAGNOSTIC_SESSION_TYPES = [i for i in range(0x80, 0xff + 1) if i != 0xc0] + [0xc0]
+NISSAN_DIAGNOSTIC_SESSION_TYPES = [i for i in range(0x80, 0xff + 1) if i != 0xc0 and i != 0x85]
 NISSAN_DEFAULT_DIAGNOSTIC_SESSION_TYPE = 0xc0
 
 FW_QUERY_CONFIG = FwQueryConfig(
