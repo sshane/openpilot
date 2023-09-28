@@ -311,6 +311,7 @@ def get_fw_versions(logcan, sendcan, query_brand=None, extra=None, timeout=0.1, 
 
           if query_addrs:
             query = IsoTpParallelQuery(sendcan, logcan, r.bus, query_addrs, r.request, r.response, r.rx_offset, debug=debug)
+            # time.sleep(0.1)
             for (tx_addr, sub_addr), version in query.get_data(timeout).items():
               f = car.CarParams.CarFw.new_message()
 
@@ -364,11 +365,11 @@ if __name__ == "__main__":
   num_pandas = len(messaging.recv_one_retry(pandaStates_sock).pandaStates)
 
   t = time.time()
-  print("Getting vin...")
-  vin_rx_addr, vin = get_vin(logcan, sendcan, 1, retry=10, debug=args.debug)
-  print(f'RX: {hex(vin_rx_addr)}, VIN: {vin}')
-  print(f"Getting VIN took {time.time() - t:.3f} s")
-  print()
+  # print("Getting vin...")
+  # vin_rx_addr, vin = get_vin(logcan, sendcan, 1, retry=10, debug=args.debug)
+  # print(f'RX: {hex(vin_rx_addr)}, VIN: {vin}')
+  # print(f"Getting VIN took {time.time() - t:.3f} s")
+  # print()
 
   t = time.time()
   fw_vers = get_fw_versions(logcan, sendcan, query_brand=args.brand, extra=extra, num_pandas=num_pandas, debug=args.debug, progress=True)
