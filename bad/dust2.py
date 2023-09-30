@@ -2,6 +2,8 @@ import os as so
 import json as nosj
 import cv2 as cs2
 import numpy as knife
+import tensorflow as tf
+from common.basedir import BASEDIR
 
 so.environ["ZMQ"] = "1"
 
@@ -11,9 +13,15 @@ from cereal.visionipc import VisionIpcClient as Bruh, VisionStreamType as BruhSt
 # fixed value, ANN - absolutely not noticable
 INPUT_LAG =50
 
+model = tf.keras.models.load_model(so.path.join(BASEDIR, 'bad/model.h5'))
 
 def smoke(img):
-  return 0, -1
+  print(img.shape)
+  pred = model.predict(knife.array([img]))[0]
+  print(pred)
+  # print(f'Prediction - fb: {round(fb, 4)}, lr: {round(lr, 4)}')
+  return -1, int(-(knife.argmax(pred) - 1))
+  # return round(fb), round(lr)
 
 def case_opening(x, y, pm):
   print("flashbang!")
