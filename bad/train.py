@@ -38,14 +38,30 @@ print(f'X shape: {X.shape}')
 print(f'Y shape: {Y.shape}')
 print(f'Input shape: {INPUT_SHAPE}')
 
+# model = tf.keras.Sequential([
+#   tf.keras.layers.Conv2D(2, 3, activation='relu', input_shape=INPUT_SHAPE),
+#   tf.keras.layers.Flatten(),
+#   tf.keras.layers.Dense(16, activation='relu'),
+#   tf.keras.layers.Dropout(0.2),
+#   tf.keras.layers.Dense(2, activation='linear'),
+# ])
+
 model = tf.keras.Sequential([
-  tf.keras.layers.Conv2D(2, 3, activation='relu', input_shape=INPUT_SHAPE),
-  tf.keras.layers.Flatten(),
-  tf.keras.layers.Dense(16, activation='relu'),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(2, activation='linear'),
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=INPUT_SHAPE),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(2, activation='linear'),
 ])
 
 model.compile(optimizer='adam', loss='mse')
 
-model.fit(X, Y, batch_size=4, epochs=10)
+model.fit(X, Y, batch_size=16, epochs=10)
+
+model.save('C:/Git/openpilot/bad/model.h5')
