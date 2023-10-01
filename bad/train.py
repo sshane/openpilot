@@ -231,26 +231,26 @@ input_prev = tf.keras.Input(shape=INPUT_SHAPE)
 input_cur = tf.keras.Input(shape=INPUT_SHAPE)
 
 # previous frame (0.5s ago)
-x = tf.keras.layers.Conv2D(16, (7, 7), strides=(2, 2), padding='same')(input_prev)
-y = tf.keras.layers.SpatialDropout2D(0.2)(x)
+x = tf.keras.layers.Conv2D(6, (7, 7), strides=(2, 2), padding='same')(input_prev)
+# y = tf.keras.layers.SpatialDropout2D(0.2)(x)
 x = tf.keras.layers.ELU()(x)
 x = tf.keras.layers.MaxPooling2D((2, 2))(x)
 
-x = tf.keras.layers.Conv2D(32, (3, 3), strides=(1, 1), padding='same')(x)
-y = tf.keras.layers.SpatialDropout2D(0.2)(x)
+x = tf.keras.layers.Conv2D(8, (3, 3), strides=(1, 1), padding='same')(x)
+# y = tf.keras.layers.SpatialDropout2D(0.2)(x)
 x = tf.keras.layers.ELU()(x)
 x = tf.keras.layers.MaxPooling2D((2, 2))(x)
 
 x = tf.keras.models.Model(inputs=input_prev, outputs=x)
 
 # current frame
-y = tf.keras.layers.Conv2D(16, (7, 7), strides=(2, 2), padding='same')(input_cur)
-y = tf.keras.layers.SpatialDropout2D(0.2)(y)
+y = tf.keras.layers.Conv2D(6, (7, 7), strides=(2, 2), padding='same')(input_cur)
+# y = tf.keras.layers.SpatialDropout2D(0.2)(y)
 y = tf.keras.layers.ELU()(y)
 y = tf.keras.layers.MaxPooling2D((2, 2))(y)
 
-y = tf.keras.layers.Conv2D(32, (3, 3), strides=(1, 1), padding='same')(y)
-y = tf.keras.layers.SpatialDropout2D(0.2)(y)
+y = tf.keras.layers.Conv2D(8, (3, 3), strides=(1, 1), padding='same')(y)
+# y = tf.keras.layers.SpatialDropout2D(0.2)(y)
 y = tf.keras.layers.ELU()(y)
 y = tf.keras.layers.MaxPooling2D((2, 2))(y)
 
@@ -260,15 +260,21 @@ y = tf.keras.models.Model(inputs=input_cur, outputs=y)
 combined = tf.keras.layers.concatenate([x.output, y.output])
 
 z = tf.keras.layers.Flatten()(combined)
-z = tf.keras.layers.Dense(16)(z)
+z = tf.keras.layers.Dense(8)(z)
+# z = tf.keras.layers.BatchNormalization()(z)
+z = tf.keras.layers.ELU()(z)
+z = tf.keras.layers.Dropout(0.2)(z)
+
+z = tf.keras.layers.Flatten()(combined)
+z = tf.keras.layers.Dense(8)(z)
 # z = tf.keras.layers.BatchNormalization()(z)
 z = tf.keras.layers.ELU()(z)
 # z = tf.keras.layers.Dropout(0.2)(z)
 
-# z = tf.keras.layers.Dense(4)(z)
+# z = tf.keras.layers.Dense(6)(z)
 # # z = tf.keras.layers.BatchNormalization()(z)
 # z = tf.keras.layers.ELU()(z)
-# # z = tf.keras.layers.Dropout(0.8)(z)
+# z = tf.keras.layers.Dropout(0.2)(z)
 
 
 # z = tf.keras.layers.Dense(2, activation="linear")(z)
@@ -372,10 +378,10 @@ try:
   # model.fit([X_prev, X_cur], Y_new,
   model.fit([X_prev, X_cur], Y_action,
   # model.fit(datagen.flow(X, Y_combined, batch_size=32, subset='training'),
-            batch_size=12,
-            epochs=50,
+            batch_size=32,
+            epochs=100,
             class_weight=class_weight_dict,
-            validation_split=0.2)
+            validation_split=0.33)
             # validation_data=datagen.flow(X, Y_combined, subset='validation'))
 except KeyboardInterrupt:
   pass
