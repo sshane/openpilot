@@ -350,7 +350,7 @@ Export('cereal', 'messaging', 'messaging_python', 'visionipc')
 SConscript([
   'body/board/SConscript',
   'opendbc/can/SConscript',
-  'panda/SConscript',
+#   'panda/SConscript',
 ])
 
 # Build rednose library and ekf models

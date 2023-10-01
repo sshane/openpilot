@@ -1,18 +1,32 @@
+import random
+
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import os
 import cv2
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+from sklearn.utils import compute_class_weight
+import random
+# from sklearn.model_selection import train_test_split
 
-IMGS_PATH = 'C:/Users/Shane/bad'
+IMGS_PATH = 'C:/Users/Shane/bad/new'
+# IMGS_PATH = '/mnt/c/Users/Shane/bad'
 
 images = []
-image_fns = [i for i in os.listdir(IMGS_PATH) if i.endswith('.png')]
+image_fns = [i for i in os.listdir(IMGS_PATH) if i.endswith('.png')
+             if random.uniform(0, 1) > 0.5
+             ]
 # print(image_fns)
-for img_fn in image_fns:
-  images.append(cv2.imread(f'{IMGS_PATH}/{img_fn}'))
+for img_fn in tqdm(image_fns):
+  img = cv2.imread(f'{IMGS_PATH}/{img_fn}')
+  img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  img = img.reshape(img.shape[0], img.shape[1], 1)
+  # print(img.shape)
+  # print((img / 255.).astype(np.float32))
+  # raise Exception
+  images.append((img / 255.).astype(np.float32))
 
 # raise Exception
 SAMPLES = len(images)
@@ -23,81 +37,253 @@ SAMPLES = len(images)
 X = np.array(images)
 
 
-Y = []
+Y_new = []
+Y_fb = []
+Y_lr = []
+Y_action = []
 for image_fn in image_fns:
   # print(image_fn)
   y_start_idx = image_fn.split('_').index('y')
   # print(image_fn)
   fb = int(image_fn.split('_')[y_start_idx + 1])
   lr = int(image_fn.split('_')[y_start_idx + 2])
+  Y_new.append([fb, lr])
   # Y.append([int(fb), int(lr)])
-  Y.append([1 if lr == 1 else 0,
-            1 if lr == 0 else 0,
-            1 if lr == -1 else 0])
-  # print(image_fn, fb, lr)
-# print(image_fns)
-# raise Exception
-Y = np.array(Y)
-print(Y)
-# Y = np.random.random((SAMPLES,))
+  Y_fb.append([1 if fb == 1 else 0,
+               1 if fb == 0 else 0,
+               1 if fb == -1 else 0])
+  Y_lr.append([1 if lr == 1 else 0,
+               1 if lr == 0 else 0,
+               1 if lr == -1 else 0])
 
-if TO_PLOT:=False:
-  for x, y in zip(X, Y):
+  # Initialize actions as [forward, backward, left, right, do_nothing]
+  actions = [0, 0, 0, 0, 0]
+
+  # because we don't want bias if both fb and lr are actuating, randomly pick one
+  use_lr = lr != 0
+  use_fb = fb != 0
+  if use_lr and use_fb:
+    if random.uniform(0, 1) > 0.5:
+      use_lr = False
+    else:
+      use_fb = False
+
+  if use_fb:
+    if fb == -1:
+      actions[1] = 1
+    else:
+      actions[0] = 1
+  elif use_lr:
+    if lr == 1:
+      actions[2] = 1
+    else:
+      actions[3] = 1
+  else:  # DO NOTHING
+    actions[4] = 1
+
+  Y_action.append(actions)
+
+  # print(image_fn, fb, lr)
+  # print(image_fns)
+# Y = np.array(Y)
+Y_combined = np.array(Y_action, dtype=np.float32)
+Y_new = np.array(Y_new, dtype=np.float32)
+print(Y_combined)
+
+# # raise Exception
+# Y_combined = []
+# for fb, lr in zip(Y_fb, Y_lr):
+#   # Create a 9-element list initialized with zeros
+#   combined = [0] * 9
+#
+#   # Index calculation: 3 * fb's index + lr's index
+#   index = 3 * fb.index(1) + lr.index(1)
+#   combined[index] = 1
+#
+#   Y_combined.append(combined)
+# Y_combined = np.array(Y_combined, dtype=np.float32)
+# # print(Y_combined)
+# # raise Exception
+
+del Y_fb, Y_lr
+
+
+# datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+#     rotation_range=10,
+#     zoom_range=0.1,
+#     width_shift_range=0.1,
+#     height_shift_range=0.1,
+#     horizontal_flip=True,
+#     vertical_flip=False
+# )
+#
+# o = datagen.flow(X, Y_combined, batch_size=32)
+# print(len(list(o)))
+# raise Exception
+
+
+
+# Y_fb = np.array(Y_fb, dtype=np.float32)
+# Y_lr = np.array(Y_lr, dtype=np.float32)
+
+
+# print(np.unique(Y_fb, return_counts=True))
+# print(np.unique(Y_lr, return_counts=True))
+# raise Exception
+
+
+# # balance
+# y_labels = np.argmax(Y, axis=1)
+# class_counts = np.bincount(y_labels)
+# max_class_index = np.argmax(class_counts)
+# target_count = sorted(class_counts)[-2]
+# majority_class_indices = np.where(y_labels == max_class_index)[0]
+# delete_indices = np.random.choice(majority_class_indices, size=len(majority_class_indices)-target_count, replace=False)
+# X = np.delete(X, delete_indices, axis=0)
+# Y = np.delete(Y, delete_indices, axis=0)
+#
+# print(len([i for i in Y if i[0]]))
+# print(len([i for i in Y if i[1]]))
+# print(len([i for i in Y if i[2]]))
+
+
+if TO_PLOT := False:
+  for x, y in zip(X, Y_new):
     plt.clf()
-    plt.imshow(x)
+    plt.imshow(x.astype(np.float32))
     plt.title(str(y))
-    plt.pause(0.2)
+    plt.pause(0.5)
 
   raise Exception
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25)
-del X, Y
+# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25)
+# del X, Y
 
 INPUT_SHAPE = images[0].shape
-print(f'X shape: {X_train.shape}, {X_test.shape}')
-print(f'Y shape: {Y_train.shape}, {Y_test.shape}')
+print(f'X shape: {X.shape}')
+print(f'Y shape: {Y_combined.shape}')
 print(f'Input shape: {INPUT_SHAPE}')
 
-# model = tf.keras.Sequential([
-#   tf.keras.layers.Conv2D(2, 3, activation='relu', input_shape=INPUT_SHAPE),
-#   tf.keras.layers.Flatten(),
-#   tf.keras.layers.Dense(16, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(2, activation='linear'),
-# ])
+
+datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+    rotation_range=10,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    zoom_range=0.1,
+    horizontal_flip=False,
+    fill_mode='nearest',
+    validation_split=0.5,
+)
+#
+# datagen.fit(X_train)
+
 
 model = tf.keras.Sequential([
-  tf.keras.layers.Conv2D(8, (3, 3), activation='relu', padding='same', input_shape=INPUT_SHAPE),
+  tf.keras.layers.Conv2D(32, (3, 3), padding='same', input_shape=INPUT_SHAPE),
+  # tf.keras.layers.SpatialDropout2D(0.2),
+  # tf.keras.layers.BatchNormalization(),
+  tf.keras.layers.LeakyReLU(),
   tf.keras.layers.MaxPooling2D((2, 2)),
-  tf.keras.layers.BatchNormalization(),
 
-  tf.keras.layers.Conv2D(8, (3, 3), activation='relu', padding='same', input_shape=INPUT_SHAPE),
+  tf.keras.layers.Conv2D(16, (3, 3), padding='same'),
+  # tf.keras.layers.SpatialDropout2D(0.2),
+  # tf.keras.layers.BatchNormalization(),
+  tf.keras.layers.LeakyReLU(),
   tf.keras.layers.MaxPooling2D((2, 2)),
-  tf.keras.layers.BatchNormalization(),
+
+  # tf.keras.layers.Conv2D(12, (3, 3), padding='same'),
+  # # tf.keras.layers.SpatialDropout2D(0.2),
+  # tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.LeakyReLU(),
+  # tf.keras.layers.MaxPooling2D((2, 2)),
+
+  # tf.keras.layers.Conv2D(24, (3, 3), padding='same'),
+  # tf.keras.layers.SpatialDropout2D(0.2),
+  # tf.keras.layers.LeakyReLU(),
+  # tf.keras.layers.MaxPooling2D((2, 2)),
+
+  # tf.keras.layers.Conv2D(16, (3, 3), padding='same'),
+  # tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.LeakyReLU(),
+  # tf.keras.layers.MaxPooling2D((2, 2)),
+  # tf.keras.layers.Dropout(0.1),
+
+  # tf.keras.layers.Conv2D(16, (5, 5), padding='same'),
+  # tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.LeakyReLU(),
+  # tf.keras.layers.MaxPooling2D((2, 2)),
+  # tf.keras.layers.Dropout(0.1),
 
   tf.keras.layers.Flatten(),
 
-  tf.keras.layers.Dense(24),
+  tf.keras.layers.Dense(16),  # , kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+  # tf.keras.layers.BatchNormalization(),
   tf.keras.layers.LeakyReLU(),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.Dropout(0.7),
 
-  tf.keras.layers.Dense(12),
+  tf.keras.layers.Dense(16),#, kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+  # tf.keras.layers.BatchNormalization(),
   tf.keras.layers.LeakyReLU(),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.Dropout(0.2),
 
-  tf.keras.layers.Dense(3, activation='softmax'),
+  # tf.keras.layers.Dense(8),  # , kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+  # tf.keras.layers.LeakyReLU(),
+  # # tf.keras.layers.BatchNormalization(),
+  # # tf.keras.layers.Dropout(0.1),
+
+  # tf.keras.layers.Dense(16),  # , kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+  # # tf.keras.layers.BatchNormalization(),
+  # tf.keras.layers.LeakyReLU(),
+  # tf.keras.layers.Dropout(0.1),
+
+  # tf.keras.layers.Dense(5, activation='softmax'),
+  tf.keras.layers.Dense(2, activation='linear'),
 ])
 
+
+# fb_output = tf.keras.layers.Dense(3, activation='softmax', name='fb_output')(model.output)
+# lr_output = tf.keras.layers.Dense(3, activation='softmax', name='lr_output')(model.output)
+# full_model = tf.keras.Model(inputs=model.input, outputs=[fb_output, lr_output])
+
+# classes are not weighted properly
+Y_classes = np.argmax(Y_combined, axis=1)
+class_weights = compute_class_weight('balanced', classes=np.unique(Y_classes), y=Y_classes)
+class_weight_dict = dict(enumerate(class_weights))
+print(class_weight_dict)
+
+
+
+# opt = tf.keras.optimizers.SGD(lr=0.001)
+# opt = tf.keras.optimizers.Adamax(lr=0.001)
+opt = tf.keras.optimizers.Adam(lr=0.001)
+# Compile the model with categorical crossentropy for both outputs
+# full_model.compile(optimizer='adam',
+#                    loss={'fb_output': 'categorical_crossentropy',
+#                          'lr_output': 'categorical_crossentropy'},
+#                    metrics=['accuracy'])
+
+
 # model.compile(optimizer='adam', loss='mse')
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+# model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=opt, loss='mse', metrics=['mae'])
 
-model.fit(X_train, Y_train, validation_data=(X_test, Y_test), batch_size=6, epochs=10)
+try:
+  # full_model.fit(X, {'fb_output': Y_fb, 'lr_output': Y_lr},
+  # model.fit(X, Y_combined,
+  model.fit(X, Y_new,
+  # model.fit(datagen.flow(X, Y_combined, batch_size=32, subset='training'),
+            batch_size=16,
+            epochs=50,
+            # class_weight=class_weight_dict,
+            validation_split=0.5)
+            # validation_data=datagen.flow(X, Y_combined, subset='validation'))
+except KeyboardInterrupt:
+  pass
 
-i = input('Would you like to save? ')
+i = input('\n\nWould you like to save? ')
 if i.lower().strip() in ('y', 'yes', 'sure', 'why not'):
   print('saved winner model')
-  model.save('C:/Git/openpilot/bad/model.h5')
+  model.save('C:/Git/openpilot/bad/models/model.h5')
+  # model.save('/mnt/c/Git/openpilot/bad/models/model.h5')
 else:
   print('didn\'t save loser model')

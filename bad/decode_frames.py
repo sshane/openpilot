@@ -18,6 +18,8 @@ OUT_DIR = '/mnt/c/Users/Shane/bad'
 CLASSES = {'fl': 1, 'fn': 0, 'fr': -1}
 
 for route_name in os.listdir(BODY_DATA_DIR):
+  # if 'c816' not in route_name:
+  #   continue
   for segment_fn in os.listdir(os.path.join(BODY_DATA_DIR, route_name)):
     rlog_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'rlog.bz2')
     dcamera_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'dcamera.hevc')
@@ -54,16 +56,16 @@ for route_name in os.listdir(BODY_DATA_DIR):
       success, image = vidcap.read()
       if not success:
         break
-      image = cv2.resize(image, (round(FRAME_SIZE[0] / 3), round(FRAME_SIZE[1] / 3)))
+      image = cv2.resize(image, (round(FRAME_SIZE[0] / 5), round(FRAME_SIZE[1] / 5)))
       frames.append(image)
 
     for idx, frame in enumerate(frames):
-      if idx % 10 != 0:
+      if idx % 5 != 0:
         continue
       # joystick_idx = round(np.interp(idx, [0, len(frames)], [0, len(joystick_packets)]))
 
       # frames are 20hz, predict half a second in future (10 frames)
-      actuators_idx = min(round(np.interp(idx + 10, [0, len(frames)], [0, len(actuators_packets)])),
+      actuators_idx = min(round(np.interp(idx + 5, [0, len(frames)], [0, len(actuators_packets)])),
                           len(actuators_packets) - 1)
       # print(idx, joystick_idx)
       print(idx, actuators_idx)
@@ -77,10 +79,10 @@ for route_name in os.listdir(BODY_DATA_DIR):
 
       if TO_SAVE := True:
         actuators_pred = actuators_packets[actuators_idx]
-        img_fn = "/mnt/c/Users/Shane/bad/image{:>3}_y_{}_{}_seg{}.png".format(idx,
-                                                                              round(actuators_pred[0]),
-                                                                              round(actuators_pred[1]),
-                                                                              segment_fn)
+        img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
+                                                                                            segment_fn, idx,
+                                                                                            round(actuators_pred[0]),
+                                                                                            round(actuators_pred[1]))
         print(img_fn)
         cv2.imwrite(img_fn, frame)
 
@@ -102,7 +104,7 @@ for route_name in os.listdir(BODY_DATA_DIR):
     # print(len(joystick_packets), cnt)
 
     print(rlog_path, dcamera_path)
-    print('Done with seg', route_name)
+    print('Done with seg', route_name, segment_fn)
     # raise Exception('Done with first seg!')
   print()
 
@@ -135,9 +137,9 @@ while success:
   if count % 20 == 0:
     train = 'train' if every else 'test'
     every = not every
-    img_fn = "/mnt/c/Users/Shane/bad/{}/image{:>3}_y_{}_{}_seg17.png".format(train, count,
-                                                                             round(train_y[count + 10][0]),
-                                                                             round(train_y[count + 10][1]))
+    img_fn = "/mnt/c/Users/Shane/bad/new/{}/image{:>3}_y_{}_{}_seg17.png".format(train, count,
+                                                                                 round(train_y[count + 10][0]),
+                                                                                 round(train_y[count + 10][1]))
     cv2.imwrite(img_fn, image)
     print(img_fn)
   print(image.shape)
