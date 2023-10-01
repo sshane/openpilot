@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 
 import tensorflow as tf
@@ -9,16 +10,17 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.utils import compute_class_weight
 import random
+from common.basedir import BASEDIR
 # from sklearn.model_selection import train_test_split
 
-IMGS_PATH = 'C:/Users/Shane/bad/new'
 # IMGS_PATH = '/mnt/c/Users/Shane/bad'
+IMGS_PATH = os.path.join(BASEDIR, 'bad/data/new')
 
 images = []
 image_fns = [i for i in os.listdir(IMGS_PATH) if i.endswith('.png')
-             if random.uniform(0, 1) > 0.5
+             # if random.uniform(0, 1) > 0.5
              ]
-# print(image_fns)
+
 for img_fn in tqdm(image_fns):
   img = cv2.imread(f'{IMGS_PATH}/{img_fn}')
   img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -219,12 +221,12 @@ model = tf.keras.Sequential([
   tf.keras.layers.Dense(16),  # , kernel_regularizer=tf.keras.regularizers.l2(0.01)),
   # tf.keras.layers.BatchNormalization(),
   tf.keras.layers.LeakyReLU(),
-  # tf.keras.layers.Dropout(0.7),
+  tf.keras.layers.Dropout(0.5),
 
   tf.keras.layers.Dense(16),#, kernel_regularizer=tf.keras.regularizers.l2(0.01)),
   # tf.keras.layers.BatchNormalization(),
   tf.keras.layers.LeakyReLU(),
-  # tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dropout(0.5),
 
   # tf.keras.layers.Dense(8),  # , kernel_regularizer=tf.keras.regularizers.l2(0.01)),
   # tf.keras.layers.LeakyReLU(),
@@ -272,7 +274,7 @@ try:
   # model.fit(X, Y_combined,
   model.fit(X, Y_new,
   # model.fit(datagen.flow(X, Y_combined, batch_size=32, subset='training'),
-            batch_size=16,
+            batch_size=8,
             epochs=50,
             # class_weight=class_weight_dict,
             validation_split=0.5)

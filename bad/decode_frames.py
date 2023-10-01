@@ -1,17 +1,19 @@
+#!/usr/bin/env python3
 from tools.lib.framereader import FrameReader
 import os
 from tools.lib.logreader import LogReader
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+from common.basedir import BASEDIR
 
 import cv2
 
 # FrameReader()
 FRAME_SIZE = (1928, 1208)
 
-BODY_DATA_DIR = '/mnt/c/Users/Shane/Downloads/body-data'
-OUT_DIR = '/mnt/c/Users/Shane/bad'
+BODY_DATA_DIR = os.path.join(BASEDIR, 'bad/body-data')
+OUT_DIR = os.path.join(BASEDIR, 'bad/data')
 
 # CLASSES = {'nn': [0, 0], 'fn': [0, 0], 'bn': [0, 0], 'nl': [0, 0], 'nr': [0, 0], 'fr': [0, 0], 'fn': [0, 0]}
 # CLASSES = {'fl': [-1, 0], 'fn': [-1, 0], 'fr': [-1, 0]}
@@ -60,12 +62,12 @@ for route_name in os.listdir(BODY_DATA_DIR):
       frames.append(image)
 
     for idx, frame in enumerate(frames):
-      if idx % 5 != 0:
+      if idx % 10 != 0:
         continue
       # joystick_idx = round(np.interp(idx, [0, len(frames)], [0, len(joystick_packets)]))
 
       # frames are 20hz, predict half a second in future (10 frames)
-      actuators_idx = min(round(np.interp(idx + 5, [0, len(frames)], [0, len(actuators_packets)])),
+      actuators_idx = min(round(np.interp(idx + 10, [0, len(frames)], [0, len(actuators_packets)])),
                           len(actuators_packets) - 1)
       # print(idx, joystick_idx)
       print(idx, actuators_idx)
@@ -79,13 +81,14 @@ for route_name in os.listdir(BODY_DATA_DIR):
 
       if TO_SAVE := True:
         actuators_pred = actuators_packets[actuators_idx]
-        img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
-                                                                                            segment_fn, idx,
-                                                                                            round(actuators_pred[0]),
-                                                                                            round(actuators_pred[1]))
+        # img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
+        img_fn = "{}/bad/data/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(BASEDIR,
+                                                                                 route_name.split('_')[0],
+                                                                                 segment_fn, idx,
+                                                                                 round(actuators_pred[0]),
+                                                                                 round(actuators_pred[1]))
         print(img_fn)
         cv2.imwrite(img_fn, frame)
-
 
     # frames = fr.get(0, fr.frame_count)
     # print(len(frames), np.array(frames).shape)
