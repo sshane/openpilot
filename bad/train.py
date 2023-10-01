@@ -23,8 +23,9 @@ Y = []
 for image_fn in image_fns:
   # print(image_fn)
   y_start_idx = image_fn.split('_').index('y')
-  fb = image_fn.split('_')[y_start_idx + 1]
-  lr = image_fn.split('_')[y_start_idx + 2]
+  # print(image_fn)
+  fb = int(image_fn.split('_')[y_start_idx + 1])
+  lr = int(image_fn.split('_')[y_start_idx + 2])
   # Y.append([int(fb), int(lr)])
   Y.append([1 if lr == 1 else 0,
             1 if lr == 0 else 0,
