@@ -23,22 +23,29 @@ for route_name in os.listdir(BODY_DATA_DIR):
     dcamera_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'dcamera.hevc')
 
     lr = LogReader(rlog_path)
-    fr = FrameReader(dcamera_path)
+    # fr = FrameReader(dcamera_path)
 
     all_msgs = sorted(lr, key=lambda m: m.logMonoTime)
 
     joystick_packets = []
+    actuators_packets = []
     cnt = 0
     for msg in all_msgs:
       # TODO: think this is a minimum of ~10Hz?
       if msg.which() == 'testJoystick':
         if len(msg.testJoystick.axes):
           # print(msg.testJoystick.axes)
-          joystick_packets.append((msg.logMonoTime, msg.testJoystick.axes))
+          joystick_packets.append((msg.logMonoTime, list(msg.testJoystick.axes)))
+      elif msg.which() == 'carControl':
+        # actuators_packets.append((msg.carControl.actuators.steer, msg.carControl.actuators.accel))
+        actuators_packets.append((msg.carControl.actuators.accel / 4, msg.carControl.actuators.steer))
+        # print(msg.carControl.actuators.steer, msg.carControl.actuators.accel)
 
     # fr.get(0, fr.frame_count, pix_fmt='rgb24')
     # print('don')
     # continue
+    print(len(actuators_packets), 'len')
+    # raise Exception
 
     vidcap = cv2.VideoCapture(dcamera_path)
     # count = 0
@@ -49,24 +56,33 @@ for route_name in os.listdir(BODY_DATA_DIR):
         break
       image = cv2.resize(image, (round(FRAME_SIZE[0] / 3), round(FRAME_SIZE[1] / 3)))
       frames.append(image)
-      continue
 
-      joystick_idx = round(np.interp(count, [0, len()]))
+    for idx, frame in enumerate(frames):
+      if idx % 10 != 0:
+        continue
+      # joystick_idx = round(np.interp(idx, [0, len(frames)], [0, len(joystick_packets)]))
 
-      img_fn = "/mnt/c/Users/Shane/bad/{}/image{:>3}_y_{}_{}_seg17.png".format(train, count,
-                                                                               round(train_y[count + 10][0]),
-                                                                               round(train_y[count + 10][1]))
-      cv2.imwrite(img_fn, image)
-      count += 1
-    print('lenframes', len(frames))
+      # frames are 20hz, predict half a second in future (10 frames)
+      actuators_idx = min(round(np.interp(idx + 10, [0, len(frames)], [0, len(actuators_packets)])),
+                          len(actuators_packets) - 1)
+      # print(idx, joystick_idx)
+      print(idx, actuators_idx)
 
-    # for idx, frame in enumerate(frames):
-    #   joystick_idx = np.interp(idx, [0, len(frames)], [0, len(joystick_packets)])
-    #   print(idx, joystick_idx)
-    #   plt.clf()
-    #   plt.imshow(frame)
-    #   plt.title(str(joystick_packets[joystick_idx]))
-    #   plt.pause(2)
+      if TO_PLOT := False:
+        plt.clf()
+        plt.imshow(frame)
+        # plt.title(str(joystick_packets[joystick_idx]))
+        plt.title(str(actuators_packets[actuators_idx]))
+        plt.pause(0.2)
+
+      if TO_SAVE := True:
+        actuators_pred = actuators_packets[actuators_idx]
+        img_fn = "/mnt/c/Users/Shane/bad/image{:>3}_y_{}_{}_seg{}.png".format(idx,
+                                                                              round(actuators_pred[0]),
+                                                                              round(actuators_pred[1]),
+                                                                              segment_fn)
+        print(img_fn)
+        cv2.imwrite(img_fn, frame)
 
 
     # frames = fr.get(0, fr.frame_count)
@@ -86,7 +102,10 @@ for route_name in os.listdir(BODY_DATA_DIR):
     # print(len(joystick_packets), cnt)
 
     print(rlog_path, dcamera_path)
+    print('Done with seg', route_name)
+    # raise Exception('Done with first seg!')
   print()
+
 
 raise Exception
 # TEST_SEG = '/mnt/c/Users/Shane/Downloads/body-data/c81675c456f9f72d_2023-09-27--17-23-04/5'
