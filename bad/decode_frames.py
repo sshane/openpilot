@@ -6,6 +6,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 from common.basedir import BASEDIR
+import copy
 
 import cv2
 
@@ -20,11 +21,20 @@ OUT_DIR = os.path.join(BASEDIR, 'bad/data')
 CLASSES = {'fl': 1, 'fn': 0, 'fr': -1}
 
 for route_name in os.listdir(BODY_DATA_DIR):
-  # if 'c816' not in route_name:
+  if 'c452f8ee3bec47d6' not in route_name:  # route gathered avoiding obstacles
+    continue
+  # print(route_name)
+  # if '9bb74d06b7261e2c|2023-09-27--17-02-23' not in route_name:
   #   continue
   for segment_fn in os.listdir(os.path.join(BODY_DATA_DIR, route_name)):
-    rlog_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'rlog.bz2')
-    dcamera_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'dcamera.hevc')
+    # if segment_fn != '3':
+    #   continue
+    # rlog_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'rlog.bz2')
+    # dcamera_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, 'dcamera.hevc')
+    rlog_name = next(i for i in os.listdir(os.path.join(BODY_DATA_DIR, route_name, segment_fn)) if i.endswith('.bz2'))
+    rlog_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, rlog_name)
+    dcamera_name = next(i for i in os.listdir(os.path.join(BODY_DATA_DIR, route_name, segment_fn)) if i.endswith('.hevc'))
+    dcamera_path = os.path.join(BODY_DATA_DIR, route_name, segment_fn, dcamera_name)
 
     lr = LogReader(rlog_path)
     # fr = FrameReader(dcamera_path)
@@ -61,34 +71,39 @@ for route_name in os.listdir(BODY_DATA_DIR):
       image = cv2.resize(image, (round(FRAME_SIZE[0] / 5), round(FRAME_SIZE[1] / 5)))
       frames.append(image)
 
+    prev_frame = None
     for idx, frame in enumerate(frames):
       if idx % 10 != 0:
         continue
-      # joystick_idx = round(np.interp(idx, [0, len(frames)], [0, len(joystick_packets)]))
 
-      # frames are 20hz, predict half a second in future (10 frames)
-      actuators_idx = min(round(np.interp(idx + 10, [0, len(frames)], [0, len(actuators_packets)])),
-                          len(actuators_packets) - 1)
-      # print(idx, joystick_idx)
-      print(idx, actuators_idx)
+      if prev_frame is not None:
+        # frames are 20hz, predict half a second in future (10 frames)
+        actuators_idx = min(round(np.interp(idx + 10, [0, len(frames)], [0, len(actuators_packets)])),
+                            len(actuators_packets) - 1)
+        # print(idx, joystick_idx)
+        print(idx, actuators_idx)
 
-      if TO_PLOT := False:
-        plt.clf()
-        plt.imshow(frame)
-        # plt.title(str(joystick_packets[joystick_idx]))
-        plt.title(str(actuators_packets[actuators_idx]))
-        plt.pause(0.2)
+        if TO_PLOT := True:
+          plt.clf()
+          plt.imshow(frame)
+          # plt.title(str(joystick_packets[joystick_idx]))
+          plt.title(str(actuators_packets[actuators_idx]))
+          plt.pause(0.5)
 
-      if TO_SAVE := True:
-        actuators_pred = actuators_packets[actuators_idx]
-        # img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
-        img_fn = "{}/bad/data/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(BASEDIR,
-                                                                                 route_name.split('_')[0],
-                                                                                 segment_fn, idx,
-                                                                                 round(actuators_pred[0]),
-                                                                                 round(actuators_pred[1]))
-        print(img_fn)
-        cv2.imwrite(img_fn, frame)
+        if TO_SAVE := False:
+          actuators_pred = actuators_packets[actuators_idx]
+          # img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
+          sample_folder = "{}/bad/data/best/dongle{}-seg{}_sample{:04}_y_{}_{}_".format(BASEDIR,
+                                                                                       route_name.split('_')[0],
+                                                                                       segment_fn, idx,
+                                                                                       round(actuators_pred[0]),
+                                                                                       round(actuators_pred[1]))
+
+          os.makedirs(sample_folder, exist_ok=True)
+          cv2.imwrite(os.path.join(sample_folder, 'image_0_prev.png'), prev_frame)
+          cv2.imwrite(os.path.join(sample_folder, 'image_1_cur.png'), frame)
+
+      prev_frame = copy.copy(frame)
 
     # frames = fr.get(0, fr.frame_count)
     # print(len(frames), np.array(frames).shape)

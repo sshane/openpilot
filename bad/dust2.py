@@ -7,7 +7,9 @@ from common.basedir import BASEDIR
 import time
 from common.filter_simple import FirstOrderFilter
 import math
+import copy as flash
 import matplotlib.pyplot as plt
+from collections import deque
 
 so.environ["ZMQ"] = "1"
 
@@ -20,28 +22,29 @@ INPUT_LAG =50
 # model = tf.keras.models.load_model(so.path.join(BASEDIR, 'bad/models/model-high-acc-low-valacc.h5'))
 model = tf.keras.models.load_model(so.path.join(BASEDIR, 'bad/models/model.h5'))
 
-fof = FirstOrderFilter(0, 0, 0.2)
-lrf = FirstOrderFilter(0, 0, 0.2)
-fbf = FirstOrderFilter(0, 0, 0.2)
+fof = FirstOrderFilter(0, 0.2, 0.05)
+lrf = FirstOrderFilter(0, 0, 0.05)
+fbf = FirstOrderFilter(0, 0, 0.05)
+frame_deque = deque([], 10)
 
 def random_argmax(probs):
   # return sorted(list(enumerate(probs)), key=lambda x: x[1], reverse=True)[0][0]
   return knife.random.choice(len(probs), p=probs)
 
 
-def smoke(img):
-  print(img.shape)
-  pred = model.predict(knife.array([img]))[0]
-  print(pred)
-  bumped_pred = (math.e ** (pred * 5) - 1)
+def smoke(img, prev_img):
+  print('img shapes', img.shape, prev_img.shape)
+  pred = model.predict([[knife.array([img]), knife.array([prev_img])]])[0]
+  # bumped_pred = (math.e ** (pred * 5) - 1)
   # bumped_pred = pred * 2
   # bumped_pred[0] = -0.8
-  print(bumped_pred)
-  return knife.clip(bumped_pred, -1, 1).tolist()
-  # pred[3] *= 0.5  # max(pred[3] - 0.1, 0)
-  # pred[1] *= 2  # max(pred[3] - 0.1, 0)
-  idx = random_argmax(pred)
-  # idx = knife.argmax(pred)
+  # print(bumped_pred)
+  # return 0, 0
+  # return knife.clip(bumped_pred, -1, 1).tolist()
+  # # pred[3] *= 0.5  # max(pred[3] - 0.1, 0)
+  # # pred[1] *= 2  # max(pred[3] - 0.1, 0)
+  # idx = random_argmax(pred)
+  idx = knife.argmax(pred)
 
   print(pred, idx)
   idx = round(fof.update(idx))
@@ -92,10 +95,13 @@ def inferno_loop():
     # plt.imshow(img)
     # plt.pause(10)
 
-    x, y = smoke(img / 255.)
+    if len(frame_deque) == 10:
+      print('sending')
+      x, y = smoke(img / 255., frame_deque[0] / 255.)
 
-    case_opening(x, y, pm)
-    time.sleep(0.2)
+      case_opening(x, y, pm)
+      # time.sleep(0.2)
+    frame_deque.append(flash.copy(img))
 
 
 if __name__=="__main__":
