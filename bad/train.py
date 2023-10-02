@@ -14,7 +14,7 @@ from common.basedir import BASEDIR
 # from sklearn.model_selection import train_test_split
 
 # IMGS_PATH = '/mnt/c/Users/Shane/bad'
-IMGS_PATH = os.path.join(BASEDIR, 'bad/data/best')
+IMGS_PATH = os.path.join(BASEDIR, 'bad/data/all')
 
 # images = []
 sample_folders = [i for i in os.listdir(IMGS_PATH) #if i.endswith('.png')
@@ -52,10 +52,11 @@ for sample_folder_name in tqdm(sample_folders):
   use_lr = lr != 0
   use_fb = fb != 0
   if use_lr and use_fb:
-    if random.uniform(0, 1) > 0.5:
-      use_lr = False
-    else:
-      use_fb = False
+    use_fb = False
+    # if random.uniform(0, 1) > 0.5:
+    #   use_lr = False
+    # else:
+    #   use_fb = False
 
   if use_fb:
     if fb == -1:
@@ -231,28 +232,28 @@ input_prev = tf.keras.Input(shape=INPUT_SHAPE)
 input_cur = tf.keras.Input(shape=INPUT_SHAPE)
 
 # previous frame (0.5s ago)
-x = tf.keras.layers.Conv2D(6, (7, 7), strides=(2, 2), padding='same')(input_prev)
-# y = tf.keras.layers.SpatialDropout2D(0.2)(x)
+x = tf.keras.layers.Conv2D(16, (7, 7), strides=(2, 2), padding='same', kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(input_prev)
+y = tf.keras.layers.SpatialDropout2D(0.1)(x)
 x = tf.keras.layers.ELU()(x)
-x = tf.keras.layers.MaxPooling2D((2, 2))(x)
+# x = tf.keras.layers.MaxPooling2D((2, 2))(x)
 
-x = tf.keras.layers.Conv2D(8, (3, 3), strides=(1, 1), padding='same')(x)
-# y = tf.keras.layers.SpatialDropout2D(0.2)(x)
+x = tf.keras.layers.Conv2D(24, (3, 3), strides=(2, 2), padding='same', kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(x)
+x = tf.keras.layers.SpatialDropout2D(0.1)(x)
 x = tf.keras.layers.ELU()(x)
-x = tf.keras.layers.MaxPooling2D((2, 2))(x)
+# x = tf.keras.layers.MaxPooling2D((2, 2))(x)
 
 x = tf.keras.models.Model(inputs=input_prev, outputs=x)
 
 # current frame
-y = tf.keras.layers.Conv2D(6, (7, 7), strides=(2, 2), padding='same')(input_cur)
-# y = tf.keras.layers.SpatialDropout2D(0.2)(y)
+y = tf.keras.layers.Conv2D(16, (7, 7), strides=(2, 2), padding='same', kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(input_cur)
+y = tf.keras.layers.SpatialDropout2D(0.1)(y)
 y = tf.keras.layers.ELU()(y)
-y = tf.keras.layers.MaxPooling2D((2, 2))(y)
+# y = tf.keras.layers.MaxPooling2D((2, 2))(y)
 
-y = tf.keras.layers.Conv2D(8, (3, 3), strides=(1, 1), padding='same')(y)
-# y = tf.keras.layers.SpatialDropout2D(0.2)(y)
+y = tf.keras.layers.Conv2D(24, (3, 3), strides=(2, 2), padding='same', kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(y)
+y = tf.keras.layers.SpatialDropout2D(0.1)(y)
 y = tf.keras.layers.ELU()(y)
-y = tf.keras.layers.MaxPooling2D((2, 2))(y)
+# y = tf.keras.layers.MaxPooling2D((2, 2))(y)
 
 y = tf.keras.models.Model(inputs=input_cur, outputs=y)
 
@@ -260,16 +261,14 @@ y = tf.keras.models.Model(inputs=input_cur, outputs=y)
 combined = tf.keras.layers.concatenate([x.output, y.output])
 
 z = tf.keras.layers.Flatten()(combined)
-z = tf.keras.layers.Dense(8)(z)
-# z = tf.keras.layers.BatchNormalization()(z)
+z = tf.keras.layers.Dense(32, kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(z)
 z = tf.keras.layers.ELU()(z)
-z = tf.keras.layers.Dropout(0.2)(z)
+# z = tf.keras.layers.BatchNormalization()(z)
 
 z = tf.keras.layers.Flatten()(combined)
-z = tf.keras.layers.Dense(8)(z)
-# z = tf.keras.layers.BatchNormalization()(z)
+z = tf.keras.layers.Dense(16, kernel_regularizer=tf.keras.regularizers.l2(0.01), bias_regularizer=tf.keras.regularizers.l2(0.01))(z)
 z = tf.keras.layers.ELU()(z)
-# z = tf.keras.layers.Dropout(0.2)(z)
+# z = tf.keras.layers.BatchNormalization()(z)
 
 # z = tf.keras.layers.Dense(6)(z)
 # # z = tf.keras.layers.BatchNormalization()(z)
@@ -360,7 +359,7 @@ print(class_weight_dict)
 
 # opt = tf.keras.optimizers.SGD(lr=0.001)
 # opt = tf.keras.optimizers.Adamax(lr=0.001)
-opt = tf.keras.optimizers.Adam(lr=0.0005, amsgrad=True)
+opt = tf.keras.optimizers.Adam(lr=0.001, amsgrad=True)
 # Compile the model with categorical crossentropy for both outputs
 # full_model.compile(optimizer='adam',
 #                    loss={'fb_output': 'categorical_crossentropy',
@@ -381,7 +380,7 @@ try:
             batch_size=32,
             epochs=100,
             class_weight=class_weight_dict,
-            validation_split=0.33)
+            validation_split=0.25)
             # validation_data=datagen.flow(X, Y_combined, subset='validation'))
 except KeyboardInterrupt:
   pass

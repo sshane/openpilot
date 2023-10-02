@@ -21,8 +21,8 @@ OUT_DIR = os.path.join(BASEDIR, 'bad/data')
 CLASSES = {'fl': 1, 'fn': 0, 'fr': -1}
 
 for route_name in os.listdir(BODY_DATA_DIR):
-  if 'c452f8ee3bec47d6' not in route_name:  # route gathered avoiding obstacles
-    continue
+  # if 'c452f8ee3bec47d6|2023-10-01--12-49-07' not in route_name:  # route gathered avoiding obstacles
+  #   continue
   # print(route_name)
   # if '9bb74d06b7261e2c|2023-09-27--17-02-23' not in route_name:
   #   continue
@@ -83,17 +83,17 @@ for route_name in os.listdir(BODY_DATA_DIR):
         # print(idx, joystick_idx)
         print(idx, actuators_idx)
 
-        if TO_PLOT := True:
+        if TO_PLOT := False:
           plt.clf()
           plt.imshow(frame)
           # plt.title(str(joystick_packets[joystick_idx]))
           plt.title(str(actuators_packets[actuators_idx]))
           plt.pause(0.5)
 
-        if TO_SAVE := False:
+        if TO_SAVE := True:
           actuators_pred = actuators_packets[actuators_idx]
           # img_fn = "/mnt/c/Users/Shane/bad/new/dongle{}-seg{}_image{:>4}_y_{}_{}_.png".format(route_name.split('_')[0],
-          sample_folder = "{}/bad/data/best/dongle{}-seg{}_sample{:04}_y_{}_{}_".format(BASEDIR,
+          sample_folder = "{}/bad/data/all/dongle{}-seg{}_sample{:04}_y_{}_{}_".format(BASEDIR,
                                                                                        route_name.split('_')[0],
                                                                                        segment_fn, idx,
                                                                                        round(actuators_pred[0]),
