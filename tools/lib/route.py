@@ -280,12 +280,11 @@ class SegmentRange:
       return [start]
 
     s = slice(start, end, step)
+    # no specified end or using relative indexing, need number of segments
     if end is None or end < 0 or (start is not None and start < 0):
-      # no specified endd or using relative indexing, need number of segments
-      segs = range(get_max_seg_number_cached(self) + 1)
+      return list(range(get_max_seg_number_cached(self) + 1))[s]
     else:
-      segs = range(end + 1)
-    return list(segs)[s]
+      return list(range(end + 1))[s]
 
   @property
   def selector(self) -> str:
