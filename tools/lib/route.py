@@ -273,18 +273,19 @@ class SegmentRange:
     assert m is not None, f"Invalid slice: {self._slice}"
     start, end, step = (None if s is None else int(s) for s in m.groups())
 
-    # positive start is easier to work with
-    if start is not None and start < 0:
-      start += get_max_seg_number_cached(self) + 1
-
-    # if start is specified without end, set end to get a single segment
+    # one segment specified
     if start is not None and end is None and ':' not in self._slice:
-      end = start + 1
+      if start < 0:
+        start += get_max_seg_number_cached(self) + 1
+      return [start]
 
+    s = slice(start, end, step)
     if end is None or end < 0 or (start is not None and start < 0):
-      return list(range(get_max_seg_number_cached(self) + 1))[slice(start, end, step)]
+      # no specified endd or using relative indexing, need number of segments
+      segs = range(get_max_seg_number_cached(self) + 1)
     else:
-      return list(range(end + 1))[slice(start, end, step)]
+      segs = range(end + 1)
+    return list(segs)[s]
 
   @property
   def selector(self) -> str:
