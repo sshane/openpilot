@@ -90,22 +90,6 @@ class TestLogReader(unittest.TestCase):
 
   @parameterized.expand([
     (f"{TEST_ROUTE}/0", False),
-    (f"{TEST_ROUTE}/0:2", False),
-    (f"{TEST_ROUTE}/0:", True),
-    (f"{TEST_ROUTE}/-1", True),
-    (f"{TEST_ROUTE}", True),
-  ])
-  def test_slicing_api_call(self, segment_range, api_call):
-    with mock.patch("openpilot.tools.lib.route.get_max_seg_number_cached") as max_seg_mock:
-      max_seg_mock.return_value = NUM_SEGS
-      _ = SegmentRange(segment_range).seg_idxs
-      if api_call:
-        max_seg_mock.assert_called()
-      else:
-        max_seg_mock.assert_not_called()
-
-  @parameterized.expand([
-    (f"{TEST_ROUTE}/0", False),
     (f"{TEST_ROUTE}/:2", False),
     (f"{TEST_ROUTE}/0:", True),
     (f"{TEST_ROUTE}/-1", True),
@@ -114,7 +98,7 @@ class TestLogReader(unittest.TestCase):
   def test_slicing_api_call(self, segment_range, api_call):
     with mock.patch("openpilot.tools.lib.route.get_max_seg_number_cached") as max_seg_mock:
       max_seg_mock.return_value = NUM_SEGS
-      parse_slice(SegmentRange(segment_range))
+      _ = SegmentRange(segment_range).seg_idxs
       self.assertEqual(api_call, max_seg_mock.called)
 
   @pytest.mark.slow
