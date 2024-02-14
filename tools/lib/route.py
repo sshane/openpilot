@@ -277,7 +277,7 @@ class SegmentRange:
     # if start is specified without end, set end to get a single segment
     if start is not None and end is None and ':' not in self._slice:
       if start < 0:
-        end = start + (get_max_seg_number_cached(self) + 2)
+        end = start + get_max_seg_number_cached(self) + 2
       else:
         end = start + 1
 
