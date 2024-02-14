@@ -238,7 +238,6 @@ class SegmentName:
 
 @cache
 def get_max_seg_number_cached(sr: 'SegmentRange') -> int:
-  print('hit the API')
   try:
     api = CommaApi(get_token())
     return cast(int, api.get("/v1/route/" + sr.route_name.replace("/", "|"))["segment_numbers"][-1])
@@ -283,9 +282,7 @@ class SegmentRange:
 
     relative = end is None or end < 0 or (start is not None and start < 0)
     max_seg = (get_max_seg_number_cached(self) if relative else end) + 1
-
-    ret = list(range(max_seg))[slice(start, end, step)]
-    return ret
+    return list(range(max_seg))[slice(start, end, step)]
 
   @property
   def selector(self) -> str:
