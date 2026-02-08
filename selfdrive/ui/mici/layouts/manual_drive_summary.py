@@ -7,6 +7,7 @@ Poker hand themed with waddle/jacket references.
 """
 
 import json
+import random
 import pyray as rl
 from typing import Optional, Callable
 
@@ -62,13 +63,11 @@ class ManualDriveSummaryDialog(NavWidget):
     # Load data immediately since show_event may not be called for modals
     self._load_session()
     self._load_historical()
+    # Pick random texts once for this instance
+    self._header_text, self._header_color = self._pick_header()
+    self._encouragement_text = self._pick_encouragement()
     # Set back callback to dismiss modal
     self.set_back_callback(lambda: gui_app.set_modal_overlay(None))
-
-  def show_event(self):
-    super().show_event()
-    self._load_session()
-    self._load_historical()
 
   def _load_session(self):
     """Load the last session data from session_history in ManualDriveStats"""
@@ -156,17 +155,34 @@ class ManualDriveSummaryDialog(NavWidget):
       self._card_rank = "10"
       self._overall_grade = "poor"
 
-  def _get_header_text(self) -> tuple[str, rl.Color]:
-    """Get header text and color based on grade"""
+  def _pick_header(self) -> tuple[str, rl.Color]:
     if self._overall_grade == "good":
-      return "Waddle Driver!", GREEN
+      return random.choice([
+        "Waddle Driver!",
+        "KP Earned!",
+        "Porch-worthy!",
+        "CCR Energy!",
+        "Priest-approved!",
+        "Pure Waddle!",
+      ]), GREEN
     elif self._overall_grade == "ok":
-      return "Decent Drive", YELLOW
+      return random.choice([
+        "Decent Drive",
+        "Getting There!",
+        "Not SS... Yet",
+        "Shedding Jackets",
+        "Almost Waddle",
+      ]), YELLOW
     else:
-      return "Jackets...", RED
+      return random.choice([
+        "Jackets...",
+        "Huge Oof",
+        "SS Vibes",
+        "Full Jackets!",
+        "Jacketed!",
+      ]), RED
 
-  def _get_encouragement_text(self) -> str:
-    """Get encouragement or criticism text based on performance"""
+  def _pick_encouragement(self) -> str:
     if not self._session_data:
       return "No data available for this drive."
 
@@ -191,48 +207,77 @@ class ManualDriveSummaryDialog(NavWidget):
       perfect_launches = launch_total > 0 and launch_good == launch_total
 
       if self._card_rank == "A" and stalls == 0 and lugs == 0 and perfect_shifts and perfect_launches:
-        messages.append("PERFECT! Waddle is driving! Kacper threw his glasses!")
+        messages.append(random.choice([
+          "PERFECT! Waddle is driving! Kacper threw his glasses!",
+          "FLAWLESS! Even Kacper couldn't believe it!",
+          "LEGENDARY! Full waddle, zero jackets, KP maxed!",
+        ]))
       elif self._card_rank == "A":
-        messages.append("Aces! Porch-worthy waddle, KP earned!")
+        messages.append(random.choice([
+          "Aces! Porch-worthy waddle, KP earned!",
+          "Aces! CCR material right here!",
+          "Aces! Waddle would be proud!",
+        ]))
       elif self._card_rank == "K":
-        messages.append("Kings! Waddle energy, CCM vibes!")
+        messages.append(random.choice([
+          "Kings! Waddle energy, CCM vibes!",
+          "Kings! Solid drive, almost porch-worthy!",
+          "Kings! Not SS, definitely QG!",
+        ]))
       if stalls == 0 and launch_stalled == 0:
-        messages.append("No stalls!")
+        messages.append(random.choice(["No stalls!", "Zero stalls, clean!", "Stall-free!"]))
       if perfect_shifts:
-        messages.append("Perfect shifts - priest-approved!")
+        messages.append(random.choice([
+          "Perfect shifts - priest-approved!",
+          "Every shift was butter!",
+          "Flawless shifting, pure waddle!",
+        ]))
       elif upshift_total > 0 and upshift_good == upshift_total:
-        messages.append("Perfect upshifts!")
+        messages.append(random.choice(["Perfect upshifts!", "Upshifts on point!", "Clean upshifts!"]))
       if downshift_total > 0 and downshift_good >= downshift_total * 0.8:
-        messages.append("Great rev matching!")
+        messages.append(random.choice(["Great rev matching!", "Rev matching on point!", "Heel-toe vibes!"]))
       if perfect_launches:
-        messages.append("Flawless launches!")
+        messages.append(random.choice(["Flawless launches!", "Every launch was smooth!", "Launch game maxed!"]))
       elif launch_total > 0 and launch_good >= launch_total * 0.8:
-        messages.append("Smooth launches!")
+        messages.append(random.choice(["Smooth launches!", "Launches looking clean!", "Good clutch control!"]))
       if not messages:
-        messages.append("Keep channeling waddle!")
+        messages.append(random.choice(["Keep channeling waddle!", "Waddle energy maintained!", "Stay on this path!"]))
 
     elif self._overall_grade == "ok":
       if self._card_rank == "Q":
-        messages.append("Queens - almost there!")
+        messages.append(random.choice([
+          "Queens - almost there!",
+          "Queens - one step from waddle!",
+          "Queens - so close to KP!",
+        ]))
       else:
-        messages.append("Jacks - improving, not SS!")
+        messages.append(random.choice([
+          "Jacks - improving, not SS!",
+          "Jacks - shedding jackets slowly!",
+          "Jacks - waddle is within reach!",
+        ]))
       if stalls > 0:
-        messages.append(f"Only {stalls} stall{'s' if stalls > 1 else ''} - shedding jackets!")
+        messages.append(f"Only {stalls} stall{'s' if stalls > 1 else ''} - {random.choice(['shedding jackets!', 'getting better!', 'less than before?'])}")
       if lugs > 0:
-        messages.append(f"Watch RPMs - {lugs} lug{'s' if lugs > 1 else ''}.")
+        messages.append(f"{random.choice(['Watch RPMs', 'Easy on the low RPMs'])} - {lugs} lug{'s' if lugs > 1 else ''}.")
       if upshift_total > 0 and upshift_good < upshift_total:
-        messages.append("Smoother upshifts needed.")
+        messages.append(random.choice(["Smoother upshifts needed.", "Upshifts could be cleaner.", "Work on those upshifts!"]))
 
     else:  # poor - jackets
-      messages.append("Jacketed! Huge oof. SS vibes!")
+      messages.append(random.choice([
+        "Jacketed! Huge oof. SS vibes!",
+        "Full jackets! CCR this is not.",
+        "Oof. Jacket city. QG needed!",
+        "Jacketed hard. Waddle disapproves.",
+      ]))
       if stalls > 2:
-        messages.append(f"{stalls} stalls - more gas, slower clutch!")
+        messages.append(f"{stalls} stalls - {random.choice(['more gas, slower clutch!', 'find that bite point!', 'easy on the clutch!'])}")
       if launch_stalled > 0:
-        messages.append(f"{launch_stalled} stalled launch{'es' if launch_stalled > 1 else ''} - find bite point!")
+        messages.append(f"{launch_stalled} stalled launch{'es' if launch_stalled > 1 else ''} - {random.choice(['find bite point!', 'more revs before release!', 'hold clutch longer!'])}")
       if lugs > 3:
-        messages.append(f"Lugging {lugs}x - downshift sooner!")
+        messages.append(f"Lugging {lugs}x - {random.choice(['downshift sooner!', 'drop a gear!', 'RPMs too low!'])}")
       if not messages[1:]:
-        messages.append("Even the best got jacketed at first. QG!")
+        messages.append(random.choice(["Even the best got jacketed at first. QG!", "Keep practicing, waddle awaits!", "Every driver starts here. KP is coming!"]))
 
     return " ".join(messages)
 
@@ -246,7 +291,7 @@ class ManualDriveSummaryDialog(NavWidget):
     h += 75   # Shift score bar
     h += 195  # Stats card
     # Encouragement text (estimate)
-    encouragement = self._get_encouragement_text()
+    encouragement = self._encouragement_text
     wrapped = wrap_text(font_roman, encouragement, 22, 500)
     h += len(wrapped) * 28 + 20
     return h
@@ -273,7 +318,7 @@ class ManualDriveSummaryDialog(NavWidget):
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, top_card_h), 0.02, 10, BG_CARD)
 
     # Header
-    header_text, header_color = self._get_header_text()
+    header_text, header_color = self._header_text, self._header_color
     rl.draw_text_ex(font_bold, header_text, rl.Vector2(x + 15, y + 12), 44, 0, header_color)
     y += 58
 
@@ -338,7 +383,7 @@ class ManualDriveSummaryDialog(NavWidget):
     y += 200
 
     # Encouragement/criticism text
-    encouragement = self._get_encouragement_text()
+    encouragement = self._encouragement_text
     wrapped = wrap_text(font_roman, encouragement, 22, w)
     for line in wrapped:
       rl.draw_text_ex(font_roman, line, rl.Vector2(x, y), 22, 0, LIGHT_GRAY)

@@ -36,9 +36,6 @@ class MiciMainLayout(Widget):
     self._onroad_time_delay: float | None = None
     self._setup = False
 
-    # Manual drive summary dialog
-    self._drive_summary_dialog: ManualDriveSummaryDialog | None = None
-
     # Initialize widgets
     self._home_layout = MiciHomeLayout()
     self._alerts_layout = MiciOffroadAlerts()
@@ -150,8 +147,7 @@ class MiciMainLayout(Widget):
                    session.get('upshifts', 0) > 0 or
                    session.get('launches', 0) > 0)
     if duration > 30 and has_activity:
-      self._drive_summary_dialog = ManualDriveSummaryDialog()
-      gui_app.set_modal_overlay(self._drive_summary_dialog)
+      gui_app.set_modal_overlay(ManualDriveSummaryDialog())
 
   def _set_mode_for_started(self, onroad_transition: bool = False):
     if ui_state.started:
