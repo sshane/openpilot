@@ -76,27 +76,27 @@ class ManualStatsWidget(Widget):
     if not cs:
       return
 
-    # Widget dimensions - extend to bottom with same margin as top
+    # Widget dimensions - full width with equal margins
     margin = 10
-    w = 250
-    h = int(rect.height - 2 * margin)  # Full height minus top and bottom margin
-    x = int(rect.x + rect.width - w - margin)
+    w = int(rect.width - 2 * margin)
+    h = int(rect.height - 2 * margin)
+    x = int(rect.x + margin)
     y = int(rect.y + margin)
 
     # Background
-    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.08, 10, BG_COLOR)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.2, 10, BG_COLOR)
 
     font = gui_app.font(FontWeight.MEDIUM)
     font_bold = gui_app.font(FontWeight.BOLD)
-    px = x + 14
-    py = y + 12
+    px = x + 16
+    py = y + 2
 
-    # === RPM METER ===
+    # === RPM METER (top, full width) ===
     rpm = cs.engineRpm
-    self._draw_rpm_meter(px, py, w - 28, 50, rpm, cs)
-    py += 62
+    self._draw_rpm_meter(px, py, w - 32, 60, rpm, cs)
+    py += 64
 
-    # === GEAR + SHIFT GRADE FLASH ===
+    # === GEAR (left) + RPM NUMBER (right) on same line ===
     gear = cs.gearActual
     gear_text = str(gear) if gear > 0 else "N"
 
@@ -120,35 +120,43 @@ class ManualStatsWidget(Widget):
       else:
         gear_color = RED
         grade_text = "✗"
-      rl.draw_text_ex(font_bold, gear_text, rl.Vector2(px, py), 55, 0, gear_color)
-      rl.draw_text_ex(font_bold, grade_text, rl.Vector2(px + 42, py + 8), 40, 0, gear_color)
+      rl.draw_text_ex(font_bold, gear_text, rl.Vector2(px, py), 66, 0, gear_color)
+      rl.draw_text_ex(font_bold, grade_text, rl.Vector2(px + 50, py + 10), 48, 0, gear_color)
     else:
-      rl.draw_text_ex(font_bold, gear_text, rl.Vector2(px, py), 55, 0, WHITE)
+      rl.draw_text_ex(font_bold, gear_text, rl.Vector2(px, py), 66, 0, WHITE)
 
     # Shift suggestion arrow
     suggestion = self._stats.get('shift_suggestion', 'ok')
     if suggestion == 'upshift':
-      rl.draw_text_ex(font_bold, "↑", rl.Vector2(px + 95, py + 8), 43, 0, GREEN)
+      rl.draw_text_ex(font_bold, "↑", rl.Vector2(px + 115, py + 10), 52, 0, GREEN)
     elif suggestion == 'downshift':
-      rl.draw_text_ex(font_bold, "↓", rl.Vector2(px + 95, py + 8), 43, 0, YELLOW)
+      rl.draw_text_ex(font_bold, "↓", rl.Vector2(px + 115, py + 10), 52, 0, YELLOW)
 
-    py += 62
+    # RPM number (right-aligned, same line as gear)
+    rpm_text = f"{int(round(self._rpm_filter.x / 10) * 10)}"
+    rpm_width = rl.measure_text_ex(font_bold, rpm_text, 44, 0).x
+    rpm_label_width = rl.measure_text_ex(font, "rpm", 22, 0).x
+    rpm_right = x + w - 16
+    rl.draw_text_ex(font_bold, rpm_text, rl.Vector2(rpm_right - rpm_width - rpm_label_width - 22, py + 22), 44, 0, WHITE)
+    rl.draw_text_ex(font, "rpm", rl.Vector2(rpm_right - rpm_label_width, py + 42), 22, 0, GRAY)
+
+    py += 68
 
     # === LAUNCH FEEDBACK ===
     launches = self._stats.get('launches', 0)
     good_launches = self._stats.get('good_launches', 0)
     if self._stats.get('is_launching', False):
-      rl.draw_text_ex(font, "LAUNCHING...", rl.Vector2(px, py), 26, 0, CYAN)
+      rl.draw_text_ex(font, "LAUNCHING...", rl.Vector2(px, py), 31, 0, CYAN)
     elif launches > 0:
       pct = int(good_launches / launches * 100) if launches > 0 else 0
       color = GREEN if pct >= 75 else (YELLOW if pct >= 50 else GRAY)
-      rl.draw_text_ex(font, f"Launch: {good_launches}/{launches}", rl.Vector2(px, py), 26, 0, color)
+      rl.draw_text_ex(font, f"Launch: {good_launches}/{launches}", rl.Vector2(px, py), 31, 0, color)
     else:
-      rl.draw_text_ex(font, "Launch: -", rl.Vector2(px, py), 26, 0, GRAY)
-    py += 34
+      rl.draw_text_ex(font, "Launch: -", rl.Vector2(px, py), 31, 0, GRAY)
+    py += 36
 
     # === STATS ROW ===
-    font_size = 24
+    font_size = 29
 
     # Stalls & Lugs on same line
     stalls = self._stats.get('stalls', 0)
@@ -161,7 +169,7 @@ class ManualStatsWidget(Widget):
       stall_color = GREEN if stalls == 0 else RED
       lug_color = GREEN if lugs == 0 else YELLOW
       rl.draw_text_ex(font, f"S:{stalls}", rl.Vector2(px, py), font_size, 0, stall_color)
-      rl.draw_text_ex(font, f"L:{lugs}", rl.Vector2(px + 65, py), font_size, 0, lug_color)
+      rl.draw_text_ex(font, f"L:{lugs}", rl.Vector2(px + 78, py), font_size, 0, lug_color)
 
     # Shift quality
     shifts = self._stats.get('shifts', 0)
@@ -169,18 +177,18 @@ class ManualStatsWidget(Widget):
     if shifts > 0:
       pct = int(good_shifts / shifts * 100)
       color = GREEN if pct >= 80 else (YELLOW if pct >= 50 else RED)
-      rl.draw_text_ex(font, f"Sh:{pct}%", rl.Vector2(px + 135, py), font_size, 0, color)
+      rl.draw_text_ex(font, f"Sh:{pct}%", rl.Vector2(px + 162, py), font_size, 0, color)
     else:
-      rl.draw_text_ex(font, "Sh:-", rl.Vector2(px + 135, py), font_size, 0, GRAY)
+      rl.draw_text_ex(font, "Sh:-", rl.Vector2(px + 162, py), font_size, 0, GRAY)
 
   def _draw_rpm_meter(self, x: int, y: int, w: int, h: int, rpm: float, cs):
     """Draw RPM bar with color zones and rev-match target"""
     font = gui_app.font(FontWeight.MEDIUM)
 
-    # Bar background (pushed down for bigger RPM text)
-    bar_h = 20
-    bar_y = y + 32
-    rl.draw_rectangle_rounded(rl.Rectangle(x, bar_y, w, bar_h), 0.3, 5, rl.Color(40, 40, 40, 200))
+    # Bar at top, taller
+    bar_h = 56
+    bar_y = y + 4
+    rl.draw_rectangle_rounded(rl.Rectangle(x, bar_y, w, bar_h), 0.2, 5, rl.Color(40, 40, 40, 200))
 
     # Calculate fill width
     rpm_pct = min(rpm / RPM_REDLINE, 1.0)
@@ -227,24 +235,21 @@ class ManualStatsWidget(Widget):
         # Over redline - show red warning clipped to right side
         down_x = x + w
         rl.draw_rectangle(down_x - 4, bar_y - 5, 4, bar_h + 10, red)
-        rl.draw_text_ex(font, f"{int(round(down_rpm / 10) * 10)}!", rl.Vector2(down_x - 45, bar_y + bar_h + 3), 20, 0, red)
+        rl.draw_text_ex(font, f"{int(round(down_rpm / 10) * 10)}!", rl.Vector2(down_x - 54, bar_y + bar_h + 4), 24, 0, red)
       elif down_rpm > RPM_TARGET_MIN_DISPLAY:
         # Safe downshift target (cyan)
         down_x = x + int(w * (down_rpm / RPM_REDLINE))
         rl.draw_rectangle(down_x - 2, bar_y - 5, 4, bar_h + 10, cyan)
-        rl.draw_text_ex(font, f"{int(round(down_rpm / 10) * 10)}", rl.Vector2(down_x - 20, bar_y + bar_h + 3), 20, 0, cyan)
+        rl.draw_text_ex(font, f"{int(round(down_rpm / 10) * 10)}", rl.Vector2(down_x - 24, bar_y + bar_h + 4), 24, 0, cyan)
 
       # Upshift target (white) - only show if above minimum display threshold
       if up_rpm > RPM_TARGET_MIN_DISPLAY and up_rpm < RPM_REDLINE:
         up_x = x + int(w * (up_rpm / RPM_REDLINE))
         rl.draw_rectangle(up_x - 2, bar_y - 5, 4, bar_h + 10, white)
-        rl.draw_text_ex(font, f"{int(round(up_rpm / 10) * 10)}", rl.Vector2(up_x - 20, bar_y + bar_h + 3), 20, 0, white)
+        rl.draw_text_ex(font, f"{int(round(up_rpm / 10) * 10)}", rl.Vector2(up_x - 24, bar_y + bar_h + 4), 24, 0, white)
 
-    # RPM text (filtered for smooth display, rounded to nearest 10)
+    # Update RPM filter (text drawn in main render next to gear)
     self._rpm_filter.update(rpm)
-    rpm_text = f"{int(round(self._rpm_filter.x / 10) * 10)}"
-    rl.draw_text_ex(font, rpm_text, rl.Vector2(x, y), 28, 0, WHITE)
-    rl.draw_text_ex(font, "rpm", rl.Vector2(x + 70, y + 5), 20, 0, GRAY)
 
   def _load_stats(self):
     """Load current session stats"""
