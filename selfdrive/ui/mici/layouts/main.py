@@ -1,4 +1,3 @@
-import json
 import pyray as rl
 from enum import IntEnum
 import cereal.messaging as messaging
@@ -136,7 +135,7 @@ class MiciMainLayout(Widget):
     data = self._params.get("ManualDriveStats")
     if not data:
       return
-    stats = data if isinstance(data, dict) else json.loads(data)
+    stats = data
     history = stats.get('session_history', [])
     if not history:
       return

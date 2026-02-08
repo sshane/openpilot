@@ -6,7 +6,6 @@ encouraging or critical feedback based on performance.
 Poker hand themed with waddle/jacket references.
 """
 
-import json
 import random
 import pyray as rl
 from typing import Optional
@@ -72,7 +71,7 @@ class ManualDriveSummaryDialog(NavWidget):
     if not data:
       return
 
-    stats = json.loads(data)
+    stats = data
     history = stats.get('session_history', [])
 
     # Last session
@@ -201,18 +200,21 @@ class ManualDriveSummaryDialog(NavWidget):
           "PERFECT! Waddle is driving! Kacper threw his glasses!",
           "FLAWLESS! Even Kacper couldn't believe it!",
           "LEGENDARY! Full waddle, zero jackets, KP maxed!",
+          "PERFECT! Weixing just shed a tear of joy. Kirby is star-spinning.",
         ]))
       elif self._card_rank == "A":
         messages.append(random.choice([
           "Aces! Porch-worthy waddle, KP earned!",
           "Aces! CCR material right here!",
           "Aces! Waddle would be proud!",
+          "Aces! Weixing raised an eyebrow, in a good way. Kirby did a little twirl.",
         ]))
       elif self._card_rank == "K":
         messages.append(random.choice([
           "Kings! Waddle energy, CCM vibes!",
           "Kings! Solid drive, almost porch-worthy!",
           "Kings! Not SS, definitely QG!",
+          "Kings! Weixing didn't complain. For Weixing, that's a compliment. Kirby is chilling.",
         ]))
       if stalls == 0 and launch_stalled == 0:
         messages.append(random.choice(["No stalls!", "Zero stalls, clean!", "Stall-free!"]))
@@ -239,12 +241,14 @@ class ManualDriveSummaryDialog(NavWidget):
           "Queens - almost there!",
           "Queens - one step from waddle!",
           "Queens - so close to KP!",
+          "Queens - Weixing checked his watch. Kirby yawned.",
         ]))
       else:
         messages.append(random.choice([
           "Jacks - improving, not SS!",
           "Jacks - shedding jackets slowly!",
           "Jacks - waddle is within reach!",
+          "Jacks - Weixing pinched the bridge of his nose. Kirby deflated.",
         ]))
       if stalls > 0:
         messages.append(f"Only {stalls} stall{'s' if stalls > 1 else ''} - {random.choice(['shedding jackets!', 'getting better!', 'less than before?'])}")
@@ -259,6 +263,7 @@ class ManualDriveSummaryDialog(NavWidget):
         "Full jackets! CCR this is not.",
         "Oof. Jacket city. QG needed!",
         "Jacketed hard. Waddle disapproves.",
+        "Weixing pretends he doesn't know you. Kirby swallowed the car whole.",
       ]))
       if stalls > 2:
         messages.append(f"{stalls} stalls - {random.choice(['more gas, slower clutch!', 'find that bite point!', 'easy on the clutch!'])}")

@@ -5,7 +5,7 @@ Shows historical stats and trends for manual transmission driving.
 """
 
 import datetime
-import json
+import random
 import pyray as rl
 
 from openpilot.common.params import Params
@@ -34,6 +34,9 @@ class ManualStatsLayout(NavWidget):
     self._params = Params()
     self._scroll_panel = GuiScrollPanel2(horizontal=False)
     self._stats: dict = {}
+    self._hand_text: str = ""
+    self._hand_color: rl.Color = GRAY
+    self._encouragement_text: str = ""
     self.set_back_callback(back_callback)
 
   def show_event(self):
@@ -42,12 +45,15 @@ class ManualStatsLayout(NavWidget):
     self._load_stats()
 
   def _load_stats(self):
-    """Load historical stats from Params"""
+    """Load historical stats from Params and cache random text picks"""
     data = self._params.get("ManualDriveStats")
     if data:
-      self._stats = data if isinstance(data, dict) else json.loads(data)
+      self._stats = data
     else:
       self._stats = {}
+    # Pick random texts once per page visit (not every frame)
+    self._hand_text, self._hand_color = self._get_overall_hand()
+    self._encouragement_text = self._get_encouragement()
 
   def _render(self, rect: rl.Rectangle):
     content_height = self._measure_content_height(rect)
@@ -81,9 +87,8 @@ class ManualStatsLayout(NavWidget):
       return
 
     # Overall hand rating
-    hand_rating, hand_color = self._get_overall_hand()
     y = self._draw_card(x, y, w, "Your Hand", [
-      ("Overall Rating", hand_rating, hand_color),
+      ("Overall Rating", self._hand_text, self._hand_color),
       ("Total Drives", str(self._stats.get('total_drives', 0)), WHITE),
       ("Total Drive Time", self._format_time(self._stats.get('total_drive_time', 0)), WHITE),
       ("Total Stalls", str(self._stats.get('total_stalls', 0)), self._stall_color(self._stats.get('total_stalls', 0))),
@@ -172,8 +177,7 @@ class ManualStatsLayout(NavWidget):
 
     # Encouragement based on progress (with text wrapping)
     y += 10
-    encouragement = self._get_encouragement()
-    wrapped_lines = wrap_text(font_roman, encouragement, 24, w - 10)
+    wrapped_lines = wrap_text(font_roman, self._encouragement_text, 24, w - 10)
     for line in wrapped_lines:
       rl.draw_text_ex(font_roman, line, rl.Vector2(x, y), 24, 0, LIGHT_GRAY)
       y += 30
@@ -588,11 +592,11 @@ class ManualStatsLayout(NavWidget):
     if lower_better:
       if trend < 0:
         return "Improving!", GREEN
-      return "Getting worse", RED
+      return random.choice(["Getting worse", "Getting worse - Weixing is shaking his head. Kirby turned around."]), RED
     else:
       if trend > 0:
         return "Improving!", GREEN
-      return "Getting worse", RED
+      return random.choice(["Getting worse", "Getting worse - Weixing is shaking his head. Kirby turned around."]), RED
 
   def _get_overall_hand(self) -> tuple[str, rl.Color]:
     """Calculate overall poker hand rating based on all stats"""
@@ -623,27 +627,86 @@ class ManualStatsLayout(NavWidget):
         score += 5  # Bonus for improving
 
     if score >= 98 and stall_rate == 0:
-      return "Royal Flush - Waddle is driving! Kacper threw his glasses!", GREEN
+      return random.choice([
+        "Royal Flush - Waddle is driving! Kacper threw his glasses!",
+        "Royal Flush - Perfection! Pure waddle energy!",
+        "Royal Flush - Legendary! KP maxed out!",
+        "Royal Flush - CCR material! Waddle certified!",
+        "Royal Flush - Elite! Priest-approved waddle!",
+        "Royal Flush - Weixing just shed a tear of joy. Kirby is star-spinning.",
+      ]), GREEN
     elif score >= 95 and stall_rate == 0:
-      return "Royal Flush - Porch-worthy waddle! KP earned!", GREEN
+      return random.choice([
+        "Royal Flush - Porch-worthy waddle! KP earned!",
+        "Royal Flush - Top-tier driving, almost flawless!",
+        "Royal Flush - So close to perfection! Waddle approved!",
+        "Royal Flush - KP is proud, keep this up!",
+        "Royal Flush - Premium waddle, just shy of legendary!",
+        "Royal Flush - Weixing put your photo on his fridge. Kirby gave you a star.",
+      ]), GREEN
     elif score >= 90:
-      return "Straight Flush - Elite waddle, CCM vibes!", GREEN
+      return random.choice([
+        "Straight Flush - Elite waddle, CCM vibes!",
+        "Straight Flush - Near-perfect, porch is calling!",
+        "Straight Flush - Waddle royalty!",
+        "Straight Flush - Weixing raised an eyebrow, in a good way. Kirby did a little twirl.",
+      ]), GREEN
     elif score >= 85:
-      return "Four of a Kind - Priest-approved waddle!", GREEN
+      return random.choice([
+        "Four of a Kind - Priest-approved waddle!",
+        "Four of a Kind - Strong waddle game!",
+        "Four of a Kind - CCR energy building!",
+        "Four of a Kind - Weixing almost smiled. Kirby perked up.",
+      ]), GREEN
     elif score >= 80:
-      return "Full House - Solid waddle, not SS!", GREEN
+      return random.choice([
+        "Full House - Solid waddle, not SS!",
+        "Full House - Consistent waddle vibes!",
+        "Full House - QG territory!",
+        "Full House - Weixing didn't complain. For Weixing, that's a compliment. Kirby is chilling.",
+      ]), GREEN
     elif score >= 70:
-      return "Flush - Good waddle, almost KP", YELLOW
+      return random.choice([
+        "Flush - Good waddle, almost KP",
+        "Flush - Getting there, waddle incoming!",
+        "Flush - Shedding jackets nicely!",
+        "Flush - Weixing looked up from his phone briefly. Kirby yawned.",
+      ]), YELLOW
     elif score >= 60:
-      return "Straight - Improving, not SS yet", YELLOW
+      return random.choice([
+        "Straight - Improving, not SS yet",
+        "Straight - Progress! Keep pushing!",
+        "Straight - Jacket count dropping!",
+        "Straight - Weixing checked his watch. Kirby fell asleep.",
+      ]), YELLOW
     elif score >= 50:
-      return "Three of a Kind - Getting there, shake off jackets", YELLOW
+      return random.choice([
+        "Three of a Kind - Getting there, shake off jackets",
+        "Three of a Kind - Waddle is within reach!",
+        "Three of a Kind - Keep at it, less jackets soon!",
+        "Three of a Kind - Weixing pinched the bridge of his nose. Kirby deflated.",
+      ]), YELLOW
     elif score >= 40:
-      return "Two Pair - Jackets territory", YELLOW
+      return random.choice([
+        "Two Pair - Jackets territory",
+        "Two Pair - Room to grow, QG!",
+        "Two Pair - Still shedding jackets",
+        "Two Pair - Weixing closed his laptop and stared out the window. Kirby popped.",
+      ]), YELLOW
     elif score >= 30:
-      return "One Pair - Jacketed, huge oof", RED
+      return random.choice([
+        "One Pair - Jacketed, huge oof",
+        "One Pair - Jacket city, but improving?",
+        "One Pair - SS vibes, keep practicing!",
+        "One Pair - Weixing blocked your number. Kirby ate your clutch.",
+      ]), RED
     else:
-      return "High Card - SS! Full jackets!", RED
+      return random.choice([
+        "High Card - SS! Full jackets!",
+        "High Card - Jacketed hard! QG needed!",
+        "High Card - Waddle disapproves. Keep going!",
+        "High Card - Weixing pretends he doesn't know you. Kirby swallowed the car whole.",
+      ]), RED
 
   def _get_encouragement(self) -> str:
     """Get encouragement based on overall progress"""
@@ -661,12 +724,24 @@ class ManualStatsLayout(NavWidget):
       recent_scores.append(int(good / total * 100) if total > 0 else 100)
 
     if total_drives == 0:
-      return "Start driving to see your stats! Time to earn your first waddle KP."
+      return random.choice([
+        "Start driving to see your stats! Time to earn your first waddle KP.",
+        "No drives yet! Get out there and start your waddle journey!",
+        "Empty stats - the porch awaits your first drive!",
+      ])
 
     if total_drives <= 2:
       if total_stalls == 0:
-        return "No stalls yet! Waddle energy from day 1. Keep it up!"
-      return f"{total_stalls} stall{'s' if total_stalls > 1 else ''} so far - every waddle driver starts somewhere. QG!"
+        return random.choice([
+          "No stalls yet! Waddle energy from day 1. Keep it up!",
+          "Zero stalls early on! Natural waddle talent?!",
+          "Clean start! Priest-approved from the jump!",
+        ])
+      return random.choice([
+        f"{total_stalls} stall{'s' if total_stalls > 1 else ''} so far - every waddle driver starts somewhere. QG!",
+        f"{total_stalls} stall{'s' if total_stalls > 1 else ''} early on - totally normal, waddle is coming!",
+        f"{total_stalls} stall{'s' if total_stalls > 1 else ''} - shedding jackets already. Keep going!",
+      ])
 
     stall_rate = total_stalls / total_drives
 
@@ -681,18 +756,55 @@ class ManualStatsLayout(NavWidget):
       if recent_avg == 0:
         # Check for crazy good performance
         if len(recent_scores) >= 3 and all(s >= 95 for s in recent_scores[-3:]):
-          return f"Last {num_days}d: 95%+ shifts, NO stalls?! Waddle is driving! Kacper threw his glasses!"
+          return random.choice([
+            f"Last {num_days}d: 95%+ shifts, NO stalls?! Waddle is driving! Kacper threw his glasses!",
+            f"Last {num_days}d: near-perfect shifts, zero stalls! Legendary waddle!",
+            f"Last {num_days}d: flawless! Porch-worthy, priest-approved, KP maxed!",
+          ])
         if improving:
-          return f"Last {num_days}d: no stalls AND improving? Waddle energy! QG to KP!"
-        return f"Last {num_days}d: no stalls - waddle game strong! Not SS, priest-approved!"
+          return random.choice([
+            f"Last {num_days}d: no stalls AND improving? Waddle energy! QG to KP!",
+            f"Last {num_days}d: stall-free and trending up! CCR energy!",
+            f"Last {num_days}d: zero stalls, scores climbing! Porch incoming!",
+          ])
+        return random.choice([
+          f"Last {num_days}d: no stalls - waddle game strong! Not SS, priest-approved!",
+          f"Last {num_days}d: stall-free! Solid waddle vibes!",
+          f"Last {num_days}d: clean driving, no jackets! Keep it up!",
+        ])
       elif recent_avg < stall_rate:
-        return f"Last {num_days}d: better than avg - shedding jackets, channeling waddle!"
+        return random.choice([
+          f"Last {num_days}d: better than avg - shedding jackets, channeling waddle!",
+          f"Last {num_days}d: fewer stalls than usual! De-jacketing in progress!",
+          f"Last {num_days}d: improving! Waddle is within reach!",
+        ])
 
-    if stall_rate < 0.5:
+    if total_stalls == 0:
+      return random.choice([
+        "Zero stalls overall! Waddle game is immaculate!",
+        "Not a single stall! Priest-approved driving!",
+        "Stall-free career! Pure waddle energy!",
+      ])
+
+    drives_per_stall = round(total_drives / total_stalls)
+
+    if stall_rate < 1:
       if improving:
-        return f"< 1 stall per 2 drives AND improving (last {num_days}d)! Porch-worthy waddle progress!"
-      return "< 1 stall per 2 drives - solid waddle vibes, not SS!"
-    elif stall_rate < 1:
-      return "~1 stall per drive - de-jacketing in progress!"
+        return random.choice([
+          f"1 stall every {drives_per_stall} drives AND improving (last {num_days}d)! Porch-worthy waddle progress!",
+          f"1 stall every {drives_per_stall} drives AND getting better (last {num_days}d)! CCR material!",
+          f"1 stall every {drives_per_stall} drives AND trending up (last {num_days}d)! KP earned!",
+        ])
+      return random.choice([
+        f"1 stall every {drives_per_stall} drives - solid waddle vibes, not SS!",
+        f"1 stall every {drives_per_stall} drives - consistent waddle energy!",
+        f"1 stall every {drives_per_stall} drives - jacket count staying low!",
+      ])
     else:
-      return "Keep at it! Even the best got jacketed at first. QG to KP!"
+      stalls_per_drive = round(total_stalls / total_drives)
+      return random.choice([
+        f"About {stalls_per_drive} stall{'s' if stalls_per_drive > 1 else ''} every drive - keep at it! QG to KP!",
+        f"About {stalls_per_drive} stall{'s' if stalls_per_drive > 1 else ''} every drive - still jacketed, but every drive is practice!",
+        f"About {stalls_per_drive} stall{'s' if stalls_per_drive > 1 else ''} every drive - jackets happen! The porch is waiting!",
+        f"About {stalls_per_drive} stall{'s' if stalls_per_drive > 1 else ''} every drive - Weixing left the room. Kirby followed him out.",
+      ])
