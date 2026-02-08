@@ -4,6 +4,7 @@ Manual Driving Stats Settings Page
 Shows historical stats and trends for manual transmission driving.
 """
 
+import datetime
 import json
 import pyray as rl
 
@@ -121,30 +122,32 @@ class ManualStatsLayout(NavWidget):
     ])
     y += 15
 
-    # Trend card - derive from session_history
+    # Trend card - aggregate by day for consistency with charts
     session_history = self._stats.get('session_history', [])
-    recent_sessions = session_history[-10:]
-    recent_stalls = [s.get('stalls', 0) for s in recent_sessions]
+    recent_days = self._aggregate_by_day(session_history)[-10:]
+    num_days = len(recent_days)
+
+    recent_stalls = [d.get('stalls', 0) for d in recent_days]
     recent_shifts = []
-    for s in recent_sessions:
-      total = s.get('upshifts', 0) + s.get('downshifts', 0)
-      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+    for d in recent_days:
+      total = d.get('upshifts', 0) + d.get('downshifts', 0)
+      good = d.get('upshifts_good', 0) + d.get('downshifts_good', 0)
       recent_shifts.append(int(good / total * 100) if total > 0 else 100)
 
     trend_items = []
     if len(recent_stalls) >= 2:
       trend = self._calculate_trend(recent_stalls)
       trend_text, trend_color = self._trend_text(trend, lower_better=True)
-      trend_items.append(("Stall Trend", trend_text, trend_color))
+      trend_items.append((f"Stall Trend (last {num_days}d)", trend_text, trend_color))
 
     if len(recent_shifts) >= 2:
       trend = self._calculate_trend(recent_shifts)
       trend_text, trend_color = self._trend_text(trend, lower_better=False)
-      trend_items.append(("Shift Score Trend", trend_text, trend_color))
+      trend_items.append((f"Shift Score Trend (last {num_days}d)", trend_text, trend_color))
 
     if recent_shifts:
       avg_score = sum(recent_shifts) / len(recent_shifts)
-      trend_items.append(("Avg Shift Score (last 10)", f"{int(avg_score)}/100", self._score_color(avg_score)))
+      trend_items.append((f"Avg Shift Score (last {num_days}d)", f"{int(avg_score)}/100", self._score_color(avg_score)))
 
     if trend_items:
       y = self._draw_card(x, y, w, "Recent Trends", trend_items)
@@ -218,9 +221,32 @@ class ManualStatsLayout(NavWidget):
 
     return y
 
+  def _aggregate_by_day(self, sessions: list) -> list:
+    """Aggregate sessions into per-day summaries, summing counts"""
+    import math
+    days: dict[str, dict] = {}  # date_str -> aggregated dict
+    for s in sessions:
+      ts = s.get('timestamp', 0)
+      if not ts or not isinstance(ts, (int, float)) or math.isnan(ts) or ts <= 0:
+        continue
+      date_key = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+      if date_key not in days:
+        days[date_key] = {
+          'timestamp': ts,  # Keep last timestamp for the day label
+          'duration': 0, 'stalls': 0, 'lugs': 0,
+          'upshifts': 0, 'upshifts_good': 0,
+          'downshifts': 0, 'downshifts_good': 0,
+          'launches': 0, 'launches_good': 0,
+        }
+      d = days[date_key]
+      d['timestamp'] = max(d['timestamp'], ts)
+      for k in ('duration', 'stalls', 'lugs', 'upshifts', 'upshifts_good',
+                'downshifts', 'downshifts_good', 'launches', 'launches_good'):
+        d[k] = d.get(k, 0) + s.get(k, 0)
+    return list(days.values())
+
   def _draw_shift_chart(self, x: int, y: int, w: int, sessions: list) -> int:
-    """Draw a bar chart showing shift score history"""
-    import datetime
+    """Draw a bar chart showing shift score history (aggregated by day)"""
     font_bold = gui_app.font(FontWeight.BOLD)
     font_small = gui_app.font(FontWeight.ROMAN)
 
@@ -245,30 +271,31 @@ class ManualStatsLayout(NavWidget):
     rl.draw_text_ex(font_small, "50", rl.Vector2(x + 15, chart_y + chart_inner_h // 2 - 5), 14, 0, GRAY)
     rl.draw_text_ex(font_small, "0", rl.Vector2(x + 22, chart_y + chart_inner_h - 5), 14, 0, GRAY)
 
-    display_sessions = sessions[-12:] if len(sessions) > 12 else sessions
-    if not display_sessions:
+    days = self._aggregate_by_day(sessions)
+    display_days = days[-12:] if len(days) > 12 else days
+    if not display_days:
       return y + chart_h
 
     bar_spacing = 4
-    bar_w = max(8, (chart_w - bar_spacing * len(display_sessions)) // len(display_sessions))
+    bar_w = max(8, (chart_w - bar_spacing * len(display_days)) // len(display_days))
 
-    for i, session in enumerate(display_sessions):
-      ups = session.get('upshifts', 0)
-      ups_good = session.get('upshifts_good', 0)
-      downs = session.get('downshifts', 0)
-      downs_good = session.get('downshifts_good', 0)
+    for i, day in enumerate(display_days):
+      ups = day.get('upshifts', 0)
+      ups_good = day.get('upshifts_good', 0)
+      downs = day.get('downshifts', 0)
+      downs_good = day.get('downshifts_good', 0)
       total = ups + downs
       score = ((ups_good + downs_good) / total * 100) if total > 0 else 100
 
       bar_h = int((score / 100) * chart_inner_h)
       bar_x = chart_x + i * (bar_w + bar_spacing)
-      bar_y = chart_y + chart_inner_h - bar_h
+      bar_y_top = chart_y + chart_inner_h - bar_h
 
       color = GREEN if score >= 80 else (YELLOW if score >= 50 else RED)
-      rl.draw_rectangle(int(bar_x), int(bar_y), int(bar_w), int(bar_h), color)
+      rl.draw_rectangle(int(bar_x), int(bar_y_top), int(bar_w), int(bar_h), color)
 
       # Day label
-      timestamp = session.get('timestamp', 0)
+      timestamp = day.get('timestamp', 0)
       if timestamp > 0:
         dt = datetime.datetime.fromtimestamp(timestamp)
         day_x = bar_x + bar_w // 2 - 4
@@ -281,8 +308,7 @@ class ManualStatsLayout(NavWidget):
     return y + chart_h
 
   def _draw_stalls_chart(self, x: int, y: int, w: int, sessions: list) -> int:
-    """Draw a bar chart showing stalls and lugs per session"""
-    import datetime
+    """Draw a bar chart showing stalls and lugs per day"""
     font_bold = gui_app.font(FontWeight.BOLD)
     font_small = gui_app.font(FontWeight.ROMAN)
 
@@ -298,9 +324,11 @@ class ManualStatsLayout(NavWidget):
     chart_w = w - 60
     chart_inner_h = 70
 
+    days = self._aggregate_by_day(sessions)
+    display_days = days[-12:] if len(days) > 12 else days
+
     # Find max for scaling
-    display_sessions = sessions[-12:] if len(sessions) > 12 else sessions
-    max_issues = max((s.get('stalls', 0) + s.get('lugs', 0) for s in display_sessions), default=1)
+    max_issues = max((d.get('stalls', 0) + d.get('lugs', 0) for d in display_days), default=1) if display_days else 1
     max_issues = max(max_issues, 5)  # Min scale of 5
 
     # Draw axis
@@ -311,15 +339,15 @@ class ManualStatsLayout(NavWidget):
     rl.draw_text_ex(font_small, str(max_issues), rl.Vector2(x + 15, chart_y - 5), 14, 0, GRAY)
     rl.draw_text_ex(font_small, "0", rl.Vector2(x + 22, chart_y + chart_inner_h - 5), 14, 0, GRAY)
 
-    if not display_sessions:
+    if not display_days:
       return y + chart_h
 
     bar_spacing = 4
-    bar_w = max(8, (chart_w - bar_spacing * len(display_sessions)) // len(display_sessions))
+    bar_w = max(8, (chart_w - bar_spacing * len(display_days)) // len(display_days))
 
-    for i, session in enumerate(display_sessions):
-      stalls = session.get('stalls', 0)
-      lugs = session.get('lugs', 0)
+    for i, day in enumerate(display_days):
+      stalls = day.get('stalls', 0)
+      lugs = day.get('lugs', 0)
       bar_x = chart_x + i * (bar_w + bar_spacing)
 
       # Stacked bar: stalls (red) on bottom, lugs (orange) on top
@@ -335,7 +363,7 @@ class ManualStatsLayout(NavWidget):
         rl.draw_rectangle(int(bar_x), int(chart_y + chart_inner_h - lug_h - stall_h), int(bar_w), int(stall_h), RED)
 
       # Day label
-      timestamp = session.get('timestamp', 0)
+      timestamp = day.get('timestamp', 0)
       if timestamp > 0:
         dt = datetime.datetime.fromtimestamp(timestamp)
         day_x = bar_x + bar_w // 2 - 4
@@ -352,8 +380,7 @@ class ManualStatsLayout(NavWidget):
     return y + chart_h
 
   def _draw_launch_chart(self, x: int, y: int, w: int, sessions: list) -> int:
-    """Draw a bar chart showing launch success rate"""
-    import datetime
+    """Draw a bar chart showing launch success rate per day"""
     font_bold = gui_app.font(FontWeight.BOLD)
     font_small = gui_app.font(FontWeight.ROMAN)
 
@@ -377,30 +404,31 @@ class ManualStatsLayout(NavWidget):
     rl.draw_text_ex(font_small, "100%", rl.Vector2(x + 5, chart_y - 5), 14, 0, GRAY)
     rl.draw_text_ex(font_small, "0%", rl.Vector2(x + 15, chart_y + chart_inner_h - 5), 14, 0, GRAY)
 
-    display_sessions = sessions[-12:] if len(sessions) > 12 else sessions
-    if not display_sessions:
+    days = self._aggregate_by_day(sessions)
+    display_days = days[-12:] if len(days) > 12 else days
+    if not display_days:
       return y + chart_h
 
     bar_spacing = 4
-    bar_w = max(8, (chart_w - bar_spacing * len(display_sessions)) // len(display_sessions))
+    bar_w = max(8, (chart_w - bar_spacing * len(display_days)) // len(display_days))
 
-    for i, session in enumerate(display_sessions):
-      launches = session.get('launches', 0)
-      launches_good = session.get('launches_good', 0)
+    for i, day in enumerate(display_days):
+      launches = day.get('launches', 0)
+      launches_good = day.get('launches_good', 0)
       bar_x = chart_x + i * (bar_w + bar_spacing)
 
       if launches > 0:
         pct = (launches_good / launches) * 100
         bar_h = int((pct / 100) * chart_inner_h)
-        bar_y = chart_y + chart_inner_h - bar_h
+        bar_y_top = chart_y + chart_inner_h - bar_h
         color = GREEN if pct >= 80 else (YELLOW if pct >= 50 else RED)
-        rl.draw_rectangle(int(bar_x), int(bar_y), int(bar_w), int(bar_h), color)
+        rl.draw_rectangle(int(bar_x), int(bar_y_top), int(bar_w), int(bar_h), color)
       else:
         # No launches - draw thin gray bar
         rl.draw_rectangle(int(bar_x), int(chart_y + chart_inner_h - 2), int(bar_w), 2, GRAY)
 
       # Day label
-      timestamp = session.get('timestamp', 0)
+      timestamp = day.get('timestamp', 0)
       if timestamp > 0:
         dt = datetime.datetime.fromtimestamp(timestamp)
         day_x = bar_x + bar_w // 2 - 4
@@ -582,12 +610,13 @@ class ManualStatsLayout(NavWidget):
     # Calculate overall score
     score = shift_pct - (stall_rate * 10)
 
-    # Recent improvement bonus - derive from session_history
+    # Recent improvement bonus - aggregate by day
     session_history = self._stats.get('session_history', [])
+    recent_days = self._aggregate_by_day(session_history)[-10:]
     recent_scores = []
-    for s in session_history[-10:]:
-      total = s.get('upshifts', 0) + s.get('downshifts', 0)
-      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+    for d in recent_days:
+      total = d.get('upshifts', 0) + d.get('downshifts', 0)
+      good = d.get('upshifts_good', 0) + d.get('downshifts_good', 0)
       recent_scores.append(int(good / total * 100) if total > 0 else 100)
     if len(recent_scores) >= 3:
       if recent_scores[-1] > recent_scores[0]:
@@ -620,20 +649,26 @@ class ManualStatsLayout(NavWidget):
     """Get encouragement based on overall progress"""
     total_drives = self._stats.get('total_drives', 0)
     total_stalls = self._stats.get('total_stalls', 0)
-    # Derive recent trends from session_history
+    # Aggregate by day for consistent messaging
     session_history = self._stats.get('session_history', [])
-    recent_sessions = session_history[-10:]
-    recent_stalls = [s.get('stalls', 0) for s in recent_sessions]
+    recent_days = self._aggregate_by_day(session_history)[-10:]
+    num_days = len(recent_days)
+    recent_stalls = [d.get('stalls', 0) for d in recent_days]
     recent_scores = []
-    for s in recent_sessions:
-      total = s.get('upshifts', 0) + s.get('downshifts', 0)
-      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+    for d in recent_days:
+      total = d.get('upshifts', 0) + d.get('downshifts', 0)
+      good = d.get('upshifts_good', 0) + d.get('downshifts_good', 0)
       recent_scores.append(int(good / total * 100) if total > 0 else 100)
 
     if total_drives == 0:
       return "Start driving to see your stats! Time to earn your first waddle KP."
 
-    stall_rate = total_stalls / total_drives if total_drives > 0 else 0
+    if total_drives <= 2:
+      if total_stalls == 0:
+        return "No stalls yet! Waddle energy from day 1. Keep it up!"
+      return f"{total_stalls} stall{'s' if total_stalls > 1 else ''} so far - every waddle driver starts somewhere. QG!"
+
+    stall_rate = total_stalls / total_drives
 
     # Check for improvement
     improving = False
@@ -646,16 +681,16 @@ class ManualStatsLayout(NavWidget):
       if recent_avg == 0:
         # Check for crazy good performance
         if len(recent_scores) >= 3 and all(s >= 95 for s in recent_scores[-3:]):
-          return "3 drives 95%+ NO stalls?! Waddle is driving! Kacper threw his glasses!"
+          return f"Last {num_days}d: 95%+ shifts, NO stalls?! Waddle is driving! Kacper threw his glasses!"
         if improving:
-          return "No stalls AND improving? Waddle energy! QG to KP!"
-        return "No stalls recent - waddle game strong! Not SS, priest-approved!"
+          return f"Last {num_days}d: no stalls AND improving? Waddle energy! QG to KP!"
+        return f"Last {num_days}d: no stalls - waddle game strong! Not SS, priest-approved!"
       elif recent_avg < stall_rate:
-        return "Recent drives better than avg - shedding jackets, channeling waddle!"
+        return f"Last {num_days}d: better than avg - shedding jackets, channeling waddle!"
 
     if stall_rate < 0.5:
       if improving:
-        return "< 1 stall per 2 drives AND improving! Porch-worthy waddle progress!"
+        return f"< 1 stall per 2 drives AND improving (last {num_days}d)! Porch-worthy waddle progress!"
       return "< 1 stall per 2 drives - solid waddle vibes, not SS!"
     elif stall_rate < 1:
       return "~1 stall per drive - de-jacketing in progress!"
