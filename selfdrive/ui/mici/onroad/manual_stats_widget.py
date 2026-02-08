@@ -137,8 +137,7 @@ class ManualStatsWidget(Widget):
     # === LAUNCH FEEDBACK ===
     launches = self._stats.get('launches', 0)
     good_launches = self._stats.get('good_launches', 0)
-    # Detect if currently launching (low speed, was stopped)
-    if cs.vEgo < 5.0 and cs.vEgo > 0.5 and not cs.clutchPressed:
+    if self._stats.get('is_launching', False):
       rl.draw_text_ex(font, "LAUNCHING...", rl.Vector2(px, py), 26, 0, CYAN)
     elif launches > 0:
       pct = int(good_launches / launches * 100) if launches > 0 else 0
