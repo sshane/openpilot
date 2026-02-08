@@ -9,10 +9,10 @@ Poker hand themed with waddle/jacket references.
 import json
 import random
 import pyray as rl
-from typing import Optional, Callable
+from typing import Optional
 
 from openpilot.common.params import Params
-from openpilot.system.ui.lib.application import gui_app, FontWeight, FONT_SCALE
+from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.scroll_panel2 import GuiScrollPanel2
 from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.system.ui.widgets import NavWidget
@@ -22,11 +22,9 @@ from openpilot.system.ui.widgets import NavWidget
 GREEN = rl.Color(46, 204, 113, 255)
 YELLOW = rl.Color(241, 196, 15, 255)
 RED = rl.Color(231, 76, 60, 255)
-ORANGE = rl.Color(230, 126, 34, 255)
 GRAY = rl.Color(150, 150, 150, 255)
 LIGHT_GRAY = rl.Color(200, 200, 200, 255)
 WHITE = rl.Color(255, 255, 255, 255)
-BG_COLOR = rl.Color(30, 30, 30, 245)
 BG_CARD = rl.Color(45, 45, 45, 255)
 
 # Poker hand names
@@ -50,58 +48,50 @@ HAND_SUBTITLES = {
 class ManualDriveSummaryDialog(NavWidget):
   """Modal dialog showing end-of-drive manual transmission stats"""
 
-  def __init__(self, dismiss_callback: Optional[Callable] = None):
+  def __init__(self):
     super().__init__()
-    self._params = Params()
     self._scroll_panel = GuiScrollPanel2(horizontal=False)
     self._session_data: Optional[dict] = None
-    self._historical_data: Optional[dict] = None
     self._overall_grade: str = "good"  # good, ok, poor
     self._card_rank: str = "10"  # Poker card rank: 10, J, Q, K, A
     self._shift_score: float = 0.0
     self._avg_shift_score: float = 0.0
-    # Load data immediately since show_event may not be called for modals
-    self._load_session()
-    self._load_historical()
+
+    # Load all data from one param read
+    self._load_data()
+
     # Pick random texts once for this instance
     self._header_text, self._header_color = self._pick_header()
     self._encouragement_text = self._pick_encouragement()
-    # Set back callback to dismiss modal
+
     self.set_back_callback(lambda: gui_app.set_modal_overlay(None))
 
-  def _load_session(self):
-    """Load the last session data from session_history in ManualDriveStats"""
-    data = self._params.get("ManualDriveStats")
-    if data:
-      stats = data if isinstance(data, dict) else json.loads(data)
-      history = stats.get('session_history', [])
-      if history:
-        self._session_data = history[-1]
-        self._calculate_grade()
-        return
-    self._session_data = None
+  def _load_data(self):
+    """Load session and historical data from ManualDriveStats (single read)"""
+    data = Params().get("ManualDriveStats")
+    if not data:
+      return
 
-  def _load_historical(self):
-    """Load historical stats for comparison"""
-    data = self._params.get("ManualDriveStats")
-    if data:
-      self._historical_data = data if isinstance(data, dict) else json.loads(data)
-      # Calculate average shift score from history
-      history = self._historical_data.get('session_history', [])
-      if history:
-        scores = []
-        for s in history[-10:]:  # Last 10 sessions
-          ups = s.get('upshifts', 0)
-          ups_good = s.get('upshifts_good', 0)
-          downs = s.get('downshifts', 0)
-          downs_good = s.get('downshifts_good', 0)
-          total = ups + downs
-          if total > 0:
-            scores.append((ups_good + downs_good) / total * 100)
-        if scores:
-          self._avg_shift_score = sum(scores) / len(scores)
-    else:
-      self._historical_data = None
+    stats = json.loads(data)
+    history = stats.get('session_history', [])
+
+    # Last session
+    if history:
+      self._session_data = history[-1]
+      self._calculate_grade()
+
+    # Average shift score from recent history
+    scores = []
+    for s in history[-10:]:
+      ups = s.get('upshifts', 0)
+      ups_good = s.get('upshifts_good', 0)
+      downs = s.get('downshifts', 0)
+      downs_good = s.get('downshifts_good', 0)
+      total = ups + downs
+      if total > 0:
+        scores.append((ups_good + downs_good) / total * 100)
+    if scores:
+      self._avg_shift_score = sum(scores) / len(scores)
 
   def _calculate_grade(self):
     """Calculate overall grade based on session performance"""
@@ -291,8 +281,7 @@ class ManualDriveSummaryDialog(NavWidget):
     h += 75   # Shift score bar
     h += 195  # Stats card
     # Encouragement text (estimate)
-    encouragement = self._encouragement_text
-    wrapped = wrap_text(font_roman, encouragement, 22, 500)
+    wrapped = wrap_text(font_roman, self._encouragement_text, 22, 500)
     h += len(wrapped) * 28 + 20
     return h
 
@@ -318,8 +307,7 @@ class ManualDriveSummaryDialog(NavWidget):
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, top_card_h), 0.02, 10, BG_CARD)
 
     # Header
-    header_text, header_color = self._header_text, self._header_color
-    rl.draw_text_ex(font_bold, header_text, rl.Vector2(x + 15, y + 12), 44, 0, header_color)
+    rl.draw_text_ex(font_bold, self._header_text, rl.Vector2(x + 15, y + 12), 44, 0, self._header_color)
     y += 58
 
     # Card rank display - poker hand style with subtitle
@@ -383,8 +371,7 @@ class ManualDriveSummaryDialog(NavWidget):
     y += 200
 
     # Encouragement/criticism text
-    encouragement = self._encouragement_text
-    wrapped = wrap_text(font_roman, encouragement, 22, w)
+    wrapped = wrap_text(font_roman, self._encouragement_text, 22, w)
     for line in wrapped:
       rl.draw_text_ex(font_roman, line, rl.Vector2(x, y), 22, 0, LIGHT_GRAY)
       y += 28
@@ -464,42 +451,3 @@ class ManualDriveSummaryDialog(NavWidget):
     rl.draw_text_ex(font_roman, value_str, rl.Vector2(x + w - value_width, y), font_size, 0, color)
 
     return y + 26
-
-  def _draw_stat_section(self, x: int, y: int, w: int, label: str, value, target=None,
-                          current=None, lower_better=False) -> int:
-    """Draw a stat row with label and value, colored based on performance"""
-    font = gui_app.font(FontWeight.MEDIUM)
-    font_size = 28
-
-    # Determine color based on target
-    if target is not None:
-      if lower_better:
-        if value == 0:
-          color = GREEN
-        elif value <= 2:
-          color = YELLOW
-        else:
-          color = RED
-      else:
-        if current is not None:
-          ratio = current / target if target > 0 else 1
-          if ratio >= 0.8:
-            color = GREEN
-          elif ratio >= 0.5:
-            color = YELLOW
-          else:
-            color = RED
-        else:
-          color = LIGHT_GRAY
-    else:
-      color = LIGHT_GRAY
-
-    # Draw label
-    rl.draw_text_ex(font, label, rl.Vector2(x, y), font_size, 0, LIGHT_GRAY)
-
-    # Draw value (right-aligned)
-    value_str = str(value)
-    value_width = rl.measure_text_ex(font, value_str, font_size, 0).x
-    rl.draw_text_ex(font, value_str, rl.Vector2(x + w - value_width, y), font_size, 0, color)
-
-    return y + 38
