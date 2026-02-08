@@ -42,14 +42,10 @@ class ManualStatsLayout(NavWidget):
 
   def _load_stats(self):
     """Load historical stats from Params"""
-    try:
-      data = self._params.get("ManualDriveStats")
-      if data:
-        # Params returns dict directly for JSON type
-        self._stats = data if isinstance(data, dict) else json.loads(data)
-      else:
-        self._stats = {}
-    except Exception:
+    data = self._params.get("ManualDriveStats")
+    if data:
+      self._stats = data if isinstance(data, dict) else json.loads(data)
+    else:
       self._stats = {}
 
   def _render(self, rect: rl.Rectangle):
@@ -125,9 +121,15 @@ class ManualStatsLayout(NavWidget):
     ])
     y += 15
 
-    # Trend card
-    recent_stalls = self._stats.get('recent_stall_rates', [])
-    recent_shifts = self._stats.get('recent_shift_scores', [])
+    # Trend card - derive from session_history
+    session_history = self._stats.get('session_history', [])
+    recent_sessions = session_history[-10:]
+    recent_stalls = [s.get('stalls', 0) for s in recent_sessions]
+    recent_shifts = []
+    for s in recent_sessions:
+      total = s.get('upshifts', 0) + s.get('downshifts', 0)
+      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+      recent_shifts.append(int(good / total * 100) if total > 0 else 100)
 
     trend_items = []
     if len(recent_stalls) >= 2:
@@ -580,8 +582,13 @@ class ManualStatsLayout(NavWidget):
     # Calculate overall score
     score = shift_pct - (stall_rate * 10)
 
-    # Recent improvement bonus
-    recent_scores = self._stats.get('recent_shift_scores', [])
+    # Recent improvement bonus - derive from session_history
+    session_history = self._stats.get('session_history', [])
+    recent_scores = []
+    for s in session_history[-10:]:
+      total = s.get('upshifts', 0) + s.get('downshifts', 0)
+      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+      recent_scores.append(int(good / total * 100) if total > 0 else 100)
     if len(recent_scores) >= 3:
       if recent_scores[-1] > recent_scores[0]:
         score += 5  # Bonus for improving
@@ -613,8 +620,15 @@ class ManualStatsLayout(NavWidget):
     """Get encouragement based on overall progress"""
     total_drives = self._stats.get('total_drives', 0)
     total_stalls = self._stats.get('total_stalls', 0)
-    recent_stalls = self._stats.get('recent_stall_rates', [])
-    recent_scores = self._stats.get('recent_shift_scores', [])
+    # Derive recent trends from session_history
+    session_history = self._stats.get('session_history', [])
+    recent_sessions = session_history[-10:]
+    recent_stalls = [s.get('stalls', 0) for s in recent_sessions]
+    recent_scores = []
+    for s in recent_sessions:
+      total = s.get('upshifts', 0) + s.get('downshifts', 0)
+      good = s.get('upshifts_good', 0) + s.get('downshifts_good', 0)
+      recent_scores.append(int(good / total * 100) if total > 0 else 100)
 
     if total_drives == 0:
       return "Start driving to see your stats! Time to earn your first waddle KP."

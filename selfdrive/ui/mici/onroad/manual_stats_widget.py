@@ -249,8 +249,5 @@ class ManualStatsWidget(Widget):
 
   def _load_stats(self):
     """Load current session stats"""
-    try:
-      data = self._params.get("ManualDriveLiveStats")
-      self._stats = data if data else {}
-    except Exception:
-      self._stats = {}
+    data = self._params.get("ManualDriveLiveStats")
+    self._stats = data if data else {}

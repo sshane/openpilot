@@ -71,36 +71,37 @@ class ManualDriveSummaryDialog(NavWidget):
     self._load_historical()
 
   def _load_session(self):
-    """Load the last session data from Params"""
-    try:
-      data = self._params.get("ManualDriveLastSession")
-      if data:
-        self._session_data = data if isinstance(data, dict) else json.loads(data)
+    """Load the last session data from session_history in ManualDriveStats"""
+    data = self._params.get("ManualDriveStats")
+    if data:
+      stats = data if isinstance(data, dict) else json.loads(data)
+      history = stats.get('session_history', [])
+      if history:
+        self._session_data = history[-1]
         self._calculate_grade()
-    except Exception:
-      self._session_data = None
+        return
+    self._session_data = None
 
   def _load_historical(self):
     """Load historical stats for comparison"""
-    try:
-      data = self._params.get("ManualDriveStats")
-      if data:
-        self._historical_data = data if isinstance(data, dict) else json.loads(data)
-        # Calculate average shift score from history
-        history = self._historical_data.get('session_history', [])
-        if history:
-          scores = []
-          for s in history[-10:]:  # Last 10 sessions
-            ups = s.get('upshifts', 0)
-            ups_good = s.get('upshifts_good', 0)
-            downs = s.get('downshifts', 0)
-            downs_good = s.get('downshifts_good', 0)
-            total = ups + downs
-            if total > 0:
-              scores.append((ups_good + downs_good) / total * 100)
-          if scores:
-            self._avg_shift_score = sum(scores) / len(scores)
-    except Exception:
+    data = self._params.get("ManualDriveStats")
+    if data:
+      self._historical_data = data if isinstance(data, dict) else json.loads(data)
+      # Calculate average shift score from history
+      history = self._historical_data.get('session_history', [])
+      if history:
+        scores = []
+        for s in history[-10:]:  # Last 10 sessions
+          ups = s.get('upshifts', 0)
+          ups_good = s.get('upshifts_good', 0)
+          downs = s.get('downshifts', 0)
+          downs_good = s.get('downshifts_good', 0)
+          total = ups + downs
+          if total > 0:
+            scores.append((ups_good + downs_good) / total * 100)
+        if scores:
+          self._avg_shift_score = sum(scores) / len(scores)
+    else:
       self._historical_data = None
 
   def _calculate_grade(self):
@@ -112,19 +113,19 @@ class ManualDriveSummaryDialog(NavWidget):
       return
 
     # Calculate grade based on stalls, shifts, and launches
-    stalls = self._session_data.get('stall_count', 0)
-    lugs = self._session_data.get('lug_count', 0)
+    stalls = self._session_data.get('stalls', 0)
+    lugs = self._session_data.get('lugs', 0)
 
     # Shift quality
-    upshift_total = self._session_data.get('upshift_count', 0)
-    upshift_good = self._session_data.get('upshift_good', 0)
-    downshift_total = self._session_data.get('downshift_count', 0)
-    downshift_good = self._session_data.get('downshift_good', 0)
+    upshift_total = self._session_data.get('upshifts', 0)
+    upshift_good = self._session_data.get('upshifts_good', 0)
+    downshift_total = self._session_data.get('downshifts', 0)
+    downshift_good = self._session_data.get('downshifts_good', 0)
 
     # Launch quality
-    launch_total = self._session_data.get('launch_count', 0)
-    launch_good = self._session_data.get('launch_good', 0)
-    launch_stalled = self._session_data.get('launch_stalled', 0)
+    launch_total = self._session_data.get('launches', 0)
+    launch_good = self._session_data.get('launches_good', 0)
+    launch_stalled = self._session_data.get('launches_stalled', 0)
 
     # Calculate scores
     total_shifts = upshift_total + downshift_total
@@ -169,16 +170,16 @@ class ManualDriveSummaryDialog(NavWidget):
     if not self._session_data:
       return "No data available for this drive."
 
-    stalls = self._session_data.get('stall_count', 0)
-    lugs = self._session_data.get('lug_count', 0)
-    launch_stalled = self._session_data.get('launch_stalled', 0)
+    stalls = self._session_data.get('stalls', 0)
+    lugs = self._session_data.get('lugs', 0)
+    launch_stalled = self._session_data.get('launches_stalled', 0)
 
-    upshift_good = self._session_data.get('upshift_good', 0)
-    upshift_total = self._session_data.get('upshift_count', 0)
-    downshift_good = self._session_data.get('downshift_good', 0)
-    downshift_total = self._session_data.get('downshift_count', 0)
-    launch_good = self._session_data.get('launch_good', 0)
-    launch_total = self._session_data.get('launch_count', 0)
+    upshift_good = self._session_data.get('upshifts_good', 0)
+    upshift_total = self._session_data.get('upshifts', 0)
+    downshift_good = self._session_data.get('downshifts_good', 0)
+    downshift_total = self._session_data.get('downshifts', 0)
+    launch_good = self._session_data.get('launches_good', 0)
+    launch_total = self._session_data.get('launches', 0)
 
     messages = []
 
@@ -304,8 +305,8 @@ class ManualDriveSummaryDialog(NavWidget):
     card_y = y + 12
 
     # Jackets section (stalls + lugs)
-    stalls = self._session_data.get('stall_count', 0) if self._session_data else 0
-    lugs = self._session_data.get('lug_count', 0) if self._session_data else 0
+    stalls = self._session_data.get('stalls', 0) if self._session_data else 0
+    lugs = self._session_data.get('lugs', 0) if self._session_data else 0
     jackets_text = "Jackets:" if (stalls > 0 or lugs > 0) else "No Jackets!"
     jackets_color = RED if stalls > 0 else (YELLOW if lugs > 0 else GREEN)
     rl.draw_text_ex(font_medium, jackets_text, rl.Vector2(card_x, card_y), 24, 0, jackets_color)
@@ -319,12 +320,12 @@ class ManualDriveSummaryDialog(NavWidget):
     rl.draw_text_ex(font_medium, "Waddle Stats:", rl.Vector2(card_x, card_y), 24, 0, WHITE)
     card_y += 30
 
-    upshift_total = self._session_data.get('upshift_count', 0) if self._session_data else 0
-    upshift_good = self._session_data.get('upshift_good', 0) if self._session_data else 0
-    downshift_total = self._session_data.get('downshift_count', 0) if self._session_data else 0
-    downshift_good = self._session_data.get('downshift_good', 0) if self._session_data else 0
-    launch_total = self._session_data.get('launch_count', 0) if self._session_data else 0
-    launch_good = self._session_data.get('launch_good', 0) if self._session_data else 0
+    upshift_total = self._session_data.get('upshifts', 0) if self._session_data else 0
+    upshift_good = self._session_data.get('upshifts_good', 0) if self._session_data else 0
+    downshift_total = self._session_data.get('downshifts', 0) if self._session_data else 0
+    downshift_good = self._session_data.get('downshifts_good', 0) if self._session_data else 0
+    launch_total = self._session_data.get('launches', 0) if self._session_data else 0
+    launch_good = self._session_data.get('launches_good', 0) if self._session_data else 0
 
     if launch_total > 0:
       card_y = self._draw_mini_stat(card_x, card_y, w - 30, "Launches", f"{launch_good}/{launch_total}", launch_total, False, launch_good)

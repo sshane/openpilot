@@ -134,30 +134,24 @@ class MiciMainLayout(Widget):
     self._prev_standstill = CS.standstill
 
   def _show_drive_summary_if_available(self):
-    """End manual stats session and show summary dialog if data exists"""
-    # Try to end the manual stats session
-    try:
-      from opendbc.car.subaru.manual_stats import get_tracker
-      tracker = get_tracker()
-      tracker.end_session()
-    except Exception:
-      pass
+    """Show end-of-drive summary dialog if there's data worth showing.
+    All stats are saved by the card process -- UI just reads and displays."""
+    data = self._params.get("ManualDriveStats")
+    if not data:
+      return
+    stats = data if isinstance(data, dict) else json.loads(data)
+    history = stats.get('session_history', [])
+    if not history:
+      return
 
-    # Show the summary dialog if there's session data
-    try:
-      data = self._params.get("ManualDriveLastSession")
-      if data:
-        session = json.loads(data)
-        # Only show if there's meaningful data (duration > 30s and some activity)
-        duration = session.get('duration', 0)
-        has_activity = (session.get('stall_count', 0) > 0 or
-                       session.get('upshift_count', 0) > 0 or
-                       session.get('launch_count', 0) > 0)
-        if duration > 30 and has_activity:
-          self._drive_summary_dialog = ManualDriveSummaryDialog()
-          gui_app.set_modal_overlay(self._drive_summary_dialog)
-    except Exception:
-      pass
+    session = history[-1]
+    duration = session.get('duration', 0)
+    has_activity = (session.get('stalls', 0) > 0 or
+                   session.get('upshifts', 0) > 0 or
+                   session.get('launches', 0) > 0)
+    if duration > 30 and has_activity:
+      self._drive_summary_dialog = ManualDriveSummaryDialog()
+      gui_app.set_modal_overlay(self._drive_summary_dialog)
 
   def _set_mode_for_started(self, onroad_transition: bool = False):
     if ui_state.started:
