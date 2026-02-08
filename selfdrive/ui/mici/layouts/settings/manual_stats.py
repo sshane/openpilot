@@ -37,6 +37,7 @@ class ManualStatsLayout(NavWidget):
     self._hand_text: str = ""
     self._hand_color: rl.Color = GRAY
     self._encouragement_text: str = ""
+    self._section_comments: dict[str, tuple[str, rl.Color]] = {}
     self.set_back_callback(back_callback)
 
   def show_event(self):
@@ -54,6 +55,19 @@ class ManualStatsLayout(NavWidget):
     # Pick random texts once per page visit (not every frame)
     self._hand_text, self._hand_color = self._get_overall_hand()
     self._encouragement_text = self._get_encouragement()
+    self._section_comments = self._pick_section_comments()
+
+  def _draw_comment(self, x: int, y: int, w: int, key: str) -> int:
+    """Draw a section comment if one exists. Returns updated y."""
+    if key not in self._section_comments:
+      return y
+    text, color = self._section_comments[key]
+    font_roman = gui_app.font(FontWeight.ROMAN)
+    wrapped = wrap_text(font_roman, text, 18, w)
+    for line in wrapped:
+      rl.draw_text_ex(font_roman, line, rl.Vector2(x, y), 18, 0, color)
+      y += 22
+    return y + 5
 
   def _render(self, rect: rl.Rectangle):
     content_height = self._measure_content_height(rect)
@@ -111,6 +125,7 @@ class ManualStatsLayout(NavWidget):
       ("Total Downshifts", str(total_down), WHITE),
       ("Good Downshifts", f"{down_good} ({down_pct})", self._pct_color(down_good, total_down)),
     ])
+    y = self._draw_comment(x, y, w, 'shifts')
     y += 15
 
     # Launch quality card
@@ -125,6 +140,7 @@ class ManualStatsLayout(NavWidget):
       ("Good Launches", f"{good_launches} ({launch_pct})", self._pct_color(good_launches, total_launches)),
       ("Stalled Launches", str(stalled_launches), RED if stalled_launches > 0 else GREEN),
     ])
+    y = self._draw_comment(x, y, w, 'launches')
     y += 15
 
     # Trend card - aggregate by day for consistency with charts
@@ -163,16 +179,20 @@ class ManualStatsLayout(NavWidget):
     gear_jerks = self._stats.get('gear_shift_jerk_totals', {})
     if gear_counts and any(gear_counts.values()):
       y = self._draw_gear_chart(x, y, w, gear_counts, gear_jerks)
+      y = self._draw_comment(x, y, w, 'gears')
       y += 15
 
     # Session history charts
     session_history = self._stats.get('session_history', [])
     if session_history:
       y = self._draw_shift_chart(x, y, w, session_history)
+      y = self._draw_comment(x, y, w, 'shift_chart')
       y += 15
       y = self._draw_stalls_chart(x, y, w, session_history)
+      y = self._draw_comment(x, y, w, 'stalls_chart')
       y += 15
       y = self._draw_launch_chart(x, y, w, session_history)
+      y = self._draw_comment(x, y, w, 'launch_chart')
       y += 15
 
     # Encouragement based on progress (with text wrapping)
@@ -520,23 +540,37 @@ class ManualStatsLayout(NavWidget):
     if not self._stats or self._stats.get('total_drives', 0) == 0:
       return y + 40
 
+    comment_h = 27  # height per section comment line
+
     # Overview card (now has 5 items with hand rating, +60 for potential wrapped lines)
     y += 50 + 5 * 38 + 60 + 15
-    # Shift card
+    # Shift card + comment
     y += 50 + 4 * 38 + 15
-    # Launch card
+    if 'shifts' in self._section_comments:
+      y += comment_h
+    # Launch card + comment
     y += 50 + 3 * 38 + 15
+    if 'launches' in self._section_comments:
+      y += comment_h
     # Trend card (estimate)
     y += 50 + 3 * 38 + 15
-    # Gear chart
+    # Gear chart + comment
     if self._stats.get('gear_shift_counts'):
       y += 180 + 15
+      if 'gears' in self._section_comments:
+        y += comment_h
 
-    # Charts (3 charts)
+    # Charts (3 charts) + comments
     if self._stats.get('session_history'):
       y += 200 + 15  # Shift score chart
+      if 'shift_chart' in self._section_comments:
+        y += comment_h
       y += 180 + 15  # Stalls/lugs chart
+      if 'stalls_chart' in self._section_comments:
+        y += comment_h
       y += 180 + 15  # Launch chart
+      if 'launch_chart' in self._section_comments:
+        y += comment_h
     # Encouragement (estimate 2-3 lines wrapped)
     y += 100
 
@@ -707,6 +741,172 @@ class ManualStatsLayout(NavWidget):
         "High Card - Waddle disapproves. Keep going!",
         "High Card - Weixing pretends he doesn't know you. Kirby swallowed the car whole.",
       ]), RED
+
+  def _pick_section_comments(self) -> dict[str, tuple[str, 'rl.Color']]:
+    """Pick a contextual comment for each section based on the data"""
+    comments: dict[str, tuple[str, rl.Color]] = {}
+
+    # Shift quality
+    total_up = self._stats.get('total_upshifts', 0)
+    total_down = self._stats.get('total_downshifts', 0)
+    up_good = self._stats.get('upshifts_good', 0)
+    down_good = self._stats.get('downshifts_good', 0)
+    total_shifts = total_up + total_down
+    if total_shifts > 0:
+      shift_pct = (up_good + down_good) / total_shifts * 100
+      if shift_pct >= 90:
+        comments['shifts'] = random.choice([
+          "Butter smooth! Weixing almost smiled.",
+          "Shifts are dialed. Kirby did a little twirl.",
+          "Priest-approved shifting right here.",
+        ]), GREEN
+      elif shift_pct >= 70:
+        comments['shifts'] = random.choice([
+          "Solid shifts, room to polish.",
+          "Getting cleaner. Kirby is watching.",
+          "Not bad! Weixing looked up briefly.",
+        ]), YELLOW
+      else:
+        comments['shifts'] = random.choice([
+          "Those shifts need some love.",
+          "Weixing felt that from across the room.",
+          "Kirby is concerned about your synchros.",
+        ]), RED
+
+    # Launch quality
+    total_launches = self._stats.get('total_launches', 0)
+    good_launches = self._stats.get('launches_good', 0)
+    stalled_launches = self._stats.get('launches_stalled', 0)
+    if total_launches > 0:
+      launch_pct = good_launches / total_launches * 100
+      if launch_pct >= 90:
+        comments['launches'] = random.choice([
+          "Smooth off the line! Clutch control on point.",
+          "Launch game is strong. Kirby approves.",
+          "Clean launches. The bite point is your friend.",
+        ]), GREEN
+      elif launch_pct >= 70:
+        comments['launches'] = random.choice([
+          "Launches are OK. Find that bite point more consistently.",
+          "Getting there! A little more clutch feel needed.",
+          "Decent launches, some room to grow.",
+        ]), YELLOW
+      else:
+        comments['launches'] = random.choice([
+          "Launches need work. Easy on the clutch!",
+          "Kirby is bracing for impact every launch.",
+          "More revs, slower clutch release. You'll get it.",
+        ]), RED
+      if stalled_launches > 2:
+        comments['launches'] = random.choice([
+          f"{stalled_launches} stalled launches - find that bite point!",
+          f"{stalled_launches} stalled launches - Kirby is hiding the keys.",
+          f"{stalled_launches} stalled launches - more gas before you release!",
+        ]), RED
+
+    # Gear chart
+    gear_counts = self._stats.get('gear_shift_counts', {})
+    gear_jerks = self._stats.get('gear_shift_jerk_totals', {})
+    if gear_counts and any(gear_counts.values()):
+      worst_gear, worst_score = None, 101
+      best_gear, best_score = None, -1
+      for gear in range(1, 7):
+        count = gear_counts.get(gear, gear_counts.get(str(gear), 0))
+        jerk = gear_jerks.get(gear, gear_jerks.get(str(gear), 0.0))
+        if count > 0:
+          smoothness = max(0, min(100, 100 - (jerk / count * 20)))
+          if smoothness < worst_score:
+            worst_gear, worst_score = gear, smoothness
+          if smoothness > best_score:
+            best_gear, best_score = gear, smoothness
+      if worst_gear and best_gear and worst_gear != best_gear:
+        comments['gears'] = random.choice([
+          f"Gear {best_gear} is your smoothest. Gear {worst_gear} needs practice.",
+          f"Cleanest into gear {best_gear}. Gear {worst_gear} is your weak spot.",
+          f"Gear {worst_gear} is where the jackets live. Gear {best_gear} is waddle territory.",
+        ]), YELLOW
+
+    # Shift score chart
+    session_history = self._stats.get('session_history', [])
+    days = self._aggregate_by_day(session_history)
+    if len(days) >= 3:
+      recent = days[-3:]
+      scores = []
+      for d in recent:
+        t = d.get('upshifts', 0) + d.get('downshifts', 0)
+        g = d.get('upshifts_good', 0) + d.get('downshifts_good', 0)
+        scores.append(int(g / t * 100) if t > 0 else 100)
+      avg = sum(scores) / len(scores)
+      if avg >= 85:
+        comments['shift_chart'] = random.choice([
+          "Recent shifts looking clean!",
+          "Shift scores are up. Waddle energy.",
+          "Consistency is showing. Kirby is pleased.",
+        ]), GREEN
+      elif scores[-1] > scores[0]:
+        comments['shift_chart'] = random.choice([
+          "Trending up! Keep this momentum.",
+          "Scores climbing. Weixing might notice soon.",
+          "Getting better day by day.",
+        ]), YELLOW
+      else:
+        comments['shift_chart'] = random.choice([
+          "Shift scores dipping. Focus up!",
+          "Weixing is watching these numbers drop.",
+          "Time to tighten up those shifts.",
+        ]), RED
+
+    # Stalls chart
+    if len(days) >= 3:
+      recent_stalls = [d.get('stalls', 0) for d in days[-3:]]
+      if all(s == 0 for s in recent_stalls):
+        comments['stalls_chart'] = random.choice([
+          "Stall-free streak! Don't break it.",
+          "Zero stalls lately. Weixing is watching... approvingly.",
+          "Clean streak. Kirby is relaxed.",
+        ]), GREEN
+      elif recent_stalls[-1] < recent_stalls[0]:
+        comments['stalls_chart'] = random.choice([
+          "Stalls trending down. Shedding jackets!",
+          "Fewer stalls recently. Progress!",
+          "The jacket count is dropping. Keep going.",
+        ]), YELLOW
+      elif recent_stalls[-1] > recent_stalls[0]:
+        comments['stalls_chart'] = random.choice([
+          "Stalls creeping up. Deep breath, find the bite point.",
+          "More stalls lately. Weixing noticed.",
+          "Jacket count rising. Kirby is concerned.",
+        ]), RED
+
+    # Launch chart
+    if len(days) >= 3:
+      recent_launch_pcts = []
+      for d in days[-3:]:
+        l_total = d.get('launches', 0)
+        l_good = d.get('launches_good', 0)
+        if l_total > 0:
+          recent_launch_pcts.append(l_good / l_total * 100)
+      if len(recent_launch_pcts) >= 2:
+        if all(p >= 80 for p in recent_launch_pcts):
+          comments['launch_chart'] = random.choice([
+            "Launches looking consistent!",
+            "Smooth off the line, day after day.",
+            "Kirby trusts your launches now.",
+          ]), GREEN
+        elif recent_launch_pcts[-1] > recent_launch_pcts[0]:
+          comments['launch_chart'] = random.choice([
+            "Launch success trending up!",
+            "Getting smoother off the line.",
+            "Clutch control improving. Waddle incoming.",
+          ]), YELLOW
+        elif recent_launch_pcts[-1] < recent_launch_pcts[0]:
+          comments['launch_chart'] = random.choice([
+            "Launches getting rougher. Easy on the clutch!",
+            "Launch success dipping. Find that bite point.",
+            "Kirby is bracing again.",
+          ]), RED
+
+    return comments
 
   def _get_encouragement(self) -> str:
     """Get encouragement based on overall progress"""
