@@ -12,7 +12,8 @@ from openpilot.common.params import Params
 from openpilot.system.ui.lib.application import gui_app, FontWeight, FONT_SCALE
 from openpilot.system.ui.lib.scroll_panel2 import GuiScrollPanel2
 from openpilot.system.ui.lib.wrap_text import wrap_text
-from openpilot.system.ui.widgets import Widget, NavWidget
+from openpilot.system.ui.widgets import Widget
+from openpilot.system.ui.widgets.nav_widget import NavWidget
 from openpilot.selfdrive.ui.mici.layouts.manual_drive_summary import ManualDriveSummaryDialog
 
 
@@ -29,7 +30,7 @@ BG_CARD = rl.Color(45, 45, 45, 255)
 class ManualStatsLayout(NavWidget):
   """Settings page showing historical manual driving stats"""
 
-  def __init__(self, back_callback):
+  def __init__(self):
     super().__init__()
     self._params = Params()
     self._scroll_panel = GuiScrollPanel2(horizontal=False)
@@ -38,7 +39,7 @@ class ManualStatsLayout(NavWidget):
     self._hand_color: rl.Color = GRAY
     self._encouragement_text: str = ""
     self._section_comments: dict[str, tuple[str, rl.Color]] = {}
-    self.set_back_callback(back_callback)
+    self.set_back_callback(gui_app.pop_widget)
 
   def show_event(self):
     super().show_event()

@@ -14,7 +14,7 @@ from openpilot.common.params import Params
 from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.scroll_panel2 import GuiScrollPanel2
 from openpilot.system.ui.lib.wrap_text import wrap_text
-from openpilot.system.ui.widgets import NavWidget
+from openpilot.system.ui.widgets.nav_widget import NavWidget
 
 
 # Colors
