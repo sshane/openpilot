@@ -14,7 +14,6 @@ Decider('MD5-timestamp')
 
 SetOption('num_jobs', max(1, int(os.cpu_count()/2)))
 
-AddOption('--kaitai', action='store_true', help='Regenerate kaitai struct parsers')
 AddOption('--asan', action='store_true', help='turn on ASAN')
 AddOption('--ubsan', action='store_true', help='turn on UBSan')
 AddOption('--mutation', action='store_true', help='generate mutation-ready code')
@@ -95,7 +94,6 @@ env = Environment(
 
 # Arch-specific flags and paths
 if arch == "larch64":
-  env.Append(CPPPATH=["#third_party/opencl/include"])
   env.Append(LIBPATH=[
     "/usr/local/lib",
     "/system/vendor/lib64",
@@ -202,7 +200,6 @@ SConscript(['rednose/SConscript'])
 
 # Build system services
 SConscript([
-  'system/ubloxd/SConscript',
   'system/loggerd/SConscript',
 ])
 
@@ -214,10 +211,8 @@ SConscript(['third_party/SConscript'])
 
 SConscript(['selfdrive/SConscript'])
 
-if Dir('#tools/cabana/').exists() and GetOption('extras'):
-  SConscript(['tools/replay/SConscript'])
-  if arch != "larch64":
-    SConscript(['tools/cabana/SConscript'])
+if Dir('#tools/cabana/').exists() and arch != "larch64":
+  SConscript(['tools/cabana/SConscript'])
 
 
 env.CompilationDatabase('compile_commands.json')

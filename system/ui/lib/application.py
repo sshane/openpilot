@@ -1,6 +1,7 @@
 import atexit
 import cffi
 import os
+import queue
 import time
 import signal
 import sys
@@ -11,7 +12,6 @@ import subprocess
 from contextlib import contextmanager
 from collections.abc import Callable
 from collections import deque
-from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import NamedTuple
@@ -40,6 +40,10 @@ PROFILE_RENDER = int(os.getenv("PROFILE_RENDER", "0"))
 PROFILE_STATS = int(os.getenv("PROFILE_STATS", "100"))  # Number of functions to show in profile output
 RECORD = os.getenv("RECORD") == "1"
 RECORD_OUTPUT = str(Path(os.getenv("RECORD_OUTPUT", "output")).with_suffix(".mp4"))
+RECORD_QUALITY = int(os.getenv("RECORD_QUALITY", "23"))  # Dynamic bitrate quality level (CRF); 0 is lossless (bigger size), max is 51, default is 23 for x264
+RECORD_BITRATE = os.getenv("RECORD_BITRATE", "")  # Target bitrate e.g. "2000k" (overrides RECORD_QUALITY when set)
+RECORD_SPEED = int(os.getenv("RECORD_SPEED", "1"))  # Speed multiplier
+OFFSCREEN = os.getenv("OFFSCREEN") == "1"  # Disable FPS limiting for fast offline rendering
 
 GL_VERSION = """
 #version 300 es
@@ -108,12 +112,6 @@ def font_fallback(font: rl.Font) -> rl.Font:
   if multilang.requires_unifont():
     return gui_app.font(FontWeight.UNIFONT)
   return font
-
-
-@dataclass
-class ModalOverlay:
-  overlay: object = None
-  callback: Callable | None = None
 
 
 class MousePos(NamedTuple):
@@ -213,14 +211,17 @@ class GuiApplication:
     self._render_texture: rl.RenderTexture | None = None
     self._burn_in_shader: rl.Shader | None = None
     self._ffmpeg_proc: subprocess.Popen | None = None
+    self._ffmpeg_queue: queue.Queue | None = None
+    self._ffmpeg_thread: threading.Thread | None = None
+    self._ffmpeg_stop_event: threading.Event | None = None
     self._textures: dict[str, rl.Texture] = {}
     self._target_fps: int = _DEFAULT_FPS
     self._last_fps_log_time: float = time.monotonic()
     self._frame = 0
     self._window_close_requested = False
-    self._modal_overlay = ModalOverlay()
-    self._modal_overlay_shown = False
-    self._modal_overlay_tick: Callable[[], None] | None = None
+    self._nav_stack: list[object] = []
+    self._nav_stack_tick: Callable[[], None] | None = None
+    self._nav_stack_widgets_to_render = 1 if self.big_ui() else 2
 
     self._mouse = MouseState(self._scale)
     self._mouse_events: list[MouseEvent] = []
@@ -246,6 +247,10 @@ class GuiApplication:
 
   def set_show_fps(self, show: bool):
     self._show_fps = show
+
+  @property
+  def show_touches(self) -> bool:
+    return self._show_touches
 
   @property
   def target_fps(self):
@@ -277,25 +282,38 @@ class GuiApplication:
         rl.set_texture_filter(self._render_texture.texture, rl.TextureFilter.TEXTURE_FILTER_BILINEAR)
 
       if RECORD:
+        output_fps = fps * RECORD_SPEED
         ffmpeg_args = [
           'ffmpeg',
           '-v', 'warning',          # Reduce ffmpeg log spam
-          '-stats',                 # Show encoding progress
+          '-nostats',               # Suppress encoding progress
           '-f', 'rawvideo',         # Input format
           '-pix_fmt', 'rgba',       # Input pixel format
           '-s', f'{self._width}x{self._height}',  # Input resolution
           '-r', str(fps),           # Input frame rate
           '-i', 'pipe:0',           # Input from stdin
-          '-vf', 'vflip,format=yuv420p',  # Flip vertically and convert rgba to yuv420p
-          '-c:v', 'libx264',        # Video codec
-          '-preset', 'ultrafast',   # Encoding speed
+          '-vf', 'vflip,format=yuv420p',  # Flip vertically and convert to yuv420p
+          '-r', str(output_fps),    # Output frame rate (for speed multiplier)
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', str(RECORD_QUALITY)
+        ]
+        if RECORD_BITRATE:
+          # NOTE: custom bitrate overrides crf setting
+          ffmpeg_args += ['-b:v', RECORD_BITRATE, '-maxrate', RECORD_BITRATE, '-bufsize', RECORD_BITRATE]
+        ffmpeg_args += [
           '-y',                     # Overwrite existing file
           '-f', 'mp4',              # Output format
           RECORD_OUTPUT,            # Output file path
         ]
         self._ffmpeg_proc = subprocess.Popen(ffmpeg_args, stdin=subprocess.PIPE)
+        self._ffmpeg_queue = queue.Queue(maxsize=60)  # Buffer up to 60 frames
+        self._ffmpeg_stop_event = threading.Event()
+        self._ffmpeg_thread = threading.Thread(target=self._ffmpeg_writer_thread, daemon=True)
+        self._ffmpeg_thread.start()
 
-      rl.set_target_fps(fps)
+      # OFFSCREEN disables FPS limiting for fast offline rendering (e.g. clips)
+      rl.set_target_fps(0 if OFFSCREEN else fps)
 
       self._target_fps = fps
       self._set_styles()
@@ -337,18 +355,64 @@ class GuiApplication:
     print(f"{green}UI window ready in {elapsed_ms:.1f} ms{reset}")
     sys.exit(0)
 
-  def set_modal_overlay(self, overlay, callback: Callable | None = None):
-    if self._modal_overlay.overlay is not None:
-      if hasattr(self._modal_overlay.overlay, 'hide_event'):
-        self._modal_overlay.overlay.hide_event()
+  def _ffmpeg_writer_thread(self):
+    """Background thread that writes frames to ffmpeg."""
+    while True:
+      try:
+        data = self._ffmpeg_queue.get(timeout=1.0)
+        if data is None:  # Sentinel to stop
+          break
+        self._ffmpeg_proc.stdin.write(data)
+      except queue.Empty:
+        if self._ffmpeg_stop_event.is_set():
+          break
+        continue
+      except Exception:
+        break
 
-      if self._modal_overlay.callback is not None:
-        self._modal_overlay.callback(-1)
+  def push_widget(self, widget: object):
+    if widget in self._nav_stack:
+      cloudlog.warning("Widget already in stack, cannot push again!")
+      return
 
-    self._modal_overlay = ModalOverlay(overlay=overlay, callback=callback)
+    # disable previous widget to prevent input processing
+    if len(self._nav_stack) > 0:
+      prev_widget = self._nav_stack[-1]
+      # TODO: change these to touch_valid
+      prev_widget.set_enabled(False)
 
-  def set_modal_overlay_tick(self, tick_function: Callable | None):
-    self._modal_overlay_tick = tick_function
+    self._nav_stack.append(widget)
+    widget.show_event()
+
+  def pop_widget(self):
+    if len(self._nav_stack) < 2:
+      cloudlog.warning("At least one widget should remain on the stack, ignoring pop!")
+      return
+
+    # re-enable previous widget and pop current
+    # TODO: switch to touch_valid
+    prev_widget = self._nav_stack[-2]
+    prev_widget.set_enabled(True)
+
+    widget = self._nav_stack.pop()
+    widget.hide_event()
+
+  def pop_widgets_to(self, widget):
+    if widget not in self._nav_stack:
+      cloudlog.warning("Widget not in stack, cannot pop to it!")
+      return
+
+    # pops all widgets after specified widget
+    while len(self._nav_stack) > 0 and self._nav_stack[-1] != widget:
+      self.pop_widget()
+
+  def get_active_widget(self):
+    if len(self._nav_stack) > 0:
+      return self._nav_stack[-1]
+    return None
+
+  def set_nav_stack_tick(self, tick_function: Callable | None):
+    self._nav_stack_tick = tick_function
 
   def set_should_render(self, should_render: bool):
     self._should_render = should_render
@@ -409,11 +473,17 @@ class GuiApplication:
     return texture
 
   def close_ffmpeg(self):
+    if self._ffmpeg_thread is not None:
+      # Signal thread to stop, send sentinel, then wait for it to drain
+      self._ffmpeg_stop_event.set()
+      self._ffmpeg_queue.put(None)
+      self._ffmpeg_thread.join(timeout=30)
+
     if self._ffmpeg_proc is not None:
       self._ffmpeg_proc.stdin.flush()
       self._ffmpeg_proc.stdin.close()
       try:
-        self._ffmpeg_proc.wait(timeout=5)
+        self._ffmpeg_proc.wait(timeout=30)
       except subprocess.TimeoutExpired:
         self._ffmpeg_proc.terminate()
         self._ffmpeg_proc.wait()
@@ -486,14 +556,15 @@ class GuiApplication:
           rl.begin_drawing()
           rl.clear_background(rl.BLACK)
 
-        # Handle modal overlay rendering and input processing
-        if self._handle_modal_overlay():
-          # Allow a Widget to still run a function while overlay is shown
-          if self._modal_overlay_tick is not None:
-            self._modal_overlay_tick()
-          yield False
-        else:
-          yield True
+        # Allow a Widget to still run a function regardless of the stack depth
+        if self._nav_stack_tick is not None:
+          self._nav_stack_tick()
+
+        # Only render top widgets
+        for widget in self._nav_stack[-self._nav_stack_widgets_to_render:]:
+          widget.render(rl.Rectangle(0, 0, self.width, self.height))
+
+        yield True
 
         if self._render_texture:
           rl.end_texture_mode()
@@ -525,8 +596,7 @@ class GuiApplication:
           image = rl.load_image_from_texture(self._render_texture.texture)
           data_size = image.width * image.height * 4
           data = bytes(rl.ffi.buffer(image.data, data_size))
-          self._ffmpeg_proc.stdin.write(data)
-          self._ffmpeg_proc.stdin.flush()
+          self._ffmpeg_queue.put(data)  # Async write via background thread
           rl.unload_image(image)
 
         self._monitor_fps()
@@ -547,33 +617,6 @@ class GuiApplication:
   @property
   def height(self):
     return self._height
-
-  def _handle_modal_overlay(self) -> bool:
-    if self._modal_overlay.overlay:
-      if hasattr(self._modal_overlay.overlay, 'render'):
-        result = self._modal_overlay.overlay.render(rl.Rectangle(0, 0, self.width, self.height))
-      elif callable(self._modal_overlay.overlay):
-        result = self._modal_overlay.overlay()
-      else:
-        raise Exception
-
-      # Send show event to Widget
-      if not self._modal_overlay_shown and hasattr(self._modal_overlay.overlay, 'show_event'):
-        self._modal_overlay.overlay.show_event()
-        self._modal_overlay_shown = True
-
-      if result >= 0:
-        # Clear the overlay and execute the callback
-        original_modal = self._modal_overlay
-        self._modal_overlay = ModalOverlay()
-        if hasattr(original_modal.overlay, 'hide_event'):
-          original_modal.overlay.hide_event()
-        if original_modal.callback is not None:
-          original_modal.callback(result)
-      return True
-    else:
-      self._modal_overlay_shown = False
-      return False
 
   def _load_fonts(self):
     for font_weight_file in FontWeight:
