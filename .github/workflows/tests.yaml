@@ -66,22 +66,13 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    - run: echo "CACHE_COMMIT_DATE=$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" >> $GITHUB_ENV
-    - name: Install dependencies
-      run: ./tools/mac_setup.sh
-      env:
-        HOMEBREW_DISPLAY_INSTALL_TIMES: 1
-    - run: git lfs pull
-    - name: Getting scons cache
-      uses: ./.github/workflows/auto-cache
-      with:
-        path: /tmp/scons_cache
-        key: scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
-        restore-keys: |
-          scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}
-          scons-${{ runner.arch }}-macos
+    - name: Remove Homebrew from environment
+      run: |
+        FILTERED=$(echo "$PATH" | tr ':' '\n' | grep -v '/opt/homebrew' | tr '\n' ':')
+        echo "PATH=${FILTERED}/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" >> $GITHUB_ENV
+    - uses: ./.github/workflows/setup-with-retry
     - name: Building openpilot
-      run: . .venv/bin/activate && scons
+      run: scons
 
   static_analysis:
     name: static analysis
@@ -171,15 +162,15 @@ jobs:
       if: github.repository == 'commaai/openpilot' && github.ref == 'refs/heads/master'
       working-directory: ${{ github.workspace }}/ci-artifacts
       run: |
-        git checkout --orphan process-replay
-        git rm -rf .
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
+        git fetch origin process-replay || true
+        git checkout process-replay 2>/dev/null || git checkout --orphan process-replay
         cp ${{ github.workspace }}/selfdrive/test/process_replay/fakedata/*.zst .
         echo "${{ github.sha }}" > ref_commit
         git add .
-        git commit -m "process-replay refs for ${{ github.repository }}@${{ github.sha }}"
-        git push origin process-replay --force
+        git commit -m "process-replay refs for ${{ github.repository }}@${{ github.sha }}" || echo "No changes to commit"
+        git push origin process-replay
     - name: Run regen
       if: false
       timeout-minutes: 4
