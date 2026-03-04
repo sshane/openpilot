@@ -1,16 +1,13 @@
-import pyray as rl
-
 from openpilot.common.params import Params
-from openpilot.system.ui.widgets.scroller import Scroller
+from openpilot.system.ui.widgets.scroller import NavScroller
 from openpilot.selfdrive.ui.mici.widgets.button import BigButton
 from openpilot.selfdrive.ui.mici.layouts.settings.toggles import TogglesLayoutMici
-from openpilot.selfdrive.ui.mici.layouts.settings.network import NetworkLayoutMici
+from openpilot.selfdrive.ui.mici.layouts.settings.network.network_layout import NetworkLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.device import DeviceLayoutMici, PairBigButton
 from openpilot.selfdrive.ui.mici.layouts.settings.developer import DeveloperLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayout
 from openpilot.selfdrive.ui.mici.layouts.settings.manual_stats import ManualStatsLayout
 from openpilot.system.ui.lib.application import gui_app, FontWeight
-from openpilot.system.ui.widgets.nav_widget import NavWidget
 
 
 class SettingsBigButton(BigButton):
@@ -18,7 +15,7 @@ class SettingsBigButton(BigButton):
     return 64
 
 
-class SettingsLayout(NavWidget):
+class SettingsLayout(NavScroller):
   def __init__(self):
     super().__init__()
     self._params = Params()
@@ -47,7 +44,7 @@ class SettingsLayout(NavWidget):
     manual_stats_btn = SettingsBigButton("MT stats", "", "icons_mici/wheel.png")
     manual_stats_btn.set_click_callback(lambda: gui_app.push_widget(manual_stats_panel))
 
-    self._scroller = Scroller([
+    self._scroller.add_widgets([
       manual_stats_btn,  # MT Stats first!
       toggles_btn,
       network_btn,
@@ -57,18 +54,4 @@ class SettingsLayout(NavWidget):
       developer_btn,
     ])
 
-    # Set up back navigation
-    self.set_back_callback(gui_app.pop_widget)
-
     self._font_medium = gui_app.font(FontWeight.MEDIUM)
-
-  def show_event(self):
-    super().show_event()
-    self._scroller.show_event()
-
-  def hide_event(self):
-    super().hide_event()
-    self._scroller.hide_event()
-
-  def _render(self, rect: rl.Rectangle):
-    self._scroller.render(rect)
