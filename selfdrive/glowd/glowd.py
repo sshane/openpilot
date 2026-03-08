@@ -29,9 +29,7 @@ import cereal.messaging as messaging
 from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 
-from openpilot.tools.underglow.sp105e import (
-  connect, set_color, set_brightness, power_on, power_off, BRIGHTNESS_MAX,
-)
+from openpilot.tools.underglow import sp105e
 
 DEBUG = True
 
@@ -195,74 +193,25 @@ class GlowController:
     return rpm_to_color(rpm)
 
 
-def bt_init():
-  """Initialize BT adapter on comma four (WCN3990). Requires sudo (passwordless on AGNOS).
-  Safe to call multiple times — kills stale hciattach first.
-  Sleeps between steps since BT stack can be slow to come up on boot."""
-  try:
-    # Kill any stale hciattach
-    subprocess.run(["sudo", "killall", "hciattach"], capture_output=True)
-    time.sleep(1)
-
-    # Power cycle BT chip via btpower ioctl (off then on — fixes stale state on retries)
-    subprocess.run(["sudo", "python3", "-c",
-                    "import fcntl,os; fd=os.open('/dev/btpower',os.O_RDWR); fcntl.ioctl(fd,0xbfad,0); os.close(fd)"],
-                   capture_output=True)
-    time.sleep(1)
-    subprocess.run(["sudo", "python3", "-c",
-                    "import fcntl,os; fd=os.open('/dev/btpower',os.O_RDWR); fcntl.ioctl(fd,0xbfad,1); os.close(fd)"],
-                   check=True, capture_output=True)
-    time.sleep(2)
-
-    # Unblock bluetooth
-    subprocess.run(["sudo", "rfkill", "unblock", "bluetooth"], check=True, capture_output=True)
-    time.sleep(0.5)
-
-    # Attach UART — prints firmware errors but works fine without firmware
-    result = subprocess.run(
-      ["sudo", "hciattach", "-s", "115200", "/dev/ttyHS0", "qualcomm", "115200", "flow"],
-      capture_output=True, timeout=15,
-    )
-    if result.returncode != 0:
-      print(f"glowd: hciattach stderr: {result.stderr.decode().strip()}")
-    time.sleep(1)
-
-    # Bring interface up
-    subprocess.run(["sudo", "hciconfig", "hci0", "up"], check=True, capture_output=True)
-    time.sleep(0.5)
-
-    # Verify it's actually up
-    if not bt_is_up():
-      print("glowd: BT init completed but hci0 not up")
-      return False
-
-    print("glowd: BT adapter initialized")
-    return True
-  except Exception as e:
-    print(f"glowd: BT init failed: {e}")
-    return False
-
-
-def bt_is_up() -> bool:
-  """Check if hci0 is up."""
+def bt_is_ready() -> bool:
+  """Check if BT stack is up (managed by bluetooth.service in AGNOS)."""
   result = subprocess.run(["sudo", "hciconfig", "hci0"], capture_output=True)
   return b"UP RUNNING" in result.stdout
 
 
 async def ble_connect():
-  """Initialize BT, connect to SP105E, power on, max brightness. Returns client or None."""
-  # Always reinit BT stack to ensure clean state
-  print("glowd: initializing BT adapter...")
-  if not bt_init():
+  """Connect to SP105E, power on, max brightness. Returns client or None.
+  Assumes BT stack is already up (bluetooth.service in AGNOS)."""
+  if not bt_is_ready():
+    print("glowd: hci0 not up (waiting for bluetooth.service)")
     return None
-  await asyncio.sleep(1)
 
   print("glowd: connecting to SP105E...")
-  client = await connect(exit_on_fail=False)
+  client = await sp105e.connect(exit_on_fail=False)
   if client is None:
     return None
-  await power_on(client)
-  await set_brightness(client, BRIGHTNESS_MAX)
+  await sp105e.power_on(client)
+  await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MAX)
   print("glowd: connected, LEDs on, brightness maxed")
   return client
 
@@ -271,7 +220,7 @@ async def ble_shutdown(client):
   """Power off LEDs and disconnect."""
   if client is not None:
     try:
-      await power_off(client)
+      await sp105e.power_off(client)
       await client.disconnect()
       print("glowd: LEDs off, disconnected")
     except Exception as e:
@@ -334,7 +283,7 @@ async def glowd_thread():
           print(f"glowd: RPM={cs.engineRpm:.0f} gear={cs.gearActual} chill={chill_mode} → RGB{color}")
 
         try:
-          await set_color(client, *color)
+          await sp105e.set_color(client, *color)
         except Exception as e:
           print(f"glowd: BLE error: {e}")
           try:

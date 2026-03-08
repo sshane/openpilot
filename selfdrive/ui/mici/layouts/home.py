@@ -29,27 +29,38 @@ NETWORK_TYPES = {
 
 
 class GlowStatusIcon(Widget):
-  """Small colored circle indicating glowd connection status."""
-  SIZE = 16
+  """LED-style icon indicating glowd connection status."""
+  SIZE = 48
 
   def __init__(self):
     super().__init__()
     self.set_rect(rl.Rectangle(0, 0, self.SIZE, self.SIZE))
-    self._color = rl.Color(128, 128, 128, 180)
+    self._color = rl.Color(200, 40, 40, 230)
+    self._glow = rl.Color(200, 40, 40, 60)
     self.set_enabled(False)
 
   def set_status(self, status: str | None):
     if status == "connected":
-      self._color = rl.Color(0, 200, 80, 230)
+      self._color = rl.Color(0, 200, 80, 240)
+      self._glow = rl.Color(0, 200, 80, 60)
     elif status == "connecting":
-      self._color = rl.Color(255, 200, 0, 230)
+      self._color = rl.Color(255, 200, 0, 240)
+      self._glow = rl.Color(255, 200, 0, 50)
     else:
-      self._color = rl.Color(128, 128, 128, 180)
+      self._color = rl.Color(200, 40, 40, 230)
+      self._glow = rl.Color(200, 40, 40, 50)
 
   def _render(self, _):
     cx = int(self._rect.x + self.SIZE / 2)
     cy = int(self._rect.y + self.SIZE / 2)
-    rl.draw_circle(cx, cy, self.SIZE // 2, self._color)
+    # Outer glow
+    rl.draw_circle(cx, cy, self.SIZE // 2, self._glow)
+    # Bulb body
+    rl.draw_circle(cx, cy - 3, 12, self._color)
+    # Base/stem
+    rl.draw_rectangle(cx - 6, cy + 8, 12, 8, self._color)
+    # Highlight reflection
+    rl.draw_circle(cx - 3, cy - 7, 3, rl.Color(255, 255, 255, 80))
 
 
 class NetworkIcon(Widget):
