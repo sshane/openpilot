@@ -93,7 +93,7 @@ class ManualStatsLayout(NavWidget):
     rl.draw_rectangle_rounded(btn_rect, 0.3, 10, btn_color)
     rl.draw_text_ex(font_medium, "View Last Drive Summary", rl.Vector2(x + 20, y + 18), 26, 0, WHITE)
     if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT) and rl.check_collision_point_rec(rl.get_mouse_position(), btn_rect):
-      gui_app.set_modal_overlay(ManualDriveSummaryDialog())
+      gui_app.push_widget(ManualDriveSummaryDialog())
     y += btn_h + 25
 
     if not self._stats or self._stats.get('total_drives', 0) == 0:

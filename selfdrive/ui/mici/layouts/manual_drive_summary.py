@@ -63,7 +63,7 @@ class ManualDriveSummaryDialog(NavWidget):
     self._header_text, self._header_color = self._pick_header()
     self._encouragement_text = self._pick_encouragement()
 
-    self.set_back_callback(lambda: gui_app.set_modal_overlay(None))
+    self.set_back_callback(lambda: gui_app.pop_widget())
 
   def _load_data(self):
     """Load session and historical data from ManualDriveStats (single read)"""

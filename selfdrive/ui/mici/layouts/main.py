@@ -124,7 +124,7 @@ class MiciMainLayout(Scroller):
                    session.get('upshifts', 0) > 0 or
                    session.get('launches', 0) > 0)
     if duration > 30 and has_activity:
-      gui_app.set_modal_overlay(ManualDriveSummaryDialog())
+      gui_app.push_widget(ManualDriveSummaryDialog())
 
   def _on_interactive_timeout(self):
     # Don't pop if onboarding

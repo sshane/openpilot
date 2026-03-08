@@ -24,6 +24,7 @@ class TogglesLayoutMici(NavScroller):
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback)
 
     self._scroller.add_widgets([
+      glow_toggle,
       self._personality_toggle,
       self._experimental_btn,
       is_metric_toggle,
@@ -31,7 +32,6 @@ class TogglesLayoutMici(NavScroller):
       always_on_dm_toggle,
       record_front,
       record_mic,
-      glow_toggle,
       enable_openpilot,
     ])
 
