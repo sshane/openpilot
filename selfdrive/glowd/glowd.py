@@ -26,6 +26,7 @@ import subprocess
 import time
 
 import cereal.messaging as messaging
+from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 
@@ -33,14 +34,8 @@ from openpilot.tools.underglow import sp105e
 
 DEBUG = True
 
-# --- Color palette (California-legal: no red, no blue) ---
-COLOR_IDLE = (0, 180, 60)        # green at idle
-COLOR_BRAKE = (255, 40, 0)       # deep orange-red (more orange than red)
-COLOR_BRAKE_HARD = (255, 80, 0)  # bright orange on hard brake
-COLOR_GAS = (255, 140, 0)        # warm amber
+# --- Color palette ---
 COLOR_REVERSE = (255, 255, 255)  # white
-COLOR_BLINKER = (255, 160, 0)    # amber
-COLOR_DOWNSHIFT = (180, 0, 255)  # purple flash
 COLOR_STANDSTILL = (0, 200, 80)  # soft green for breathing
 
 # RPM thresholds
@@ -49,12 +44,7 @@ RPM_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
-BLINKER_HZ = 1.5
-DOWNSHIFT_FLASH_DURATION = 0.4
 BRIGHT_INIT_STEPS = 10
-
-# Gear debounce: ignore gearActual == 0 briefly (neutral between shifts)
-GEAR_ZERO_DEBOUNCE_S = 0.5
 
 
 def rpm_to_color(rpm: float) -> tuple[int, int, int]:
@@ -70,9 +60,9 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
     # orange → purple via RGB blend (avoids blue in HSV path)
     frac = (t - 0.7) / 0.3
     return (
-      int(255 + (COLOR_DOWNSHIFT[0] - 255) * frac),
+      int(255 + (180 - 255) * frac),
       int(122 * (1 - frac)),
-      int(COLOR_DOWNSHIFT[2] * frac),
+      int(255 * frac),
     )
 
 
@@ -88,87 +78,37 @@ def scale_color(color: tuple[int, int, int], brightness: float) -> tuple[int, in
 
 class GlowController:
   def __init__(self):
-    self.last_valid_gear = 0
-    self.gear_zero_since = 0.0
-    self.effective_gear = 0
-    self._prev_effective_gear = 0
-
-    self.downshift_until = 0.0
-    self.last_blinker_toggle = 0.0
-    self.blinker_on = False
     self.last_color = (0, 0, 0)
     self.standstill_start = 0.0
     self.was_standstill = False
 
-  def _update_gear(self, raw_gear: int, now: float) -> int:
-    """Debounce gearActual: hold last valid gear when it drops to 0 briefly."""
-    if raw_gear > 0:
-      self.last_valid_gear = raw_gear
-      self.gear_zero_since = 0.0
-      self.effective_gear = raw_gear
-    else:
-      if self.gear_zero_since == 0.0:
-        self.gear_zero_since = now
-      if now - self.gear_zero_since < GEAR_ZERO_DEBOUNCE_S:
-        self.effective_gear = self.last_valid_gear
-      else:
-        self.effective_gear = 0
-    return self.effective_gear
+    # HSV smoothing filters
+    dt = 1.0 / UPDATE_HZ
+    self._h_filter = FirstOrderFilter(0.0, 0.1, dt)
+    self._s_filter = FirstOrderFilter(0.0, 0.1, dt)
+    self._v_filter = FirstOrderFilter(0.0, 0.1, dt)
+
+  def _smooth_color(self, color: tuple[int, int, int]) -> tuple[int, int, int]:
+    """Filter RGB through HSV space for smooth transitions."""
+    h, s, v = colorsys.rgb_to_hsv(color[0] / 255, color[1] / 255, color[2] / 255)
+    h = self._h_filter.update(h)
+    s = self._s_filter.update(s)
+    v = self._v_filter.update(v)
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return int(r * 255), int(g * 255), int(b * 255)
 
   def compute_color(self, sm, chill_mode: bool = False) -> tuple[int, int, int]:
     cs = sm['carState']
     now = time.monotonic()
 
     rpm = cs.engineRpm
-    brake = cs.brakePressed
-    gas = cs.gasPressed
     standstill = cs.standstill
-    left_blinker = cs.leftBlinker
-    right_blinker = cs.rightBlinker
-    raw_gear = cs.gearActual
 
-    gear = self._update_gear(raw_gear, now)
-    prev_gear = self._prev_effective_gear
-
-    # Chill mode: RPM color only, no reactive effects
-    if chill_mode:
-      self._prev_effective_gear = gear
-      if not self.was_standstill and standstill:
-        self.was_standstill = True
-      elif not standstill:
-        self.was_standstill = False
-      return rpm_to_color(rpm)
-
-    # --- Priority 1: Downshift flash ---
-    if gear > 0 and prev_gear > 0 and gear < prev_gear:
-      self.downshift_until = now + DOWNSHIFT_FLASH_DURATION
-      if DEBUG:
-        print(f"glowd: DOWNSHIFT {prev_gear} → {gear}")
-    self._prev_effective_gear = gear
-
-    if now < self.downshift_until:
-      return COLOR_DOWNSHIFT
-
-    # --- Priority 2: Braking ---
-    if brake:
-      if cs.aEgo < -3.0:
-        return COLOR_BRAKE_HARD
-      return COLOR_BRAKE
-
-    # --- Priority 3: Blinker amber pulse ---
-    if left_blinker or right_blinker:
-      period = 1.0 / BLINKER_HZ
-      if now - self.last_blinker_toggle >= period / 2:
-        self.blinker_on = not self.blinker_on
-        self.last_blinker_toggle = now
-      if self.blinker_on:
-        return COLOR_BLINKER
-
-    # --- Priority 4: Reverse ---
+    # Reverse
     if str(cs.gearShifter) == 'reverse':
       return COLOR_REVERSE
 
-    # --- Priority 5: Standstill breathing ---
+    # Standstill breathing
     if standstill:
       if not self.was_standstill:
         self.standstill_start = now
@@ -180,16 +120,7 @@ class GlowController:
     else:
       self.was_standstill = False
 
-    # --- Priority 6: Gas pressed (warm amber overlay) ---
-    if gas and rpm > RPM_MIN:
-      rpm_color = rpm_to_color(rpm)
-      return (
-        (rpm_color[0] + COLOR_GAS[0]) // 2,
-        (rpm_color[1] + COLOR_GAS[1]) // 2,
-        (rpm_color[2] + COLOR_GAS[2]) // 2,
-      )
-
-    # --- Priority 7: RPM-based color ---
+    # RPM-based color
     return rpm_to_color(rpm)
 
 
@@ -279,7 +210,7 @@ async def glowd_thread():
       continue
 
     if sm.updated['carState']:
-      color = ctrl.compute_color(sm, chill_mode)
+      color = ctrl._smooth_color(ctrl.compute_color(sm, chill_mode))
 
       if color != ctrl.last_color:
         if DEBUG:
