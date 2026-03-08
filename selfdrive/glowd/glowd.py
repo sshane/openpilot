@@ -81,6 +81,8 @@ class GlowController:
     self.last_color = (0, 0, 0)
     self.standstill_start = 0.0
     self.was_standstill = False
+    self._brake_dark_until = 0.0
+    self._was_brake = False
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
@@ -103,25 +105,35 @@ class GlowController:
 
     rpm = cs.engineRpm
     standstill = cs.standstill
+    # TODO: use sp105e.set_brightness instead of scaling RGB
+    brightness = 1.0 if standstill or str(cs.gearShifter) == 'reverse' else 0.7
+
+    # Brake rising edge: go dark for 0.6s
+    if cs.brakePressed and not self._was_brake:
+      self._brake_dark_until = now + 0.6
+    self._was_brake = cs.brakePressed
+    if now < self._brake_dark_until:
+      return (128, 0, 0)
 
     # Reverse
     if str(cs.gearShifter) == 'reverse':
-      return COLOR_REVERSE
+      return scale_color(COLOR_REVERSE, brightness)
 
-    # Standstill breathing
+    # Standstill: slow rainbow cycle
     if standstill:
       if not self.was_standstill:
         self.standstill_start = now
         self.was_standstill = True
       elapsed = now - self.standstill_start
       if elapsed > 2.0:
-        bright = breathing_brightness(elapsed - 2.0, period=3.0)
-        return scale_color(COLOR_STANDSTILL, bright)
+        hue = ((elapsed - 2.0) / 8.0) % 1.0  # full cycle every 8s
+        r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+        return scale_color((int(r * 255), int(g * 255), int(b * 255)), brightness)
     else:
       self.was_standstill = False
 
     # RPM-based color
-    return rpm_to_color(rpm)
+    return scale_color(rpm_to_color(rpm), brightness)
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
