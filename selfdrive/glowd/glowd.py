@@ -204,11 +204,15 @@ def bt_init():
     subprocess.run(["sudo", "killall", "hciattach"], capture_output=True)
     time.sleep(1)
 
-    # Power on BT chip via btpower ioctl (needs root)
+    # Power cycle BT chip via btpower ioctl (off then on — fixes stale state on retries)
+    subprocess.run(["sudo", "python3", "-c",
+                    "import fcntl,os; fd=os.open('/dev/btpower',os.O_RDWR); fcntl.ioctl(fd,0xbfad,0); os.close(fd)"],
+                   capture_output=True)
+    time.sleep(1)
     subprocess.run(["sudo", "python3", "-c",
                     "import fcntl,os; fd=os.open('/dev/btpower',os.O_RDWR); fcntl.ioctl(fd,0xbfad,1); os.close(fd)"],
                    check=True, capture_output=True)
-    time.sleep(1)
+    time.sleep(2)
 
     # Unblock bluetooth
     subprocess.run(["sudo", "rfkill", "unblock", "bluetooth"], check=True, capture_output=True)
