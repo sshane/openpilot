@@ -45,6 +45,7 @@ class Command(IntEnum):
   BRIGHT_UP = 0x2A    # relative: step brighter, D1=step size (1-16)
   BRIGHT_DOWN = 0x28  # relative: step dimmer, D1=step size (1-8)
   SET_MODE = 0x2C
+  GET_STATE = 0x10    # triggers notify with 8-byte state response
   COLOR_ORDER = 0x3C
   # DANGEROUS — do not send, will soft-brick (requires power cycle):
   # 0x1C — bright white, ignores all commands after
@@ -130,6 +131,35 @@ async def send(client, data: bytes):
   await client.write_gatt_char(CHAR, data, response=False)
 
 
+# --- State reading ---
+
+async def get_state(client) -> bytes | None:
+  """Send GET_STATE (0x10) and return 8-byte notify response.
+  Returns None on timeout. Byte 0: 1=on, 0=off."""
+  result = None
+  event = asyncio.Event()
+
+  def on_notify(sender, data):
+    nonlocal result
+    result = data
+    event.set()
+
+  await client.start_notify(CHAR, on_notify)
+  await send(client, packet(0, 0, 0, Command.GET_STATE))
+  try:
+    await asyncio.wait_for(event.wait(), timeout=2.0)
+  except asyncio.TimeoutError:
+    pass
+  await client.stop_notify(CHAR)
+  return result
+
+
+async def is_on(client) -> bool:
+  """Returns True if LEDs are on."""
+  state = await get_state(client)
+  return state is not None and state[0] == 1
+
+
 # --- High-level commands ---
 
 async def set_color(client, r, g, b):
@@ -140,14 +170,59 @@ async def power_toggle(client):
   await send(client, packet(0, 0, 0, Command.POWER_TOGGLE))
 
 
-async def set_brightness(client, val):
-  """Step brightness up. Relative, not absolute. Step size 1-16."""
-  await send(client, packet(val, 0, 0, Command.BRIGHT_UP))
+async def power_on(client):
+  """Turn on if off. No-op if already on."""
+  if not await is_on(client):
+    await power_toggle(client)
 
 
-async def dim(client, val):
-  """Step brightness down. Relative, not absolute. Step size 1-8."""
-  await send(client, packet(val, 0, 0, Command.BRIGHT_DOWN))
+async def power_off(client):
+  """Turn off if on. No-op if already off."""
+  if await is_on(client):
+    await power_toggle(client)
+
+
+BRIGHTNESS_MAX = 6
+BRIGHTNESS_MIN = 0
+
+
+async def get_brightness(client) -> int | None:
+  """Read current brightness level (0-6). Returns None on error."""
+  state = await get_state(client)
+  if state is not None and len(state) >= 4:
+    return state[3]
+  return None
+
+
+async def set_brightness(client, level: int):
+  """Set absolute brightness (0-6). Reads current level and steps to target."""
+  level = max(BRIGHTNESS_MIN, min(BRIGHTNESS_MAX, level))
+  current = await get_brightness(client)
+  if current is None:
+    # Can't read state, just step up to max as fallback
+    for _ in range(BRIGHTNESS_MAX):
+      await send(client, packet(1, 0, 0, Command.BRIGHT_UP))
+      await asyncio.sleep(0.05)
+    return
+  diff = level - current
+  if diff > 0:
+    for _ in range(diff):
+      await send(client, packet(1, 0, 0, Command.BRIGHT_UP))
+      await asyncio.sleep(0.05)
+  elif diff < 0:
+    for _ in range(-diff):
+      await send(client, packet(1, 0, 0, Command.BRIGHT_DOWN))
+      await asyncio.sleep(0.05)
+
+
+async def brightness_step_up(client, step=1):
+  """Step brightness up. Relative. Step size 1-16."""
+  await send(client, packet(step, 0, 0, Command.BRIGHT_UP))
+
+
+async def brightness_step_down(client, step=1):
+  """Step brightness down. Relative. Step size 1-8."""
+  await send(client, packet(step, 0, 0, Command.BRIGHT_DOWN))
 
 
 async def set_mode(client, mode):
@@ -181,19 +256,40 @@ async def cmd_toggle(args):
   await client.disconnect()
 
 
+async def cmd_on(args):
+  client = await connect()
+  await power_on(client)
+  print("ON")
+  await client.disconnect()
+
+
+async def cmd_off(args):
+  client = await connect()
+  await power_off(client)
+  print("OFF")
+  await client.disconnect()
+
+
+async def cmd_state(args):
+  client = await connect()
+  state = await get_state(client)
+  if state is None:
+    print("No response")
+  else:
+    print(f"Power: {'ON' if state[0] == 1 else 'OFF'}")
+    print(f"Brightness: {state[3]}/{BRIGHTNESS_MAX}")
+    print(f"Mode: {state[1]} ({'static' if state[1] == 0xC9 else 'pattern'})")
+    print(f"Color order: {state[5]} ({ColorOrder(state[5]).name})")
+    print(f"Raw: {' '.join(f'{b:02x}' for b in state)}")
+  await client.disconnect()
+
+
 async def cmd_bright(args):
   client = await connect()
-  steps = abs(args.value)
-  if args.value >= 0:
-    for _ in range(steps):
-      await set_brightness(client, 8)
-      await asyncio.sleep(0.1)
-    print(f"Brightness up {steps} steps")
-  else:
-    for _ in range(steps):
-      await dim(client, 8)
-      await asyncio.sleep(0.1)
-    print(f"Brightness down {steps} steps")
+  current = await get_brightness(client)
+  await set_brightness(client, args.value)
+  after = await get_brightness(client)
+  print(f"Brightness: {current} → {after} (range 0-{BRIGHTNESS_MAX})")
   await client.disconnect()
 
 
@@ -214,10 +310,8 @@ async def cmd_pattern(args):
 async def run_demo(client):
   """HSV color cycle → brightness ramp → repeat. Ctrl+C to stop."""
   import colorsys
-  # Max brightness
-  for _ in range(10):
-    await set_brightness(client, 16)
-    await asyncio.sleep(0.05)
+  await power_on(client)
+  await set_brightness(client, BRIGHTNESS_MAX)
 
   print("Demo: colors → brightness → colors. Ctrl+C to stop.")
   try:
@@ -232,18 +326,15 @@ async def run_demo(client):
       print("  brightness ramp...")
       await set_color(client, 255, 0, 0)
       await asyncio.sleep(0.1)
-      for _ in range(6):
-        await dim(client, 1)
-        await asyncio.sleep(0.05)
-      for _ in range(6):
-        await set_brightness(client, 1)
-        await asyncio.sleep(0.05)
+      for level in range(BRIGHTNESS_MAX, -1, -1):
+        await set_brightness(client, level)
+        await asyncio.sleep(0.15)
+      for level in range(BRIGHTNESS_MAX + 1):
+        await set_brightness(client, level)
+        await asyncio.sleep(0.15)
   except KeyboardInterrupt:
     pass
-  # Restore full bright
-  for _ in range(10):
-    await set_brightness(client, 16)
-    await asyncio.sleep(0.05)
+  await set_brightness(client, BRIGHTNESS_MAX)
   print("\n  demo done.")
 
 
@@ -257,8 +348,9 @@ async def cmd_interactive(args):
   client = await connect()
   print("\nCommands:")
   print("  color R G B       set static color (RGB 0-255)")
-  print("  bright N          step brighter (N steps, use -N to dim)")
-  print("  toggle            power on/off")
+  print("  bright N          set brightness (0-6)")
+  print("  on / off / toggle power control")
+  print("  state             read device state")
   print("  mode N            set mode (decimal, via SET_MODE)")
   print("  pattern NAME      set pattern (e.g. BREATHING, RAINBOW_FLOW)")
   print("  raw HH HH ...     send raw hex bytes")
@@ -279,17 +371,29 @@ async def cmd_interactive(args):
       if c == "color" and len(parts) == 4:
         await set_color(client, int(parts[1]), int(parts[2]), int(parts[3]))
       elif c in ("bright", "brightness") and len(parts) == 2:
-        val = int(parts[1])
-        if val >= 0:
-          for _ in range(val):
-            await set_brightness(client, 8)
-            await asyncio.sleep(0.1)
-        else:
-          for _ in range(-val):
-            await dim(client, 8)
-            await asyncio.sleep(0.1)
+        level = int(parts[1])
+        current = await get_brightness(client)
+        await set_brightness(client, level)
+        after = await get_brightness(client)
+        print(f"  Brightness: {current} → {after}")
+      elif c == "on":
+        await power_on(client)
+        print("  ON")
+      elif c == "off":
+        await power_off(client)
+        print("  OFF")
       elif c == "toggle":
         await power_toggle(client)
+      elif c == "state":
+        state = await get_state(client)
+        if state is None:
+          print("  No response")
+        else:
+          print(f"  Power: {'ON' if state[0] == 1 else 'OFF'}")
+          print(f"  Brightness: {state[3]}/{BRIGHTNESS_MAX}")
+          print(f"  Mode: {state[1]} ({'static' if state[1] == 0xC9 else 'pattern'})")
+          print(f"  Color order: {state[5]} ({ColorOrder(state[5]).name})")
+          print(f"  Raw: {' '.join(f'{b:02x}' for b in state)}")
       elif c == "mode" and len(parts) == 2:
         await set_mode(client, int(parts[1]))
       elif c == "pattern" and len(parts) == 2:
@@ -336,12 +440,15 @@ def main():
   p_color.add_argument("b", type=int)
 
   sub.add_parser("toggle", help="Toggle power on/off")
+  sub.add_parser("on", help="Turn on (no-op if already on)")
+  sub.add_parser("off", help="Turn off (no-op if already off)")
+  sub.add_parser("state", help="Read device state")
   sub.add_parser("demo", help="Color cycle demo")
   sub.add_parser("interactive", help="Interactive REPL")
   sub.add_parser("scan", help="Scan for BLE devices")
 
-  p_bright = sub.add_parser("bright", help="Step brightness (positive=up, negative=down)")
-  p_bright.add_argument("value", type=int, help="number of steps (negative to dim)")
+  p_bright = sub.add_parser("bright", help="Set brightness (0-6)")
+  p_bright.add_argument("value", type=int, help="brightness level 0-6")
 
   p_mode = sub.add_parser("mode", help="Set mode (decimal)")
   p_mode.add_argument("mode", type=int)
@@ -355,6 +462,9 @@ def main():
   commands = {
     "color": cmd_color,
     "toggle": cmd_toggle,
+    "on": cmd_on,
+    "off": cmd_off,
+    "state": cmd_state,
     "bright": cmd_bright,
     "mode": cmd_mode,
     "pattern": cmd_pattern,

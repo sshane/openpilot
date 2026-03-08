@@ -28,7 +28,7 @@ import cereal.messaging as messaging
 from openpilot.common.realtime import Ratekeeper
 
 from openpilot.tools.underglow.sp105e import (
-  connect, set_color, set_brightness, dim, power_toggle, send, packet, Command,
+  connect, set_color, set_brightness, power_on, power_off, BRIGHTNESS_MAX,
 )
 
 DEBUG = True
@@ -186,12 +186,8 @@ async def ble_connect():
   client = await connect(exit_on_fail=False)
   if client is None:
     return None
-  # Toggle on + max brightness
-  await power_toggle(client)
-  await asyncio.sleep(0.3)
-  for _ in range(BRIGHT_INIT_STEPS):
-    await set_brightness(client, 16)
-    await asyncio.sleep(0.03)
+  await power_on(client)
+  await set_brightness(client, BRIGHTNESS_MAX)
   print("glowd: connected, LEDs on, brightness maxed")
   return client
 
@@ -200,8 +196,7 @@ async def ble_shutdown(client):
   """Power off LEDs and disconnect."""
   if client is not None:
     try:
-      await power_toggle(client)
-      await asyncio.sleep(0.1)
+      await power_off(client)
       await client.disconnect()
       print("glowd: LEDs off, disconnected")
     except Exception as e:

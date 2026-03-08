@@ -91,7 +91,23 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 | BRIGHT_UP | `38 SS 00 00 2A 83` | Relative step brighter, S=step size (1-16) |
 | BRIGHT_DOWN | `38 SS 00 00 28 83` | Relative step dimmer, S=step size (1-8) |
 | SET_MODE | `38 MM 00 00 2C 83` | Mode number in D1 (01, 05, 0A, etc.) |
+| GET_STATE | `38 00 00 00 10 83` | Triggers notify with 8-byte state (see below) |
 | COLOR_ORDER | `38 NN 00 00 3C 83` | 0=GRB 1=GBR 2=RGB 3=BGR 4=RBG 5=BRG. Persists to flash! |
+
+### State Response (GET_STATE 0x10, via notify on FFE1)
+8 bytes returned via BLE notify after sending GET_STATE. Also fires automatically on POWER_TOGGLE.
+```
+Byte 0: Power state (1=ON, 0=OFF)
+Byte 1: 0xC9 (brightness? — doesn't change with BRIGHT_UP/DOWN, may be stored config)
+Byte 2: 0x06 (mode/pattern? — doesn't change with SET_MODE/pattern, may be stored config)
+Byte 3: 0x06 (speed? — untested)
+Byte 4: 0x03 (unknown)
+Byte 5: 0x00 (color order? — matches GRB=0)
+Byte 6: 0x02 (unknown)
+Byte 7: 0x58 (88 — LED count?)
+```
+Only byte 0 (power) changes at runtime. Other bytes appear to be flash config.
+Power state enables deterministic on/off: read state, toggle only if needed.
 
 ### Color Order Map (0x3C)
 | Value | D1 | D2 | D3 | Name |
