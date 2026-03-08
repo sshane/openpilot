@@ -80,9 +80,10 @@ class GlowController:
   def __init__(self):
     self.last_color = (0, 0, 0)
     self.standstill_start = 0.0
-    self.was_standstill = False
-    self._brake_dark_until = 0.0
-    self._was_brake = False
+    self.prev_standstill = False
+    self._rainbow_until = 0.0
+    self._brake_pressed_t = 0.0
+    self._prev_brake = False
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
@@ -108,29 +109,31 @@ class GlowController:
     # TODO: use sp105e.set_brightness instead of scaling RGB
     brightness = 1.0 if standstill or str(cs.gearShifter) == 'reverse' else 0.7
 
-    # Brake rising edge: go dark for 0.6s
-    if cs.brakePressed and not self._was_brake:
-      self._brake_dark_until = now + 0.6
-    self._was_brake = cs.brakePressed
-    if now < self._brake_dark_until:
+    # Brake rising edge: dark red for 0.4s
+    if cs.brakePressed and not self._prev_brake:
+      self._brake_pressed_t = now
+    self._prev_brake = cs.brakePressed
+    if now - self._brake_pressed_t < 0.4:
       return (128, 0, 0)
 
     # Reverse
     if str(cs.gearShifter) == 'reverse':
       return scale_color(COLOR_REVERSE, brightness)
 
-    # Standstill: slow rainbow cycle
+    # Standstill: slow rainbow cycle (continues 2.5s after leaving)
     if standstill:
-      if not self.was_standstill:
+      if not self.prev_standstill:
         self.standstill_start = now
-        self.was_standstill = True
-      elapsed = now - self.standstill_start
-      if elapsed > 2.0:
-        hue = ((elapsed - 2.0) / 8.0) % 1.0  # full cycle every 8s
-        r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
-        return scale_color((int(r * 255), int(g * 255), int(b * 255)), brightness)
-    else:
-      self.was_standstill = False
+        self.prev_standstill = True
+    elif self.prev_standstill:
+      self.prev_standstill = False
+      self._rainbow_until = now + 2.5
+
+    elapsed = now - self.standstill_start
+    if (standstill and elapsed > 2.0) or now < self._rainbow_until:
+      hue = ((elapsed - 2.0) / 8.0) % 1.0  # full cycle every 8s
+      r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+      return scale_color((int(r * 255), int(g * 255), int(b * 255)), brightness)
 
     # RPM-based color
     return scale_color(rpm_to_color(rpm), brightness)
