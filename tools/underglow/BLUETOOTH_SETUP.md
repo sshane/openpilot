@@ -148,7 +148,7 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 - **openpilot engaged** (cruiseState.enabled): comma green (0,255,100)
 - **Reverse** (gearShifter==reverse): white glow
 - **Parked/idle** (standstill): slow breathing pulse
-- Note: engineRpm is DEPRECATED in car.capnp, use vEgo/aEgo instead
+- engineRpm available on brzpilot fork (un-deprecated), also gearActual, shiftGrade, clutchPressed
 
 ## Quick Reference Commands
 - Scan: `adb shell "timeout 10 hcitool -i hci0 lescan 2>&1 | grep -v '(unknown)' | sort -u -k2"`

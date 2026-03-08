@@ -32,6 +32,9 @@ from bleak import BleakScanner, BleakClient
 
 CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
+CONNECT_RETRIES = 3
+SCAN_TIMEOUT = 8
+
 PACKET_START = 0x38
 PACKET_END = 0x83
 
@@ -81,7 +84,8 @@ def color_packet(r: int, g: int, b: int) -> bytes:
   return packet(g, r, b, Command.SET_COLOR)
 
 
-async def find_sp105e(timeout=10):
+async def find_sp105e(timeout=SCAN_TIMEOUT):
+  """Scan for SP105E by name. Returns BLEDevice or None."""
   scanner = BleakScanner()
   await scanner.start()
   for _ in range(timeout * 10):
@@ -94,18 +98,32 @@ async def find_sp105e(timeout=10):
   return None
 
 
-async def connect():
-  dev = await find_sp105e()
-  if not dev:
-    print("SP105E not found")
+async def connect(retries=CONNECT_RETRIES, exit_on_fail=True):
+  """Connect to SP105E with retries. Returns BleakClient."""
+  for attempt in range(1, retries + 1):
+    try:
+      dev = await find_sp105e()
+      if not dev:
+        print(f"SP105E not found (attempt {attempt}/{retries})")
+        if attempt < retries:
+          await asyncio.sleep(2)
+        continue
+      print(f"Found {dev.address}")
+      client = BleakClient(dev.address, timeout=20)
+      await client.connect()
+      # Always set GRB (factory default) on connect to ensure known state
+      await send(client, packet(ColorOrder.GRB, 0, 0, Command.COLOR_ORDER))
+      print(f"Connected to {dev.address} (GRB order set)")
+      return client
+    except Exception as e:
+      print(f"Connect failed (attempt {attempt}/{retries}): {e}")
+      if attempt < retries:
+        await asyncio.sleep(2)
+
+  if exit_on_fail:
+    print("SP105E: all connection attempts failed")
     sys.exit(1)
-  print(f"Found {dev.address}")
-  client = BleakClient(dev.address, timeout=20)
-  await client.connect()
-  # Always set GRB (factory default) on connect to ensure known state
-  await send(client, packet(ColorOrder.GRB, 0, 0, Command.COLOR_ORDER))
-  print(f"Connected to {dev.address} (GRB order set)")
-  return client
+  return None
 
 
 async def send(client, data: bytes):
