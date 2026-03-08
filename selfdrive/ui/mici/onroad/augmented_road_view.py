@@ -250,9 +250,9 @@ class AugmentedRoadView(CameraView):
       self._alert_renderer.render(self._content_rect)
     self._hud_renderer.render(self._content_rect)
 
-    # Glow color dot (top right)
+    # Glow color dot (bottom right)
     glow_cx = int(self._content_rect.x + self._content_rect.width - 30)
-    glow_cy = int(self._content_rect.y + 30)
+    glow_cy = int(self._content_rect.y + self._content_rect.height - 30)
     rl.draw_circle(glow_cx, glow_cy, 16, self._glow_glow)
     rl.draw_circle(glow_cx, glow_cy, 8, self._glow_color)
 
