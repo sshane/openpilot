@@ -85,10 +85,22 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 ### Confirmed Commands
 | Command | Format | Notes |
 |---------|--------|-------|
-| SET_COLOR | `38 GG RR BB 1E 83` | GRB byte order! |
+| SET_COLOR | `38 RR GG BB 1E 83` | After setting RGB order (0x3C=2) |
 | POWER_TOGGLE | `38 00 00 00 AA 83` | Toggle only, 0xAB does nothing |
 | BRIGHTNESS | `38 BB 00 00 2A 83` | 0-255, higher=brighter |
 | SET_MODE | `38 MM 00 00 2C 83` | Mode number in D1 (01, 05, 0A, etc.) |
+| COLOR_ORDER | `38 NN 00 00 3C 83` | 0=GRB 1=GBR **2=RGB** 3=BGR 4=RBG 5=BRG |
+| PIXEL_COUNT? | `38 NN 00 00 2D 83` | Causes brief off/on, might set LED count |
+
+### Color Order Map (0x3C)
+| Value | D1 | D2 | D3 | Name |
+|-------|----|----|-----|------|
+| 0 | G | R | B | GRB (default) |
+| 1 | G | B | R | GBR |
+| **2** | **R** | **G** | **B** | **RGB** (use this!) |
+| 3 | B | G | R | BGR |
+| 4 | R | B | G | RBG |
+| 5 | B | R | G | BRG |
 
 ### Pattern Modes (CMD byte directly, D1-D3 ignored)
 | CMD | Description |
@@ -104,11 +116,11 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 | 0x10 | Same as 0x0F |
 
 ### Other findings
-- `0x28` also affects brightness (inverse: higher=dimmer)
+- Sending color (0x1E) stops any active pattern → returns to static
 - `0xAB` (OFF) does nothing
-- `0x03` as speed command didn't work — triggers pattern instead
+- Speed command not found yet (patterns auto-cycle between effects)
 - Device must be ON for commands to work; color cmd alone doesn't turn it on
-- `0x1C`-`0x29` (except 0x28) had no visible effect
+- `0x28` also affects brightness (inverse: higher=dimmer)
 - SP110E gist (partial overlap): https://gist.github.com/mbullington/37957501a07ad065b67d4e8d39bfe012
 
 ## Color Ideas for CarState Mapping

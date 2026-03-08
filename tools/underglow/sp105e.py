@@ -4,51 +4,76 @@ SP105E BLE LED controller for LowGlow underglow kit.
 
 Protocol (reverse-engineered March 2026):
   Packet format: 38 [D1] [D2] [D3] [CMD] 83
-  Color byte order: GRB (not RGB!)
+  Send COLOR_ORDER=RGB on connect, then use standard RGB values.
 
 Confirmed commands:
-  0x1E = Set color:      38 RR GG BB 1E 83  (after setting order=2 for RGB)
-  0xAA = Power toggle:   38 00 00 00 AA 83  (toggle only, 0xAB does nothing)
-  0x2C = Set mode:       38 MM 00 00 2C 83  (mode number in D1)
-  0x2A = Brightness:     38 BB 00 00 2A 83  (higher = brighter)
-  0x3C = Color order:    38 NN 00 00 3C 83  (0=GRB, 1=GBR, 2=RGB, 3=BGR, 4=RBG, 5=BRG)
-  0x2D = Pixel count?:   38 NN 00 00 2D 83  (causes brief off/on, might set LED count)
+  SET_COLOR:      38 RR GG BB 1E 83  (after setting RGB order)
+  POWER_TOGGLE:   38 00 00 00 AA 83  (toggle only, 0xAB does nothing)
+  SET_MODE:       38 MM 00 00 2C 83  (mode number in D1)
+  SET_BRIGHTNESS: 38 BB 00 00 2A 83  (higher = brighter)
+  COLOR_ORDER:    38 NN 00 00 3C 83  (0=GRB, 1=GBR, 2=RGB, 3=BGR, 4=RBG, 5=BRG)
 
 Pattern modes (as CMD byte directly, D1-D3 ignored):
-  0x03 = rainbow animation (blue/red/green flowing)
-  0x05 = rainbow pattern 1
-  0x06 = rainbow pattern 2
-  0x07 = breathing: fade through colors (red->blue->yellow etc), slow
-  0x08-0x0B = breathing variations (similar to 0x07)
-  0x0D = color cycle: yellow->orange->red, no fade between colors
-  0x0E = same as 0x0D but very slow
-  0x0F = fast flowing rainbow
-  0x10 = same as 0x0F
+  See Pattern enum below.
 
 Notes:
-  - Send 38 02 00 00 3C 83 on connect to set RGB order
-  - Sending color (0x1E) stops any active pattern and goes to static
+  - Sending SET_COLOR stops any active pattern and goes to static
   - Device must be ON for commands to work
   - 0xAA is a toggle (on->off, off->on), not absolute
-  - 0xAB does nothing
   - Speed command not found yet
-  - bleak needs: source /etc/profile && python3
 """
 import argparse
 import asyncio
 import sys
+from enum import IntEnum
 from bleak import BleakScanner, BleakClient
 
 CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
+PACKET_START = 0x38
+PACKET_END = 0x83
+
+
+class Command(IntEnum):
+  SET_COLOR = 0x1E
+  POWER_TOGGLE = 0xAA
+  SET_BRIGHTNESS = 0x2A
+  SET_MODE = 0x2C
+  COLOR_ORDER = 0x3C
+  PIXEL_COUNT = 0x2D  # unconfirmed, causes brief off/on
+
+
+class ColorOrder(IntEnum):
+  GRB = 0  # default
+  GBR = 1
+  RGB = 2
+  BGR = 3
+  RBG = 4
+  BRG = 5
+
+
+class Pattern(IntEnum):
+  RAINBOW_FLOW = 0x03
+  RAINBOW_1 = 0x05
+  RAINBOW_2 = 0x06
+  BREATHING = 0x07       # fade through colors, slow
+  BREATHING_2 = 0x08
+  BREATHING_3 = 0x09
+  BREATHING_4 = 0x0A
+  BREATHING_5 = 0x0B
+  COLOR_CYCLE = 0x0D     # yellow->orange->red, no fade
+  COLOR_CYCLE_SLOW = 0x0E
+  RAINBOW_FAST = 0x0F
+  RAINBOW_FAST_2 = 0x10
+
 
 def packet(d1: int, d2: int, d3: int, cmd: int) -> bytes:
-  return bytes([0x38, d1, d2, d3, cmd, 0x83])
+  return bytes([PACKET_START, d1, d2, d3, cmd, PACKET_END])
 
 
 def color_packet(r: int, g: int, b: int) -> bytes:
-  """Color packet. Assumes RGB order has been set via set_color_order(2)."""
-  return packet(r, g, b, 0x1E)
+  """Color packet. Assumes RGB order has been set via set_color_order()."""
+  return packet(r, g, b, Command.SET_COLOR)
 
 
 async def find_sp105e(timeout=10):
@@ -70,7 +95,8 @@ async def connect():
   print(f"Found {dev.address}")
   client = BleakClient(dev.address, timeout=20)
   await client.connect()
-  print("Connected.")
+  await set_color_order(client, ColorOrder.RGB)
+  print("Connected (RGB order set).")
   return client
 
 
@@ -85,22 +111,27 @@ async def set_color(client, r, g, b):
 
 
 async def power_toggle(client):
-  await send(client, packet(0, 0, 0, 0xAA))
+  await send(client, packet(0, 0, 0, Command.POWER_TOGGLE))
 
 
 async def set_brightness(client, val):
   """Set brightness. 0-255, higher = brighter."""
-  await send(client, packet(val, 0, 0, 0x2A))
+  await send(client, packet(val, 0, 0, Command.SET_BRIGHTNESS))
 
 
 async def set_mode(client, mode):
-  """Set animation mode via 0x2C with mode number in D1."""
-  await send(client, packet(mode, 0, 0, 0x2C))
+  """Set animation mode via SET_MODE with mode number in D1."""
+  await send(client, packet(mode, 0, 0, Command.SET_MODE))
 
 
 async def set_pattern(client, pattern):
-  """Set pattern directly via CMD byte (0x03, 0x05-0x10, etc.)."""
+  """Set pattern directly via CMD byte."""
   await send(client, packet(0, 0, 0, pattern))
+
+
+async def set_color_order(client, order=ColorOrder.RGB):
+  """Set color byte order."""
+  await send(client, packet(order, 0, 0, Command.COLOR_ORDER))
 
 
 # --- CLI ---
@@ -136,7 +167,7 @@ async def cmd_mode(args):
 async def cmd_pattern(args):
   client = await connect()
   await set_pattern(client, args.pattern)
-  print(f"Pattern set to 0x{args.pattern:02X}")
+  print(f"Pattern set to {args.pattern.name}")
   await client.disconnect()
 
 
@@ -166,11 +197,12 @@ async def cmd_interactive(args):
   print("  color R G B       set static color")
   print("  bright N          brightness 0-255")
   print("  toggle            power on/off")
-  print("  mode N            set mode (decimal, via 0x2C)")
-  print("  pattern HH        set pattern (hex CMD byte)")
+  print("  mode N            set mode (decimal, via SET_MODE)")
+  print("  pattern NAME      set pattern (e.g. BREATHING, RAINBOW_FLOW)")
   print("  raw HH HH ...     send raw hex bytes")
   print("  demo              color cycle")
   print("  quit\n")
+  print(f"  Available patterns: {', '.join(p.name for p in Pattern)}\n")
 
   while True:
     try:
@@ -191,7 +223,14 @@ async def cmd_interactive(args):
       elif c == "mode" and len(parts) == 2:
         await set_mode(client, int(parts[1]))
       elif c == "pattern" and len(parts) == 2:
-        await set_pattern(client, int(parts[1], 16))
+        name = parts[1].upper()
+        try:
+          p = Pattern[name]
+        except KeyError:
+          print(f"  Unknown pattern. Options: {', '.join(p.name for p in Pattern)}")
+          continue
+        await set_pattern(client, p)
+        print(f"  {p.name}")
       elif c == "raw":
         data = bytes([int(x, 16) for x in parts[1:]])
         await send(client, data)
@@ -241,11 +280,12 @@ def main():
   p_bright = sub.add_parser("bright", help="Set brightness (0-255)")
   p_bright.add_argument("value", type=int)
 
-  p_mode = sub.add_parser("mode", help="Set mode (decimal, via 0x2C)")
+  p_mode = sub.add_parser("mode", help="Set mode (decimal)")
   p_mode.add_argument("mode", type=int)
 
-  p_pattern = sub.add_parser("pattern", help="Set pattern (hex CMD byte)")
-  p_pattern.add_argument("pattern", type=lambda x: int(x, 16))
+  p_pattern = sub.add_parser("pattern", help="Set pattern by name")
+  p_pattern.add_argument("pattern", type=lambda x: Pattern[x.upper()],
+                          choices=list(Pattern), metavar="PATTERN")
 
   args = parser.parse_args()
 
