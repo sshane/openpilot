@@ -4,13 +4,14 @@ SP105E BLE LED controller for LowGlow underglow kit.
 
 Protocol (reverse-engineered March 2026):
   Packet format: 38 [D1] [D2] [D3] [CMD] 83
-  Send COLOR_ORDER=RGB on connect, then use standard RGB values.
+  Sets GRB color order (factory default) on connect. API accepts RGB.
 
 Confirmed commands:
-  SET_COLOR:      38 RR GG BB 1E 83  (after setting RGB order)
+  SET_COLOR:      38 GG RR BB 1E 83  (GRB wire order, API takes RGB)
   POWER_TOGGLE:   38 00 00 00 AA 83  (toggle only, 0xAB does nothing)
   SET_MODE:       38 MM 00 00 2C 83  (mode number in D1)
-  SET_BRIGHTNESS: 38 BB 00 00 2A 83  (higher = brighter)
+  BRIGHT_UP:      38 SS 00 00 2A 83  (relative step up, S=step size 1-16)
+  BRIGHT_DOWN:    38 SS 00 00 28 83  (relative step down, S=step size 1-8)
   COLOR_ORDER:    38 NN 00 00 3C 83  (0=GRB, 1=GBR, 2=RGB, 3=BGR, 4=RBG, 5=BRG)
 
 Pattern modes (as CMD byte directly, D1-D3 ignored):
@@ -21,6 +22,7 @@ Notes:
   - Device must be ON for commands to work
   - 0xAA is a toggle (on->off, off->on), not absolute
   - Speed command not found yet
+  - Color order (0x3C) persists to flash — script sets GRB on connect
 """
 import argparse
 import asyncio
@@ -37,10 +39,13 @@ PACKET_END = 0x83
 class Command(IntEnum):
   SET_COLOR = 0x1E
   POWER_TOGGLE = 0xAA
-  SET_BRIGHTNESS = 0x2A
+  BRIGHT_UP = 0x2A    # relative: step brighter, D1=step size (1-16)
+  BRIGHT_DOWN = 0x28  # relative: step dimmer, D1=step size (1-8)
   SET_MODE = 0x2C
   COLOR_ORDER = 0x3C
-  PIXEL_COUNT = 0x2D  # unconfirmed, causes brief off/on
+  # DANGEROUS — do not send, will soft-brick (requires power cycle):
+  # 0x1C — bright white, ignores all commands after
+  # 0x2D — brief off/on, may wedge state
 
 
 class ColorOrder(IntEnum):
@@ -72,8 +77,8 @@ def packet(d1: int, d2: int, d3: int, cmd: int) -> bytes:
 
 
 def color_packet(r: int, g: int, b: int) -> bytes:
-  """Color packet. Assumes RGB order has been set via set_color_order()."""
-  return packet(r, g, b, Command.SET_COLOR)
+  """Color packet. Swaps to GRB wire order so callers use standard RGB."""
+  return packet(g, r, b, Command.SET_COLOR)
 
 
 async def find_sp105e(timeout=10):
@@ -97,8 +102,9 @@ async def connect():
   print(f"Found {dev.address}")
   client = BleakClient(dev.address, timeout=20)
   await client.connect()
-  await set_color_order(client, ColorOrder.RGB)
-  print("Connected (RGB order set).")
+  # Always set GRB (factory default) on connect to ensure known state
+  await send(client, packet(ColorOrder.GRB, 0, 0, Command.COLOR_ORDER))
+  print(f"Connected to {dev.address} (GRB order set)")
   return client
 
 
@@ -117,8 +123,13 @@ async def power_toggle(client):
 
 
 async def set_brightness(client, val):
-  """Set brightness. 0-255, higher = brighter."""
-  await send(client, packet(val, 0, 0, Command.SET_BRIGHTNESS))
+  """Step brightness up. Relative, not absolute. Step size 1-16."""
+  await send(client, packet(val, 0, 0, Command.BRIGHT_UP))
+
+
+async def dim(client, val):
+  """Step brightness down. Relative, not absolute. Step size 1-8."""
+  await send(client, packet(val, 0, 0, Command.BRIGHT_DOWN))
 
 
 async def set_mode(client, mode):
@@ -131,8 +142,8 @@ async def set_pattern(client, pattern):
   await send(client, packet(0, 0, 0, pattern))
 
 
-async def set_color_order(client, order=ColorOrder.RGB):
-  """Set color byte order."""
+async def set_color_order(client, order=ColorOrder.GRB):
+  """Set color byte order. WARNING: persists to flash! Leave as GRB (default)."""
   await send(client, packet(order, 0, 0, Command.COLOR_ORDER))
 
 
@@ -154,8 +165,17 @@ async def cmd_toggle(args):
 
 async def cmd_bright(args):
   client = await connect()
-  await set_brightness(client, args.value)
-  print(f"Brightness set to {args.value}")
+  steps = abs(args.value)
+  if args.value >= 0:
+    for _ in range(steps):
+      await set_brightness(client, 8)
+      await asyncio.sleep(0.1)
+    print(f"Brightness up {steps} steps")
+  else:
+    for _ in range(steps):
+      await dim(client, 8)
+      await asyncio.sleep(0.1)
+    print(f"Brightness down {steps} steps")
   await client.disconnect()
 
 
@@ -173,31 +193,53 @@ async def cmd_pattern(args):
   await client.disconnect()
 
 
+async def run_demo(client):
+  """HSV color cycle → brightness ramp → repeat. Ctrl+C to stop."""
+  import colorsys
+  # Max brightness
+  for _ in range(10):
+    await set_brightness(client, 16)
+    await asyncio.sleep(0.05)
+
+  print("Demo: colors → brightness → colors. Ctrl+C to stop.")
+  try:
+    while True:
+      print("  color cycle...")
+      for step in range(300):
+        hue = step / 300.0
+        r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+        await set_color(client, int(r * 255), int(g * 255), int(b * 255))
+        await asyncio.sleep(0.01)
+
+      print("  brightness ramp...")
+      await set_color(client, 255, 0, 0)
+      await asyncio.sleep(0.1)
+      for _ in range(6):
+        await dim(client, 1)
+        await asyncio.sleep(0.05)
+      for _ in range(6):
+        await set_brightness(client, 1)
+        await asyncio.sleep(0.05)
+  except KeyboardInterrupt:
+    pass
+  # Restore full bright
+  for _ in range(10):
+    await set_brightness(client, 16)
+    await asyncio.sleep(0.05)
+  print("\n  demo done.")
+
+
 async def cmd_demo(args):
   client = await connect()
-  colors = [
-    (255, 0, 0, "red"),
-    (0, 255, 0, "green"),
-    (0, 0, 255, "blue"),
-    (255, 255, 0, "yellow"),
-    (0, 255, 100, "comma green"),
-    (255, 0, 255, "magenta"),
-    (255, 128, 0, "orange"),
-    (255, 255, 255, "white"),
-  ]
-  for r, g, b, name in colors:
-    print(f"  {name} ({r},{g},{b})")
-    await set_color(client, r, g, b)
-    await asyncio.sleep(1.5)
-  print("Demo done.")
+  await run_demo(client)
   await client.disconnect()
 
 
 async def cmd_interactive(args):
   client = await connect()
   print("\nCommands:")
-  print("  color R G B       set static color")
-  print("  bright N          brightness 0-255")
+  print("  color R G B       set static color (RGB 0-255)")
+  print("  bright N          step brighter (N steps, use -N to dim)")
   print("  toggle            power on/off")
   print("  mode N            set mode (decimal, via SET_MODE)")
   print("  pattern NAME      set pattern (e.g. BREATHING, RAINBOW_FLOW)")
@@ -219,7 +261,15 @@ async def cmd_interactive(args):
       if c == "color" and len(parts) == 4:
         await set_color(client, int(parts[1]), int(parts[2]), int(parts[3]))
       elif c in ("bright", "brightness") and len(parts) == 2:
-        await set_brightness(client, int(parts[1]))
+        val = int(parts[1])
+        if val >= 0:
+          for _ in range(val):
+            await set_brightness(client, 8)
+            await asyncio.sleep(0.1)
+        else:
+          for _ in range(-val):
+            await dim(client, 8)
+            await asyncio.sleep(0.1)
       elif c == "toggle":
         await power_toggle(client)
       elif c == "mode" and len(parts) == 2:
@@ -238,14 +288,7 @@ async def cmd_interactive(args):
         await send(client, data)
         print(f"  sent: {data.hex()}")
       elif c == "demo":
-        colors = [
-          (255, 0, 0, "red"), (0, 255, 0, "green"), (0, 0, 255, "blue"),
-          (255, 255, 0, "yellow"), (0, 255, 100, "comma green"),
-        ]
-        for r, g, b, name in colors:
-          print(f"  {name}")
-          await set_color(client, r, g, b)
-          await asyncio.sleep(1.5)
+        await run_demo(client)
       elif c in ("quit", "exit", "q"):
         break
       else:
@@ -279,8 +322,8 @@ def main():
   sub.add_parser("interactive", help="Interactive REPL")
   sub.add_parser("scan", help="Scan for BLE devices")
 
-  p_bright = sub.add_parser("bright", help="Set brightness (0-255)")
-  p_bright.add_argument("value", type=int)
+  p_bright = sub.add_parser("bright", help="Step brightness (positive=up, negative=down)")
+  p_bright.add_argument("value", type=int, help="number of steps (negative to dim)")
 
   p_mode = sub.add_parser("mode", help="Set mode (decimal)")
   p_mode.add_argument("mode", type=int)

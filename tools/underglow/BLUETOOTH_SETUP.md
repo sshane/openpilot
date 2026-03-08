@@ -65,39 +65,40 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 - BLE device name: `SP105E`
 - MAC seen: `BA:AB:05:04:02:BD`
 - Protocol: SP110E-compatible (same BLE service 0xFFE0, characteristic 0xFFE1)
-- Can set: static color, brightness, mode (1-120 presets), speed, on/off
-- Cannot address individual LEDs over BT (controller limitation)
+- Can set: static color, brightness (relative), mode (1-120 presets), on/off. Speed not found yet
+- Controller addresses LEDs individually for built-in patterns (rainbow flow etc.), but no per-LED BLE command found yet. May require longer payloads — only 6-byte packets tested so far
 - Python library: `sp110e` (pip) or raw `bleak`
 
 ## Remaining TODO
-1. **UI setup button** - install bluez+rfkill, run init sequence, confirm slider pattern
-2. **SP105E control script** - Python script using bleak to connect to SP105E and send commands
+1. **Speed command** - Not found yet, need focused testing with patterns running
+2. **Absolute brightness** - Only relative up/down exists, may need software tracking
 3. **CarState reactive colors** - Map vEgo/steeringAngleDeg/brakePressed/etc to SP105E color commands
 4. **Bake into AGNOS** - Add bluez+rfkill to agnos-builder system image so they persist across reboots
+5. **App "apply configuration" recovery sequence** - Reverse-engineer what the app sends to recover from soft-brick
 
 ## SP105E BLE Protocol (Reverse-Engineered March 2026)
 - Service: 0xFFE0, Write characteristic: 0xFFE1 (read/write-without-response/write/notify)
 - SP105E does NOT have 0xFFE2 init char (SP110E does) — no init needed
 - Also has battery service 0x180F char 0x2A19 (read/notify)
 - **Packet format: `38 [D1] [D2] [D3] [CMD] 83`** (6 bytes, 38/83 framing)
-- **Color byte order: GRB (not RGB!)**
+- **Color byte order: GRB (factory default) — persists to flash. Script sets GRB on connect to ensure known state**
 
 ### Confirmed Commands
 | Command | Format | Notes |
 |---------|--------|-------|
-| SET_COLOR | `38 RR GG BB 1E 83` | After setting RGB order (0x3C=2) |
+| SET_COLOR | `38 GG RR BB 1E 83` | GRB wire order (set on connect), API takes RGB |
 | POWER_TOGGLE | `38 00 00 00 AA 83` | Toggle only, 0xAB does nothing |
-| BRIGHTNESS | `38 BB 00 00 2A 83` | 0-255, higher=brighter |
+| BRIGHT_UP | `38 SS 00 00 2A 83` | Relative step brighter, S=step size (1-16) |
+| BRIGHT_DOWN | `38 SS 00 00 28 83` | Relative step dimmer, S=step size (1-8) |
 | SET_MODE | `38 MM 00 00 2C 83` | Mode number in D1 (01, 05, 0A, etc.) |
-| COLOR_ORDER | `38 NN 00 00 3C 83` | 0=GRB 1=GBR **2=RGB** 3=BGR 4=RBG 5=BRG |
-| PIXEL_COUNT? | `38 NN 00 00 2D 83` | Causes brief off/on, might set LED count |
+| COLOR_ORDER | `38 NN 00 00 3C 83` | 0=GRB 1=GBR 2=RGB 3=BGR 4=RBG 5=BRG. Persists to flash! |
 
 ### Color Order Map (0x3C)
 | Value | D1 | D2 | D3 | Name |
 |-------|----|----|-----|------|
 | 0 | G | R | B | GRB (default) |
 | 1 | G | B | R | GBR |
-| **2** | **R** | **G** | **B** | **RGB** (use this!) |
+| 2 | R | G | B | RGB |
 | 3 | B | G | R | BGR |
 | 4 | R | B | G | RBG |
 | 5 | B | R | G | BRG |
@@ -120,7 +121,21 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 - `0xAB` (OFF) does nothing
 - Speed command not found yet (patterns auto-cycle between effects)
 - Device must be ON for commands to work; color cmd alone doesn't turn it on
-- `0x28` also affects brightness (inverse: higher=dimmer)
+- Brightness is RELATIVE not absolute:
+  - `0x2A` = step brighter, D1=step size (usable range 1-16, caps around 16)
+  - `0x28` = step dimmer, D1=step size (usable range 1-8, caps around 8)
+  - Both are one-directional per command — 0x2A only goes up, 0x28 only goes down
+  - ~6-7 visible brightness levels total, cannot dim to fully off
+  - No absolute brightness command found (entire CMD range 0x01-0xFE swept)
+  - Must track brightness level in software for absolute control
+- BLE read-back: FFE1 direct read returns 128 bytes of zeros. Notify subscription also returns nothing. No way to read device state over BLE
+- Battery service (0x180F/0x2A19) returns 0 (not useful)
+- Color order (0x3C) persists to flash across power cycles — script sets GRB (0) on connect
+- **DANGEROUS commands** (soft-brick, ignores all commands after):
+  - `0x1C` — sets bright white, unresponsive
+  - `0x2D` — brief off/on, may wedge device state
+  - **Recovery without power cycle**: App "apply configuration" (change color order to RGB then back to GRB + apply) recovers the device. Sending 0x3C alone does NOT work — app sends a config bundle that reinitializes the controller. Exact recovery sequence unknown.
+  - LowGlow LED app config options: controller type (LowGlow V1), IC model (OG Kit vs Standard Kit), color order
 - SP110E gist (partial overlap): https://gist.github.com/mbullington/37957501a07ad065b67d4e8d39bfe012
 
 ## Color Ideas for CarState Mapping
