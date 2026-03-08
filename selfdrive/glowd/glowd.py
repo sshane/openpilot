@@ -20,8 +20,11 @@ Safe colors: green, yellow, amber, orange, purple, white, pink.
 """
 import asyncio
 import colorsys
+import fcntl
 import math
+import os
 import signal
+import subprocess
 import time
 
 import cereal.messaging as messaging
@@ -180,8 +183,64 @@ class GlowController:
     return rpm_to_color(rpm)
 
 
+def bt_init():
+  """Initialize BT adapter on comma four (WCN3990). Requires sudo (passwordless on AGNOS).
+  Safe to call multiple times — kills stale hciattach first.
+  Sleeps between steps since BT stack can be slow to come up on boot."""
+  try:
+    # Kill any stale hciattach
+    subprocess.run(["sudo", "killall", "hciattach"], capture_output=True)
+    time.sleep(1)
+
+    # Power on BT chip via btpower ioctl
+    fd = os.open('/dev/btpower', os.O_RDWR)
+    fcntl.ioctl(fd, 0xbfad, 1)  # BT_CMD_PWR_CTRL
+    os.close(fd)
+    time.sleep(1)
+
+    # Unblock bluetooth
+    subprocess.run(["sudo", "rfkill", "unblock", "bluetooth"], check=True, capture_output=True)
+    time.sleep(0.5)
+
+    # Attach UART — prints firmware errors but works fine without firmware
+    result = subprocess.run(
+      ["sudo", "hciattach", "-s", "115200", "/dev/ttyHS0", "qualcomm", "115200", "flow"],
+      capture_output=True, timeout=15,
+    )
+    if result.returncode != 0:
+      print(f"glowd: hciattach stderr: {result.stderr.decode().strip()}")
+    time.sleep(1)
+
+    # Bring interface up
+    subprocess.run(["sudo", "hciconfig", "hci0", "up"], check=True, capture_output=True)
+    time.sleep(0.5)
+
+    # Verify it's actually up
+    if not bt_is_up():
+      print("glowd: BT init completed but hci0 not up")
+      return False
+
+    print("glowd: BT adapter initialized")
+    return True
+  except Exception as e:
+    print(f"glowd: BT init failed: {e}")
+    return False
+
+
+def bt_is_up() -> bool:
+  """Check if hci0 is up."""
+  result = subprocess.run(["sudo", "hciconfig", "hci0"], capture_output=True)
+  return b"UP RUNNING" in result.stdout
+
+
 async def ble_connect():
-  """Connect to SP105E, power on, max brightness. Returns client or None."""
+  """Initialize BT, connect to SP105E, power on, max brightness. Returns client or None."""
+  # Always reinit BT stack to ensure clean state
+  print("glowd: initializing BT adapter...")
+  if not bt_init():
+    return None
+  await asyncio.sleep(1)
+
   print("glowd: connecting to SP105E...")
   client = await connect(exit_on_fail=False)
   if client is None:

@@ -70,11 +70,11 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 - Python library: `sp110e` (pip) or raw `bleak`
 
 ## Remaining TODO
-1. **Speed command** - Not found yet, need focused testing with patterns running
-2. **Absolute brightness** - Only relative up/down exists, may need software tracking
-3. **CarState reactive colors** - Map vEgo/steeringAngleDeg/brakePressed/etc to SP105E color commands
-4. **Bake into AGNOS** - Add bluez+rfkill to agnos-builder system image so they persist across reboots
-5. **App "apply configuration" recovery sequence** - Reverse-engineer what the app sends to recover from soft-brick
+1. **Speed command** - Not found yet (0x24/0x26 don't work), need more testing
+2. **Map remaining state bytes** - Bytes 2, 4, 6, 7 still unknown
+3. **Bake into AGNOS** - Add bluez+rfkill to agnos-builder system image so they persist across reboots
+4. **App "apply configuration" recovery sequence** - Reverse-engineer what the app sends to recover from soft-brick
+5. **Test glowd on device while driving**
 
 ## SP105E BLE Protocol (Reverse-Engineered March 2026)
 - Service: 0xFFE0, Write characteristic: 0xFFE1 (read/write-without-response/write/notify)
@@ -97,17 +97,17 @@ Added BT UART (SE6 at 0x898000, GPIOs 45-48):
 ### State Response (GET_STATE 0x10, via notify on FFE1)
 8 bytes returned via BLE notify after sending GET_STATE. Also fires automatically on POWER_TOGGLE.
 ```
-Byte 0: Power state (1=ON, 0=OFF)
-Byte 1: 0xC9 (brightness? — doesn't change with BRIGHT_UP/DOWN, may be stored config)
-Byte 2: 0x06 (mode/pattern? — doesn't change with SET_MODE/pattern, may be stored config)
-Byte 3: 0x06 (speed? — untested)
+Byte 0: Power (1=ON, 0=OFF) — confirmed with visual correlation
+Byte 1: Mode (SET_MODE value: 0xC9=201=static color, 1-120+=patterns)
+Byte 2: 0x06 (unknown — never changed)
+Byte 3: Brightness (0=min, 6=max, 7 levels) — confirmed stepping 0→1→2→3→4→5→6
 Byte 4: 0x03 (unknown)
-Byte 5: 0x00 (color order? — matches GRB=0)
+Byte 5: Color order (0=GRB, 1=GBR, 2=RGB, etc.) — confirmed
 Byte 6: 0x02 (unknown)
 Byte 7: 0x58 (88 — LED count?)
 ```
-Only byte 0 (power) changes at runtime. Other bytes appear to be flash config.
-Power state enables deterministic on/off: read state, toggle only if needed.
+Power + brightness + mode + color order are live-readable.
+Enables: deterministic on/off (`power_on`/`power_off`), absolute brightness (`set_brightness(0-6)`).
 
 ### Color Order Map (0x3C)
 | Value | D1 | D2 | D3 | Name |
@@ -134,19 +134,15 @@ Power state enables deterministic on/off: read state, toggle only if needed.
 
 ### Other findings
 - Sending color (0x1E) stops any active pattern → returns to static
+- SET_COLOR does NOT change power state — byte 0 stays the same, but LEDs visually respond even when "off"
 - `0xAB` (OFF) does nothing
-- Speed command not found yet (patterns auto-cycle between effects)
-- Device must be ON for commands to work; color cmd alone doesn't turn it on
-- Brightness is RELATIVE not absolute:
-  - `0x2A` = step brighter, D1=step size (usable range 1-16, caps around 16)
-  - `0x28` = step dimmer, D1=step size (usable range 1-8, caps around 8)
-  - Both are one-directional per command — 0x2A only goes up, 0x28 only goes down
-  - ~6-7 visible brightness levels total, cannot dim to fully off
-  - No absolute brightness command found (entire CMD range 0x01-0xFE swept)
-  - Must track brightness level in software for absolute control
-- BLE read-back: FFE1 direct read returns 128 bytes of zeros. Notify subscription also returns nothing. No way to read device state over BLE
+- Speed command not found yet (0x24/0x26 don't work, patterns auto-cycle between effects)
+- Brightness: 7 levels (0-6), commands are relative (0x2A up, 0x28 down) but absolute control via state read + stepping
+- Pattern commands (0x03, 0x07, etc as CMD byte) don't update state byte 1 — only SET_MODE (0x2C) does
+- BLE direct read: FFE1 returns 128 bytes of zeros. State only readable via notify after GET_STATE (0x10) or POWER_TOGGLE (0xAA)
 - Battery service (0x180F/0x2A19) returns 0 (not useful)
 - Color order (0x3C) persists to flash across power cycles — script sets GRB (0) on connect
+- Don't rapid-fire toggles — 0.3s gap between toggles can drop one
 - **DANGEROUS commands** (soft-brick, ignores all commands after):
   - `0x1C` — sets bright white, unresponsive
   - `0x2D` — brief off/on, may wedge device state
@@ -154,17 +150,28 @@ Power state enables deterministic on/off: read state, toggle only if needed.
   - LowGlow LED app config options: controller type (LowGlow V1), IC model (OG Kit vs Standard Kit), color order
 - SP110E gist (partial overlap): https://gist.github.com/mbullington/37957501a07ad065b67d4e8d39bfe012
 
-## Color Ideas for CarState Mapping
-- **Startup** (park→drive): rainbow chase → settle to base color
-- **Speed** (vEgo): blue(0)→purple(30mph)→pink/red(60+mph), brightness scales with speed
-- **Braking** (brakePressed/brake): deep red, brightness = brake pressure, flash on hard brake (aEgo < -3)
-- **Acceleration** (gasPressed + aEgo): orange→red fire gradient
-- **Steering** (steeringAngleDeg): color shifts left=blue/purple, right=orange/amber
-- **Blinker** (leftBlinker/rightBlinker): amber pulse at ~1.5Hz
-- **openpilot engaged** (cruiseState.enabled): comma green (0,255,100)
-- **Reverse** (gearShifter==reverse): white glow
-- **Parked/idle** (standstill): slow breathing pulse
-- engineRpm available on brzpilot fork (un-deprecated), also gearActual, shiftGrade, clutchPressed
+## glowd — Underglow Daemon
+- Location: `selfdrive/glowd/glowd.py`
+- Registered in `system/manager/process_config.py` as `only_onroad`, `enabled=TICI`
+- Initializes BT adapter on start (btpower, rfkill, hciattach, hciconfig)
+- Uses `power_on()`/`power_off()` for deterministic on/off with ignition
+- SIGTERM handler (from manager) cleanly powers off LEDs on ignition off
+- Auto-reconnects every 5s on BLE failure
+- 20Hz update loop reading CarState
+
+### Color Mapping (California-legal: no red or blue)
+Priority order:
+1. **Downshift** (gearActual decreases): purple flash 0.4s — gear debounced 0.5s to ignore neutral
+2. **Braking** (brakePressed): deep orange, bright orange on hard brake (aEgo < -3)
+3. **Blinker** (leftBlinker/rightBlinker): amber pulse at 1.5Hz
+4. **Reverse** (gearShifter==reverse): white
+5. **Standstill** (>2s): slow green breathing
+6. **Gas** (gasPressed): RPM color blended toward warm amber
+7. **RPM** (default): green(800rpm) → yellow → amber → purple(7000rpm)
+
+### CarState fields used (brzpilot fork)
+engineRpm, gearActual, shiftGrade, clutchPressed, brakePressed, gasPressed,
+aEgo, vEgo, standstill, leftBlinker, rightBlinker, gearShifter
 
 ## Quick Reference Commands
 - Scan: `adb shell "timeout 10 hcitool -i hci0 lescan 2>&1 | grep -v '(unknown)' | sort -u -k2"`
