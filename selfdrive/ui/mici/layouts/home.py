@@ -28,6 +28,30 @@ NETWORK_TYPES = {
 }
 
 
+class GlowStatusIcon(Widget):
+  """Small colored circle indicating glowd connection status."""
+  SIZE = 16
+
+  def __init__(self):
+    super().__init__()
+    self.set_rect(rl.Rectangle(0, 0, self.SIZE, self.SIZE))
+    self._color = rl.Color(128, 128, 128, 180)
+    self.set_enabled(False)
+
+  def set_status(self, status: str | None):
+    if status == "connected":
+      self._color = rl.Color(0, 200, 80, 230)
+    elif status == "connecting":
+      self._color = rl.Color(255, 200, 0, 230)
+    else:
+      self._color = rl.Color(128, 128, 128, 180)
+
+  def _render(self, _):
+    cx = int(self._rect.x + self.SIZE / 2)
+    cy = int(self._rect.y + self.SIZE / 2)
+    rl.draw_circle(cx, cy, self.SIZE // 2, self._color)
+
+
 class NetworkIcon(Widget):
   def __init__(self):
     super().__init__()
@@ -95,12 +119,14 @@ class MiciHomeLayout(Widget):
 
     self._experimental_icon = IconWidget("icons_mici/experimental_mode.png", (48, 48))
     self._mic_icon = IconWidget("icons_mici/microphone.png", (32, 46))
+    self._glow_icon = GlowStatusIcon()
 
     self._status_bar_layout = HBoxLayout([
       IconWidget("icons_mici/settings.png", (48, 48), opacity=0.9),
       NetworkIcon(),
       self._experimental_icon,
       self._mic_icon,
+      self._glow_icon,
     ], spacing=18)
 
     self._openpilot_label = UnifiedLabel("openpilot", font_size=96, font_weight=FontWeight.DISPLAY, max_width=480, wrap_text=False)
@@ -117,6 +143,9 @@ class MiciHomeLayout(Widget):
 
   def _update_params(self):
     self._experimental_mode = ui_state.params.get_bool("ExperimentalMode")
+    glow_status = ui_state.params.get("GlowStatus")
+    self._glow_icon.set_status(glow_status)
+    self._glow_icon.set_visible(glow_status is not None)
 
   def _update_state(self):
     if self.is_pressed and not self._is_pressed_prev:

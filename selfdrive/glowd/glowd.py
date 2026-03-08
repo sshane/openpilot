@@ -26,6 +26,7 @@ import subprocess
 import time
 
 import cereal.messaging as messaging
+from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 
 from openpilot.tools.underglow.sp105e import (
@@ -59,15 +60,22 @@ GEAR_ZERO_DEBOUNCE_S = 0.5
 
 
 def rpm_to_color(rpm: float) -> tuple[int, int, int]:
-  """Map RPM to hue: green(idle) → yellow → amber → purple(redline).
-  Avoids pure red (0.0) and blue (0.66)."""
+  """Map RPM to color: green(idle) → yellow → amber → purple(redline).
+  Avoids pure red and blue. Low range uses HSV, high range blends RGB."""
   t = max(0.0, min(1.0, (rpm - RPM_MIN) / (RPM_MAX - RPM_MIN)))
   if t < 0.7:
+    # green (0.33) → orange (0.08) in HSV
     hue = 0.33 - (0.33 - 0.08) * (t / 0.7)
+    r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+    return int(r * 255), int(g * 255), int(b * 255)
   else:
-    hue = 0.08 + (0.78 - 0.08) * ((t - 0.7) / 0.3)
-  r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
-  return int(r * 255), int(g * 255), int(b * 255)
+    # orange → purple via RGB blend (avoids blue in HSV path)
+    frac = (t - 0.7) / 0.3
+    return (
+      int(255 + (COLOR_DOWNSHIFT[0] - 255) * frac),
+      int(122 * (1 - frac)),
+      int(COLOR_DOWNSHIFT[2] * frac),
+    )
 
 
 def breathing_brightness(t: float, period: float = 3.0) -> float:
@@ -89,7 +97,7 @@ class GlowController:
 
     self.downshift_until = 0.0
     self.last_blinker_toggle = 0.0
-    self.blinker_on = True
+    self.blinker_on = False
     self.last_color = (0, 0, 0)
     self.standstill_start = 0.0
     self.was_standstill = False
@@ -109,7 +117,7 @@ class GlowController:
         self.effective_gear = 0
     return self.effective_gear
 
-  def compute_color(self, sm) -> tuple[int, int, int]:
+  def compute_color(self, sm, chill_mode: bool = False) -> tuple[int, int, int]:
     cs = sm['carState']
     now = time.monotonic()
 
@@ -124,6 +132,15 @@ class GlowController:
     gear = self._update_gear(raw_gear, now)
     prev_gear = self._prev_effective_gear
 
+    # Chill mode: RPM color only, no reactive effects
+    if chill_mode:
+      self._prev_effective_gear = gear
+      if not self.was_standstill and standstill:
+        self.was_standstill = True
+      elif not standstill:
+        self.was_standstill = False
+      return rpm_to_color(rpm)
+
     # --- Priority 1: Downshift flash ---
     if gear > 0 and prev_gear > 0 and gear < prev_gear:
       self.downshift_until = now + DOWNSHIFT_FLASH_DURATION
@@ -136,12 +153,9 @@ class GlowController:
 
     # --- Priority 2: Braking ---
     if brake:
-      a_ego = cs.aEgo
-      if a_ego < -3.0:
+      if cs.aEgo < -3.0:
         return COLOR_BRAKE_HARD
-      else:
-        intensity = min(1.0, max(0.5, abs(a_ego) / 4.0))
-        return scale_color(COLOR_BRAKE, intensity)
+      return COLOR_BRAKE
 
     # --- Priority 3: Blinker amber pulse ---
     if left_blinker or right_blinker:
@@ -272,35 +286,48 @@ async def glowd_thread():
   signal.signal(signal.SIGTERM, signal_handler)
   signal.signal(signal.SIGINT, signal_handler)
 
+  params = Params()
+  params.put_nonblocking("GlowStatus", "connecting")
+  chill_mode = params.get_bool("GlowMode")
+  last_param_read = 0.0
+
   client = await ble_connect()
+  params.put_nonblocking("GlowStatus", "connected" if client else "disconnected")
 
   sm = messaging.SubMaster(['carState'], poll='carState')
   ctrl = GlowController()
   rk = Ratekeeper(UPDATE_HZ)
   last_reconnect_attempt = 0.0
 
-  print(f"glowd: running at {UPDATE_HZ}Hz")
+  print(f"glowd: running at {UPDATE_HZ}Hz, chill={chill_mode}")
 
   while not do_exit:
     sm.update(0)
 
+    # Refresh params every 5s
+    now = time.monotonic()
+    if now - last_param_read > 5.0:
+      chill_mode = params.get_bool("GlowMode")
+      last_param_read = now
+
     # If disconnected, try to reconnect every 5s
     if client is None:
-      now = time.monotonic()
       if now - last_reconnect_attempt > 5.0:
         last_reconnect_attempt = now
         print("glowd: attempting reconnect...")
+        params.put_nonblocking("GlowStatus", "connecting")
         client = await ble_connect()
+        params.put_nonblocking("GlowStatus", "connected" if client else "disconnected")
       rk.keep_time()
       continue
 
     if sm.updated['carState']:
-      color = ctrl.compute_color(sm)
+      color = ctrl.compute_color(sm, chill_mode)
 
       if color != ctrl.last_color:
         if DEBUG:
           cs = sm['carState']
-          print(f"glowd: RPM={cs.engineRpm:.0f} gear={cs.gearActual} → RGB{color}")
+          print(f"glowd: RPM={cs.engineRpm:.0f} gear={cs.gearActual} chill={chill_mode} → RGB{color}")
 
         try:
           await set_color(client, *color)
@@ -311,6 +338,7 @@ async def glowd_thread():
           except Exception:
             pass
           client = None
+          params.put_nonblocking("GlowStatus", "disconnected")
           continue
 
         ctrl.last_color = color
@@ -318,6 +346,7 @@ async def glowd_thread():
     rk.keep_time()
 
   # Clean shutdown: power off LEDs
+  params.put_nonblocking("GlowStatus", "disconnected")
   await ble_shutdown(client)
 
 
