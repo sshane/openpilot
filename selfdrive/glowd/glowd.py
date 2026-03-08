@@ -193,6 +193,10 @@ class GlowController:
     return rpm_to_color(rpm)
 
 
+def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
+  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color)})
+
+
 def bt_is_ready() -> bool:
   """Check if BT stack is up (managed by bluetooth.service in AGNOS)."""
   result = subprocess.run(["sudo", "hciconfig", "hci0"], capture_output=True)
@@ -240,12 +244,12 @@ async def glowd_thread():
   signal.signal(signal.SIGINT, signal_handler)
 
   params = Params()
-  params.put_nonblocking("GlowStatus", "connecting")
+  _put_glow_status(params, "connecting")
   chill_mode = params.get_bool("GlowMode")
   last_param_read = 0.0
 
   client = await ble_connect()
-  params.put_nonblocking("GlowStatus", "connected" if client else "disconnected")
+  _put_glow_status(params, "connected" if client else "disconnected")
 
   sm = messaging.SubMaster(['carState'], poll='carState')
   ctrl = GlowController()
@@ -268,9 +272,9 @@ async def glowd_thread():
       if now - last_reconnect_attempt > 5.0:
         last_reconnect_attempt = now
         print("glowd: attempting reconnect...")
-        params.put_nonblocking("GlowStatus", "connecting")
+        _put_glow_status(params, "connecting")
         client = await ble_connect()
-        params.put_nonblocking("GlowStatus", "connected" if client else "disconnected")
+        _put_glow_status(params, "connected" if client else "disconnected")
       rk.keep_time()
       continue
 
@@ -291,15 +295,16 @@ async def glowd_thread():
           except Exception:
             pass
           client = None
-          params.put_nonblocking("GlowStatus", "disconnected")
+          _put_glow_status(params, "disconnected", ctrl.last_color)
           continue
 
         ctrl.last_color = color
+        _put_glow_status(params, "connected", color)
 
     rk.keep_time()
 
   # Clean shutdown: power off LEDs
-  params.put_nonblocking("GlowStatus", "disconnected")
+  _put_glow_status(params, "disconnected", ctrl.last_color)
   await ble_shutdown(client)
 
 

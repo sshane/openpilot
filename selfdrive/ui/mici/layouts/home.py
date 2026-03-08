@@ -35,20 +35,20 @@ class GlowStatusIcon(Widget):
   def __init__(self):
     super().__init__()
     self.set_rect(rl.Rectangle(0, 0, self.SIZE, self.SIZE))
-    self._color = rl.Color(200, 40, 40, 230)
-    self._glow = rl.Color(200, 40, 40, 60)
-    self.set_enabled(False)
+    self._color = rl.Color(120, 120, 120, 160)
+    self._glow = rl.Color(120, 120, 120, 40)
 
-  def set_status(self, status: str | None):
-    if status == "connected":
-      self._color = rl.Color(0, 200, 80, 240)
-      self._glow = rl.Color(0, 200, 80, 60)
-    elif status == "connecting":
+  def set_glow_state(self, glow_state: dict | None):
+    if glow_state is None or glow_state.get("status") not in ("connected", "connecting"):
+      self._color = rl.Color(120, 120, 120, 160)
+      self._glow = rl.Color(120, 120, 120, 40)
+    elif glow_state["status"] == "connecting":
       self._color = rl.Color(255, 200, 0, 240)
       self._glow = rl.Color(255, 200, 0, 50)
     else:
-      self._color = rl.Color(200, 40, 40, 230)
-      self._glow = rl.Color(200, 40, 40, 50)
+      r, g, b = glow_state.get("color", [0, 200, 80])
+      self._color = rl.Color(r, g, b, 240)
+      self._glow = rl.Color(r, g, b, 60)
 
   def _render(self, _):
     cx = int(self._rect.x + self.SIZE / 2)
@@ -154,9 +154,7 @@ class MiciHomeLayout(Widget):
 
   def _update_params(self):
     self._experimental_mode = ui_state.params.get_bool("ExperimentalMode")
-    glow_status = ui_state.params.get("GlowStatus")
-    self._glow_icon.set_status(glow_status)
-    self._glow_icon.set_visible(glow_status is not None)
+    self._glow_icon.set_glow_state(ui_state.params.get("GlowStatus") or {})
 
   def _update_state(self):
     if self.is_pressed and not self._is_pressed_prev:

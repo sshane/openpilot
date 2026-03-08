@@ -162,6 +162,10 @@ class AugmentedRoadView(CameraView):
 
     self._fade_texture = gui_app.texture("icons_mici/onroad/onroad_fade.png")
 
+    # Glow color indicator
+    self._glow_color = rl.Color(120, 120, 120, 160)
+    self._glow_glow = rl.Color(120, 120, 120, 40)
+
     # Manual stats widget for MT cars
     self._manual_stats_widget = ManualStatsWidget()
 
@@ -174,6 +178,16 @@ class AugmentedRoadView(CameraView):
 
   def _update_state(self):
     super()._update_state()
+
+    # update glow color from param
+    state = ui_state.params.get("GlowStatus") or {}
+    if state.get("status") == "connected" and state.get("color"):
+      r, g, b = state["color"]
+      self._glow_color = rl.Color(r, g, b, 220)
+      self._glow_glow = rl.Color(r, g, b, 60)
+    else:
+      self._glow_color = rl.Color(120, 120, 120, 160)
+      self._glow_glow = rl.Color(120, 120, 120, 40)
 
     # update offroad label
     if ui_state.panda_type == log.PandaState.PandaType.unknown:
@@ -235,6 +249,12 @@ class AugmentedRoadView(CameraView):
     if ui_state.started:
       self._alert_renderer.render(self._content_rect)
     self._hud_renderer.render(self._content_rect)
+
+    # Glow color dot (top right)
+    glow_cx = int(self._content_rect.x + self._content_rect.width - 30)
+    glow_cy = int(self._content_rect.y + 30)
+    rl.draw_circle(glow_cx, glow_cy, 16, self._glow_glow)
+    rl.draw_circle(glow_cx, glow_cy, 8, self._glow_color)
 
     # Draw fake rounded border
     rl.draw_rectangle_rounded_lines_ex(self._content_rect, 0.2 * 1.02, 10, 50, rl.BLACK)
