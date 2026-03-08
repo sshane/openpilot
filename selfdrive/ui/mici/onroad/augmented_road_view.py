@@ -250,12 +250,6 @@ class AugmentedRoadView(CameraView):
       self._alert_renderer.render(self._content_rect)
     self._hud_renderer.render(self._content_rect)
 
-    # Glow color dot (bottom right)
-    glow_cx = int(self._content_rect.x + self._content_rect.width - 30)
-    glow_cy = int(self._content_rect.y + self._content_rect.height - 30)
-    rl.draw_circle(glow_cx, glow_cy, 16, self._glow_glow)
-    rl.draw_circle(glow_cx, glow_cy, 8, self._glow_color)
-
     # Draw fake rounded border
     rl.draw_rectangle_rounded_lines_ex(self._content_rect, 0.2 * 1.02, 10, 50, rl.BLACK)
 
@@ -270,6 +264,12 @@ class AugmentedRoadView(CameraView):
     is_manual = ui_state.CP is not None and bool(ui_state.CP.flags & 128)
     self._manual_stats_widget.set_visible(is_manual and ui_state.started)
     self._manual_stats_widget.render(self._content_rect)
+
+    # Glow color dot (bottom right, after MT stats overlay)
+    glow_cx = int(self._content_rect.x + self._content_rect.width - 50)
+    glow_cy = int(self._content_rect.y + self._content_rect.height - 50)
+    rl.draw_circle(glow_cx, glow_cy, 48, self._glow_glow)
+    rl.draw_circle(glow_cx, glow_cy, 24, self._glow_color)
 
     self._bookmark_icon.render(self.rect)
 
