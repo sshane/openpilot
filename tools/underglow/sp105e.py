@@ -79,11 +79,13 @@ def color_packet(r: int, g: int, b: int) -> bytes:
 async def find_sp105e(timeout=10):
   scanner = BleakScanner()
   await scanner.start()
-  await asyncio.sleep(timeout)
+  for _ in range(timeout * 10):
+    await asyncio.sleep(0.1)
+    for d in scanner.discovered_devices:
+      if d.name and "SP" in d.name:
+        await scanner.stop()
+        return d
   await scanner.stop()
-  for d in scanner.discovered_devices:
-    if d.name and "SP" in d.name:
-      return d
   return None
 
 
