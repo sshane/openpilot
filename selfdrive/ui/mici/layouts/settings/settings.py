@@ -41,7 +41,7 @@ class SettingsLayout(NavScroller):
     firehose_btn.set_click_callback(lambda: gui_app.push_widget(firehose_panel))
 
     manual_stats_panel = ManualStatsLayout()
-    manual_stats_btn = SettingsBigButton("MT stats", "", "icons_mici/wheel.png")
+    manual_stats_btn = SettingsBigButton("MT stats", "", gui_app.texture("icons_mici/wheel.png", 64, 64))
     manual_stats_btn.set_click_callback(lambda: gui_app.push_widget(manual_stats_panel))
 
     self._scroller.add_widgets([
