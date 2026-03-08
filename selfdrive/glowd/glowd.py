@@ -20,9 +20,7 @@ Safe colors: green, yellow, amber, orange, purple, white, pink.
 """
 import asyncio
 import colorsys
-import fcntl
 import math
-import os
 import signal
 import subprocess
 import time
@@ -192,10 +190,10 @@ def bt_init():
     subprocess.run(["sudo", "killall", "hciattach"], capture_output=True)
     time.sleep(1)
 
-    # Power on BT chip via btpower ioctl
-    fd = os.open('/dev/btpower', os.O_RDWR)
-    fcntl.ioctl(fd, 0xbfad, 1)  # BT_CMD_PWR_CTRL
-    os.close(fd)
+    # Power on BT chip via btpower ioctl (needs root)
+    subprocess.run(["sudo", "python3", "-c",
+                    "import fcntl,os; fd=os.open('/dev/btpower',os.O_RDWR); fcntl.ioctl(fd,0xbfad,1); os.close(fd)"],
+                   check=True, capture_output=True)
     time.sleep(1)
 
     # Unblock bluetooth
@@ -284,7 +282,7 @@ async def glowd_thread():
   print(f"glowd: running at {UPDATE_HZ}Hz")
 
   while not do_exit:
-    sm.update(timeout=100)
+    sm.update(0)
 
     # If disconnected, try to reconnect every 5s
     if client is None:
