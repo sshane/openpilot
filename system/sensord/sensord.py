@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import gc
 import os
 import time
 import ctypes
@@ -92,7 +91,6 @@ def polling_loop(sensor: Sensor, service: str, event: threading.Event) -> None:
 
 def main() -> None:
   config_realtime_process([1, ], 1)
-  gc.enable()
 
   sensors_cfg = [
     (LSM6DS3_Accel(I2C_BUS_IMU), "accelerometer", True),
