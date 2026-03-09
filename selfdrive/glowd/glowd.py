@@ -25,6 +25,8 @@ import subprocess
 import time
 from enum import IntEnum, IntFlag
 
+import numpy as np
+
 import cereal.messaging as messaging
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
@@ -108,9 +110,10 @@ class GlowController:
     r, g, b = colorsys.hsv_to_rgb(h, s, v)
     return int(r * 255), int(g * 255), int(b * 255)
 
-  def _rainbow_color(self) -> tuple[int, int, int]:
+  def _rainbow_color(self, v_ego: float) -> tuple[int, int, int]:
+    speed_mult = np.interp(v_ego, [0.0, 5.0], [1.0, 2.0])
     elapsed = time.monotonic() - self._standstill_start - RAINBOW_DELAY_S
-    hue = (elapsed / RAINBOW_PERIOD_S) % 1.0
+    hue = (elapsed * speed_mult / RAINBOW_PERIOD_S) % 1.0
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
@@ -146,7 +149,7 @@ class GlowController:
     if self.state == GlowState.STANDSTILL:
       standstill_elapsed = now - self._standstill_start
       if standstill_elapsed > RAINBOW_DELAY_S or not cs.standstill:
-        base = self._rainbow_color()
+        base = self._rainbow_color(cs.vEgo)
       else:
         base = rpm_to_color(cs.engineRpm)
     else:
