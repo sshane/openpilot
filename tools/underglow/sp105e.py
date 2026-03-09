@@ -26,6 +26,7 @@ Notes:
 """
 import argparse
 import asyncio
+import subprocess
 import sys
 from enum import IntEnum
 from bleak import BleakScanner, BleakClient
@@ -111,7 +112,7 @@ async def connect(retries=CONNECT_RETRIES, exit_on_fail=True):
         continue
       print(f"Found {dev.address}")
       # Clear any stale BlueZ connection from a crashed process
-      await BleakClient(dev.address).disconnect()
+      subprocess.run(["bluetoothctl", "disconnect", dev.address], capture_output=True, timeout=5)
       client = BleakClient(dev.address, timeout=20)
       await client.connect()
       # Always set GRB (factory default) on connect to ensure known state
