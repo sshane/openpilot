@@ -38,12 +38,12 @@ DEBUG = True
 
 # RPM thresholds
 RPM_MIN = 800
-RPM_COLOR_MAX = 4500
+RPM_COLOR_MAX = 5500
 RPM_BRIGHTNESS_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
-BRAKE_FLASH_S = 1.2
+BRAKE_FLASH_S = 0.8
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
 RAINBOW_PERIOD_S = 8.0
@@ -171,8 +171,8 @@ class GlowController:
     return color, brightness
 
 
-def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
-  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color)})
+def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0), brightness: int = 0):
+  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color), "brightness": brightness})
 
 
 def bt_is_ready() -> bool:
@@ -286,17 +286,17 @@ async def glowd_thread():
           except Exception:
             pass
           client = None
-          _put_glow_status(params, "disconnected", ctrl.last_color)
+          _put_glow_status(params, "disconnected", ctrl.last_color, ctrl.last_brightness)
           continue
 
         ctrl.last_color = color
         ctrl.last_brightness = brightness
-        _put_glow_status(params, "connected", color)
+        _put_glow_status(params, "connected", color, brightness)
 
     rk.keep_time()
 
   # Clean shutdown: power off LEDs
-  _put_glow_status(params, "disconnected", ctrl.last_color)
+  _put_glow_status(params, "disconnected", ctrl.last_color, ctrl.last_brightness)
   await ble_shutdown(client)
 
 
