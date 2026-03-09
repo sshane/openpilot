@@ -233,6 +233,7 @@ async def glowd_thread():
   params = Params()
   _put_glow_status(params, "connecting")
   chill_mode = params.get_bool("GlowMode")
+  standstill_only = params.get_bool("GlowStandstillOnly")
   last_param_read = 0.0
 
   client = await ble_connect()
@@ -252,6 +253,7 @@ async def glowd_thread():
     now = time.monotonic()
     if now - last_param_read > 2.5:
       chill_mode = params.get_bool("GlowMode")
+      standstill_only = params.get_bool("GlowStandstillOnly")
       last_param_read = now
 
     # If disconnected, try to reconnect every 5s
@@ -267,6 +269,17 @@ async def glowd_thread():
 
     if sm.updated['carState']:
       ctrl.update(sm, chill_mode)
+
+      if standstill_only and ctrl.state == GlowState.DRIVING:
+        if ctrl.last_color != (0, 0, 0):
+          await sp105e.power_off(client)
+          ctrl.last_color = (0, 0, 0)
+          _put_glow_status(params, "connected")
+        rk.keep_time()
+        continue
+      elif standstill_only and ctrl.last_color == (0, 0, 0):
+        await sp105e.power_on(client)
+
       raw_color, brightness = ctrl.get_color(sm)
       color = ctrl.smooth_color(raw_color)
 

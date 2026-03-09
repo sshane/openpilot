@@ -46,9 +46,8 @@ class GlowStatusIcon(Widget):
       self._color = rl.Color(255, 200, 0, 240)
       self._glow = rl.Color(255, 200, 0, 50)
     else:
-      r, g, b = glow_state.get("color", [0, 200, 80])
-      self._color = rl.Color(r, g, b, 240)
-      self._glow = rl.Color(r, g, b, 60)
+      self._color = rl.Color(0, 200, 80, 240)
+      self._glow = rl.Color(0, 200, 80, 60)
 
   def _render(self, _):
     cx = int(self._rect.x + self.SIZE / 2)
