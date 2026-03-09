@@ -95,9 +95,9 @@ class GlowController:
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
-    self._h_filter = FirstOrderFilter(0.0, 0.15, dt)
-    self._s_filter = FirstOrderFilter(0.0, 0.15, dt)
-    self._v_filter = FirstOrderFilter(0.0, 0.15, dt)
+    self._h_filter = FirstOrderFilter(0.0, 0.5, dt)
+    self._s_filter = FirstOrderFilter(0.0, 0.5, dt)
+    self._v_filter = FirstOrderFilter(0.0, 0.5, dt)
 
   def _set_state(self, state: GlowState):
     if self.state != state:
