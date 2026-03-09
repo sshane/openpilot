@@ -42,7 +42,7 @@ RPM_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
-BRAKE_FLASH_S = 0.6
+BRAKE_FLASH_S = 1.2
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
 RAINBOW_PERIOD_S = 8.0
@@ -117,9 +117,14 @@ class GlowController:
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
-  def update(self, sm):
+  def update(self, sm, chill: bool):
     cs = sm['carState']
     now = time.monotonic()
+
+    if chill:
+      self._set_state(GlowState.DRIVING)
+      self._mods = GlowMod(0)
+      return
 
     # Base state transitions
     if self.state == GlowState.DRIVING:
@@ -139,7 +144,6 @@ class GlowController:
       self._mods |= GlowMod.BRAKE
     else:
       self._mods &= ~GlowMod.BRAKE
-
 
   def get_color(self, sm) -> tuple[int, int, int]:
     cs = sm['carState']
@@ -236,7 +240,7 @@ async def glowd_thread():
 
     # Refresh params every 5s
     now = time.monotonic()
-    if now - last_param_read > 5.0:
+    if now - last_param_read > 2.5:
       chill_mode = params.get_bool("GlowMode")
       last_param_read = now
 
@@ -252,7 +256,7 @@ async def glowd_thread():
       continue
 
     if sm.updated['carState']:
-      ctrl.update(sm)
+      ctrl.update(sm, chill_mode)
       color = ctrl.smooth_color(ctrl.get_color(sm))
 
       if color != ctrl.last_color:
