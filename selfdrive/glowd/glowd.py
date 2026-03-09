@@ -20,7 +20,6 @@ Safe colors: green, yellow, amber, orange, purple, white, pink.
 """
 import asyncio
 import colorsys
-import math
 import signal
 import subprocess
 import time
@@ -35,16 +34,13 @@ from openpilot.tools.underglow import sp105e
 
 DEBUG = True
 
-# --- Color palette ---
-COLOR_REVERSE = (255, 255, 255)  # white
-
 # RPM thresholds
 RPM_MIN = 800
 RPM_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
-BRAKE_FLASH_S = 0.4
+BRAKE_FLASH_S = 0.6
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
 RAINBOW_PERIOD_S = 8.0
@@ -57,7 +53,6 @@ class GlowState(IntEnum):
 
 class GlowMod(IntFlag):
   BRAKE = 1
-  REVERSE = 2
 
 
 def rpm_to_color(rpm: float) -> tuple[int, int, int]:
@@ -79,12 +74,6 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
     )
 
 
-def breathing_brightness(t: float, period: float = 3.0) -> float:
-  """Sinusoidal breathing: 0.3 → 1.0 → 0.3."""
-  phase = (t % period) / period
-  return 0.3 + 0.7 * (0.5 + 0.5 * math.sin(2 * math.pi * phase - math.pi / 2))
-
-
 def scale_color(color: tuple[int, int, int], brightness: float) -> tuple[int, int, int]:
   return (int(color[0] * brightness), int(color[1] * brightness), int(color[2] * brightness))
 
@@ -101,9 +90,9 @@ class GlowController:
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
-    self._h_filter = FirstOrderFilter(0.0, 0.1, dt)
-    self._s_filter = FirstOrderFilter(0.0, 0.1, dt)
-    self._v_filter = FirstOrderFilter(0.0, 0.1, dt)
+    self._h_filter = FirstOrderFilter(0.0, 0.15, dt)
+    self._s_filter = FirstOrderFilter(0.0, 0.15, dt)
+    self._v_filter = FirstOrderFilter(0.0, 0.15, dt)
 
   def _set_state(self, state: GlowState):
     if self.state != state:
@@ -148,10 +137,6 @@ class GlowController:
     else:
       self._mods &= ~GlowMod.BRAKE
 
-    if str(cs.gearShifter) == 'reverse':
-      self._mods |= GlowMod.REVERSE
-    else:
-      self._mods &= ~GlowMod.REVERSE
 
   def get_color(self, sm) -> tuple[int, int, int]:
     cs = sm['carState']
@@ -171,16 +156,7 @@ class GlowController:
     brightness = 1.0 if self.state == GlowState.STANDSTILL else 0.7
     color = scale_color(base, brightness)
 
-    # Modifier: reverse — pulse between normal color and white at 1Hz
-    if self._mods & GlowMod.REVERSE:
-      blend = 0.5 + 0.5 * math.sin(2 * math.pi * now)
-      color = (
-        int(color[0] + (255 - color[0]) * blend),
-        int(color[1] + (255 - color[1]) * blend),
-        int(color[2] + (255 - color[2]) * blend),
-      )
-
-    # Modifier: brake — dark red flash on rising edge (highest priority)
+    # Modifier: brake — dark red flash on rising edge
     if self._mods & GlowMod.BRAKE:
       return (128, 0, 0)
 
