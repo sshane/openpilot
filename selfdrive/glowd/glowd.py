@@ -24,6 +24,7 @@ import math
 import signal
 import subprocess
 import time
+from enum import IntEnum, IntFlag
 
 import cereal.messaging as messaging
 from openpilot.common.filter_simple import FirstOrderFilter
@@ -36,7 +37,6 @@ DEBUG = True
 
 # --- Color palette ---
 COLOR_REVERSE = (255, 255, 255)  # white
-COLOR_STANDSTILL = (0, 200, 80)  # soft green for breathing
 
 # RPM thresholds
 RPM_MIN = 800
@@ -44,7 +44,20 @@ RPM_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
-BRIGHT_INIT_STEPS = 10
+BRAKE_FLASH_S = 0.4
+RAINBOW_HOLDOVER_S = 2.5
+RAINBOW_DELAY_S = 1.5
+RAINBOW_PERIOD_S = 8.0
+
+
+class GlowState(IntEnum):
+  DRIVING = 0     # RPM-based color
+  STANDSTILL = 1  # rainbow cycle
+
+
+class GlowMod(IntFlag):
+  BRAKE = 1
+  REVERSE = 2
 
 
 def rpm_to_color(rpm: float) -> tuple[int, int, int]:
@@ -79,11 +92,12 @@ def scale_color(color: tuple[int, int, int], brightness: float) -> tuple[int, in
 class GlowController:
   def __init__(self):
     self.last_color = (0, 0, 0)
-    self.standstill_start = 0.0
-    self.prev_standstill = False
-    self._rainbow_until = 0.0
-    self._brake_pressed_t = 0.0
+    self.state = GlowState.STANDSTILL
+    self._state_t = time.monotonic()
+    self._standstill_start = time.monotonic()
+    self._mods = GlowMod(0)
     self._prev_brake = False
+    self._brake_pressed_t = 0.0
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
@@ -91,7 +105,12 @@ class GlowController:
     self._s_filter = FirstOrderFilter(0.0, 0.1, dt)
     self._v_filter = FirstOrderFilter(0.0, 0.1, dt)
 
-  def _smooth_color(self, color: tuple[int, int, int]) -> tuple[int, int, int]:
+  def _set_state(self, state: GlowState):
+    if self.state != state:
+      self.state = state
+      self._state_t = time.monotonic()
+
+  def smooth_color(self, color: tuple[int, int, int]) -> tuple[int, int, int]:
     """Filter RGB through HSV space for smooth transitions."""
     h, s, v = colorsys.rgb_to_hsv(color[0] / 255, color[1] / 255, color[2] / 255)
     h = self._h_filter.update(h)
@@ -100,43 +119,72 @@ class GlowController:
     r, g, b = colorsys.hsv_to_rgb(h, s, v)
     return int(r * 255), int(g * 255), int(b * 255)
 
-  def compute_color(self, sm, chill_mode: bool = False) -> tuple[int, int, int]:
+  def _rainbow_color(self) -> tuple[int, int, int]:
+    elapsed = time.monotonic() - self._standstill_start - RAINBOW_DELAY_S
+    hue = (elapsed / RAINBOW_PERIOD_S) % 1.0
+    r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+    return int(r * 255), int(g * 255), int(b * 255)
+
+  def update(self, sm):
     cs = sm['carState']
     now = time.monotonic()
 
-    rpm = cs.engineRpm
-    standstill = cs.standstill
-    # TODO: use sp105e.set_brightness instead of scaling RGB
-    brightness = 1.0 if standstill or str(cs.gearShifter) == 'reverse' else 0.7
+    # Base state transitions
+    if self.state == GlowState.DRIVING:
+      if cs.standstill:
+        self._standstill_start = now
+        self._set_state(GlowState.STANDSTILL)
+    elif self.state == GlowState.STANDSTILL:
+      if not cs.standstill and now - self._state_t > RAINBOW_HOLDOVER_S:
+        self._set_state(GlowState.DRIVING)
 
-    # Brake rising edge: dark red for 0.4s
+    # Update modifiers
     if cs.brakePressed and not self._prev_brake:
       self._brake_pressed_t = now
     self._prev_brake = cs.brakePressed
-    if now - self._brake_pressed_t < 0.4:
+
+    if now - self._brake_pressed_t < BRAKE_FLASH_S:
+      self._mods |= GlowMod.BRAKE
+    else:
+      self._mods &= ~GlowMod.BRAKE
+
+    if str(cs.gearShifter) == 'reverse':
+      self._mods |= GlowMod.REVERSE
+    else:
+      self._mods &= ~GlowMod.REVERSE
+
+  def get_color(self, sm) -> tuple[int, int, int]:
+    cs = sm['carState']
+    now = time.monotonic()
+
+    # Base color from state
+    if self.state == GlowState.STANDSTILL:
+      standstill_elapsed = now - self._standstill_start
+      if standstill_elapsed > RAINBOW_DELAY_S or not cs.standstill:
+        base = self._rainbow_color()
+      else:
+        base = rpm_to_color(cs.engineRpm)
+    else:
+      base = rpm_to_color(cs.engineRpm)
+
+    # TODO: use sp105e.set_brightness instead of scaling RGB
+    brightness = 1.0 if self.state == GlowState.STANDSTILL else 0.7
+    color = scale_color(base, brightness)
+
+    # Modifier: reverse — pulse between normal color and white at 1Hz
+    if self._mods & GlowMod.REVERSE:
+      blend = 0.5 + 0.5 * math.sin(2 * math.pi * now)
+      color = (
+        int(color[0] + (255 - color[0]) * blend),
+        int(color[1] + (255 - color[1]) * blend),
+        int(color[2] + (255 - color[2]) * blend),
+      )
+
+    # Modifier: brake — dark red flash on rising edge (highest priority)
+    if self._mods & GlowMod.BRAKE:
       return (128, 0, 0)
 
-    # Reverse
-    if str(cs.gearShifter) == 'reverse':
-      return scale_color(COLOR_REVERSE, brightness)
-
-    # Standstill: slow rainbow cycle (continues 2.5s after leaving)
-    if standstill:
-      if not self.prev_standstill:
-        self.standstill_start = now
-        self.prev_standstill = True
-    elif self.prev_standstill:
-      self.prev_standstill = False
-      self._rainbow_until = now + 2.5
-
-    elapsed = now - self.standstill_start
-    if (standstill and elapsed > 2.0) or now < self._rainbow_until:
-      hue = ((elapsed - 2.0) / 8.0) % 1.0  # full cycle every 8s
-      r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
-      return scale_color((int(r * 255), int(g * 255), int(b * 255)), brightness)
-
-    # RPM-based color
-    return scale_color(rpm_to_color(rpm), brightness)
+    return color
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
@@ -225,7 +273,8 @@ async def glowd_thread():
       continue
 
     if sm.updated['carState']:
-      color = ctrl._smooth_color(ctrl.compute_color(sm, chill_mode))
+      ctrl.update(sm)
+      color = ctrl.smooth_color(ctrl.get_color(sm))
 
       if color != ctrl.last_color:
         if DEBUG:
