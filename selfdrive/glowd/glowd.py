@@ -20,6 +20,7 @@ Safe colors: green, yellow, amber, orange, purple, white, pink.
 """
 import asyncio
 import colorsys
+import math
 import signal
 import subprocess
 import time
@@ -95,7 +96,8 @@ class GlowController:
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
-    self._h_filter = FirstOrderFilter(0.0, 0.5, dt)
+    self._hx_filter = FirstOrderFilter(0.0, 0.5, dt)  # cos(hue)
+    self._hy_filter = FirstOrderFilter(0.0, 0.5, dt)  # sin(hue)
     self._s_filter = FirstOrderFilter(0.0, 0.5, dt)
     self._v_filter = FirstOrderFilter(0.0, 0.5, dt)
 
@@ -105,9 +107,13 @@ class GlowController:
       self._state_t = time.monotonic()
 
   def smooth_color(self, color: tuple[int, int, int]) -> tuple[int, int, int]:
-    """Filter RGB through HSV space for smooth transitions."""
+    """Filter RGB through HSV space. Hue filtered in cartesian (cos/sin)
+    to handle circular wrapping generically via atan2."""
     h, s, v = colorsys.rgb_to_hsv(color[0] / 255, color[1] / 255, color[2] / 255)
-    h = self._h_filter.update(h)
+    angle = 2 * math.pi * h
+    hx = self._hx_filter.update(math.cos(angle))
+    hy = self._hy_filter.update(math.sin(angle))
+    h = math.atan2(hy, hx) / (2 * math.pi) % 1.0
     s = self._s_filter.update(s)
     v = self._v_filter.update(v)
     r, g, b = colorsys.hsv_to_rgb(h, s, v)
@@ -194,14 +200,16 @@ async def ble_connect():
     return None
   await sp105e.power_on(client)
 
-  # Startup sweep: min → max → 70%
-  await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MIN)
+  # Startup sweep: min → max → min → 70% (like RPM gauge self-test)
   for level in range(sp105e.BRIGHTNESS_MIN, sp105e.BRIGHTNESS_MAX + 1):
     await sp105e.set_brightness(client, level)
-    await asyncio.sleep(0.2)
-  for level in range(sp105e.BRIGHTNESS_MAX, 3, -1):
+    await asyncio.sleep(0.15)
+  for level in range(sp105e.BRIGHTNESS_MAX, sp105e.BRIGHTNESS_MIN - 1, -1):
     await sp105e.set_brightness(client, level)
-    await asyncio.sleep(0.2)
+    await asyncio.sleep(0.15)
+  for level in range(sp105e.BRIGHTNESS_MIN, 5):
+    await sp105e.set_brightness(client, level)
+    await asyncio.sleep(0.15)
 
   print("glowd: connected, LEDs on, startup sweep done")
   return client
