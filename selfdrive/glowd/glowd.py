@@ -38,7 +38,8 @@ DEBUG = True
 
 # RPM thresholds
 RPM_MIN = 800
-RPM_MAX = 7000
+RPM_COLOR_MAX = 4500
+RPM_BRIGHTNESS_MAX = 7000
 
 # Timing
 UPDATE_HZ = 20
@@ -60,7 +61,7 @@ class GlowMod(IntFlag):
 def rpm_to_color(rpm: float) -> tuple[int, int, int]:
   """Map RPM to color: green(idle) → yellow → amber → purple(redline).
   Avoids pure red and blue. Low range uses HSV, high range blends RGB."""
-  t = max(0.0, min(1.0, (rpm - RPM_MIN) / (RPM_MAX - RPM_MIN)))
+  t = max(0.0, min(1.0, (rpm - RPM_MIN) / (RPM_COLOR_MAX - RPM_MIN)))
   if t < 0.7:
     # green (0.33) → orange (0.08) in HSV
     hue = 0.33 - (0.33 - 0.08) * (t / 0.7)
@@ -76,13 +77,15 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
     )
 
 
-def scale_color(color: tuple[int, int, int], brightness: float) -> tuple[int, int, int]:
-  return (int(color[0] * brightness), int(color[1] * brightness), int(color[2] * brightness))
+def rpm_to_brightness(rpm: float) -> int:
+  """70% (level 4) normally, ramp to 100% (level 6) above 4000 RPM."""
+  return int(np.interp(rpm, [RPM_COLOR_MAX, RPM_BRIGHTNESS_MAX], [4, sp105e.BRIGHTNESS_MAX]))
 
 
 class GlowController:
   def __init__(self):
     self.last_color = (0, 0, 0)
+    self.last_brightness = -1
     self.state = GlowState.STANDSTILL
     self._state_t = time.monotonic()
     self._standstill_start = time.monotonic()
@@ -145,7 +148,7 @@ class GlowController:
     else:
       self._mods &= ~GlowMod.BRAKE
 
-  def get_color(self, sm) -> tuple[int, int, int]:
+  def get_color(self, sm) -> tuple[tuple[int, int, int], int]:
     cs = sm['carState']
     now = time.monotonic()
 
@@ -153,21 +156,19 @@ class GlowController:
     if self.state == GlowState.STANDSTILL:
       standstill_elapsed = now - self._standstill_start
       if standstill_elapsed > RAINBOW_DELAY_S or not cs.standstill:
-        base = self._rainbow_color(cs.vEgo)
+        color = self._rainbow_color(cs.vEgo)
       else:
-        base = rpm_to_color(cs.engineRpm)
+        color = rpm_to_color(cs.engineRpm)
+      brightness = rpm_to_brightness(cs.engineRpm)
     else:
-      base = rpm_to_color(cs.engineRpm)
-
-    # TODO: use sp105e.set_brightness instead of scaling RGB
-    brightness = 1.0 if self.state == GlowState.STANDSTILL else 0.7
-    color = scale_color(base, brightness)
+      color = rpm_to_color(cs.engineRpm)
+      brightness = rpm_to_brightness(cs.engineRpm)
 
     # Modifier: brake — dark red flash on rising edge
     if self._mods & GlowMod.BRAKE:
-      return (128, 0, 0)
+      return (128, 0, 0), brightness
 
-    return color
+    return color, brightness
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
@@ -181,7 +182,7 @@ def bt_is_ready() -> bool:
 
 
 async def ble_connect():
-  """Connect to SP105E, power on, max brightness. Returns client or None.
+  """Connect to SP105E, power on, sweep brightness. Returns client or None.
   Assumes BT stack is already up (bluetooth.service in AGNOS)."""
   if not bt_is_ready():
     print("glowd: hci0 not up (waiting for bluetooth.service)")
@@ -192,8 +193,17 @@ async def ble_connect():
   if client is None:
     return None
   await sp105e.power_on(client)
-  await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MAX)
-  print("glowd: connected, LEDs on, brightness maxed")
+
+  # Startup sweep: min → max → 70%
+  await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MIN)
+  for level in range(sp105e.BRIGHTNESS_MIN, sp105e.BRIGHTNESS_MAX + 1):
+    await sp105e.set_brightness(client, level)
+    await asyncio.sleep(0.2)
+  for level in range(sp105e.BRIGHTNESS_MAX, 3, -1):
+    await sp105e.set_brightness(client, level)
+    await asyncio.sleep(0.2)
+
+  print("glowd: connected, LEDs on, startup sweep done")
   return client
 
 
@@ -257,15 +267,18 @@ async def glowd_thread():
 
     if sm.updated['carState']:
       ctrl.update(sm, chill_mode)
-      color = ctrl.smooth_color(ctrl.get_color(sm))
+      raw_color, brightness = ctrl.get_color(sm)
+      color = ctrl.smooth_color(raw_color)
 
-      if color != ctrl.last_color:
+      if color != ctrl.last_color or brightness != ctrl.last_brightness:
         if DEBUG:
           cs = sm['carState']
-          print(f"glowd: RPM={cs.engineRpm:.0f} gear={cs.gearActual} chill={chill_mode} → RGB{color}")
+          print(f"glowd: RPM={cs.engineRpm:.0f} brightness={brightness} chill={chill_mode} → RGB{color}")
 
         try:
           await sp105e.set_color(client, *color)
+          if brightness != ctrl.last_brightness:
+            await sp105e.set_brightness(client, brightness)
         except Exception as e:
           print(f"glowd: BLE error: {e}")
           try:
@@ -277,6 +290,7 @@ async def glowd_thread():
           continue
 
         ctrl.last_color = color
+        ctrl.last_brightness = brightness
         _put_glow_status(params, "connected", color)
 
     rk.keep_time()
