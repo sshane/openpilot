@@ -137,11 +137,11 @@ class GlowController:
 
     # Base state transitions
     if self.state == GlowState.DRIVING:
-      if cs.standstill:
+      if cs.vEgo < 1:
         self._standstill_start = now
         self._set_state(GlowState.STANDSTILL)
     elif self.state == GlowState.STANDSTILL:
-      if not cs.standstill and now - self._state_t > RAINBOW_HOLDOVER_S:
+      if cs.vEgo >= 1 and now - self._state_t > RAINBOW_HOLDOVER_S:
         self._set_state(GlowState.DRIVING)
 
     # Update modifiers
@@ -161,7 +161,7 @@ class GlowController:
     # Base color from state
     if self.state == GlowState.STANDSTILL:
       standstill_elapsed = now - self._standstill_start
-      if standstill_elapsed > RAINBOW_DELAY_S or not cs.standstill:
+      if standstill_elapsed > RAINBOW_DELAY_S or cs.vEgo >= 1:
         color = self._rainbow_color(cs.vEgo)
       else:
         color = rpm_to_color(cs.engineRpm)
