@@ -110,6 +110,8 @@ async def connect(retries=CONNECT_RETRIES, exit_on_fail=True):
           await asyncio.sleep(2)
         continue
       print(f"Found {dev.address}")
+      # Clear any stale BlueZ connection from a crashed process
+      await BleakClient(dev.address).disconnect()
       client = BleakClient(dev.address, timeout=20)
       await client.connect()
       # Always set GRB (factory default) on connect to ensure known state
