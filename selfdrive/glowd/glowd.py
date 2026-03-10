@@ -88,8 +88,8 @@ class GlowController:
     self.last_color = (0, 0, 0)
     self.last_brightness = -1
     self.state = GlowState.STANDSTILL
-    self._state_t = time.monotonic()
-    self._standstill_start = time.monotonic()
+    self._standstill_start: float | None = None
+    self._moving_start: float | None = None
     self._mods = GlowMod(0)
     self._prev_brake = False
     self._brake_pressed_t = 0.0
@@ -100,11 +100,6 @@ class GlowController:
     self._hy_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # sin(hue)
     self._s_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)
     self._v_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)
-
-  def _set_state(self, state: GlowState):
-    if self.state != state:
-      self.state = state
-      self._state_t = time.monotonic()
 
   def smooth_color(self, color: tuple[int, int, int]) -> tuple[int, int, int]:
     """Filter RGB through HSV space. Hue filtered in cartesian (cos/sin)
@@ -131,18 +126,33 @@ class GlowController:
     now = time.monotonic()
 
     if chill:
-      self._set_state(GlowState.DRIVING)
+      self.state = GlowState.DRIVING
       self._mods = GlowMod(0)
       return
 
     # Base state transitions
     if self.state == GlowState.DRIVING:
-      if cs.vEgo < 1:
-        self._standstill_start = now
-        self._set_state(GlowState.STANDSTILL)
+      if cs.vEgo < 1 and cs.engineRpm < 1500:
+        if self._standstill_start is None:
+          self._standstill_start = now
+        elif now - self._standstill_start > RAINBOW_DELAY_S:
+          self._standstill_start = None
+          self.state = GlowState.STANDSTILL
+      else:
+        self._standstill_start = None
+
     elif self.state == GlowState.STANDSTILL:
-      if cs.vEgo >= 1 and now - self._state_t > RAINBOW_HOLDOVER_S:
-        self._set_state(GlowState.DRIVING)
+      if cs.engineRpm >= 1500:
+        self._moving_start = None
+        self.state = GlowState.DRIVING
+      elif cs.vEgo >= 1:
+        if self._moving_start is None:
+          self._moving_start = now
+        elif now - self._moving_start > RAINBOW_HOLDOVER_S:
+          self._moving_start = None
+          self.state = GlowState.DRIVING
+      else:
+        self._moving_start = None
 
     # Update modifiers
     if cs.brakePressed and not self._prev_brake:
@@ -156,19 +166,13 @@ class GlowController:
 
   def get_color(self, sm) -> tuple[tuple[int, int, int], int]:
     cs = sm['carState']
-    now = time.monotonic()
 
     # Base color from state
     if self.state == GlowState.STANDSTILL:
-      standstill_elapsed = now - self._standstill_start
-      if standstill_elapsed > RAINBOW_DELAY_S or cs.vEgo >= 1:
-        color = self._rainbow_color(cs.vEgo)
-      else:
-        color = rpm_to_color(cs.engineRpm)
-      brightness = rpm_to_brightness(cs.engineRpm)
+      color = self._rainbow_color(cs.vEgo)
     else:
       color = rpm_to_color(cs.engineRpm)
-      brightness = rpm_to_brightness(cs.engineRpm)
+    brightness = rpm_to_brightness(cs.engineRpm)
 
     # Modifier: brake — dark red flash on rising edge
     if self._mods & GlowMod.BRAKE:
