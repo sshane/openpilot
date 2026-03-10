@@ -40,7 +40,6 @@ DEBUG = True
 # RPM thresholds
 RPM_MIN = 800
 RPM_COLOR_MAX = 5500
-RPM_BRIGHTNESS_MAX = 7000
 
 # Timing
 UPDATE_HZ = 15
@@ -78,15 +77,10 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
     )
 
 
-def rpm_to_brightness(rpm: float) -> int:
-  """70% (level 4) normally, ramp to 100% (level 6) above 4000 RPM."""
-  return int(np.interp(rpm, [RPM_COLOR_MAX, RPM_BRIGHTNESS_MAX], [4, sp105e.BRIGHTNESS_MAX]))
-
 
 class GlowController:
   def __init__(self):
     self.last_color = (0, 0, 0)
-    self.last_brightness = -1
     self.state = GlowState.STANDSTILL
     self._standstill_start: float | None = None
     self._moving_start: float | None = None
@@ -163,25 +157,21 @@ class GlowController:
     else:
       self._mods &= ~GlowMod.BRAKE
 
-  def get_color(self, sm) -> tuple[tuple[int, int, int], int]:
+  def get_color(self, sm) -> tuple[int, int, int]:
     cs = sm['carState']
-
-    # Base color from state
-    if self.state == GlowState.STANDSTILL:
-      color = self._rainbow_color(cs.vEgo)
-    else:
-      color = rpm_to_color(cs.engineRpm)
-    brightness = rpm_to_brightness(cs.engineRpm)
 
     # Modifier: brake — dark red flash on rising edge
     if self._mods & GlowMod.BRAKE:
-      return (128, 0, 0), brightness
+      return (128, 0, 0)
 
-    return color, brightness
+    # Base color from state
+    if self.state == GlowState.STANDSTILL:
+      return self._rainbow_color(cs.vEgo)
+    return rpm_to_color(cs.engineRpm)
 
 
-def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0), brightness: int = 0):
-  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color), "brightness": brightness})
+def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
+  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color)})
 
 
 def bt_is_ready() -> bool:
@@ -202,7 +192,7 @@ async def ble_connect():
   if client is None:
     return None
   await asyncio.sleep(0.5)
-  await sp105e.power_on(client)
+  await sp105e.set_power(client, on=True)
   await asyncio.sleep(0.5)
   print("glowd: connected, LEDs on")
   return client
@@ -214,7 +204,7 @@ async def ble_shutdown(client):
     try:
       await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MIN)
       await asyncio.sleep(0.5)
-      await sp105e.power_off(client)
+      await sp105e.set_power(client, on=False)
       await client.disconnect()
       print("glowd: LEDs off, disconnected")
     except Exception as e:
@@ -275,26 +265,24 @@ async def glowd_thread():
 
       if standstill_only and ctrl.state == GlowState.DRIVING:
         if ctrl.last_color != (0, 0, 0):
-          await sp105e.power_off(client)
+          await sp105e.set_power(client, on=False)
           ctrl.last_color = (0, 0, 0)
           _put_glow_status(params, "connected")
         rk.keep_time()
         continue
       elif standstill_only and ctrl.last_color == (0, 0, 0):
-        await sp105e.power_on(client)
+        await sp105e.set_power(client, on=True)
 
-      raw_color, brightness = ctrl.get_color(sm)
+      raw_color = ctrl.get_color(sm)
       color = ctrl.smooth_color(raw_color)
 
-      if color != ctrl.last_color or brightness != ctrl.last_brightness:
+      if color != ctrl.last_color:
         if DEBUG:
           cs = sm['carState']
-          print(f"glowd: RPM={cs.engineRpm:.0f} brightness={brightness} chill={chill_mode} → RGB{color}")
+          print(f"glowd: RPM={cs.engineRpm:.0f} chill={chill_mode} → RGB{color}")
 
         try:
           await sp105e.set_color(client, *color)
-          if brightness != ctrl.last_brightness:
-            await sp105e.set_brightness(client, brightness)
         except Exception as e:
           print(f"glowd: BLE error: {e}")
           try:
@@ -302,17 +290,16 @@ async def glowd_thread():
           except Exception:
             pass
           client = None
-          _put_glow_status(params, "disconnected", ctrl.last_color, ctrl.last_brightness)
+          _put_glow_status(params, "disconnected", ctrl.last_color)
           continue
 
         ctrl.last_color = color
-        ctrl.last_brightness = brightness
-        _put_glow_status(params, "connected", color, brightness)
+        _put_glow_status(params, "connected", color)
 
     rk.keep_time()
 
   # Clean shutdown: power off LEDs
-  _put_glow_status(params, "disconnected", ctrl.last_color, ctrl.last_brightness)
+  _put_glow_status(params, "disconnected", ctrl.last_color)
   await ble_shutdown(client)
 
 

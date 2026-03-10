@@ -136,25 +136,29 @@ async def send(client, data: bytes, response=False):
 
 # --- State reading ---
 
-async def get_state(client) -> bytes | None:
+async def get_state(client, retries: int = 2) -> bytes | None:
   """Send GET_STATE (0x10) and return 8-byte notify response.
   Returns None on timeout. Byte 0: 1=on, 0=off."""
-  result = None
-  event = asyncio.Event()
+  for attempt in range(retries):
+    result = None
+    event = asyncio.Event()
 
-  def on_notify(sender, data):
-    nonlocal result
-    result = data
-    event.set()
+    def on_notify(sender, data):
+      nonlocal result
+      result = data
+      event.set()
 
-  await client.start_notify(CHAR, on_notify)
-  await send(client, packet(0, 0, 0, Command.GET_STATE))
-  try:
-    await asyncio.wait_for(event.wait(), timeout=2.0)
-  except asyncio.TimeoutError:
-    print("sp105e: get_state timeout")
-  await client.stop_notify(CHAR)
-  return result
+    await client.start_notify(CHAR, on_notify)
+    await send(client, packet(0, 0, 0, Command.GET_STATE))
+    try:
+      await asyncio.wait_for(event.wait(), timeout=2.0)
+    except asyncio.TimeoutError:
+      print(f"sp105e: get_state timeout (attempt {attempt + 1}/{retries})")
+    await client.stop_notify(CHAR)
+    if result is not None:
+      return result
+    await asyncio.sleep(0.5)
+  return None
 
 
 async def is_on(client) -> bool:
@@ -166,33 +170,28 @@ async def is_on(client) -> bool:
 # --- High-level commands ---
 
 async def set_color(client, r, g, b):
-  await send(client, color_packet(r, g, b))
+  await send(client, color_packet(r, g, b), response=True)
 
 
 async def power_toggle(client):
   await send(client, packet(0, 0, 0, Command.POWER_TOGGLE), response=True)
 
 
-async def power_on(client):
-  """Turn on if off. No-op if already on."""
-  state = await get_state(client)
-  if state is None:
-    print("WARNING: power_on state read failed, skipping")
-  elif state[0] == 1:
-    print("WARNING: power_on called but already on")
-  else:
+async def set_power(client, on: bool, retries: int = 2):
+  """Set power state. No-op if already in desired state."""
+  target = 1 if on else 0
+  label = "on" if on else "off"
+  for attempt in range(retries):
+    state = await get_state(client)
+    if state is None:
+      print(f"WARNING: power_{label} state read failed (attempt {attempt + 1}/{retries})")
+      await asyncio.sleep(0.5)
+      continue
+    if state[0] == target:
+      return
     await power_toggle(client)
-
-
-async def power_off(client):
-  """Turn off if on. No-op if already off."""
-  state = await get_state(client)
-  if state is None:
-    print("WARNING: power_off state read failed, skipping")
-  elif state[0] != 1:
-    print("WARNING: power_off called but already off")
-  else:
-    await power_toggle(client)
+    return
+  print(f"WARNING: power_{label} failed after retries")
 
 
 BRIGHTNESS_MAX = 6
@@ -212,30 +211,25 @@ async def set_brightness(client, level: int):
   level = max(BRIGHTNESS_MIN, min(BRIGHTNESS_MAX, level))
   current = await get_brightness(client)
   if current is None:
-    # Can't read state, just step up to max as fallback
-    for _ in range(BRIGHTNESS_MAX):
-      await send(client, packet(1, 0, 0, Command.BRIGHT_UP))
-      await asyncio.sleep(0.05)
+    print("WARNING: set_brightness can't read current level, skipping")
     return
   diff = level - current
   if diff > 0:
     for _ in range(diff):
-      await send(client, packet(1, 0, 0, Command.BRIGHT_UP))
-      await asyncio.sleep(0.05)
+      await brightness_step_up(client)
   elif diff < 0:
     for _ in range(-diff):
-      await send(client, packet(1, 0, 0, Command.BRIGHT_DOWN))
-      await asyncio.sleep(0.05)
+      await brightness_step_down(client)
 
 
 async def brightness_step_up(client, step=1):
   """Step brightness up. Relative. Step size 1-16."""
-  await send(client, packet(step, 0, 0, Command.BRIGHT_UP))
+  await send(client, packet(step, 0, 0, Command.BRIGHT_UP), response=True)
 
 
 async def brightness_step_down(client, step=1):
   """Step brightness down. Relative. Step size 1-8."""
-  await send(client, packet(step, 0, 0, Command.BRIGHT_DOWN))
+  await send(client, packet(step, 0, 0, Command.BRIGHT_DOWN), response=True)
 
 
 async def set_mode(client, mode):
@@ -271,14 +265,14 @@ async def cmd_toggle(args):
 
 async def cmd_on(args):
   client = await connect()
-  await power_on(client)
+  await set_power(client, on=True)
   print("ON")
   await client.disconnect()
 
 
 async def cmd_off(args):
   client = await connect()
-  await power_off(client)
+  await set_power(client, on=False)
   print("OFF")
   await client.disconnect()
 
@@ -323,28 +317,25 @@ async def cmd_pattern(args):
 async def run_demo(client):
   """HSV color cycle → brightness ramp → repeat. Ctrl+C to stop."""
   import colorsys
-  await power_on(client)
+  await set_power(client, on=True)
   await set_brightness(client, BRIGHTNESS_MAX)
 
   print("Demo: colors → brightness → colors. Ctrl+C to stop.")
   try:
     while True:
       print("  color cycle...")
-      for step in range(300):
-        hue = step / 300.0
+      for step in range(200):
+        hue = step / 200.0
         r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
         await set_color(client, int(r * 255), int(g * 255), int(b * 255))
-        await asyncio.sleep(0.01)
 
       print("  brightness ramp...")
       await set_color(client, 255, 0, 0)
       await asyncio.sleep(0.1)
       for _ in range(BRIGHTNESS_MAX):
         await brightness_step_down(client)
-        await asyncio.sleep(0.05)
       for _ in range(BRIGHTNESS_MAX):
         await brightness_step_up(client)
-        await asyncio.sleep(0.05)
   except KeyboardInterrupt:
     pass
   await set_brightness(client, BRIGHTNESS_MAX)
@@ -390,10 +381,10 @@ async def cmd_interactive(args):
         after = await get_brightness(client)
         print(f"  Brightness: {current} → {after}")
       elif c == "on":
-        await power_on(client)
+        await set_power(client, on=True)
         print("  ON")
       elif c == "off":
-        await power_off(client)
+        await set_power(client, on=False)
         print("  OFF")
       elif c == "toggle":
         await power_toggle(client)
