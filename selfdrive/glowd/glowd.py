@@ -43,7 +43,7 @@ RPM_COLOR_MAX = 5500
 RPM_BRIGHTNESS_MAX = 7000
 
 # Timing
-UPDATE_HZ = 20
+UPDATE_HZ = 15
 BRAKE_FLASH_S = 0.8
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
@@ -116,8 +116,7 @@ class GlowController:
 
   def _rainbow_color(self, v_ego: float) -> tuple[int, int, int]:
     speed_mult = np.interp(v_ego, [0.0, 5.0], [1.0, 2.0])
-    elapsed = time.monotonic() - self._standstill_start - RAINBOW_DELAY_S
-    hue = (elapsed * speed_mult / RAINBOW_PERIOD_S) % 1.0
+    hue = (time.monotonic() * speed_mult / RAINBOW_PERIOD_S) % 1.0
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
@@ -202,8 +201,9 @@ async def ble_connect():
   client = await sp105e.connect(exit_on_fail=False)
   if client is None:
     return None
+  await asyncio.sleep(0.5)
   await sp105e.power_on(client)
-  await sp105e.set_brightness(client, 4)
+  await asyncio.sleep(0.5)
   print("glowd: connected, LEDs on")
   return client
 
@@ -212,6 +212,8 @@ async def ble_shutdown(client):
   """Power off LEDs and disconnect."""
   if client is not None:
     try:
+      await sp105e.set_brightness(client, sp105e.BRIGHTNESS_MIN)
+      await asyncio.sleep(0.5)
       await sp105e.power_off(client)
       await client.disconnect()
       print("glowd: LEDs off, disconnected")
