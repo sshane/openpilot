@@ -228,20 +228,28 @@ async def get_brightness(client) -> int | None:
   return None
 
 
-async def set_brightness(client, level: int):
-  """Set absolute brightness (0-6). Reads current level and steps to target."""
+async def set_brightness(client, level: int, retries: int = 2):
+  """Set absolute brightness (0-6). Reads current level, steps to target, verifies."""
   level = max(BRIGHTNESS_MIN, min(BRIGHTNESS_MAX, level))
-  current = await get_brightness(client)
-  if current is None:
-    print("WARNING: set_brightness can't read current level, skipping")
-    return
-  diff = level - current
-  if diff > 0:
-    for _ in range(diff):
-      await brightness_step_up(client)
-  elif diff < 0:
-    for _ in range(-diff):
-      await brightness_step_down(client)
+  for attempt in range(retries):
+    current = await get_brightness(client)
+    if current is None:
+      print("WARNING: set_brightness can't read current level, skipping")
+      return
+    diff = level - current
+    if diff == 0:
+      return
+    if diff > 0:
+      for _ in range(diff):
+        await brightness_step_up(client)
+    else:
+      for _ in range(-diff):
+        await brightness_step_down(client)
+    # verify
+    actual = await get_brightness(client)
+    if actual == level:
+      return
+    print(f"set_brightness: attempt {attempt + 1} wanted {level}, got {actual}, retrying")
 
 
 async def brightness_step_up(client):
