@@ -41,6 +41,8 @@ DEBUG = True
 RPM_MIN = 800
 RPM_COLOR_MAX = 5500
 
+DRIVING_BRIGHTNESS = 3  # ~43%, level 0-6
+
 # Timing
 UPDATE_HZ = 15
 BRAKE_FLASH_S = 0.8
@@ -194,6 +196,7 @@ async def ble_connect():
   await asyncio.sleep(0.5)
   await sp105e.set_power(client, on=True)
   await asyncio.sleep(0.5)
+  await sp105e.set_brightness(client, DRIVING_BRIGHTNESS)
   print("glowd: connected, LEDs on")
   return client
 

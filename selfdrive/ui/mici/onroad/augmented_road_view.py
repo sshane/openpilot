@@ -183,11 +183,8 @@ class AugmentedRoadView(CameraView):
     state = ui_state.params.get("GlowStatus") or {}
     if state.get("status") == "connected" and state.get("color"):
       r, g, b = state["color"]
-      bright = state.get("brightness", 6)
-      alpha = int(np.interp(bright + 1, [0, 7], [100, 220]))
-      glow_alpha = int(np.interp(bright + 1, [0, 7], [20, 60]))
-      self._glow_color = rl.Color(r, g, b, alpha)
-      self._glow_glow = rl.Color(r, g, b, glow_alpha)
+      self._glow_color = rl.Color(r, g, b, 200)
+      self._glow_glow = rl.Color(r, g, b, 50)
     else:
       self._glow_color = rl.Color(120, 120, 120, 160)
       self._glow_glow = rl.Color(120, 120, 120, 40)

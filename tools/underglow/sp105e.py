@@ -224,11 +224,13 @@ async def set_brightness(client, level: int):
 
 async def brightness_step_up(client, step=1):
   """Step brightness up. Relative. Step size 1-16."""
+  await asyncio.sleep(0.05)
   await send(client, packet(step, 0, 0, Command.BRIGHT_UP), response=True)
 
 
 async def brightness_step_down(client, step=1):
   """Step brightness down. Relative. Step size 1-8."""
+  await asyncio.sleep(0.05)
   await send(client, packet(step, 0, 0, Command.BRIGHT_DOWN), response=True)
 
 
