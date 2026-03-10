@@ -8,21 +8,53 @@ Protocol (reverse-engineered March 2026):
 
 Confirmed commands:
   SET_COLOR:      38 GG RR BB 1E 83  (GRB wire order, API takes RGB)
-  POWER_TOGGLE:   38 00 00 00 AA 83  (toggle only, 0xAB does nothing)
-  SET_MODE:       38 MM 00 00 2C 83  (mode number in D1)
-  BRIGHT_UP:      38 SS 00 00 2A 83  (relative step up, S=step size 1-16)
-  BRIGHT_DOWN:    38 SS 00 00 28 83  (relative step down, S=step size 1-8)
+  POWER_TOGGLE:   38 00 00 00 AA 83  (toggle only, 0xAB does nothing on SP105E)
+  SET_MODE:       38 MM 00 00 2C 83  (mode 0-202, sets pattern/animation)
+  BRIGHT_UP:      38 00 00 00 2A 83  (relative +1, all data bytes ignored)
+  BRIGHT_DOWN:    38 00 00 00 28 83  (relative -1, all data bytes ignored)
+  Brightness: 7 levels (0-6), clamps at both ends (no wrap)
   COLOR_ORDER:    38 NN 00 00 3C 83  (0=GRB, 1=GBR, 2=RGB, 3=BGR, 4=RBG, 5=BRG)
 
-Pattern modes (as CMD byte directly, D1-D3 ignored):
-  See Pattern enum below.
+Modes (via SET_MODE 0x2C with mode number in D1):
+  - Modes 0-202 accepted (state byte 1 reflects mode number)
+  - Mode 0xC9 (201) = static color (also set implicitly by SET_COLOR)
+  - Modes 0xFE-0xFF wrap to mode 1
+  - Mode 1 = rainbow flow (confirmed visually)
+  - Speed command not found yet (0x03 doesn't work, unlike SP110E)
+
+GET_STATE response (8 bytes via notify on 0xFFE1):
+  Byte 0: power (1=on, 0=off)
+  Byte 1: mode number (0xC9=static, 0x01-0xCA=patterns)
+  Byte 2: unknown (typically 5-6)
+  Byte 3: brightness (0-6)
+  Byte 4: unknown (0x03)
+  Byte 5: color order (0=GRB, etc.)
+  Byte 6: unknown (0x02)
+  Byte 7: 0x58 (88) — likely pixel count
+
+SP110E vs SP105E differences:
+  - SP110E has no packet framing (no 0x38/0x83), SP105E requires it
+  - SP110E: 0xAA=on, 0xAB=off. SP105E: 0xAA=toggle, 0xAB=no-op
+  - SP110E: 0x2A=absolute brightness (D1=level). SP105E: 0x2A=relative +1 (D1 ignored)
+  - SP110E: 0x03=speed. SP105E: 0x03 does nothing useful
+  - SP110E: 12-byte state (includes color, white, pixel count). SP105E: 8-byte state
+  - SP110E: 122 modes. SP105E: 202 modes
 
 Notes:
-  - Sending SET_COLOR stops any active pattern and goes to static
+  - Sending SET_COLOR stops any active pattern and sets mode to 0xC9 (static)
   - Device must be ON for commands to work
   - 0xAA is a toggle (on->off, off->on), not absolute
-  - Speed command not found yet
   - Color order (0x3C) persists to flash — script sets GRB on connect
+
+BLE timing (measured on comma four):
+  - SET_COLOR at ~33Hz sustained with response=True (no sleep needed)
+  - Brightness steps: 100ms sleep before each required (~50% drop rate without)
+  - GET_STATE round-trip: 150-400ms (start_notify → send → wait → stop_notify)
+  - GET_STATE unreliable if interleaved between brightness steps — verify only after all steps done
+  - After connect: 0.5s sleep before first command
+  - After rapid color writes: 0.5s sleep before GET_STATE works
+  - response=True on all commands prevents BLE write buffer buildup
+  - Stale BlueZ connections after kill -9: `bluetoothctl disconnect` clears them
 """
 import argparse
 import asyncio
@@ -43,14 +75,14 @@ PACKET_END = 0x83
 class Command(IntEnum):
   SET_COLOR = 0x1E
   POWER_TOGGLE = 0xAA
-  BRIGHT_UP = 0x2A    # relative: step brighter, D1=step size (1-16)
-  BRIGHT_DOWN = 0x28  # relative: step dimmer, D1=step size (1-8)
+  BRIGHT_UP = 0x2A    # relative +1, all data bytes ignored, clamps at 6
+  BRIGHT_DOWN = 0x28  # relative -1, all data bytes ignored, clamps at 0
   SET_MODE = 0x2C
   GET_STATE = 0x10    # triggers notify with 8-byte state response
   COLOR_ORDER = 0x3C
-  # DANGEROUS — do not send, will soft-brick (requires power cycle):
-  # 0x1C — bright white, ignores all commands after
-  # 0x2D — brief off/on, may wedge state
+  # DANGEROUS on SP105E — do not send (requires power cycle to recover):
+  # 0x1C — SP110E: set IC model. SP105E: bright white, ignores all commands after
+  # 0x2D — SP110E: set pixel count. SP105E: brief off/on, may wedge state
 
 
 class ColorOrder(IntEnum):
@@ -62,19 +94,8 @@ class ColorOrder(IntEnum):
   BRG = 5
 
 
-class Pattern(IntEnum):
-  RAINBOW_FLOW = 0x03
-  RAINBOW_1 = 0x05
-  RAINBOW_2 = 0x06
-  BREATHING = 0x07       # fade through colors, slow
-  BREATHING_2 = 0x08
-  BREATHING_3 = 0x09
-  BREATHING_4 = 0x0A
-  BREATHING_5 = 0x0B
-  COLOR_CYCLE = 0x0D     # yellow->orange->red, no fade
-  COLOR_CYCLE_SLOW = 0x0E
-  RAINBOW_FAST = 0x0F
-  RAINBOW_FAST_2 = 0x10
+MODE_STATIC = 0xC9  # set implicitly by SET_COLOR
+MODE_MAX = 202      # modes 0-202 accepted, 0xFE+ wraps
 
 
 def packet(d1: int, d2: int, d3: int, cmd: int) -> bytes:
@@ -222,26 +243,21 @@ async def set_brightness(client, level: int):
       await brightness_step_down(client)
 
 
-async def brightness_step_up(client, step=1):
-  """Step brightness up. Relative. Step size 1-16."""
-  await asyncio.sleep(0.05)
-  await send(client, packet(step, 0, 0, Command.BRIGHT_UP), response=True)
+async def brightness_step_up(client):
+  """Step brightness up by 1. All data bytes ignored by controller."""
+  await asyncio.sleep(0.1)
+  await send(client, packet(0, 0, 0, Command.BRIGHT_UP), response=True)
 
 
-async def brightness_step_down(client, step=1):
-  """Step brightness down. Relative. Step size 1-8."""
-  await asyncio.sleep(0.05)
-  await send(client, packet(step, 0, 0, Command.BRIGHT_DOWN), response=True)
+async def brightness_step_down(client):
+  """Step brightness down by 1. All data bytes ignored by controller."""
+  await asyncio.sleep(0.1)
+  await send(client, packet(0, 0, 0, Command.BRIGHT_DOWN), response=True)
 
 
 async def set_mode(client, mode):
-  """Set animation mode via SET_MODE with mode number in D1."""
-  await send(client, packet(mode, 0, 0, Command.SET_MODE))
-
-
-async def set_pattern(client, pattern):
-  """Set pattern directly via CMD byte."""
-  await send(client, packet(0, 0, 0, pattern))
+  """Set animation mode (0-202). Mode 0xC9=static (also set by SET_COLOR)."""
+  await send(client, packet(mode, 0, 0, Command.SET_MODE), response=True)
 
 
 async def set_color_order(client, order=ColorOrder.GRB):
@@ -309,13 +325,6 @@ async def cmd_mode(args):
   await client.disconnect()
 
 
-async def cmd_pattern(args):
-  client = await connect()
-  await set_pattern(client, args.pattern)
-  print(f"Pattern set to {args.pattern.name}")
-  await client.disconnect()
-
-
 async def run_demo(client):
   """HSV color cycle → brightness ramp → repeat. Ctrl+C to stop."""
   import colorsys
@@ -357,12 +366,11 @@ async def cmd_interactive(args):
   print("  bright N          set brightness (0-6)")
   print("  on / off / toggle power control")
   print("  state             read device state")
-  print("  mode N            set mode (decimal, via SET_MODE)")
-  print("  pattern NAME      set pattern (e.g. BREATHING, RAINBOW_FLOW)")
+  print("  mode N            set mode (0-202, decimal or 0xNN hex)")
+  print("  cmd XX [D1 D2 D3]  send command byte (hex), wraps in packet")
   print("  raw HH HH ...     send raw hex bytes")
   print("  demo              color cycle")
   print("  quit\n")
-  print(f"  Available patterns: {', '.join(p.name for p in Pattern)}\n")
 
   while True:
     try:
@@ -401,16 +409,17 @@ async def cmd_interactive(args):
           print(f"  Color order: {state[5]} ({ColorOrder(state[5]).name})")
           print(f"  Raw: {' '.join(f'{b:02x}' for b in state)}")
       elif c == "mode" and len(parts) == 2:
-        await set_mode(client, int(parts[1]))
-      elif c == "pattern" and len(parts) == 2:
-        name = parts[1].upper()
-        try:
-          p = Pattern[name]
-        except KeyError:
-          print(f"  Unknown pattern. Options: {', '.join(p.name for p in Pattern)}")
-          continue
-        await set_pattern(client, p)
-        print(f"  {p.name}")
+        val = parts[1]
+        mode = int(val, 16) if val.startswith("0x") else int(val)
+        await set_mode(client, mode)
+        print(f"  mode {mode}")
+      elif c == "cmd" and len(parts) >= 2:
+        cmd = int(parts[1], 16)
+        d1 = int(parts[2], 16) if len(parts) > 2 else 0
+        d2 = int(parts[3], 16) if len(parts) > 3 else 0
+        d3 = int(parts[4], 16) if len(parts) > 4 else 0
+        await send(client, packet(d1, d2, d3, cmd), response=True)
+        print(f"  sent: {packet(d1, d2, d3, cmd).hex()}")
       elif c == "raw":
         data = bytes([int(x, 16) for x in parts[1:]])
         await send(client, data)
@@ -459,10 +468,6 @@ def main():
   p_mode = sub.add_parser("mode", help="Set mode (decimal)")
   p_mode.add_argument("mode", type=int)
 
-  p_pattern = sub.add_parser("pattern", help="Set pattern by name")
-  p_pattern.add_argument("pattern", type=lambda x: Pattern[x.upper()],
-                          choices=list(Pattern), metavar="PATTERN")
-
   args = parser.parse_args()
 
   commands = {
@@ -473,7 +478,6 @@ def main():
     "state": cmd_state,
     "bright": cmd_bright,
     "mode": cmd_mode,
-    "pattern": cmd_pattern,
     "demo": cmd_demo,
     "interactive": cmd_interactive,
     "scan": cmd_scan,
