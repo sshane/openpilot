@@ -160,6 +160,7 @@ async def send(client, data: bytes, response=False):
 async def get_state(client, retries: int = 2) -> bytes | None:
   """Send GET_STATE (0x10) and return 8-byte notify response.
   Returns None on timeout. Byte 0: 1=on, 0=off."""
+  await asyncio.sleep(0.1)
   for attempt in range(retries):
     result = None
     event = asyncio.Event()
@@ -245,13 +246,13 @@ async def set_brightness(client, level: int):
 
 async def brightness_step_up(client):
   """Step brightness up by 1. All data bytes ignored by controller."""
-  await asyncio.sleep(0.05)
+  await asyncio.sleep(0.1)
   await send(client, packet(0, 0, 0, Command.BRIGHT_UP), response=True)
 
 
 async def brightness_step_down(client):
   """Step brightness down by 1. All data bytes ignored by controller."""
-  await asyncio.sleep(0.05)
+  await asyncio.sleep(0.1)
   await send(client, packet(0, 0, 0, Command.BRIGHT_DOWN), response=True)
 
 
