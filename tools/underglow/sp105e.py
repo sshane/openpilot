@@ -130,8 +130,8 @@ async def connect(retries=CONNECT_RETRIES, exit_on_fail=True):
   return None
 
 
-async def send(client, data: bytes):
-  await client.write_gatt_char(CHAR, data, response=False)
+async def send(client, data: bytes, response=False):
+  await client.write_gatt_char(CHAR, data, response=response)
 
 
 # --- State reading ---
@@ -152,7 +152,7 @@ async def get_state(client) -> bytes | None:
   try:
     await asyncio.wait_for(event.wait(), timeout=2.0)
   except asyncio.TimeoutError:
-    pass
+    print("sp105e: get_state timeout")
   await client.stop_notify(CHAR)
   return result
 
@@ -170,18 +170,28 @@ async def set_color(client, r, g, b):
 
 
 async def power_toggle(client):
-  await send(client, packet(0, 0, 0, Command.POWER_TOGGLE))
+  await send(client, packet(0, 0, 0, Command.POWER_TOGGLE), response=True)
 
 
 async def power_on(client):
   """Turn on if off. No-op if already on."""
-  if not await is_on(client):
+  state = await get_state(client)
+  if state is None:
+    print("WARNING: power_on state read failed, skipping")
+  elif state[0] == 1:
+    print("WARNING: power_on called but already on")
+  else:
     await power_toggle(client)
 
 
 async def power_off(client):
   """Turn off if on. No-op if already off."""
-  if await is_on(client):
+  state = await get_state(client)
+  if state is None:
+    print("WARNING: power_off state read failed, skipping")
+  elif state[0] != 1:
+    print("WARNING: power_off called but already off")
+  else:
     await power_toggle(client)
 
 
@@ -329,12 +339,12 @@ async def run_demo(client):
       print("  brightness ramp...")
       await set_color(client, 255, 0, 0)
       await asyncio.sleep(0.1)
-      for level in range(BRIGHTNESS_MAX, -1, -1):
-        await set_brightness(client, level)
-        await asyncio.sleep(0.15)
-      for level in range(BRIGHTNESS_MAX + 1):
-        await set_brightness(client, level)
-        await asyncio.sleep(0.15)
+      for _ in range(BRIGHTNESS_MAX):
+        await brightness_step_down(client)
+        await asyncio.sleep(0.05)
+      for _ in range(BRIGHTNESS_MAX):
+        await brightness_step_up(client)
+        await asyncio.sleep(0.05)
   except KeyboardInterrupt:
     pass
   await set_brightness(client, BRIGHTNESS_MAX)
