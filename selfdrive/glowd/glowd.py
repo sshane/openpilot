@@ -26,8 +26,6 @@ import subprocess
 import time
 from enum import IntEnum, IntFlag
 
-import numpy as np
-
 import cereal.messaging as messaging
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
@@ -49,11 +47,13 @@ BRAKE_FLASH_S = 0.8
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
 RAINBOW_PERIOD_S = 8.0
+FULL_RAINBOW_DELAY_S = 60.0
 
 
 class GlowState(IntEnum):
-  DRIVING = 0     # RPM-based color
-  STANDSTILL = 1  # rainbow cycle
+  DRIVING = 0          # RPM-based color
+  STANDSTILL = 1       # safe rainbow (green ↔ amber/purple, filter-friendly)
+  STANDSTILL_FULL = 2  # full rainbow (after 1min standstill)
 
 
 class GlowMod(IntFlag):
@@ -65,8 +65,8 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
   Avoids pure red and blue. Low range uses HSV, high range blends RGB."""
   t = max(0.0, min(1.0, (rpm - RPM_MIN) / (RPM_COLOR_MAX - RPM_MIN)))
   if t < 0.7:
-    # green (0.33) → orange (0.08) in HSV
-    hue = 0.33 - (0.33 - 0.08) * (t / 0.7)
+    # green (0.33) → orange (0.08) in HSV, stays greener at low RPM
+    hue = 0.33 - (0.33 - 0.08) * (t / 0.7) ** 1.5
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
   else:
@@ -77,7 +77,6 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
       int(122 * (1 - frac)),
       int(255 * frac),
     )
-
 
 
 class GlowController:
@@ -110,9 +109,17 @@ class GlowController:
     r, g, b = colorsys.hsv_to_rgb(h, s, v)
     return int(r * 255), int(g * 255), int(b * 255)
 
-  def _rainbow_color(self, v_ego: float) -> tuple[int, int, int]:
-    speed_mult = np.interp(v_ego, [0.0, 5.0], [1.0, 2.0])
-    hue = (time.monotonic() * speed_mult / RAINBOW_PERIOD_S) % 1.0
+  def _rainbow_safe_color(self) -> tuple[int, int, int]:
+    """Cycle green(0.33) ↔ yellow(0.14). Smooth enough for the HSV filter."""
+    t = (time.monotonic() / RAINBOW_PERIOD_S) % 1.0
+    # Ping-pong between green and yellow
+    hue = 0.14 + (0.33 - 0.14) * (0.5 + 0.5 * math.sin(2 * math.pi * t))
+    r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+    return int(r * 255), int(g * 255), int(b * 255)
+
+  def _rainbow_full_color(self) -> tuple[int, int, int]:
+    """Full hue cycle. Only used after extended standstill."""
+    hue = (time.monotonic() / RAINBOW_PERIOD_S) % 1.0
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
@@ -136,7 +143,7 @@ class GlowController:
       else:
         self._standstill_start = None
 
-    elif self.state == GlowState.STANDSTILL:
+    elif self.state in (GlowState.STANDSTILL, GlowState.STANDSTILL_FULL):
       if cs.engineRpm >= 1500:
         self._moving_start = None
         self.state = GlowState.DRIVING
@@ -148,6 +155,14 @@ class GlowController:
           self.state = GlowState.DRIVING
       else:
         self._moving_start = None
+
+      # Upgrade to full rainbow after extended standstill
+      if self.state == GlowState.STANDSTILL:
+        if self._standstill_start is None:
+          self._standstill_start = now
+        elif now - self._standstill_start > FULL_RAINBOW_DELAY_S:
+          self._standstill_start = None
+          self.state = GlowState.STANDSTILL_FULL
 
     # Update modifiers
     if cs.brakePressed and not self._prev_brake:
@@ -168,7 +183,9 @@ class GlowController:
 
     # Base color from state
     if self.state == GlowState.STANDSTILL:
-      return self._rainbow_color(cs.vEgo)
+      return self._rainbow_safe_color()
+    if self.state == GlowState.STANDSTILL_FULL:
+      return self._rainbow_full_color()
     return rpm_to_color(cs.engineRpm)
 
 
@@ -282,7 +299,7 @@ async def glowd_thread():
       if color != ctrl.last_color:
         if DEBUG:
           cs = sm['carState']
-          print(f"glowd: RPM={cs.engineRpm:.0f} chill={chill_mode} → RGB{color}")
+          print(f"glowd: state={ctrl.state.name} RPM={cs.engineRpm:.0f} v={cs.vEgo:.1f} brake={cs.brakePressed} chill={chill_mode} → RGB{color}")
 
         try:
           await sp105e.set_color(client, *color)
