@@ -96,10 +96,10 @@ class GlowController:
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
-    self._hx_filter = FirstOrderFilter(0.0, 0.5, dt)  # cos(hue)
-    self._hy_filter = FirstOrderFilter(0.0, 0.5, dt)  # sin(hue)
-    self._s_filter = FirstOrderFilter(0.0, 0.5, dt)
-    self._v_filter = FirstOrderFilter(0.0, 0.5, dt)
+    self._hx_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # cos(hue)
+    self._hy_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # sin(hue)
+    self._s_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)
+    self._v_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)
 
   def _set_state(self, state: GlowState):
     if self.state != state:
@@ -199,19 +199,8 @@ async def ble_connect():
   if client is None:
     return None
   await sp105e.power_on(client)
-
-  # Startup sweep: min → max → min → 70% (like RPM gauge self-test)
-  for level in range(sp105e.BRIGHTNESS_MIN, sp105e.BRIGHTNESS_MAX + 1):
-    await sp105e.set_brightness(client, level)
-    await asyncio.sleep(0.15)
-  for level in range(sp105e.BRIGHTNESS_MAX, sp105e.BRIGHTNESS_MIN - 1, -1):
-    await sp105e.set_brightness(client, level)
-    await asyncio.sleep(0.15)
-  for level in range(sp105e.BRIGHTNESS_MIN, 5):
-    await sp105e.set_brightness(client, level)
-    await asyncio.sleep(0.15)
-
-  print("glowd: connected, LEDs on, startup sweep done")
+  await sp105e.set_brightness(client, 4)
+  print("glowd: connected, LEDs on")
   return client
 
 
