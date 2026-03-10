@@ -48,7 +48,7 @@ Notes:
 
 BLE timing (measured on comma four):
   - SET_COLOR at ~33Hz sustained with response=True (no sleep needed)
-  - Brightness steps: 100ms sleep before each required (~50% drop rate without)
+  - Brightness steps: 50ms sleep before each required (0ms drops ~50%)
   - GET_STATE round-trip: 150-400ms (start_notify → send → wait → stop_notify)
   - GET_STATE unreliable if interleaved between brightness steps — verify only after all steps done
   - After connect: 0.5s sleep before first command
@@ -245,13 +245,13 @@ async def set_brightness(client, level: int):
 
 async def brightness_step_up(client):
   """Step brightness up by 1. All data bytes ignored by controller."""
-  await asyncio.sleep(0.1)
+  await asyncio.sleep(0.05)
   await send(client, packet(0, 0, 0, Command.BRIGHT_UP), response=True)
 
 
 async def brightness_step_down(client):
   """Step brightness down by 1. All data bytes ignored by controller."""
-  await asyncio.sleep(0.1)
+  await asyncio.sleep(0.05)
   await send(client, packet(0, 0, 0, Command.BRIGHT_DOWN), response=True)
 
 
