@@ -303,11 +303,6 @@ async def glowd_thread():
       color = ctrl.smooth_color(raw_color)
 
       if color != ctrl.last_color:
-        # Skip BLE write if we're behind — catch up on next frame
-        if rk.remaining < -0.1:
-          rk.keep_time()
-          continue
-
         if DEBUG:
           cs = sm['carState']
           print(f"glowd: state={ctrl.state.name} RPM={cs.engineRpm:.0f} v={cs.vEgo:.1f} brake={cs.brakePressed} chill={chill_mode} → RGB{color}")
