@@ -1,7 +1,7 @@
 from cereal import log
 
 from openpilot.system.ui.widgets.scroller import NavScroller
-from openpilot.selfdrive.ui.mici.widgets.button import BigParamControl, BigMultiParamToggle
+from openpilot.selfdrive.ui.mici.widgets.button import BigParamControl, BigMultiParamToggle, BigParamCycler
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callback
 from openpilot.selfdrive.ui.ui_state import ui_state
@@ -22,11 +22,13 @@ class TogglesLayoutMici(NavScroller):
     record_mic = BigParamControl("record & upload mic audio", "RecordAudio", toggle_callback=restart_needed_callback)
     glow_toggle = BigParamControl("chill glow", "GlowMode")
     glow_standstill_toggle = BigParamControl("standstill only glow", "GlowStandstillOnly")
+    glow_brightness = BigParamCycler("glow brightness", "GlowBrightness", 6, callback=restart_needed_callback)
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback)
 
     self._scroller.add_widgets([
       glow_toggle,
       glow_standstill_toggle,
+      glow_brightness,
       self._personality_toggle,
       self._experimental_btn,
       is_metric_toggle,

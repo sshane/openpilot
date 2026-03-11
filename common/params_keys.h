@@ -49,6 +49,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"GithubSshKeys", {PERSISTENT, STRING}},
     {"GithubUsername", {PERSISTENT, STRING}},
     {"GitRemote", {PERSISTENT, STRING}},
+    {"GlowBrightness", {PERSISTENT, INT, "4"}},
     {"GlowMode", {PERSISTENT, BOOL}},
     {"GlowStandstillOnly", {PERSISTENT, BOOL, "1"}},
     {"GlowStatus", {CLEAR_ON_MANAGER_START, JSON}},

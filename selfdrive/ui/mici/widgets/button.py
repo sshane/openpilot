@@ -368,6 +368,27 @@ class BigParamControl(BigToggle):
     self.set_checked(self.params.get_bool(self.param, False))
 
 
+class BigParamCycler(BigButton):
+  """Button that cycles through int values on tap, shows current value as subtitle."""
+  def __init__(self, text: str, param: str, max_val: int, callback: Callable | None = None):
+    self._param = param
+    self._max_val = max_val
+    self._callback = callback
+    self._params = Params()
+    val = self._params.get(self._param) or 0
+    super().__init__(text, f"{val}/{max_val}")
+
+  def _handle_mouse_release(self, mouse_pos: MousePos):
+    super()._handle_mouse_release(mouse_pos)
+    val = (self._params.get(self._param) or 0) + 1
+    if val > self._max_val:
+      val = 0
+    self._params.put_nonblocking(self._param, val)
+    self.set_value(f"{val}/{self._max_val}")
+    if self._callback:
+      self._callback(val)
+
+
 # TODO: param control base class
 class BigCircleParamControl(BigCircleToggle):
   def __init__(self, icon: rl.Texture, param: str, toggle_callback: Callable | None = None,

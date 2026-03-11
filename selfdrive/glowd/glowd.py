@@ -37,7 +37,7 @@ DEBUG = True
 RPM_MIN = 800
 RPM_COLOR_MAX = 5500
 
-DRIVING_BRIGHTNESS = 4  # ~57%, level 0-6
+DEFAULT_BRIGHTNESS = 4  # ~57%, level 0-6
 
 # Timing
 UPDATE_HZ = 15
@@ -203,9 +203,8 @@ def bt_is_ready() -> bool:
   return b"UP RUNNING" in result.stdout
 
 
-async def ble_connect():
-  """Connect to SP105E, power on, sweep brightness. Returns client or None.
-  Assumes BT stack is already up (bluetooth.service in AGNOS)."""
+async def ble_connect(brightness: int = DEFAULT_BRIGHTNESS):
+  """Connect to SP105E, power on, set brightness. Returns client or None."""
   if not bt_is_ready():
     print("glowd: hci0 not up (waiting for bluetooth.service)")
     return None
@@ -217,8 +216,8 @@ async def ble_connect():
   await asyncio.sleep(0.5)
   await sp105e.set_power(client, on=True)
   await asyncio.sleep(0.5)
-  await sp105e.set_brightness(client, DRIVING_BRIGHTNESS)
-  print("glowd: connected, LEDs on")
+  await sp105e.set_brightness(client, brightness)
+  print(f"glowd: connected, LEDs on, brightness={brightness}")
   return client
 
 
@@ -251,9 +250,10 @@ async def glowd_thread():
   _put_glow_status(params, "connecting")
   chill_mode = params.get_bool("GlowMode")
   standstill_only = params.get_bool("GlowStandstillOnly")
+  brightness = params.get("GlowBrightness") or DEFAULT_BRIGHTNESS
   last_param_read = 0.0
 
-  client = await ble_connect()
+  client = await ble_connect(brightness)
   _put_glow_status(params, "connected" if client else "disconnected")
 
   sm = messaging.SubMaster(['carState'], poll='carState')
@@ -279,7 +279,7 @@ async def glowd_thread():
         last_reconnect_attempt = now
         print("glowd: attempting reconnect...")
         _put_glow_status(params, "connecting")
-        client = await ble_connect()
+        client = await ble_connect(brightness)
         _put_glow_status(params, "connected" if client else "disconnected")
       rk.keep_time()
       continue
