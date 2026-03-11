@@ -2,21 +2,19 @@
 """
 glowd — SP105E underglow controller daemon.
 
-Runs only_onroad. On start: connects BLE + powers on LEDs.
-On SIGTERM (manager kill at ignition off): powers off LEDs + disconnects.
-Maps CarState to underglow colors reactively.
+Runs only_onroad. On start: connects BLE, powers on LEDs, sets brightness.
+On SIGTERM (manager kill at ignition off): dims to min, powers off, disconnects.
 
 Color mapping:
   - RPM → hue (green idle → yellow → amber → purple at redline)
-  - Braking → orange, intensity scales with decel
-  - Gas → warm amber blended with RPM color
-  - Downshift → brief purple flash
-  - Blinker → amber pulse
-  - Standstill → slow breathing pulse
-  - Reverse → white
+  - RPM rate-of-change → bounce filter overshoots color on downshifts/rev matches
+  - Braking → brief red flash (0.4s) on press
+  - Standstill → safe rainbow (green ↔ yellow, filter-friendly)
+  - Standstill 60s+ → full hue rainbow
 
+All colors smoothed through HSV filter (cos/sin for hue wrapping).
+BLE writes skip frames when lagging to prevent queue snowball.
 California-legal: no red or blue, especially on the front.
-Safe colors: green, yellow, amber, orange, purple, white, pink.
 """
 import asyncio
 import colorsys
@@ -39,7 +37,7 @@ DEBUG = True
 RPM_MIN = 800
 RPM_COLOR_MAX = 5500
 
-DRIVING_BRIGHTNESS = 3  # ~43%, level 0-6
+DRIVING_BRIGHTNESS = 4  # ~57%, level 0-6
 
 # Timing
 UPDATE_HZ = 15
