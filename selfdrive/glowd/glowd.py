@@ -89,11 +89,12 @@ class GlowController:
     self._prev_brake = False
     self._brake_pressed_t = 0.0
 
+    dt = 1.0 / UPDATE_HZ
+
     # RPM bounce filter — overshoots on rapid changes (downshifts), settles back
     self._rpm_bounce = BounceFilter(RPM_MIN, 0.3, dt, initialized=False, bounce=3)
 
     # HSV smoothing filters
-    dt = 1.0 / UPDATE_HZ
     self._hx_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # cos(hue)
     self._hy_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # sin(hue)
     self._s_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)
