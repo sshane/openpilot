@@ -27,7 +27,7 @@ import time
 from enum import IntEnum, IntFlag
 
 import cereal.messaging as messaging
-from openpilot.common.filter_simple import FirstOrderFilter
+from openpilot.common.filter_simple import BounceFilter, FirstOrderFilter
 from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 
@@ -43,7 +43,7 @@ DRIVING_BRIGHTNESS = 3  # ~43%, level 0-6
 
 # Timing
 UPDATE_HZ = 15
-BRAKE_FLASH_S = 0.8
+BRAKE_FLASH_S = 0.4
 RAINBOW_HOLDOVER_S = 2.5
 RAINBOW_DELAY_S = 1.5
 RAINBOW_PERIOD_S = 8.0
@@ -88,6 +88,9 @@ class GlowController:
     self._mods = GlowMod(0)
     self._prev_brake = False
     self._brake_pressed_t = 0.0
+
+    # RPM bounce filter — overshoots on rapid changes (downshifts), settles back
+    self._rpm_bounce = BounceFilter(RPM_MIN, 0.3, dt, initialized=False, bounce=3)
 
     # HSV smoothing filters
     dt = 1.0 / UPDATE_HZ
@@ -186,7 +189,9 @@ class GlowController:
       return self._rainbow_safe_color()
     if self.state == GlowState.STANDSTILL_FULL:
       return self._rainbow_full_color()
-    return rpm_to_color(cs.engineRpm)
+    # Bounce filter adds overshoot on rapid RPM changes (downshifts, rev matches)
+    effective_rpm = self._rpm_bounce.update(cs.engineRpm)
+    return rpm_to_color(effective_rpm)
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
