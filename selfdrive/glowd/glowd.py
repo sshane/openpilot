@@ -8,7 +8,6 @@ On SIGTERM (manager kill at ignition off): dims to min, powers off, disconnects.
 Color mapping:
   - RPM → hue (green idle → yellow → amber → purple at redline)
   - RPM rate-of-change → bounce filter overshoots color on downshifts/rev matches
-  - Braking → brief red flash (0.4s) on press
   - Standstill → safe rainbow (green ↔ yellow, filter-friendly)
   - Standstill 60s+ → full hue rainbow
 
@@ -86,7 +85,6 @@ class GlowController:
     self._mods = GlowMod(0)
     self._prev_brake = False
     self._brake_pressed_t = 0.0
-
     dt = 1.0 / UPDATE_HZ
 
     # RPM bounce filter — overshoots on rapid changes (downshifts), settles back
@@ -180,8 +178,8 @@ class GlowController:
     cs = sm['carState']
 
     # Modifier: brake — dark red flash on rising edge
-    if self._mods & GlowMod.BRAKE:
-      return (128, 0, 0)
+    # if self._mods & GlowMod.BRAKE:
+    #   return (128, 0, 0)
 
     # Base color from state
     if self.state == GlowState.STANDSTILL:
