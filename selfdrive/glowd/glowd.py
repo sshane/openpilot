@@ -33,8 +33,8 @@ from openpilot.tools.underglow import sp105e
 DEBUG = True
 
 # RPM thresholds
-RPM_MIN = 800
-RPM_COLOR_MAX = 4000
+RPM_MIN = 1500
+RPM_COLOR_MAX = 5500
 
 DEFAULT_BRIGHTNESS = 4  # ~57%, level 0-6
 
