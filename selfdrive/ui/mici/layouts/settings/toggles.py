@@ -20,14 +20,12 @@ class TogglesLayoutMici(NavScroller):
     always_on_dm_toggle = BigParamControl("always-on driver monitor", "AlwaysOnDM")
     record_front = BigParamControl("record & upload driver camera", "RecordFront", toggle_callback=restart_needed_callback)
     record_mic = BigParamControl("record & upload mic audio", "RecordAudio", toggle_callback=restart_needed_callback)
-    glow_toggle = BigParamControl("chill glow", "GlowMode")
-    glow_standstill_toggle = BigParamControl("standstill only glow", "GlowStandstillOnly")
+    glow_enabled = BigParamControl("enable underglow", "GlowEnabled", toggle_callback=restart_needed_callback)
     glow_brightness = BigParamCycler("glow brightness", "GlowBrightness", 6, callback=restart_needed_callback)
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback)
 
     self._scroller.add_widgets([
-      glow_toggle,
-      glow_standstill_toggle,
+      glow_enabled,
       glow_brightness,
       self._personality_toggle,
       self._experimental_btn,
@@ -47,8 +45,7 @@ class TogglesLayoutMici(NavScroller):
       ("AlwaysOnDM", always_on_dm_toggle),
       ("RecordFront", record_front),
       ("RecordAudio", record_mic),
-      ("GlowMode", glow_toggle),
-      ("GlowStandstillOnly", glow_standstill_toggle),
+      ("GlowEnabled", glow_enabled),
       ("OpenpilotEnabledToggle", enable_openpilot),
     )
 

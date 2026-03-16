@@ -192,7 +192,7 @@ async def is_on(client) -> bool:
 # --- High-level commands ---
 
 async def set_color(client, r, g, b):
-  await send(client, color_packet(r, g, b), response=True)
+  await send(client, color_packet(r, g, b))
 
 
 async def power_toggle(client):

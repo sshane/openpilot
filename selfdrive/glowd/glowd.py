@@ -123,14 +123,9 @@ class GlowController:
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
-  def update(self, sm, chill: bool):
+  def update(self, sm):
     cs = sm['carState']
     now = time.monotonic()
-
-    if chill:
-      self.state = GlowState.DRIVING
-      self._mods = GlowMod(0)
-      return
 
     # Base state transitions
     if self.state == GlowState.DRIVING:
@@ -245,11 +240,13 @@ async def glowd_thread():
   signal.signal(signal.SIGINT, signal_handler)
 
   params = Params()
+  if not params.get_bool("GlowEnabled"):
+    print("glowd: disabled via GlowEnabled param")
+    _put_glow_status(params, "disabled")
+    return
+
   _put_glow_status(params, "connecting")
-  chill_mode = params.get_bool("GlowMode")
-  standstill_only = params.get_bool("GlowStandstillOnly")
   brightness = params.get("GlowBrightness") or DEFAULT_BRIGHTNESS
-  last_param_read = 0.0
 
   client = await ble_connect(brightness)
   _put_glow_status(params, "connected" if client else "disconnected")
@@ -259,17 +256,12 @@ async def glowd_thread():
   rk = Ratekeeper(UPDATE_HZ)
   last_reconnect_attempt = 0.0
 
-  print(f"glowd: running at {UPDATE_HZ}Hz, chill={chill_mode}")
+  print(f"glowd: running at {UPDATE_HZ}Hz")
 
   while not do_exit:
     sm.update(0)
 
-    # Refresh params every 5s
     now = time.monotonic()
-    if now - last_param_read > 2.5:
-      chill_mode = params.get_bool("GlowMode")
-      standstill_only = params.get_bool("GlowStandstillOnly")
-      last_param_read = now
 
     # If disconnected, try to reconnect every 5s
     if client is None:
@@ -283,17 +275,7 @@ async def glowd_thread():
       continue
 
     if sm.updated['carState']:
-      ctrl.update(sm, chill_mode)
-
-      if standstill_only and ctrl.state == GlowState.DRIVING:
-        if ctrl.last_color != (0, 0, 0):
-          await sp105e.set_power(client, on=False)
-          ctrl.last_color = (0, 0, 0)
-          _put_glow_status(params, "connected")
-        rk.keep_time()
-        continue
-      elif standstill_only and ctrl.last_color == (0, 0, 0):
-        await sp105e.set_power(client, on=True)
+      ctrl.update(sm)
 
       raw_color = ctrl.get_color(sm)
       color = ctrl.smooth_color(raw_color)
@@ -301,7 +283,7 @@ async def glowd_thread():
       if color != ctrl.last_color:
         if DEBUG:
           cs = sm['carState']
-          print(f"glowd: state={ctrl.state.name} RPM={cs.engineRpm:.0f} v={cs.vEgo:.1f} brake={cs.brakePressed} chill={chill_mode} → RGB{color}")
+          print(f"glowd: state={ctrl.state.name} RPM={cs.engineRpm:.0f} v={cs.vEgo:.1f} brake={cs.brakePressed} → RGB{color}")
 
         try:
           await sp105e.set_color(client, *color)
