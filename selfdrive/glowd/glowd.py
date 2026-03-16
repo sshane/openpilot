@@ -24,7 +24,7 @@ import time
 from enum import IntEnum, IntFlag
 
 import cereal.messaging as messaging
-from openpilot.common.filter_simple import BounceFilter, FirstOrderFilter
+from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 
@@ -37,6 +37,7 @@ RPM_MIN = 1500
 RPM_COLOR_MAX = 5500
 
 DEFAULT_BRIGHTNESS = 4  # ~57%, level 0-6
+DIFF_SCALE = 2.5        # multiplier on rpm-baseline diff for color mapping
 
 # Timing
 UPDATE_HZ = 15
@@ -62,8 +63,8 @@ def rpm_to_color(rpm: float) -> tuple[int, int, int]:
   Avoids pure red and blue. Low range uses HSV, high range blends RGB."""
   t = max(0.0, min(1.0, (rpm - RPM_MIN) / (RPM_COLOR_MAX - RPM_MIN)))
   if t < 0.7:
-    # green (0.33) → orange (0.08) in HSV, stays greener at low RPM
-    hue = 0.33 - (0.33 - 0.08) * (t / 0.7) ** 1.5
+    # green (0.33) → orange (0.08) in HSV
+    hue = 0.33 - (0.33 - 0.08) * (t / 0.7)
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
   else:
@@ -87,8 +88,8 @@ class GlowController:
     self._brake_pressed_t = 0.0
     dt = 1.0 / UPDATE_HZ
 
-    # RPM bounce filter — overshoots on rapid changes (downshifts), settles back
-    self._rpm_bounce = BounceFilter(RPM_MIN, 0.3, dt, initialized=False, bounce=3)
+    # RPM baseline filter — tracks steady-state RPM, color driven by rpm - baseline
+    self._rpm_baseline = FirstOrderFilter(0.0, 5.0, dt, initialized=False)
 
     # HSV smoothing filters
     self._hx_filter = FirstOrderFilter(0.0, 0.5, dt, initialized=False)  # cos(hue)
@@ -181,9 +182,10 @@ class GlowController:
       return self._rainbow_safe_color()
     if self.state == GlowState.STANDSTILL_FULL:
       return self._rainbow_full_color()
-    # Bounce filter adds overshoot on rapid RPM changes (downshifts, rev matches)
-    effective_rpm = self._rpm_bounce.update(cs.engineRpm)
-    return rpm_to_color(effective_rpm)
+    # Color driven by rpm - baseline: cruise = green, rev changes = color
+    baseline = self._rpm_baseline.update(cs.engineRpm)
+    diff = max(0, cs.engineRpm - baseline) * DIFF_SCALE
+    return rpm_to_color(RPM_MIN + diff)
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
