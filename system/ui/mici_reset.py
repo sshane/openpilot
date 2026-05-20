@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import threading
 from enum import IntEnum
 
 import pyray as rl
@@ -9,9 +10,8 @@ import pyray as rl
 from openpilot.system.hardware import HARDWARE, PC
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.widgets.scroller import Scroller
-from openpilot.system.ui.widgets.nav_widget import NavWidget
 from openpilot.system.ui.mici_setup import GreyBigButton, FailedPage
-from openpilot.selfdrive.ui.mici.widgets.dialog import BigConfirmationCircleButton
+from openpilot.selfdrive.ui.mici.widgets.dialog import BigDialog, BigConfirmationCircleButton
 
 USERDATA = "/dev/disk/by-partlabel/userdata"
 TIMEOUT = 3*60
@@ -35,15 +35,13 @@ class ResetFailedPage(FailedPage):
     return False
 
 
-class ResettingPage(NavWidget):
+class ResettingPage(BigDialog):
   DOT_STEP = 0.6
 
   def __init__(self):
-    super().__init__()
+    super().__init__("resetting device", "this may take up to\na minute...",
+                     gui_app.texture("icons_mici/setup/factory_reset.png", 64, 64))
     self._show_time = 0.0
-
-    self._resetting_card = GreyBigButton("resetting device", "this may take up to\na minute...",
-                                         gui_app.texture("icons_mici/setup/factory_reset.png", 64, 64))
 
   def show_event(self):
     super().show_event()
@@ -56,13 +54,8 @@ class ResettingPage(NavWidget):
   def _render(self, _):
     t = (rl.get_time() - self._show_time) % (self.DOT_STEP * 2)
     dots = "." * min(int(t / (self.DOT_STEP / 4)), 3)
-    self._resetting_card.set_value(f"this may take up to\na minute{dots}")
-    self._resetting_card.render(rl.Rectangle(
-      self._rect.x + self._rect.width / 2 - self._resetting_card.rect.width / 2,
-      self._rect.y + self._rect.height / 2 - self._resetting_card.rect.height / 2,
-      self._resetting_card.rect.width,
-      self._resetting_card.rect.height,
-    ))
+    self._card.set_value(f"this may take up to\na minute{dots}")
+    super()._render(_)
 
 
 class Reset(Scroller):
@@ -77,7 +70,7 @@ class Reset(Scroller):
     self._reset_failed_page = ResetFailedPage()
 
     self._reset_button = BigConfirmationCircleButton("reset &\nerase", gui_app.texture("icons_mici/settings/device/uninstall.png", 70, 70),
-                                                     self._start_reset, red=True)
+                                                     self._start_reset, exit_on_confirm=False, red=True)
     self._cancel_button = BigConfirmationCircleButton("cancel", gui_app.texture("icons_mici/setup/cancel.png", 64, 64),
                                                       gui_app.request_close, exit_on_confirm=False)
     self._reboot_button = BigConfirmationCircleButton("reboot\ndevice", gui_app.texture("icons_mici/settings/device/reboot.png", 64, 70),
@@ -105,6 +98,8 @@ class Reset(Scroller):
       self._reset_button,
     ])
 
+    gui_app.add_nav_stack_tick(self._nav_stack_tick)
+
   def _do_erase(self):
     if PC:
       return
@@ -120,12 +115,13 @@ class Reset(Scroller):
       self._reset_failed = True
 
   def _start_reset(self):
-    self._resetting_page.set_shown_callback(self._do_erase)
+    def do_erase_thread():
+      threading.Thread(target=self._do_erase, daemon=True).start()
+
+    self._resetting_page.set_shown_callback(do_erase_thread)
     gui_app.push_widget(self._resetting_page)
 
-  def _update_state(self):
-    super()._update_state()
-
+  def _nav_stack_tick(self):
     if self._reset_failed:
       self._reset_failed = False
       gui_app.pop_widgets_to(self, lambda: gui_app.push_widget(self._reset_failed_page))

@@ -33,7 +33,7 @@ def obd_callback(params: Params) -> ObdCallback:
     if params.get_bool("ObdMultiplexingEnabled") != obd_multiplexing:
       cloudlog.warning(f"Setting OBD multiplexing to {obd_multiplexing}")
       params.remove("ObdMultiplexingChanged")
-      params.put_bool("ObdMultiplexingEnabled", obd_multiplexing)
+      params.put_bool("ObdMultiplexingEnabled", obd_multiplexing, block=True)
       params.get_bool("ObdMultiplexingChanged", block=True)
       cloudlog.warning("OBD multiplexing set successfully")
   return set_obd_multiplexing
@@ -90,7 +90,6 @@ class Car:
           break
 
       alpha_long_allowed = self.params.get_bool("AlphaLongitudinalEnabled")
-      num_pandas = len(messaging.recv_one_retry(self.sm.sock['pandaStates']).pandaStates)
 
       cached_params = None
       cached_params_raw = self.params.get("CarParamsCache")
@@ -98,12 +97,12 @@ class Car:
         with car.CarParams.from_bytes(cached_params_raw) as _cached_params:
           cached_params = _cached_params
 
-      self.CI = get_car(*self.can_callbacks, obd_callback(self.params), alpha_long_allowed, is_release, num_pandas, cached_params)
+      self.CI = get_car(*self.can_callbacks, obd_callback(self.params), alpha_long_allowed, is_release, cached_params)
       self.RI = interfaces[self.CI.CP.carFingerprint].RadarInterface(self.CI.CP)
       self.CP = self.CI.CP
 
       # continue onto next fingerprinting step in pandad
-      self.params.put_bool("FirmwareQueryDone", True)
+      self.params.put_bool("FirmwareQueryDone", True, block=True)
     else:
       self.CI, self.CP = CI, CI.CP
       self.RI = RI
@@ -123,7 +122,7 @@ class Car:
         with open("/cache/params/SecOCKey") as f:
           user_key = f.readline().strip()
           if len(user_key) == 32:
-            self.params.put("SecOCKey", user_key)
+            self.params.put("SecOCKey", user_key, block=True)
       except Exception:
         pass
 
@@ -141,13 +140,13 @@ class Car:
     # Write previous route's CarParams
     prev_cp = self.params.get("CarParamsPersistent")
     if prev_cp is not None:
-      self.params.put("CarParamsPrevRoute", prev_cp)
+      self.params.put("CarParamsPrevRoute", prev_cp, block=True)
 
     # Write CarParams for controls and radard
     cp_bytes = self.CP.to_bytes()
-    self.params.put("CarParams", cp_bytes)
-    self.params.put_nonblocking("CarParamsCache", cp_bytes)
-    self.params.put_nonblocking("CarParamsPersistent", cp_bytes)
+    self.params.put("CarParams", cp_bytes, block=True)
+    self.params.put("CarParamsCache", cp_bytes)
+    self.params.put("CarParamsPersistent", cp_bytes)
 
     self.v_cruise_helper = VCruiseHelper(self.CP)
 
@@ -229,7 +228,7 @@ class Car:
       # TODO: this can make us miss at least a few cycles when doing an ECU knockout
       self.CI.init(self.CP, *self.can_callbacks)
       # signal pandad to switch to car safety mode
-      self.params.put_bool_nonblocking("ControlsReady", True)
+      self.params.put_bool("ControlsReady", True)
 
     if self.sm.all_alive(['carControl']):
       # send car controls over can
