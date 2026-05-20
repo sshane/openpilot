@@ -189,7 +189,7 @@ class GlowController:
 
 
 def _put_glow_status(params, status: str, color: tuple[int, int, int] = (0, 0, 0)):
-  params.put_nonblocking("GlowStatus", {"status": status, "color": list(color)})
+  params.put("GlowStatus", {"status": status, "color": list(color)})
 
 
 def bt_is_ready() -> bool:

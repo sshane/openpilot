@@ -420,7 +420,7 @@ class BigParamCycler(BigButton):
     val = (self._params.get(self._param) or 0) + 1
     if val > self._max_val:
       val = 0
-    self._params.put_nonblocking(self._param, val)
+    self._params.put(self._param, val)
     self.set_value(f"{val}/{self._max_val}")
     if self._callback:
       self._callback(val)
