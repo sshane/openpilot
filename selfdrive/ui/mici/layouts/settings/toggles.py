@@ -1,7 +1,7 @@
 from cereal import log
 
 from openpilot.system.ui.widgets.scroller import NavScroller
-from openpilot.selfdrive.ui.mici.widgets.button import BigParamControl, BigMultiParamToggle
+from openpilot.selfdrive.ui.mici.widgets.button import BigParamControl, BigMultiParamToggle, BigParamCycler
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callback
 from openpilot.selfdrive.ui.ui_state import ui_state
@@ -20,9 +20,13 @@ class TogglesLayoutMici(NavScroller):
     always_on_dm_toggle = BigParamControl("always-on driver monitor", "AlwaysOnDM")
     record_front = BigParamControl("record & upload driver camera", "RecordFront", toggle_callback=restart_needed_callback)
     record_mic = BigParamControl("record & upload mic audio", "RecordAudio", toggle_callback=restart_needed_callback)
+    glow_enabled = BigParamControl("enable underglow", "GlowEnabled", toggle_callback=restart_needed_callback)
+    glow_brightness = BigParamCycler("glow brightness", "GlowBrightness", 6, callback=restart_needed_callback)
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback)
 
     self._scroller.add_widgets([
+      glow_enabled,
+      glow_brightness,
       self._personality_toggle,
       self._experimental_btn,
       is_metric_toggle,
@@ -41,6 +45,7 @@ class TogglesLayoutMici(NavScroller):
       ("AlwaysOnDM", always_on_dm_toggle),
       ("RecordFront", record_front),
       ("RecordAudio", record_mic),
+      ("GlowEnabled", glow_enabled),
       ("OpenpilotEnabledToggle", enable_openpilot),
     )
 

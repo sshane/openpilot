@@ -387,7 +387,7 @@ class BigMultiParamToggle(BigMultiToggle):
   def _handle_mouse_release(self, mouse_pos: MousePos):
     super()._handle_mouse_release(mouse_pos)
     new_idx = self._options.index(self.value)
-    self._params.put_nonblocking(self._param, new_idx)
+    self._params.put(self._param, new_idx)
 
 
 class BigParamControl(BigToggle):
@@ -399,10 +399,31 @@ class BigParamControl(BigToggle):
 
   def _handle_mouse_release(self, mouse_pos: MousePos):
     super()._handle_mouse_release(mouse_pos)
-    self.params.put_bool(self.param, self._checked)
+    self.params.put_bool(self.param, self._checked, block=True)
 
   def refresh(self):
     self.set_checked(self.params.get_bool(self.param, False))
+
+
+class BigParamCycler(BigButton):
+  """Button that cycles through int values on tap, shows current value as subtitle."""
+  def __init__(self, text: str, param: str, max_val: int, callback: Callable | None = None):
+    self._param = param
+    self._max_val = max_val
+    self._callback = callback
+    self._params = Params()
+    val = self._params.get(self._param) or 0
+    super().__init__(text, f"{val}/{max_val}")
+
+  def _handle_mouse_release(self, mouse_pos: MousePos):
+    super()._handle_mouse_release(mouse_pos)
+    val = (self._params.get(self._param) or 0) + 1
+    if val > self._max_val:
+      val = 0
+    self._params.put(self._param, val)
+    self.set_value(f"{val}/{self._max_val}")
+    if self._callback:
+      self._callback(val)
 
 
 # TODO: param control base class
@@ -416,7 +437,7 @@ class BigCircleParamControl(BigCircleToggle):
 
   def _handle_mouse_release(self, mouse_pos: MousePos):
     super()._handle_mouse_release(mouse_pos)
-    self.params.put_bool(self._param, self._checked)
+    self.params.put_bool(self._param, self._checked, block=True)
 
   def refresh(self):
     self.set_checked(self.params.get_bool(self._param, False))

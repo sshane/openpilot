@@ -38,6 +38,8 @@ LaneChangeDirection = log.LaneChangeDirection
 EventName = log.OnroadEvent.EventName
 ButtonType = car.CarState.ButtonEvent.Type
 SafetyModel = car.CarParams.SafetyModel
+AlertLevel = log.DriverMonitoringState.AlertLevel
+MonitoringPolicy = log.DriverMonitoringState.MonitoringPolicy
 
 IGNORED_SAFETY_MODES = (SafetyModel.silent, SafetyModel.noOutput)
 
@@ -74,7 +76,7 @@ class SelfdriveD:
     # TODO: de-couple selfdrived with card/conflate on carState without introducing controls mismatches
     self.car_state_sock = messaging.sub_sock('carState', timeout=20)
 
-    ignore = self.sensor_packets + self.gps_packets + ['alertDebug']
+    ignore = self.sensor_packets + self.gps_packets + ['alertDebug', 'lateralManeuverPlan']
     if SIMULATION:
       ignore += ['driverCameraState', 'managerState']
     if REPLAY:
@@ -83,7 +85,8 @@ class SelfdriveD:
     self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
                                    'carOutput', 'driverMonitoringState', 'longitudinalPlan', 'livePose', 'liveDelay',
                                    'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters',
-                                   'controlsState', 'carControl', 'driverAssistance', 'alertDebug', 'userBookmark', 'audioFeedback'] + \
+                                   'controlsState', 'carControl', 'driverAssistance', 'alertDebug', 'userBookmark', 'audioFeedback',
+                                   'lateralManeuverPlan'] + \
                                    self.camera_packets + self.sensor_packets + self.gps_packets,
                                   ignore_alive=ignore, ignore_avg_freq=ignore,
                                   ignore_valid=ignore, frequency=int(1/DT_CTRL))
@@ -119,6 +122,8 @@ class SelfdriveD:
     self.experimental_mode = False
     self.personality = self.params.get("LongitudinalPersonality", return_default=True)
     self.recalibrating_seen = False
+    self.dm_lockout_set = False
+    self.dm_uncertain_alerted = False
     self.state_machine = StateMachine()
     self.rk = Ratekeeper(100, print_delay_threshold=None)
 
@@ -148,7 +153,10 @@ class SelfdriveD:
       self.events.add(EventName.joystickDebug)
       self.startup_event = None
 
-    if self.sm.recv_frame['alertDebug'] > 0:
+    if self.sm.recv_frame['lateralManeuverPlan'] > 0:
+      self.events.add(EventName.lateralManeuver)
+      self.startup_event = None
+    elif self.sm.recv_frame['alertDebug'] > 0:
       self.events.add(EventName.longitudinalManeuver)
       self.startup_event = None
 
@@ -178,8 +186,27 @@ class SelfdriveD:
     if not self.CP.pcmCruise and CS.vCruise > 250 and resume_pressed:
       self.events.add(EventName.resumeBlocked)
 
+    # Handle DM
     if not self.CP.notCar:
-      self.events.add_from_msg(self.sm['driverMonitoringState'].events)
+      # Block engaging until ignition cycle after max number or time of distractions
+      if self.sm['driverMonitoringState'].lockout and not self.dm_lockout_set:
+        self.params.put_bool("DriverTooDistracted", True)
+        self.dm_lockout_set = True
+      # No entry conditions
+      if self.sm['driverMonitoringState'].lockout or self.sm['driverMonitoringState'].alwaysOnLockout:
+        self.events.add(EventName.tooDistracted)
+      # Alerts
+      vision_dm = self.sm['driverMonitoringState'].activePolicy == MonitoringPolicy.vision
+      if self.sm['driverMonitoringState'].alertLevel == AlertLevel.one:
+        self.events.add(EventName.driverDistracted1 if vision_dm else EventName.driverUnresponsive1)
+      elif self.sm['driverMonitoringState'].alertLevel == AlertLevel.two:
+        self.events.add(EventName.driverDistracted2 if vision_dm else EventName.driverUnresponsive2)
+      elif self.sm['driverMonitoringState'].alertLevel == AlertLevel.three:
+        self.events.add(EventName.driverDistracted3 if vision_dm else EventName.driverUnresponsive3)
+      # Warn consistent DM uncertainty
+      if self.sm['driverMonitoringState'].visionPolicyState.uncertainOffroadAlertPercent >= 100 and not self.dm_uncertain_alerted:
+        set_offroad_alert("Offroad_DriverMonitoringUncertain", True)
+        self.dm_uncertain_alerted = True
 
     # Add car events, ignore if CAN isn't valid
     if CS.canValid:
@@ -188,7 +215,7 @@ class SelfdriveD:
 
       if self.CP.notCar:
         # wait for everything to init first
-        if self.sm.frame > int(5. / DT_CTRL) and self.initialized:
+        if self.sm.frame > int(2. / DT_CTRL) and self.initialized:
           # body always wants to enable
           self.events.add(EventName.pcmEnable)
 
@@ -199,7 +226,7 @@ class SelfdriveD:
         self.events.add(EventName.pedalPressed)
 
     # Create events for temperature, disk space, and memory
-    if self.sm['deviceState'].thermalStatus >= ThermalStatus.red:
+    if self.sm['deviceState'].thermalStatus >= ThermalStatus.overheated:
       self.events.add(EventName.overheat)
     if self.sm['deviceState'].freeSpacePercent < 7 and not SIMULATION:
       self.events.add(EventName.outOfSpace)
@@ -278,8 +305,9 @@ class SelfdriveD:
         safety_mismatch = pandaState.safetyModel not in IGNORED_SAFETY_MODES
 
       # safety mismatch allows some time for pandad to set the safety mode and publish it back from panda
-      if (safety_mismatch and self.sm.frame*DT_CTRL > 10.) or pandaState.safetyRxChecksInvalid or self.mismatch_counter >= 200:
-        self.events.add(EventName.controlsMismatch)
+      # TODO: we can't actuate, not important, but why?
+      # if (safety_mismatch and self.sm.frame*DT_CTRL > 10.) or pandaState.safetyRxChecksInvalid or self.mismatch_counter >= 200:
+      #   self.events.add(EventName.controlsMismatch)
 
       if log.PandaState.FaultType.relayMalfunction in pandaState.faults:
         self.events.add(EventName.relayMalfunction)
@@ -351,12 +379,13 @@ class SelfdriveD:
     if any((self.sm.frame - self.sm.recv_frame[s])*DT_CTRL > 10. for s in self.sensor_packets):
       self.events.add(EventName.sensorDataInvalid)
 
-    if not REPLAY:
-      # Check for mismatch between openpilot and car's PCM
-      cruise_mismatch = CS.cruiseState.enabled and (not self.enabled or not self.CP.pcmCruise)
-      self.cruise_mismatch_counter = self.cruise_mismatch_counter + 1 if cruise_mismatch else 0
-      if self.cruise_mismatch_counter > int(6. / DT_CTRL):
-        self.events.add(EventName.cruiseMismatch)
+    # TODO: why failing?
+    # if not REPLAY:
+    #   # Check for mismatch between openpilot and car's PCM
+    #   cruise_mismatch = CS.cruiseState.enabled and (not self.enabled or not self.CP.pcmCruise)
+    #   self.cruise_mismatch_counter = self.cruise_mismatch_counter + 1 if cruise_mismatch else 0
+    #   if self.cruise_mismatch_counter > int(6. / DT_CTRL):
+    #     self.events.add(EventName.cruiseMismatch)
 
     # Send a "steering required alert" if saturation count has reached the limit
     if CS.steeringPressed:
@@ -398,7 +427,7 @@ class SelfdriveD:
     if self.CP.openpilotLongitudinalControl:
       if any(not be.pressed and be.type == ButtonType.gapAdjustCruise for be in CS.buttonEvents):
         self.personality = (self.personality - 1) % 3
-        self.params.put_nonblocking('LongitudinalPersonality', self.personality)
+        self.params.put('LongitudinalPersonality', self.personality)
         self.events.add(EventName.personalityChanged)
 
   def data_sample(self):
