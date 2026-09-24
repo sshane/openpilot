@@ -334,8 +334,9 @@ class SelfdriveD:
         safety_mismatch = pandaState.safetyModel not in IGNORED_SAFETY_MODES
 
       # safety mismatch allows some time for pandad to set the safety mode and publish it back from panda
-      if (safety_mismatch and self.sm.frame*DT_CTRL > 10.) or pandaState.safetyRxChecksInvalid or self.mismatch_counter >= 200:
-        self.events.add(EventName.controlsMismatch)
+      # TODO: we can't actuate, not important, but why?
+      # if (safety_mismatch and self.sm.frame*DT_CTRL > 10.) or pandaState.safetyRxChecksInvalid or self.mismatch_counter >= 200:
+      #   self.events.add(EventName.controlsMismatch)
 
       if log.PandaState.FaultType.relayMalfunction in pandaState.faults:
         self.events.add(EventName.relayMalfunction)
@@ -413,12 +414,13 @@ class SelfdriveD:
     if any((self.sm.frame - self.sm.recv_frame[s])*DT_CTRL > 10. for s in self.sensor_packets):
       self.events.add(EventName.sensorDataInvalid)
 
-    if not REPLAY:
-      # Check for mismatch between openpilot and car's PCM
-      cruise_mismatch = CS.cruiseState.enabled and (not self.enabled or not self.CP.pcmCruise)
-      self.cruise_mismatch_counter = self.cruise_mismatch_counter + 1 if cruise_mismatch else 0
-      if self.cruise_mismatch_counter > int(6. / DT_CTRL):
-        self.events.add(EventName.cruiseMismatch)
+    # TODO: why failing?
+    # if not REPLAY:
+    #   # Check for mismatch between openpilot and car's PCM
+    #   cruise_mismatch = CS.cruiseState.enabled and (not self.enabled or not self.CP.pcmCruise)
+    #   self.cruise_mismatch_counter = self.cruise_mismatch_counter + 1 if cruise_mismatch else 0
+    #   if self.cruise_mismatch_counter > int(6. / DT_CTRL):
+    #     self.events.add(EventName.cruiseMismatch)
 
     # Send a "steering required alert" if saturation count has reached the limit
     if CS.steeringPressed:

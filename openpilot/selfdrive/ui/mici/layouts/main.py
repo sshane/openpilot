@@ -1,8 +1,10 @@
 import pyray as rl
 import openpilot.cereal.messaging as messaging
+from openpilot.common.params import Params
 from openpilot.selfdrive.ui.mici.layouts.home import MiciHomeLayout
 from openpilot.selfdrive.ui.mici.layouts.settings.settings import SettingsLayout
 from openpilot.selfdrive.ui.mici.layouts.offroad_alerts import MiciOffroadAlerts
+from openpilot.selfdrive.ui.mici.layouts.manual_drive_summary import ManualDriveSummaryDialog
 from openpilot.selfdrive.ui.mici.onroad.augmented_road_view import AugmentedRoadView
 from openpilot.selfdrive.ui.ui_state import device, ui_state
 from openpilot.selfdrive.ui.mici.layouts.onboarding import OnboardingWindow
@@ -20,6 +22,7 @@ class MiciMainLayout(Scroller):
     super().__init__(snap_items=True, spacing=0, pad=0, scroll_indicator=False, edge_shadows=False)
 
     self._pm = messaging.PubMaster(['bookmarkButton', 'userBookmark'])
+    self._params = Params()
 
     self._prev_onroad = False
     self._prev_standstill = False
@@ -117,6 +120,7 @@ class MiciMainLayout(Scroller):
       if ui_state.started:
         self._onroad_time_delay = rl.get_time()
       else:
+        self._show_drive_summary_if_available()
         self._scroll_to(self._home_layout)
 
     # FIXME: these two pops can interrupt user interacting in the settings
@@ -129,6 +133,25 @@ class MiciMainLayout(Scroller):
     if not CS.standstill and self._prev_standstill:
       gui_app.pop_widgets_to(self, lambda: self._scroll_to(self._onroad_layout))
     self._prev_standstill = CS.standstill
+
+  def _show_drive_summary_if_available(self):
+    """Show end-of-drive summary dialog if there's data worth showing.
+    All stats are saved by the card process -- UI just reads and displays."""
+    data = self._params.get("ManualDriveStats")
+    if not data:
+      return
+    stats = data
+    history = stats.get('session_history', [])
+    if not history:
+      return
+
+    session = history[-1]
+    duration = session.get('duration', 0)
+    has_activity = (session.get('stalls', 0) > 0 or
+                   session.get('upshifts', 0) > 0 or
+                   session.get('launches', 0) > 0)
+    if duration > 30 and has_activity:
+      gui_app.push_widget(ManualDriveSummaryDialog())
 
   def _on_interactive_timeout(self):
     # Don't pop if onboarding

@@ -11,6 +11,7 @@ from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
+from openpilot.selfdrive.ui.mici.onroad.manual_stats_widget import ManualStatsWidget
 from openpilot.system.ui.lib.application import FontWeight, gui_app, MousePos, MouseEvent, TextAlignment, TextAlignmentVertical
 from openpilot.system.ui.widgets.label import UnifiedLabel
 from openpilot.system.ui.widgets import Widget
@@ -159,12 +160,29 @@ class AugmentedRoadView(CameraView):
 
     self._fade_texture = gui_app.texture("icons_mici/onroad/onroad_fade.png")
 
+    # Glow color indicator
+    self._glow_color = rl.Color(120, 120, 120, 160)
+    self._glow_glow = rl.Color(120, 120, 120, 40)
+
+    # Manual stats widget for MT cars
+    self._manual_stats_widget = ManualStatsWidget()
+
   def is_swiping_left(self) -> bool:
     """Check if currently swiping left (for scroller to disable)."""
     return self._bookmark_icon.is_swiping_left()
 
   def _update_state(self):
     super()._update_state()
+
+    # update glow color from param
+    state = ui_state.params.get("GlowStatus") or {}
+    if state.get("status") == "connected" and state.get("color"):
+      r, g, b = state["color"]
+      self._glow_color = rl.Color(r, g, b, 200)
+      self._glow_glow = rl.Color(r, g, b, 50)
+    else:
+      self._glow_color = rl.Color(120, 120, 120, 160)
+      self._glow_glow = rl.Color(120, 120, 120, 40)
 
     # update offroad label
     if ui_state.panda_type == log.PandaState.PandaType.unknown:
@@ -241,6 +259,17 @@ class AugmentedRoadView(CameraView):
     # Custom UI extension point - add custom overlays here
     # Use self._content_rect for positioning within camera bounds
     self._confidence_ball.render(self.rect)
+
+    # Manual stats widget for MT cars - check if manual transmission (flag 128)
+    is_manual = ui_state.CP is not None and bool(ui_state.CP.flags & 128)
+    self._manual_stats_widget.set_visible(is_manual and ui_state.started)
+    self._manual_stats_widget.render(self._content_rect)
+
+    # Glow color dot (bottom right, after MT stats overlay)
+    glow_cx = int(self._content_rect.x + self._content_rect.width - 50)
+    glow_cy = int(self._content_rect.y + self._content_rect.height - 50)
+    rl.draw_circle(glow_cx, glow_cy, 32, self._glow_glow)
+    rl.draw_circle(glow_cx, glow_cy, 16, self._glow_color)
 
     self._bookmark_icon.render(self.rect)
 

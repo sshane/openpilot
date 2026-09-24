@@ -32,6 +32,40 @@ NETWORK_TYPES = {
 }
 
 
+class GlowStatusIcon(Widget):
+  """LED-style icon indicating glowd connection status."""
+  SIZE = 48
+
+  def __init__(self):
+    super().__init__()
+    self.set_rect(rl.Rectangle(0, 0, self.SIZE, self.SIZE))
+    self._color = rl.Color(120, 120, 120, 160)
+    self._glow = rl.Color(120, 120, 120, 40)
+
+  def set_glow_state(self, glow_state: dict | None):
+    if glow_state is None or glow_state.get("status") not in ("connected", "connecting"):
+      self._color = rl.Color(120, 120, 120, 160)
+      self._glow = rl.Color(120, 120, 120, 40)
+    elif glow_state["status"] == "connecting":
+      self._color = rl.Color(255, 200, 0, 240)
+      self._glow = rl.Color(255, 200, 0, 50)
+    else:
+      self._color = rl.Color(0, 200, 80, 240)
+      self._glow = rl.Color(0, 200, 80, 60)
+
+  def _render(self, _):
+    cx = int(self._rect.x + self.SIZE / 2)
+    cy = int(self._rect.y + self.SIZE / 2)
+    # Outer glow
+    rl.draw_circle(cx, cy, self.SIZE // 2, self._glow)
+    # Bulb body
+    rl.draw_circle(cx, cy - 3, 12, self._color)
+    # Base/stem
+    rl.draw_rectangle(cx - 6, cy + 8, 12, 8, self._color)
+    # Highlight reflection
+    rl.draw_circle(cx - 3, cy - 7, 3, rl.Color(255, 255, 255, 80))
+
+
 class AlertsPill(Widget):
   ICON_OFFSET = 12
   COUNT_OFFSET = 40
@@ -140,6 +174,7 @@ class MiciHomeLayout(Widget):
     self._chestnut_failed_icon = IconWidget("icons_mici/chestnut_orange.png", (68, 40))
     self._mic_icon = IconWidget("icons_mici/microphone.png", (32, 46))
     self._body_icon = IconWidget("icons_mici/body.png", (54, 37))
+    self._glow_icon = GlowStatusIcon()
 
     self._alerts_pill = AlertsPill()
 
@@ -153,6 +188,7 @@ class MiciHomeLayout(Widget):
       self._chestnut_failed_icon,
       self._body_icon,
       self._mic_icon,
+      self._glow_icon,
     ], spacing=18)
 
     self._openpilot_label = UnifiedLabel("openpilot", font_size=96, font_weight=FontWeight.DISPLAY, max_width=480, wrap_text=False)
@@ -163,6 +199,8 @@ class MiciHomeLayout(Widget):
     self._version_commit_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
 
   def _update_state(self):
+    self._glow_icon.set_glow_state(ui_state.params.get("GlowStatus") or {})
+
     if self.is_pressed and not self._is_pressed_prev:
       self._mouse_down_t = time.monotonic()
     elif not self.is_pressed and self._is_pressed_prev:

@@ -65,11 +65,15 @@ class TogglesLayoutMici(NavScroller):
                                  toggle_callback=restart_needed_callback,
                                  description="Record microphone audio while driving.\n" +
                                              "Audio is included in dashcam videos in comma connect.")
+    # glow_enabled = BigParamControl("enable underglow", "GlowEnabled", toggle_callback=restart_needed_callback)
+    # glow_brightness = BigParamCycler("glow brightness", "GlowBrightness", 6, callback=restart_needed_callback)
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback,
                                        description="Enable to use openpilot driver assistance.\n" +
                                                    "Disable to use your car's stock driver assistance.")
 
     self._scroller.add_widgets([
+      # glow_enabled,
+      # glow_brightness,
       self._personality_toggle,
       self._experimental_btn,
       is_metric_toggle,
@@ -88,6 +92,7 @@ class TogglesLayoutMici(NavScroller):
       ("AlwaysOnDM", always_on_dm_toggle),
       ("RecordFront", record_front),
       ("RecordAudio", record_mic),
+      # ("GlowEnabled", glow_enabled),
       ("OpenpilotEnabledToggle", enable_openpilot),
     )
 
